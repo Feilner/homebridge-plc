@@ -49,7 +49,7 @@ S7Platform.prototype = {
         var rack = this.config.rack;
         var slot = this.config.slot;
         var isConnectOngoing = this.isConnectOngoing;
-        
+        var rv = true;
         if (!S7Client.Connected()) {
             log("Connecting to %s (%s:%s)", ip, rack, slot);
 
@@ -59,6 +59,7 @@ S7Platform.prototype = {
                 S7Client.ConnectTo(ip, rack, slot, function(err) {
                   if(err) {
                     log.Error('Connection failed. Code #' + err + ' - ' + S7Client.ErrorText(err));
+                    rv = false;
                   }
                   else {
                     log("Connected to %s (%s:%s)", ip, rack, slot);
@@ -67,6 +68,7 @@ S7Platform.prototype = {
                 });
             }
         }
+        return rv;
     }
 }
 
