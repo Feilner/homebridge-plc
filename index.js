@@ -2,40 +2,22 @@
  * (c) 2020 Feilner
  */
  
- 
 var PlatformAccessory, Service, Characteristic, UUIDGen;
 var snap7 = require('node-snap7');
 
-
 //Exports
 module.exports = function(homebridge) {
-  // Service and Characteristic from hap-nodejs/lib/gen/HomeKitTypes.js
   var platformName = 'homebridge-s7-plc';
   Service = homebridge.hap.Service;
   Characteristic = homebridge.hap.Characteristic;
   UUIDGen = homebridge.hap.uuid;
   PlatformAccessory = homebridge.platformAccessory;
   homebridge.registerPlatform(platformName, 'S7', S7Platform);
-
-  /* currently not funtional
-  homebridge.registerAccessory(platformName, 'S7_LightDimm', GenericS7, true);
-  homebridge.registerAccessory(platformName, 'S7_LightBulb', GenericS7, true);
-  homebridge.registerAccessory(platformName, 'S7_Outlet', GenericS7, true);  
-  homebridge.registerAccessory(platformName, 'S7_HumiditySensor', GenericS7, true);
-  homebridge.registerAccessory(platformName, 'S7_TemperatureSensor', GenericS7, true);  
-  homebridge.registerAccessory(platformName, 'S7_Thermostat', GenericS7, true);  
-  homebridge.registerAccessory(platformName, 'S7_WindowCovering', GenericS7, true);    
-  homebridge.registerAccessory(platformName, 'S7_Window', GenericS7, true);    
-  homebridge.registerAccessory(platformName, 'S7_OccupancySensor', GenericS7, true);      
-  homebridge.registerAccessory(platformName, 'S7_MotionSensor', GenericS7, true);      
-  homebridge.registerAccessory(platformName, 'S7_Faucet', GenericS7, true);        
-  */
 }
 
 
 
 function S7Platform(log, config) {
-    //initialize
     this.log = log;
     this.config = config;
     this.S7Client = new snap7.S7Client();
@@ -44,7 +26,6 @@ function S7Platform(log, config) {
 }
 
 S7Platform.prototype = {    
-    //Accessories retrieval
     accessories: function(callback) {
         var log = this.log;
         var s7PlatformAccessories = [];
@@ -101,7 +82,6 @@ function GenericS7(platform, config) {
   this.buf = Buffer.alloc(4);
   var uuid = UUIDGen.generate(config.name + config.accessory);
   this.accessory = new PlatformAccessory(this.name, uuid); 
-
   ////////////////////////////////////////////////////////////////
   // Lightbulb
   ////////////////////////////////////////////////////////////////
@@ -451,7 +431,7 @@ function GenericS7(platform, config) {
   .setCharacteristic(Characteristic.SerialNumber, uuid)
   .setCharacteristic(Characteristic.FirmwareRevision, '0.0.1'); 
 
-  this.log.debug("Done " + this.name + " (" + config.accessory + ")");
+  this.log.debug("Done " + this.service.displayName + " (" + this.service.subtype + ") " + this.service.UUID);
 
 }
 
