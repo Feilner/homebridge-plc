@@ -92,18 +92,32 @@ function GenericS7(platform, config) {
     this.service =  new Service.Lightbulb(this.name);
     this.accessory.addService(this.service);
 
-    this.service.getCharacteristic(Characteristic.On)
-      .on('get', function(callback) {this.getBit(callback, 
-        config.db, 
-        Math.floor(config.get_State), Math.floor((config.get_State*10)%10),
-        'get On'
-      )}.bind(this))
-      .on('set', function(powerOn, callback) { this.setOnOffBit(powerOn, callback, 
-        config.db, 
-        Math.floor(config.set_On), Math.floor((config.set_On*10)%10),
-        Math.floor(config.set_Off), Math.floor((config.set_Off*10)%10),
-        'set On'
-      )}.bind(this));
+    if ('set_Off' in config) {      
+      this.service.getCharacteristic(Characteristic.On)
+        .on('get', function(callback) {this.getBit(callback, 
+          config.db, 
+          Math.floor(config.get_On), Math.floor((config.get_On*10)%10),
+          'get On'
+        )}.bind(this))
+        .on('set', function(powerOn, callback) { this.setOnOffBit(powerOn, callback, 
+          config.db, 
+          Math.floor(config.set_On), Math.floor((config.set_On*10)%10),
+          Math.floor(config.set_Off), Math.floor((config.set_Off*10)%10),
+          'set On'
+        )}.bind(this));
+    } else {
+      this.service.getCharacteristic(Characteristic.On)
+        .on('get', function(callback) {this.getBit(callback, 
+          config.db, 
+          Math.floor(config.get_On), Math.floor((config.get_On*10)%10),
+          'get On'
+        )}.bind(this))
+        .on('set', function(powerOn, callback) { this.setBit(powerOn, callback, 
+          config.db, 
+          Math.floor(config.set_On), Math.floor((config.set_On*10)%10),
+          'set On'
+        )}.bind(this));
+    }
 
     if ('get_Brightness' in config) {
       this.service.getCharacteristic(Characteristic.Brightness)
@@ -132,18 +146,32 @@ function GenericS7(platform, config) {
     this.service =  new Service.Outlet(this.name);
     this.accessory.addService(this.service);
 
-    this.service.getCharacteristic(Characteristic.On)
-      .on('get', function(callback) {this.getBit(callback, 
-        config.db, 
-        Math.floor(config.get_State), Math.floor((config.get_State*10)%10),
-        'get On'
-      )}.bind(this))
-      .on('set', function(powerOn, callback) { this.setOnOffBit(powerOn, callback, 
-        config.db, 
-        Math.floor(config.set_On), Math.floor((config.set_On*10)%10),
-        Math.floor(config.set_Off), Math.floor((config.set_Off*10)%10),
-        'set On'
-      )}.bind(this));
+    if ('set_Off' in config) {      
+      this.service.getCharacteristic(Characteristic.On)
+        .on('get', function(callback) {this.getBit(callback, 
+          config.db, 
+          Math.floor(config.get_On), Math.floor((config.get_On*10)%10),
+          'get On'
+        )}.bind(this))
+        .on('set', function(powerOn, callback) { this.setOnOffBit(powerOn, callback, 
+          config.db, 
+          Math.floor(config.set_On), Math.floor((config.set_On*10)%10),
+          Math.floor(config.set_Off), Math.floor((config.set_Off*10)%10),
+          'set On'
+        )}.bind(this));
+    } else {
+      this.service.getCharacteristic(Characteristic.On)
+        .on('get', function(callback) {this.getBit(callback, 
+          config.db, 
+          Math.floor(config.get_On), Math.floor((config.get_On*10)%10),
+          'get On'
+        )}.bind(this))
+        .on('set', function(powerOn, callback) { this.setBit(powerOn, callback, 
+          config.db, 
+          Math.floor(config.set_On), Math.floor((config.set_On*10)%10),
+          'set On'
+        )}.bind(this));
+    }
   }
 
   ////////////////////////////////////////////////////////////////
@@ -372,18 +400,32 @@ function GenericS7(platform, config) {
     this.service =  new Service.Faucet(this.name);
     this.accessory.addService(this.service);
 
-    this.service.getCharacteristic(Characteristic.Active)
-      .on('get', function(callback) {this.getBit(callback, 
-        config.db, 
-        Math.floor(config.get_State), Math.floor((config.get_State*10)%10),
-        "get Active"
-      )}.bind(this))
-      .on('set', function(powerOn, callback) { this.setOnOffBit(powerOn, callback, 
-        config.db, 
-        Math.floor(config.set_On), Math.floor((config.set_On*10)%10),
-        Math.floor(config.set_Off), Math.floor((config.set_Off*10)%10),
-        "get Active"
-      )}.bind(this));
+    if ('set_Deactive' in config) {      
+      this.service.getCharacteristic(Characteristic.Active)
+        .on('get', function(callback) {this.getBit(callback, 
+          config.db, 
+          Math.floor(config.get_Active), Math.floor((config.get_Active*10)%10),
+          'get Active'
+        )}.bind(this))
+        .on('set', function(powerOn, callback) { this.setOnOffBit(powerOn, callback, 
+          config.db, 
+          Math.floor(config.set_Active), Math.floor((config.set_Active*10)%10),
+          Math.floor(config.set_Deactive), Math.floor((config.set_Deactive*10)%10),
+          'set Active'
+        )}.bind(this));
+    } else {
+      this.service.getCharacteristic(Characteristic.Active)
+        .on('get', function(callback) {this.getBit(callback, 
+          config.db, 
+          Math.floor(config.get_Active), Math.floor((config.get_Active*10)%10),
+          'get Active'
+        )}.bind(this))
+        .on('set', function(powerOn, callback) { this.setBit(powerOn, callback, 
+          config.db, 
+          Math.floor(config.set_Active), Math.floor((config.set_Active*10)%10),
+          'set Active'
+        )}.bind(this));
+    }
   }
   else {
     this.log("Accessory "+ config.accessory + " is not defined.")
