@@ -269,7 +269,7 @@ function GenericS7(platform, config) {
 
     // create handlers for required characteristics
     this.service.getCharacteristic(Characteristic.CurrentPosition)
-      .on('get', function(callback) {this.getReal(callback, 
+      .on('get', function(callback) {this.getByte(callback, 
         config.db, 
         config.get_CurrentPosition,        
         'get CurrentPosition',
@@ -278,13 +278,13 @@ function GenericS7(platform, config) {
 
     if ('get_TargetPosition' in config) {        
       this.service.getCharacteristic(Characteristic.TargetPosition)
-        .on('get', function(callback) {this.getReal(callback, 
+        .on('get', function(callback) {this.getByte(callback, 
           config.db, 
           config.get_TargetPosition,
           'get TargetPosition',
           modFunction
           )}.bind(this))
-        .on('set', function(value, callback) {this.setReal(value, callback, 
+        .on('set', function(value, callback) {this.setByte(value, callback, 
           config.db, 
           config.set_TargetPosition,
           'set TargetPosition',
@@ -304,7 +304,7 @@ function GenericS7(platform, config) {
       }
     if ('get_PositionState' in config) {
       this.service.getCharacteristic(Characteristic.PositionState)
-        .on('get', function(callback) {this.getReal(callback, 
+        .on('get', function(callback) {this.getByte(callback, 
           config.db, 
           config.get_PositionState,
           'get PositionState'
@@ -402,11 +402,11 @@ GenericS7.prototype = {
   },
 
   invert_0_100: function(value) {
-    return Math.round(100-value);
+    return 100-value;
   },
   
   plain_0_100: function(value) {
-    return Math.round(value);
+    return value;
   },
 
   //////////////////////////////////////////////////////////////////////////////
@@ -535,14 +535,15 @@ GenericS7.prototype = {
     var log = this.log;
     var name = this.name;
     var buf = this.buf
-    //ensure PLC connection
-    
+    var valuePLC = value;
+
     if (typeof(valueMod) != "undefined")
     {
-      value = valueMod(value);
+      valuePLC = valueMod(value);
     }
+    //ensure PLC connection    
     if (this.platform.S7ClientConnect()) {
-        buf.writeFloatBE(value, 0);
+        buf.writeFloatBE(valuePLC, 0);
         // Write one real from DB asynchonousely...
         S7Client.WriteArea(S7Client.S7AreaDB, db, offset, 1, S7Client.S7WLReal, buf, function(err) {
           if(err) {
@@ -551,7 +552,14 @@ GenericS7.prototype = {
             callback(err);
           }
           else {              
-            log.debug(logprefix , String(value));
+            if (typeof(valueMod) != "undefined")
+            {
+              log.debug(logprefix , String(value) + "->" + String(valuePLC));
+            }            
+            else
+            {
+              log.debug(logprefix , String(value));
+            }  
             callback(null);
           }
         });
@@ -578,12 +586,17 @@ GenericS7.prototype = {
             callback(err);
           }
           else {              
-            value = res.readFloatBE(0);
+            valuePLC = res.readFloatBE(0);
             if (typeof(valueMod) != "undefined")
             {
-              value = valueMod(value);
+              value = valueMod(valuePLC);
+              log.debug(logprefix , String(value) + "<-" + String(valuePLC));
             }            
-            log.debug(logprefix , String(value));
+            else
+            {
+              value = valuePLC;
+              log.debug(logprefix , String(value));
+            }            
             callback(null, value);
           }
         });
@@ -603,14 +616,15 @@ GenericS7.prototype = {
     var log = this.log;
     var name = this.name;
     var buf = this.buf    
-    // call value mod finction if requested    
+    var valuePLC = value;
+
     if (typeof(valueMod) != "undefined")
     {
-      value = valueMod(value);
+      valuePLC = valueMod(value);
     }
     //ensure PLC connection    
     if (this.platform.S7ClientConnect()) {
-        buf[0] = value;
+        buf[0] = valuePLC;
         // Write one real from DB asynchonousely...
         S7Client.WriteArea(S7Client.S7AreaDB, db, offset, 1, S7Client.S7WLByte, buf, function(err) {
           if(err) {
@@ -619,7 +633,14 @@ GenericS7.prototype = {
             callback(err);
           }
           else {              
-            log.debug(logprefix , String(value));
+            if (typeof(valueMod) != "undefined")
+            {
+              log.debug(logprefix , String(value) + "->" + String(valuePLC));
+            }            
+            else
+            {
+              log.debug(logprefix , String(value));
+            }  
             callback(null);
           }
         });
@@ -646,12 +667,17 @@ GenericS7.prototype = {
             callback(err);
           }
           else {              
-            value = res[0];
+            valuePLC = res[0];
             if (typeof(valueMod) != "undefined")
             {
-              value = valueMod(value);
+              value = valueMod(valuePLC);
+              log.debug(logprefix , String(value) + "<-" + String(valuePLC));
             }            
-            log.debug(logprefix , String(value));
+            else
+            {
+              value = valuePLC;
+              log.debug(logprefix , String(value));
+            }            
             callback(null, value);
           }
         });
@@ -672,14 +698,15 @@ GenericS7.prototype = {
     var log = this.log;
     var name = this.name;
     var buf = this.buf
-    // call value mod finction if requested
+    var valuePLC = value;
+
     if (typeof(valueMod) != "undefined")
     {
-      value = valueMod(value);
+      valuePLC = valueMod(value);
     }
     //ensure PLC connection
     if (this.platform.S7ClientConnect()) {
-        buf.writeInt16BE(value, 0);
+        buf.writeInt16BE(valuePLC, 0);
         // Write one real from DB asynchonousely...
         S7Client.WriteArea(S7Client.S7AreaDB, db, offset, 1, S7Client.S7WLWord, buf, function(err) {
           if(err) {
@@ -688,7 +715,14 @@ GenericS7.prototype = {
             callback(err);
           }
           else {              
-            log.debug(logprefix , String(value));
+            if (typeof(valueMod) != "undefined")
+            {
+              log.debug(logprefix , String(value) + "->" + String(valuePLC));
+            }            
+            else
+            {
+              log.debug(logprefix , String(value));
+            }  
             callback(null);
           }
         });
@@ -704,6 +738,7 @@ GenericS7.prototype = {
     var log = this.log;
     var name = this.name;
     var value = 0;
+    var valuePLC = 0;
     //ensure PLC connection
     if (this.platform.S7ClientConnect()) {
         // Write one real from DB asynchonousely...
@@ -715,12 +750,17 @@ GenericS7.prototype = {
             callback(err);
           }
           else {              
-            value = res.readInt16BE(0);
+            valuePLC = res.readInt16BE(0);
             if (typeof(valueMod) != "undefined")
             {
-              value = valueMod(value);
+              value = valueMod(valuePLC);
+              log.debug(logprefix , String(value) + "<-" + String(valuePLC));
             }            
-            log.debug(logprefix , String(value));
+            else
+            {
+              value = valuePLC;
+              log.debug(logprefix , String(value));
+            }            
             callback(null, value);
           }
         });

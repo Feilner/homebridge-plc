@@ -185,10 +185,10 @@ SIEMENS S7 PLC plugin for [Homebridge](https://homebridge.io)
                     "db": 2602,
                     "invert": 1,
                     "get_CurrentPosition": 0,
-                    "get_TargetPosition": 4,
-                    "set_TargetPosition": 4,
-                    "get_PositionState": 8,
-                    "set_HoldPosition": 22.4
+                    "get_TargetPosition": 1,
+                    "set_TargetPosition": 1,
+                    "get_PositionState": 2,
+                    "set_HoldPosition": 10.4
                 }   
             ]
         }
