@@ -100,44 +100,25 @@ function GenericS7(platform, config) {
         Math.floor(config.set_Off), Math.floor((config.set_Off*10)%10),
         'set On'
       )}.bind(this));
-  }
 
-  ////////////////////////////////////////////////////////////////
-  // S7_LightBulbDim
-  ////////////////////////////////////////////////////////////////
-  else if (config.accessory == 'S7_LightBulbDim') {   
-    this.service =  new Service.Lightbulb(this.name);
-    this.accessory.addService(this.service);
-
-    this.service.getCharacteristic(Characteristic.On)
-      .on('get', function(callback) {this.getBit(callback, 
+    if ('get_Brightness' in config) {
+      this.service.getCharacteristic(Characteristic.Brightness)
+      .on('get', function(callback) {this.getReal(callback, 
         config.db, 
-        Math.floor(config.get_State), Math.floor((config.get_State*10)%10),
-        'get On'
-      )}.bind(this))
-      .on('set', function(powerOn, callback) { this.setOnOffBit(powerOn, callback, 
+        config.get_Brightness,
+        'get Brightness'
+        )}.bind(this))
+      .on('set', function(value, callback) {this.setReal(value, callback, 
         config.db, 
-        Math.floor(config.set_On), Math.floor((config.set_On*10)%10),
-        Math.floor(config.set_Off), Math.floor((config.set_Off*10)%10),
-        'set On'
-      )}.bind(this));
-
-    this.service.getCharacteristic(Characteristic.Brightness)
-    .on('get', function(callback) {this.getReal(callback, 
-      config.db, 
-      config.get_Brightness,
-      'get Brightness'
-      )}.bind(this))
-    .on('set', function(value, callback) {this.setReal(value, callback, 
-      config.db, 
-      config.set_Brightness,
-      'set Brightness'
-      )}.bind(this))
-      .setProps({
-        minValue: 20,
-        maxValue: 100,
-        minStep: 1
-    });            
+        config.set_Brightness,
+        'set Brightness'
+        )}.bind(this))
+        .setProps({
+          minValue: 20,
+          maxValue: 100,
+          minStep: 1
+      });        
+    }    
   }
 
   ////////////////////////////////////////////////////////////////
@@ -266,73 +247,25 @@ function GenericS7(platform, config) {
           minStep: 1
       });                 
   }  
-  ////////////////////////////////////////////////////////////////
-  // WindowCovering
-  ////////////////////////////////////////////////////////////////    
-  else if (config.accessory == 'S7_WindowCovering'){ 
-    this.service = new Service.WindowCovering(this.name);
-    this.accessory.addService(this.service);
-
-    // create handlers for required characteristics
-    this.service.getCharacteristic(Characteristic.CurrentPosition)
-      .on('get', function(callback) {this.getReal(callback, 
-        config.db, 
-        config.get_CurrentPosition,
-        'get CurrentPosition',
-        this.adaptWindowCoveringValue
-        )}.bind(this));
-
-    this.service.getCharacteristic(Characteristic.TargetPosition)
-      .on('get', function(callback) {this.getReal(callback, 
-        config.db, 
-        config.get_TargetPosition,        
-        'get TargetPosition',
-        this.adaptWindowCoveringValue
-        )}.bind(this))
-      .on('set', function(value, callback) {this.setReal(value, callback, 
-        config.db, 
-        config.set_TargetPosition,        
-        'set TargetPosition',
-        this.adaptWindowCoveringValue
-        )}.bind(this));
-
-    if ('get_PositionState' in config) {
-      this.service.getCharacteristic(Characteristic.PositionState)
-        .on('get', function(callback) {this.getReal(callback, 
-          config.db, 
-          config.get_PositionState,
-          'get PositionState'
-        )}.bind(this));
-    }
-    else {
-        this.service.getCharacteristic(Characteristic.PositionState)
-      .on('get', function(callback) {this.getDummy(callback,
-        2,
-        'get PositionState'
-        )}.bind(this));
-    }
-      
-    if ('set_HoldPosition' in config) {
-    this.service.getCharacteristic(Characteristic.HoldPosition)
-      .on('set', function(value, callback) { this.setBit(value, callback, 
-        config.db,
-        Math.floor(config.set_HoldPosition), Math.floor((config.set_HoldPosition*10)%10),
-        'set HoldPosition'        
-        )}.bind(this));
-    }
-    else {
-      this.service.getCharacteristic(Characteristic.HoldPosition)
-        .on('set', function(callback) {this.handleDummy(callback, 
-          'set HoldPosition'        
-          )}.bind(this));
-    }
-  }
+ 
  ////////////////////////////////////////////////////////////////
-  // Window
+  // Window and WindowCovering
   ////////////////////////////////////////////////////////////////    
-  else if (config.accessory == 'S7_Window'){ 
-    this.service = new Service.Window(this.name);
+  else if (config.accessory == 'S7_Window' ||config.accessory == 'S7_WindowCovering'){ 
+    if (config.accessory == 'S7_Window')
+    {
+      this.service = new Service.Window(this.name);
+    }
+    else
+    {
+      this.service = new Service.WindowCovering(this.name);
+    }
     this.accessory.addService(this.service);
+
+    var modFunction = this.plain_0_100;
+    if ('invert' in config && config.invert) {
+      modFunction = this.invert_0_100;
+    }
 
     // create handlers for required characteristics
     this.service.getCharacteristic(Characteristic.CurrentPosition)
@@ -340,7 +273,7 @@ function GenericS7(platform, config) {
         config.db, 
         config.get_CurrentPosition,        
         'get CurrentPosition',
-        this.adaptWindowCoveringValue
+        modFunction
         )}.bind(this));
 
     if ('get_TargetPosition' in config) {        
@@ -349,13 +282,13 @@ function GenericS7(platform, config) {
           config.db, 
           config.get_TargetPosition,
           'get TargetPosition',
-          this.adaptWindowCoveringValue
+          modFunction
           )}.bind(this))
         .on('set', function(value, callback) {this.setReal(value, callback, 
           config.db, 
           config.set_TargetPosition,
           'set TargetPosition',
-          this.adaptWindowCoveringValue          
+          modFunction          
           )}.bind(this));
       }
       else
@@ -468,8 +401,12 @@ GenericS7.prototype = {
     return [this.accessory.getService(Service.AccessoryInformation), this.service];
   },
 
-  adaptWindowCoveringValue: function(value) {
+  invert_0_100: function(value) {
     return Math.round(100-value);
+  },
+  
+  plain_0_100: function(value) {
+    return Math.round(value);
   },
 
   //////////////////////////////////////////////////////////////////////////////
