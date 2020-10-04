@@ -1,8 +1,8 @@
-# homebridge-S7_PLC
+# homebridge-plc
 Homebridge plugin for Siemens Step7 and compatible PLCs
 
-[![NPM Version](https://img.shields.io/npm/v/homebridge-s7_plc.svg)](https://www.npmjs.com/package/homebridge-s7_plc)
-[![npm](https://img.shields.io/npm/l/homebridge-s7_plc.svg)](https://www.npmjs.com/package/homebridge-s7_plc) [![npm](https://img.shields.io/npm/dt/homebridge-s7_plc.svg)](https://www.npmjs.com/package/homebridge-s7_plc)
+[![NPM Version](https://img.shields.io/npm/v/homebridge-plc.svg)](https://www.npmjs.com/package/homebridge-plc)
+[![npm](https://img.shields.io/npm/l/homebridge-plc.svg)](https://www.npmjs.com/package/homebridge-plc) [![npm](https://img.shields.io/npm/dt/homebridge-plc.svg)](https://www.npmjs.com/package/homebridge-plc)
 
 SIEMENS S7 PLC plugin for [Homebridge](https://homebridge.io)
 - Uses snap7 for communication therefore compatible with:
@@ -17,13 +17,13 @@ SIEMENS S7 PLC plugin for [Homebridge](https://homebridge.io)
 ## Installation
 
 - Basic Installation
-  - Install this plugin using: `npm install -g homebridge-s7_plc`
+  - Install this plugin using: `npm install -g homebridge-plc`
   - Edit `config.json` to add the plc platform and its accessories.
   - Run Homebridge
 
 - Install via Homebridge Web UI 
   - Search for `s7` on the plugin screen of [config-ui-x](https://github.com/oznu/homebridge-config-ui-x) .
-  - Find `Homebridge-S7_Plc`
+  - Find `homebridge-plc`
   - Click install.
   - Edit configuration
 
