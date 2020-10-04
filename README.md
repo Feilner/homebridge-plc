@@ -124,19 +124,13 @@ SIEMENS S7 PLC plugin for [Homebridge](https://homebridge.io)
             "accessories": [
 
                 {
-                    "accessory": "S7_LightDimm",
-                    "name": "Palier",
-                    "DB": 10,
-                    "Byte" : 598 
-                },
-                {
                     "accessory": "S7_LightBulb",
                     "name": "myRoom",
                     "manufacturer": "some comment",
                     "db": 6061,
                     "set_On": 1.1,
-                    "set_Off": 1,
-                    "get_State": 0
+                    "set_Off": 1.0,
+                    "get_State": 0.0
                 },
                 {
                     "accessory": "S7_LightBulb",
@@ -145,7 +139,9 @@ SIEMENS S7 PLC plugin for [Homebridge](https://homebridge.io)
                     "db": 6062,
                     "set_On": 2.1,
                     "set_Off": 2.2,
-                    "get_State": 2.3
+                    "get_State": 2.3,
+                    "get_Brightness": 4,
+                    "set_Brightness": 4
                 },
                 {
                     "accessory": "S7_OccupancySensor",
@@ -158,8 +154,8 @@ SIEMENS S7 PLC plugin for [Homebridge](https://homebridge.io)
                     "name": "myOutlet",
                     "db": 6107,
                     "set_On": 1.1,
-                    "set_Off": 1,
-                    "get_State": 0
+                    "set_Off": 1.0,
+                    "get_State": 0.0
                 },
                 {
                     "accessory": "S7_HumiditySensor",

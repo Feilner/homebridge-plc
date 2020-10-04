@@ -27,6 +27,6 @@
   },
   "preferGlobal": true,
   "dependencies": {
-    "node-snap7": ">=1.0.4",
+    "node-snap7": ">=1.0.4"
   }
 }
