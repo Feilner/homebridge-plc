@@ -37,54 +37,54 @@ SIEMENS S7 PLC plugin for [Homebridge](https://homebridge.io)
 - In the platform, you can declare different types of accessories currently supported:
     - `S7_LightBulb`: normal light
         - `name`: unique name of the accessory 
-        - `manufacturer`: (optional) decription
+        - `manufacturer`: (optional) description
         - `db`: s7 data base number e.g. `4` for `DB4`
         - `get_On`: offset and bit get the current status S7 type `Bool` e.g. `55.0` for `DB4DBX55.0`        
         - Single Bit for on/off:
           - `set_On`: offset and bit set to 1/0 when switching on/off S7 type `Bool` PLC  e.g. `55.0` for `DB4DBX55.0` could be same as get_On
-        - Seperate Bits for on/off:
+        - Separate Bits for on/off:
           - `set_On`: offset and bit set to 1 when switching on S7 type `Bool` PLC has to set to 0 e.g. `55.1` for `DB4DBX55.1`
           - `set_Off`: offset and bit set to 1 when switching off S7 type `Bool` PLC has to set to 0 e.g. `55.2` for `DB4DBX55.2`   
         - `get_Brightness`: (optional) get brightness value S7 type `Byte` e.g. `56` for `DB4DBB56`    
-        - `set_Brightness`: (optional but reqired when `get_Brightness` is defined) set brightness value S7 type `Byte` e.g. `57` for `DB4DBB57`    
+        - `set_Brightness`: (optional but required when `get_Brightness` is defined) set brightness value S7 type `Byte` e.g. `57` for `DB4DBB57`    
 
 	- `S7_Outlet`: outlet possible to show also as ventilator or light
         - `name`: unique name of the accessory 
-        - `manufacturer`: (optional) decription
+        - `manufacturer`: (optional) description
         - `db`: s7 data base number e.g. `4` for `DB4`
         - `get_On`: offset and bit get the current status S7 type `Bool` e.g. `55.0` for `DB4DBX55.0`        
         - Single Bit for on/off:
           - `set_On`: offset and bit set to 1/0 when switching on/off S7 type `Bool` PLC  e.g. `55.0` for `DB4DBX55.0` could be same as get_On
-        - Seperate Bits for on/off:
+        - Separate Bits for on/off:
           - `set_On`: offset and bit set to 1 when switching on S7 type `Bool` PLC has to set to 0 e.g. `55.1` for `DB4DBX55.1`
           - `set_Off`: offset and bit set to 1 when switching off S7 type `Bool` PLC has to set to 0 e.g. `55.2` for `DB4DBX55.2` 
 
 	- `S7_Switch`: switch possible to show also as ventilator or light
         - `name`: unique name of the accessory 
-        - `manufacturer`: (optional) decription
+        - `manufacturer`: (optional) description
         - `db`: s7 data base number e.g. `4` for `DB4`
         - `get_On`: offset and bit get the current status S7 type `Bool` e.g. `55.0` for `DB4DBX55.0`        
         - Single Bit for on/off:
           - `set_On`: offset and bit set to 1/0 when switching on/off S7 type `Bool` PLC  e.g. `55.0` for `DB4DBX55.0` could be same as get_On
-        - Seperate Bits for on/off:
+        - Separate Bits for on/off:
           - `set_On`: offset and bit set to 1 when switching on S7 type `Bool` PLC has to set to 0 e.g. `55.1` for `DB4DBX55.1`
           - `set_Off`: offset and bit set to 1 when switching off S7 type `Bool` PLC has to set to 0 e.g. `55.2` for `DB4DBX55.2` 
 
-	- `S7_TemperatureSensor`: temerature sensor
+	- `S7_TemperatureSensor`: temperature sensor
 	    - `name`: unique name of the accessory 
-        - `manufacturer`: (optional) decription
+        - `manufacturer`: (optional) description
         - `db`: s7 data base number e.g. `4` for `DB4`
         - `get_CurrentTemperature`: offset to get current temperature S7 type `Real` e.g. `55` for `DB4DBD55`  
 
 	- `S7_HumiditySensor`: humidity sensor 
 	    - `name`: unique name of the accessory 
-        - `manufacturer`: (optional) decription
+        - `manufacturer`: (optional) description
         - `db`: s7 data base number e.g. `4` for `DB4`
         - `CurrentRelativeHumidity`: offset to get current humidity S7 type `Real` e.g. `55` for `DB4DBD55` 
 
-	- `S7_Thermostat`: temerature sensor and temperature regulation
+	- `S7_Thermostat`: temperature sensor and temperature regulation
 	    - `name`: unique name of the accessory 
-        - `manufacturer`: (optional) decription
+        - `manufacturer`: (optional) description
         - `db`: s7 data base number e.g. `4` for `DB4`
         - `get_CurrentTemperature`: offset to get current humidity S7 type `Real` e.g. `55` for `DB4DBD55`  
         - S7 type `Byte` e.g. `56` for `DB4DBB56`  
@@ -105,7 +105,7 @@ SIEMENS S7 PLC plugin for [Homebridge](https://homebridge.io)
 
 	- `S7_WindowCovering`: windows and window blinds 
 	    - `name`: unique name of the accessory 
-        - `manufacturer`: (optional) decription
+        - `manufacturer`: (optional) description
         - `db`: s7 data base number e.g. `4` for `DB4`
         - `invert`: set to 1 to inverts the meanings of the values from `0:closed 100:open` to `100:closed 0:open`
         - `get_CurrentPosition`: offset to get current position S7 type `Byte` e.g. `0` for `DB4DBB0`  
@@ -119,39 +119,39 @@ SIEMENS S7 PLC plugin for [Homebridge](https://homebridge.io)
 
 	- `S7_Window`: see S7_WindowCovering
 
-	- `S7_OccupancySensor`: precence sensor
+	- `S7_OccupancySensor`: presence sensor
 	    - `name`: unique name of the accessory 
-        - `manufacturer`: (optional) decription
+        - `manufacturer`: (optional) description
         - `db`: s7 data base number e.g. `4` for `DB4`
         - `get_OccupancyDetected`: offset and bit get the current status S7 type `Bool` e.g. `55.0` for `DB4DBX55.0`        
 
 	- `S7_MotionSensor`: movement sensor
 	    - `name`: unique name of the accessory 
-        - `manufacturer`: (optional) decription
+        - `manufacturer`: (optional) description
         - `db`: s7 data base number e.g. `4` for `DB4`
         - `get_MotionDetected`: offset and bit get the current status S7 type `Bool` e.g. `55.0` for `DB4DBX55.0`        
 
 	- `S7_Faucet`: watering for the garden 
 	    - `name`: unique name of the accessory 
-        - `manufacturer`: (optional) decription
+        - `manufacturer`: (optional) description
         - `db`: s7 data base number e.g. `4` for `DB4`
         - `get_Active`: offset and bit get the current status S7 type `Bool` e.g. `55.0` for `DB4DBX55.0`        
         - Single Bit for on/off:
           - `set_Active`: offset and bit set to 1/0 when switching on/off S7 type `Bool` PLC  e.g. `55.0` for `DB4DBX55.0` could be same as get_Active
-        - Seperate Bits for on/off:
+        - Separate Bits for on/off:
           - `set_Active`: offset and bit set to 1 when switching on S7 type `Bool` PLC has to set to 0 e.g. `55.1` for `DB4DBX55.1`
-          - `set_Deactive`: offset and bit set to 1 when switching off S7 type `Bool` PLC has to set to 0 e.g. `55.2` for `DB4DBX55.2` 
+          - `set_Deactivate`: offset and bit set to 1 when switching off S7 type `Bool` PLC has to set to 0 e.g. `55.2` for `DB4DBX55.2` 
       
     -  `S7_SecuritySystem`: alarm system
 	    - `name`: unique name of the accessory 
-        - `manufacturer`: (optional) decription
+        - `manufacturer`: (optional) description
         - `db`: s7 data base number e.g. `4` for `DB4`
         - `get_SecuritySystemCurrentState`: offset to current security system state S7 type `Byte` e.g. `3` for `DB4DBB3`    
           - `0`: armed stay at home
           - `1`: armed away from home
           - `2`: armed night 
           - `3`: disarmed
-          - `4`: alarm driggered
+          - `4`: alarm triggered
         - `set_SecuritySystemTargetState`: offset to set target security system state S7 type `Byte` e.g. `5` for `DB4DBB4`      
         - `get_SecuritySystemTargetState`: offset to set target security system state S7 type `Byte` e.g. `6` for `DB4DBB6`
           - `0`: armed stay at home
@@ -161,9 +161,9 @@ SIEMENS S7 PLC plugin for [Homebridge](https://homebridge.io)
     
     - `S7_Valve`: valve configurable as generic valve, irrigation, shower head or water faucet
 	    - `name`: unique name of the accessory 
-        - `manufacturer`: (optional) decription
+        - `manufacturer`: (optional) description
         - `db`: s7 data base number e.g. `4` for `DB4`
-        - `ValveType` configures the valve type that is returend
+        - `ValveType` configures the valve type that is returned
           - `0`: generic valve
           - `1`: irrigation
           - `2`: shower head 
@@ -171,9 +171,9 @@ SIEMENS S7 PLC plugin for [Homebridge](https://homebridge.io)
         - `get_Active`: offset and bit get the current status S7 type `Bool` e.g. `55.0` for `DB4DBX55.0`        
         - Single Bit for on/off:
           - `set_Active`: offset and bit set to 1/0 when switching on/off S7 type `Bool` PLC  e.g. `55.0` for `DB4DBX55.0` could be same as get_Active
-        - Seperate Bits for on/off:
+        - Separate Bits for on/off:
           - `set_Active`: offset and bit set to 1 when switching on S7 type `Bool` PLC has to set to 0 e.g. `55.1` for `DB4DBX55.1`
-          - `set_Deactive`: offset and bit set to 1 when switching off S7 type `Bool` PLC has to set to 0 e.g. `55.2` for `DB4DBX55.2` 
+          - `set_Deactivate`: offset and bit set to 1 when switching off S7 type `Bool` PLC has to set to 0 e.g. `55.2` for `DB4DBX55.2` 
         - in can be fixed or dynamic together with active the device is shown in the home app as
           - Mapping table:
             - Active: 0  InUse: 0 -> off
@@ -185,14 +185,14 @@ SIEMENS S7 PLC plugin for [Homebridge](https://homebridge.io)
           - inUse dynamic
             - `get_InUse`: offset and bit get the current inUse state S7 type `Bool` PLC has to set to 0 e.g. `55.1` for `DB4DBX55.1`
         - if one of the (optional) duration settings need specified all are needed
-          - `get_SetDuration`: (optional) duration towards homekit limit to 0..3600s ec S7 type `Time` e.g. `10` for `DB4DBD10`
-          - `set_SetDuration`: (optional) duration towards homekit limit to 0..3600s ec S7 type `Time` e.g. `14` for `DB4DBD14`
-          - `get_RemainingDuration`: (optional) duration towards homekit limit to 0..3600s ec S7 type `Time` e.g. `18` for `DB4DBD18`
+          - `get_SetDuration`: (optional) duration 0..3600 sec S7 type `Time` e.g. `10` for `DB4DBD10`
+          - `set_SetDuration`: (optional) duration 0..3600 sec S7 type `Time` e.g. `14` for `DB4DBD14`
+          - `get_RemainingDuration`: (optional) duration 0..3600 sec S7 type `Time` e.g. `18` for `DB4DBD18`
 
 
-    - `S7_StatelessProgrammableSwitch`: stateless switch from PLC to HomeKit to trigger actions in homekit only works with contol center e.g. AppleTV (Thus not yet tested)
+    - `S7_StatelessProgrammableSwitch`: stateless switch from PLC to HomeKit to trigger actions in homekit only works with control center e.g. AppleTV (Thus not yet tested)
 	    - `name`: unique name of the accessory 
-        - `manufacturer`: (optional) decription
+        - `manufacturer`: (optional) description
         - `db`: s7 data base number e.g. `4` for `DB4`
         - `get_ProgrammableSwitchEvent`: offset to red current state of the switch S7 type `Byte` e.g. `3` for `DB4DBB3`  
           - `0`: single press
@@ -245,11 +245,11 @@ SIEMENS S7 PLC plugin for [Homebridge](https://homebridge.io)
                     "db": 6096,
                     "get_Active": 0.0
                     "set_Active": 1.1,
-                    "set_Deactive": 1.0,
+                    "set_Deactivate": 1.0,
                 }                
                 {
                     "accessory": "S7_OccupancySensor",
-                    "name": "Precence",
+                    "name": "Presence",
                     "db": 6510,
                     "get_OccupancyDetected": 24
                 },

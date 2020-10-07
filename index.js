@@ -356,6 +356,7 @@ function GenericS7(platform, config) {
           config.db, 
           config.set_TargetPosition,
           'set TargetPosition',
+          function(value){this.service.getCharacteristic(Characteristic.CurrentPosition).updateValue(value) }.bind(this),
           modFunction          
           )}.bind(this));
       }
@@ -436,7 +437,7 @@ function GenericS7(platform, config) {
     this.service =  new Service.Faucet(this.name);
     this.accessory.addService(this.service);
 
-    if ('set_Deactive' in config) {      
+    if ('set_Deactivate' in config) {      
       this.service.getCharacteristic(Characteristic.Active)
         .on('get', function(callback) {this.getBit(callback, 
           config.db, 
@@ -446,7 +447,7 @@ function GenericS7(platform, config) {
         .on('set', function(powerOn, callback) { this.setOnOffBit(powerOn, callback, 
           config.db, 
           Math.floor(config.set_Active), Math.floor((config.set_Active*10)%10),
-          Math.floor(config.set_Deactive), Math.floor((config.set_Deactive*10)%10),
+          Math.floor(config.set_Deactivate), Math.floor((config.set_Deactivate*10)%10),
           'set Active'
         )}.bind(this));
     } else {
@@ -486,7 +487,8 @@ function GenericS7(platform, config) {
       .on('set', function(value, callback) {this.setByte(value, callback, 
         config.db, 
         config.set_SecuritySystemTargetState,
-        "set SecuritySystemTargetState"
+        "set SecuritySystemTargetState",
+        function(value){this.service.getCharacteristic(Characteristic.SecuritySystemCurrentState).updateValue(value) }.bind(this),        
       )}.bind(this));        
   }  
   ////////////////////////////////////////////////////////////////
@@ -496,7 +498,7 @@ function GenericS7(platform, config) {
     this.service = new Service.Valve(this.name);
     this.accessory.addService(this.service);
 
-    if ('set_Deactive' in config) {      
+    if ('set_Deactivate' in config) {      
       this.service.getCharacteristic(Characteristic.Active)
         .on('get', function(callback) {this.getBit(callback, 
           config.db, 
@@ -506,8 +508,9 @@ function GenericS7(platform, config) {
         .on('set', function(powerOn, callback) { this.setOnOffBit(powerOn, callback, 
           config.db, 
           Math.floor(config.set_Active), Math.floor((config.set_Active*10)%10),
-          Math.floor(config.set_Deactive), Math.floor((config.set_Deactive*10)%10),
-          'set Active'
+          Math.floor(config.set_Deactivate), Math.floor((config.set_Deactivate*10)%10),
+          'set Active',
+          function(value){this.service.getCharacteristic(Characteristic.InUse).updateValue(value) }.bind(this)
         )}.bind(this));
     } else {
       this.service.getCharacteristic(Characteristic.Active)
@@ -519,9 +522,17 @@ function GenericS7(platform, config) {
         .on('set', function(powerOn, callback) { this.setBit(powerOn, callback, 
           config.db, 
           Math.floor(config.set_Active), Math.floor((config.set_Active*10)%10),
-          'set Active'
+          'set Active',
+          function(value){this.service.getCharacteristic(Characteristic.InUse).updateValue(value) }.bind(this)
         )}.bind(this));
     }
+
+    this.service.getCharacteristic(Characteristic.InUse)
+    .on('get', function(callback) {this.getBit(callback, 
+      config.db, 
+      Math.floor(config.get_Active), Math.floor((config.get_Active*10)%10),
+      'get InUse'
+    )}.bind(this))    
 
     if ('ValveType' in config) {   
       this.service.getCharacteristic(Characteristic.ValveType)
@@ -530,7 +541,7 @@ function GenericS7(platform, config) {
         'get ValveType'
         )}.bind(this));
     }
-    
+  /*  
 
     if ('InUse' in config) {   
       this.service.getCharacteristic(Characteristic.InUse)
@@ -543,23 +554,15 @@ function GenericS7(platform, config) {
     
 
     if ('get_InUse' in config) {   
-/*
+
       setInterval(function() {this.getBit( 
         function(err, value){this.service.getCharacteristic(Characteristic.InUse).updateValue(value) }.bind(this),
         config.db, 
         Math.floor(config.get_InUse), Math.floor((config.get_InUse*10)%10),
         'poll InUse'
         )}.bind(this),5000);
-*/
-
-      this.service.getCharacteristic(Characteristic.InUse)
-      .on('get', function(callback) {this.getBit(callback, 
-        config.db, 
-        Math.floor(config.get_InUse), Math.floor((config.get_InUse*10)%10),
-        'get InUse'
-      )}.bind(this))
     }
-
+*/
 
 
     if ('get_RemainingDuration' in config) {   
@@ -581,7 +584,8 @@ function GenericS7(platform, config) {
         .on('set', function(value, callback) {this.setDInt(value, callback, 
           config.db, 
           config.set_SetDuration,
-          "set SetDuration2",
+          "set SetDuration",
+          function(value){this.service.getCharacteristic(Characteristic.RemainingDuration).updateValue(value) }.bind(this),
           this.int27time
         )}.bind(this));  
     }      
@@ -654,11 +658,15 @@ GenericS7.prototype = {
   //////////////////////////////////////////////////////////////////////////////
   // DUMMY
   //////////////////////////////////////////////////////////////////////////////
-  setDummy: function(value, callback, characteristic) {
+  setDummy: function(value, callback, characteristic, inform) {
     var logprefix = "[" + this.name + "] " + characteristic + ": %s (setDummy)";
     var log = this.log;    
     log.debug(logprefix , String(value));
     callback(null);
+    if (typeof(inform) != "undefined" && inform != null)
+    {
+      inform(value);
+    }       
   },
 
   handleDummy: function(callback, characteristic) {
@@ -679,7 +687,7 @@ GenericS7.prototype = {
   //////////////////////////////////////////////////////////////////////////////
   // BIT
   //////////////////////////////////////////////////////////////////////////////
-  setOnOffBit: function(value, callback, db, on_offset, on_bit, off_offset, off_bit, characteristic) {    
+  setOnOffBit: function(value, callback, db, on_offset, on_bit, off_offset, off_bit, characteristic, inform) {    
     //Set single bit depending on value
     const offset = value ? on_offset : off_offset;
     const bit = value ? on_bit : off_bit;    
@@ -701,6 +709,10 @@ GenericS7.prototype = {
         else {
           log.debug(logprefix , String(value));
           callback(null);
+          if (typeof(inform) != "undefined" && inform != null)
+          {
+            inform(value);
+          }             
         }
       });
     }
@@ -709,7 +721,7 @@ GenericS7.prototype = {
     }
   },
 
-  setBit: function(value, callback, db, offset, bit, characteristic) {    
+  setBit: function(value, callback, db, offset, bit, characteristic, inform) {    
     //Set single bit depending on value
     var logprefix = "[" + this.name + "] " + characteristic + ": %s (setBit DB" + db + "DBX"+ offset + "." + bit + ")";
     var S7Client = this.platform.S7Client;
@@ -728,6 +740,10 @@ GenericS7.prototype = {
         else {
           log.debug(logprefix , String(value));
           callback(null);
+          if (typeof(inform) != "undefined" && inform != null)
+          {
+            inform(value);
+          }             
         }
       });
     }
@@ -768,7 +784,7 @@ GenericS7.prototype = {
   //////////////////////////////////////////////////////////////////////////////
   // REAL
   //////////////////////////////////////////////////////////////////////////////
-  setReal: function(value, callback, db, offset, characteristic, valueMod) {
+  setReal: function(value, callback, db, offset, characteristic, inform, valueMod) {
     var logprefix = "[" + this.name + "] " + characteristic + ": %s (setReal DB" + db + "DBD"+ offset + ")";
     var S7Client = this.platform.S7Client;
     var log = this.log;
@@ -797,8 +813,12 @@ GenericS7.prototype = {
             else
             {
               log.debug(logprefix , String(value));
-            }  
+            }           
             callback(null);
+            if (typeof(inform) != "undefined" && inform != null)
+            {
+              inform(value);
+            }               
           }
         });
     }
@@ -846,7 +866,7 @@ GenericS7.prototype = {
   //////////////////////////////////////////////////////////////////////////////
   // BYTE
   //////////////////////////////////////////////////////////////////////////////
-  setByte: function(value, callback, db, offset, characteristic, valueMod) {
+  setByte: function(value, callback, db, offset, characteristic, inform, valueMod) {
     var logprefix = "[" + this.name + "] " + characteristic + ": %s (setByte DB" + db + "DBB"+ offset + ")";
     var S7Client = this.platform.S7Client;
     var log = this.log;
@@ -877,6 +897,10 @@ GenericS7.prototype = {
               log.debug(logprefix , String(value));
             }  
             callback(null);
+            if (typeof(inform) != "undefined" && inform != null)
+            {
+              inform(value);
+            }               
           }
         });
     }
@@ -925,7 +949,7 @@ GenericS7.prototype = {
   //////////////////////////////////////////////////////////////////////////////
   // INT
   //////////////////////////////////////////////////////////////////////////////
-  setInt: function(value, callback, db, offset, characteristic, valueMod) {
+  setInt: function(value, callback, db, offset, characteristic, inform, valueMod) {
     var logprefix = "[" + this.name + "] " + characteristic + ": %s (setInt DB" + db + "DBW"+ offset + ")";    
     var S7Client = this.platform.S7Client;
     var log = this.log;
@@ -956,6 +980,10 @@ GenericS7.prototype = {
               log.debug(logprefix , String(value));
             }  
             callback(null);
+            if (typeof(inform) != "undefined" && inform != null)
+            {
+              inform(value);
+            }               
           }
         });
     }
@@ -1005,7 +1033,7 @@ GenericS7.prototype = {
   //////////////////////////////////////////////////////////////////////////////
   // DInt
   //////////////////////////////////////////////////////////////////////////////
-  setDInt: function(value, callback, db, offset, characteristic, valueMod) {
+  setDInt: function(value, callback, db, offset, characteristic, inform, valueMod) {
     var logprefix = "[" + this.name + "] " + characteristic + ": %s (setDInt DB" + db + "DBD"+ offset + ")";    
     var S7Client = this.platform.S7Client;
     var log = this.log;
@@ -1036,6 +1064,10 @@ GenericS7.prototype = {
               log.debug(logprefix , String(value));
             }  
             callback(null);
+            if (typeof(inform) != "undefined" && inform != null)
+            {
+              inform(value);
+            }               
           }
         });
     }
