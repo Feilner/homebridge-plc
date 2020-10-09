@@ -12,10 +12,10 @@ module.exports = function(homebridge) {
   Characteristic = homebridge.hap.Characteristic;
   UUIDGen = homebridge.hap.uuid;
   PlatformAccessory = homebridge.platformAccessory;
-  homebridge.registerPlatform(platformName, 'S7', S7Platform);
+  homebridge.registerPlatform(platformName, 'PLC', PLC_Platform);
 }
 
-function S7Platform(log, config) {
+function PLC_Platform(log, config) {
     this.log = log;
     this.config = config;
     this.S7Client = new snap7.S7Client();
@@ -23,16 +23,16 @@ function S7Platform(log, config) {
     this.S7ClientConnect();
 }
 
-S7Platform.prototype = {    
+PLC_Platform.prototype = {    
     accessories: function(callback) {
         var log = this.log;
         var s7PlatformAccessories = [];
-        log("Add S7 accessories...");
+        log("Add PLC accessories...");
         //create accessory for each configuration
         this.config.accessories.forEach((config, index) => {
             log("[" + String(index+1) + "/" + this.config.accessories.length + "] " + config.name + " (" +  config.accessory + ")" );
             //call accessory construction
-            var accessory = new GenericS7(this, config);
+            var accessory = new GenericPLCAccessory(this, config);
             s7PlatformAccessories.push(accessory);
         });
         callback(s7PlatformAccessories);
@@ -56,7 +56,6 @@ S7Platform.prototype = {
 
             if (!this.isConnectOngoing == true) {
               this.isConnectOngoing = true;
-                //PLC connection asynchonousely...
                 var ok = S7Client.ConnectTo(ip, rack, slot);
                 this.isConnectOngoing = false;
                 if(ok) {
@@ -78,7 +77,7 @@ S7Platform.prototype = {
 
 
 
-function GenericS7(platform, config) {
+function GenericPLCAccessory(platform, config) {
   this.platform = platform;
   this.log = platform.log;
   this.name = config.name;
@@ -88,7 +87,7 @@ function GenericS7(platform, config) {
   ////////////////////////////////////////////////////////////////
   // Lightbulb
   ////////////////////////////////////////////////////////////////
-  if (config.accessory == 'S7_LightBulb') {   
+  if (config.accessory == 'PLC_PLC_LightBulb') {   
     this.service =  new Service.Lightbulb(this.name);
     this.accessory.addService(this.service);
 
@@ -142,8 +141,44 @@ function GenericS7(platform, config) {
   ////////////////////////////////////////////////////////////////
   // Outlet
   ////////////////////////////////////////////////////////////////    
-  else if (config.accessory == 'S7_Outlet') {   
+  else if (config.accessory == 'PLC_Outlet') {   
     this.service =  new Service.Outlet(this.name);
+    this.accessory.addService(this.service);
+
+    if ('set_Off' in config) {      
+      this.service.getCharacteristic(Characteristic.On)
+        .on('get', function(callback) {this.getBit(callback, 
+          config.db, 
+          Math.floor(config.get_On), Math.floor((config.get_On*10)%10),
+          'get On'
+        )}.bind(this))
+        .on('set', function(powerOn, callback) { this.setOnOffBit(powerOn, callback, 
+          config.db, 
+          Math.floor(config.set_On), Math.floor((config.set_On*10)%10),
+          Math.floor(config.set_Off), Math.floor((config.set_Off*10)%10),
+          'set On'
+        )}.bind(this));
+    } else {
+      this.service.getCharacteristic(Characteristic.On)
+        .on('get', function(callback) {this.getBit(callback, 
+          config.db, 
+          Math.floor(config.get_On), Math.floor((config.get_On*10)%10),
+          'get On'
+        )}.bind(this))
+        .on('set', function(powerOn, callback) { this.setBit(powerOn, callback, 
+          config.db, 
+          Math.floor(config.set_On), Math.floor((config.set_On*10)%10),
+          'set On'
+        )}.bind(this));
+    }
+  }
+
+
+  ////////////////////////////////////////////////////////////////
+  // Switch
+  ////////////////////////////////////////////////////////////////    
+  else if (config.accessory == 'PLC_Switch') {   
+    this.service =  new Service.Switch(this.name);
     this.accessory.addService(this.service);
 
     if ('set_Off' in config) {      
@@ -177,7 +212,7 @@ function GenericS7(platform, config) {
   ////////////////////////////////////////////////////////////////
   // TemperatureSensor
   //////////////////////////////////////////////////////////////// 
-  else if (config.accessory == 'S7_TemperatureSensor') {   
+  else if (config.accessory == 'PLC_TemperatureSensor') {   
     this.service =  new Service.TemperatureSensor(this.name);
     this.accessory.addService(this.service);
 
@@ -197,7 +232,7 @@ function GenericS7(platform, config) {
   ////////////////////////////////////////////////////////////////
   // HumiditySensor
   //////////////////////////////////////////////////////////////// 
-  else if (config.accessory == 'S7_HumiditySensor') {   
+  else if (config.accessory == 'PLC_HumiditySensor') {   
     this.service =  new Service.HumiditySensor(this.name);
     this.accessory.addService(this.service);
 
@@ -217,7 +252,7 @@ function GenericS7(platform, config) {
   ////////////////////////////////////////////////////////////////
   // Thermostat
   ////////////////////////////////////////////////////////////////  
-  else if (config.accessory == 'S7_Thermostat'){
+  else if (config.accessory == 'PLC_Thermostat'){
     this.service = new Service.Thermostat(this.name);
     this.accessory.addService(this.service);
 
@@ -283,8 +318,8 @@ function GenericS7(platform, config) {
  ////////////////////////////////////////////////////////////////
   // Window and WindowCovering
   ////////////////////////////////////////////////////////////////    
-  else if (config.accessory == 'S7_Window' ||config.accessory == 'S7_WindowCovering'){ 
-    if (config.accessory == 'S7_Window')
+  else if (config.accessory == 'PLC_Window' ||config.accessory == 'PLC_WindowCovering'){ 
+    if (config.accessory == 'PLC_Window')
     {
       this.service = new Service.Window(this.name);
     }
@@ -320,6 +355,7 @@ function GenericS7(platform, config) {
           config.db, 
           config.set_TargetPosition,
           'set TargetPosition',
+          function(value){this.service.getCharacteristic(Characteristic.CurrentPosition).updateValue(value) }.bind(this),
           modFunction          
           )}.bind(this));
       }
@@ -343,12 +379,12 @@ function GenericS7(platform, config) {
         )}.bind(this));
     }
     else {
-        this.service.getCharacteristic(Characteristic.PositionState)
-      .on('get', function(callback) {this.getDummy(callback,
+      this.service.getCharacteristic(Characteristic.PositionState)
+        .on('get', function(callback) {this.getDummy(callback,
         2,
         'get PositionState'
         )}.bind(this));
-    }
+        }
       
     if ('set_HoldPosition' in config) {
     this.service.getCharacteristic(Characteristic.HoldPosition)
@@ -368,7 +404,7 @@ function GenericS7(platform, config) {
   ////////////////////////////////////////////////////////////////
   // OccupancySensor
   ////////////////////////////////////////////////////////////////   
-  else if (config.accessory == 'S7_OccupancySensor'){
+  else if (config.accessory == 'PLC_OccupancySensor'){
     this.service = new Service.OccupancySensor(this.name);
     this.accessory.addService(this.service);
 
@@ -382,7 +418,7 @@ function GenericS7(platform, config) {
   ////////////////////////////////////////////////////////////////
   // MotionSensor
   ////////////////////////////////////////////////////////////////   
-  else if (config.accessory == 'S7_MotionSensor'){
+  else if (config.accessory == 'PLC_MotionSensor'){
     this.service = new Service.OccupancySensor(this.name);
     this.accessory.addService(this.service);
 
@@ -396,11 +432,11 @@ function GenericS7(platform, config) {
   ////////////////////////////////////////////////////////////////
   // Faucet
   ////////////////////////////////////////////////////////////////   
-  else if (config.accessory == 'S7_Faucet'){
+  else if (config.accessory == 'PLC_Faucet'){
     this.service =  new Service.Faucet(this.name);
     this.accessory.addService(this.service);
 
-    if ('set_Deactive' in config) {      
+    if ('set_Deactivate' in config) {      
       this.service.getCharacteristic(Characteristic.Active)
         .on('get', function(callback) {this.getBit(callback, 
           config.db, 
@@ -410,7 +446,7 @@ function GenericS7(platform, config) {
         .on('set', function(powerOn, callback) { this.setOnOffBit(powerOn, callback, 
           config.db, 
           Math.floor(config.set_Active), Math.floor((config.set_Active*10)%10),
-          Math.floor(config.set_Deactive), Math.floor((config.set_Deactive*10)%10),
+          Math.floor(config.set_Deactivate), Math.floor((config.set_Deactivate*10)%10),
           'set Active'
         )}.bind(this));
     } else {
@@ -426,13 +462,161 @@ function GenericS7(platform, config) {
           'set Active'
         )}.bind(this));
     }
-  }
+  }  
+  ////////////////////////////////////////////////////////////////
+  // SecuritySystem
+  ////////////////////////////////////////////////////////////////   
+  else if (config.accessory == 'PLC_SecuritySystem'){
+    this.service = new Service.SecuritySystem(this.name);
+    this.accessory.addService(this.service);
+
+    this.service.getCharacteristic(Characteristic.SecuritySystemCurrentState)
+      .on('get', function(callback) {this.getByte(callback, 
+        config.db, 
+        config.get_SecuritySystemCurrentState,
+        "get SecuritySystemCurrentState"
+      )}.bind(this))    
+
+      this.service.getCharacteristic(Characteristic.SecuritySystemTargetState)
+      .on('get', function(callback) {this.getByte(callback, 
+        config.db, 
+        config.get_SecuritySystemTargetState,
+        "get SecuritySystemTargetState"
+      )}.bind(this))  
+      .on('set', function(value, callback) {this.setByte(value, callback, 
+        config.db, 
+        config.set_SecuritySystemTargetState,
+        "set SecuritySystemTargetState",
+        function(value){this.service.getCharacteristic(Characteristic.SecuritySystemCurrentState).updateValue(value) }.bind(this),        
+      )}.bind(this));        
+  }  
+  ////////////////////////////////////////////////////////////////
+  // Valve
+  ////////////////////////////////////////////////////////////////   
+  else if (config.accessory == 'PLC_Valve'){
+    this.service = new Service.Valve(this.name);
+    this.accessory.addService(this.service);
+
+    if ('set_Deactivate' in config) {      
+      this.service.getCharacteristic(Characteristic.Active)
+        .on('get', function(callback) {this.getBit(callback, 
+          config.db, 
+          Math.floor(config.get_Active), Math.floor((config.get_Active*10)%10),
+          'get Active'
+        )}.bind(this))
+        .on('set', function(powerOn, callback) { this.setOnOffBit(powerOn, callback, 
+          config.db, 
+          Math.floor(config.set_Active), Math.floor((config.set_Active*10)%10),
+          Math.floor(config.set_Deactivate), Math.floor((config.set_Deactivate*10)%10),
+          'set Active',
+          function(value){this.service.getCharacteristic(Characteristic.InUse).updateValue(value) }.bind(this)
+        )}.bind(this));
+    } else {
+      this.service.getCharacteristic(Characteristic.Active)
+        .on('get', function(callback) {this.getBit(callback, 
+          config.db, 
+          Math.floor(config.get_Active), Math.floor((config.get_Active*10)%10),
+          'get Active'
+        )}.bind(this))
+        .on('set', function(powerOn, callback) { this.setBit(powerOn, callback, 
+          config.db, 
+          Math.floor(config.set_Active), Math.floor((config.set_Active*10)%10),
+          'set Active',
+          function(value){this.service.getCharacteristic(Characteristic.InUse).updateValue(value) }.bind(this)
+        )}.bind(this));
+    }
+
+    this.service.getCharacteristic(Characteristic.InUse)
+    .on('get', function(callback) {this.getBit(callback, 
+      config.db, 
+      Math.floor(config.get_Active), Math.floor((config.get_Active*10)%10),
+      'get InUse'
+    )}.bind(this))    
+
+    if ('ValveType' in config) {   
+      this.service.getCharacteristic(Characteristic.ValveType)
+        .on('get', function(callback) {this.getDummy(callback,
+          ValveType,
+        'get ValveType'
+        )}.bind(this));
+    }
+  /*  
+
+    if ('InUse' in config) {   
+      this.service.getCharacteristic(Characteristic.InUse)
+        .on('get', function(callback) {this.getDummy(callback,
+          config.InUse,
+        'get InUse'
+        )}.bind(this));        
+    }
+
+    
+
+    if ('get_InUse' in config) {   
+
+      setInterval(function() {this.getBit( 
+        function(err, value){this.service.getCharacteristic(Characteristic.InUse).updateValue(value) }.bind(this),
+        config.db, 
+        Math.floor(config.get_InUse), Math.floor((config.get_InUse*10)%10),
+        'poll InUse'
+        )}.bind(this),5000);
+    }
+*/
+
+
+    if ('get_RemainingDuration' in config) {   
+      this.service.getCharacteristic(Characteristic.RemainingDuration)
+        .on('get', function(callback) {this.getDInt(callback, 
+          config.db, 
+          config.get_RemainingDuration,
+          "get RemainingDuration",
+          this.s7time2int
+        )}.bind(this))    
+
+        this.service.getCharacteristic(Characteristic.SetDuration)
+        .on('get', function(callback) {this.getDInt(callback, 
+          config.db, 
+          config.get_SetDuration,
+          "get SetDuration",
+          this.s7time2int
+        )}.bind(this))  
+        .on('set', function(value, callback) {this.setDInt(value, callback, 
+          config.db, 
+          config.set_SetDuration,
+          "set SetDuration",
+          function(value){this.service.getCharacteristic(Characteristic.RemainingDuration).updateValue(value) }.bind(this),
+          this.int27time
+        )}.bind(this));  
+    }      
+  }    
+  ////////////////////////////////////////////////////////////////
+  // StatelessProgrammableSwitch
+  ////////////////////////////////////////////////////////////////   
+  /*
+  else if (config.accessory == 'PLC_StatelessProgrammableSwitch'){
+    this.service = new Service.StatelessProgrammableSwitch(this.name);
+    this.accessory.addService(this.service);
+
+    this.service.getCharacteristic(Characteristic.ProgrammableSwitchEvent)
+      .on('get', function(callback) {this.getByte(callback, 
+        config.db, 
+        config.get_ProgrammableSwitchEvent,
+        "get ProgrammableSwitchEvent"
+      )}.bind(this));
+
+      this.service.getCharacteristic(Characteristic.ServiceLabelIndex)
+      .on('get', function(callback) {this.getDummy(callback, 
+        1,
+        "get ServiceLabelIndex"
+      )}.bind(this))
+  }    
+      */      
   else {
     this.log("Accessory "+ config.accessory + " is not defined.")
   }
       
   this.accessory.getService(Service.AccessoryInformation)
-  .setCharacteristic(Characteristic.Manufacturer, ('manufacturer' in config) ? config.manufacturer : 'S7-PLC')
+  .setCharacteristic(Characteristic.Manufacturer, ('manufacturer' in config) ? config.manufacturer : 'homebridge-plc')
   .setCharacteristic(Characteristic.Model, config.accessory)
   .setCharacteristic(Characteristic.SerialNumber, uuid)
   .setCharacteristic(Characteristic.FirmwareRevision, '0.0.1'); 
@@ -441,7 +625,7 @@ function GenericS7(platform, config) {
 
 }
 
-GenericS7.prototype = {
+GenericPLCAccessory.prototype = {
 
   getServices: function() {
     return [this.accessory.getService(Service.AccessoryInformation), this.service];
@@ -455,14 +639,33 @@ GenericS7.prototype = {
     return value;
   },
 
+  s7time2int: function(value){
+    var val = Math.ceil(value/1000);
+    if (val > 3600) {
+      val = 3600;
+    }
+    if (val < 0) {
+      val = 0;
+    }
+    return val;
+  },
+
+  int27time: function(value){
+    return (value * 1000);
+  },
+
   //////////////////////////////////////////////////////////////////////////////
   // DUMMY
   //////////////////////////////////////////////////////////////////////////////
-  setDummy: function(value, callback, characteristic) {
+  setDummy: function(value, callback, characteristic, inform) {
     var logprefix = "[" + this.name + "] " + characteristic + ": %s (setDummy)";
     var log = this.log;    
     log.debug(logprefix , String(value));
     callback(null);
+    if (typeof(inform) != "undefined" && inform != null)
+    {
+      inform(value);
+    }       
   },
 
   handleDummy: function(callback, characteristic) {
@@ -483,7 +686,7 @@ GenericS7.prototype = {
   //////////////////////////////////////////////////////////////////////////////
   // BIT
   //////////////////////////////////////////////////////////////////////////////
-  setOnOffBit: function(value, callback, db, on_offset, on_bit, off_offset, off_bit, characteristic) {    
+  setOnOffBit: function(value, callback, db, on_offset, on_bit, off_offset, off_bit, characteristic, inform) {    
     //Set single bit depending on value
     const offset = value ? on_offset : off_offset;
     const bit = value ? on_bit : off_bit;    
@@ -496,16 +699,19 @@ GenericS7.prototype = {
     if (this.platform.S7ClientConnect()) {
 
       this.buf[0] = 1;
-      // Write single Bit to DB asynchonousely...
       S7Client.WriteArea(S7Client.S7AreaDB, db, ((offset*8) + bit), 1, S7Client.S7WLBit, this.buf, function(err) {
         if(err) {
           log.error(logprefix, "WriteArea failed #" + String(err) + " - " + S7Client.ErrorText(err));
           S7Client.Disconnect();
-          callback(err);
+          callback(new Error('PLC error'));
         }
         else {
           log.debug(logprefix , String(value));
           callback(null);
+          if (typeof(inform) != "undefined" && inform != null)
+          {
+            inform(value);
+          }             
         }
       });
     }
@@ -514,7 +720,7 @@ GenericS7.prototype = {
     }
   },
 
-  setBit: function(value, callback, db, offset, bit, characteristic) {    
+  setBit: function(value, callback, db, offset, bit, characteristic, inform) {    
     //Set single bit depending on value
     var logprefix = "[" + this.name + "] " + characteristic + ": %s (setBit DB" + db + "DBX"+ offset + "." + bit + ")";
     var S7Client = this.platform.S7Client;
@@ -524,16 +730,19 @@ GenericS7.prototype = {
     //ensure PLC connection
     if (this.platform.S7ClientConnect()) {
       this.buf[0] = value ? 1 : 0;
-      // Write single Bit to DB asynchonousely...
       S7Client.WriteArea(S7Client.S7AreaDB, db, ((offset*8) + bit), 1, S7Client.S7WLBit, this.buf, function(err) {
         if(err) {
           log.error(logprefix, "WriteArea failed #" + String(err) + " - " + S7Client.ErrorText(err));
           S7Client.Disconnect();
-          callback(err);
+          callback(new Error('PLC error'));
         }
         else {
           log.debug(logprefix , String(value));
           callback(null);
+          if (typeof(inform) != "undefined" && inform != null)
+          {
+            inform(value);
+          }             
         }
       });
     }
@@ -553,7 +762,6 @@ GenericS7.prototype = {
     this.platform.S7ClientConnect();
       
     if (this.platform.S7ClientConnect()) {
-      // Read one bit from PLC DB asynchonousely...
       S7Client.ReadArea(S7Client.S7AreaDB, db, ((offset*8) + bit), 1, S7Client.S7WLBit, function(err, res) {
         if(err) {
           log.error(logprefix, "ReadArea failed #" + String(err) + " - " + S7Client.ErrorText(err));
@@ -575,7 +783,7 @@ GenericS7.prototype = {
   //////////////////////////////////////////////////////////////////////////////
   // REAL
   //////////////////////////////////////////////////////////////////////////////
-  setReal: function(value, callback, db, offset, characteristic, valueMod) {
+  setReal: function(value, callback, db, offset, characteristic, inform, valueMod) {
     var logprefix = "[" + this.name + "] " + characteristic + ": %s (setReal DB" + db + "DBD"+ offset + ")";
     var S7Client = this.platform.S7Client;
     var log = this.log;
@@ -590,12 +798,11 @@ GenericS7.prototype = {
     //ensure PLC connection    
     if (this.platform.S7ClientConnect()) {
         buf.writeFloatBE(valuePLC, 0);
-        // Write one real from DB asynchonousely...
         S7Client.WriteArea(S7Client.S7AreaDB, db, offset, 1, S7Client.S7WLReal, buf, function(err) {
           if(err) {
             log.error(logprefix, "WriteArea failed #" + String(err) + " - " + S7Client.ErrorText(err));
             S7Client.Disconnect();
-            callback(err);
+            callback(new Error('PLC error'));
           }
           else {              
             if (typeof(valueMod) != "undefined")
@@ -605,8 +812,12 @@ GenericS7.prototype = {
             else
             {
               log.debug(logprefix , String(value));
-            }  
+            }           
             callback(null);
+            if (typeof(inform) != "undefined" && inform != null)
+            {
+              inform(value);
+            }               
           }
         });
     }
@@ -622,14 +833,12 @@ GenericS7.prototype = {
     var name = this.name;
     var value = 0;
     //ensure PLC connection
-    if (this.platform.S7ClientConnect()) {
-        // Write one real from DB asynchonousely...
-        
+    if (this.platform.S7ClientConnect()) {        
         S7Client.ReadArea(S7Client.S7AreaDB, db, offset, 1, S7Client.S7WLReal, function(err, res) {
           if(err) {
             log.error(logprefix, "ReadArea failed #" + String(err) + " - " + S7Client.ErrorText(err));
             S7Client.Disconnect();
-            callback(err);
+            callback(new Error('PLC error'));
           }
           else {              
             valuePLC = res.readFloatBE(0);
@@ -656,7 +865,7 @@ GenericS7.prototype = {
   //////////////////////////////////////////////////////////////////////////////
   // BYTE
   //////////////////////////////////////////////////////////////////////////////
-  setByte: function(value, callback, db, offset, characteristic, valueMod) {
+  setByte: function(value, callback, db, offset, characteristic, inform, valueMod) {
     var logprefix = "[" + this.name + "] " + characteristic + ": %s (setByte DB" + db + "DBB"+ offset + ")";
     var S7Client = this.platform.S7Client;
     var log = this.log;
@@ -671,12 +880,11 @@ GenericS7.prototype = {
     //ensure PLC connection    
     if (this.platform.S7ClientConnect()) {
         buf[0] = valuePLC;
-        // Write one real from DB asynchonousely...
         S7Client.WriteArea(S7Client.S7AreaDB, db, offset, 1, S7Client.S7WLByte, buf, function(err) {
           if(err) {
             log.error(logprefix, "WriteArea failed #" + String(err) + " - " + S7Client.ErrorText(err));
             S7Client.Disconnect();
-            callback(err);
+            callback(new Error('PLC error'));
           }
           else {              
             if (typeof(valueMod) != "undefined")
@@ -688,6 +896,10 @@ GenericS7.prototype = {
               log.debug(logprefix , String(value));
             }  
             callback(null);
+            if (typeof(inform) != "undefined" && inform != null)
+            {
+              inform(value);
+            }               
           }
         });
     }
@@ -703,14 +915,12 @@ GenericS7.prototype = {
     var name = this.name;
     var value = 0;
     //ensure PLC connection    
-    if (this.platform.S7ClientConnect()) {
-        // Write one real from DB asynchonousely...
-        
+    if (this.platform.S7ClientConnect()) {      
         S7Client.ReadArea(S7Client.S7AreaDB, db, offset, 1, S7Client.S7WLByte, function(err, res) {
           if(err) {
             log.error(logprefix, "ReadArea failed #" + String(err) + " - " + S7Client.ErrorText(err));
             S7Client.Disconnect();
-            callback(err);
+            callback(new Error('PLC error'));
           }
           else {              
             valuePLC = res[0];
@@ -738,7 +948,7 @@ GenericS7.prototype = {
   //////////////////////////////////////////////////////////////////////////////
   // INT
   //////////////////////////////////////////////////////////////////////////////
-  setInt: function(value, callback, db, offset, characteristic, valueMod) {
+  setInt: function(value, callback, db, offset, characteristic, inform, valueMod) {
     var logprefix = "[" + this.name + "] " + characteristic + ": %s (setInt DB" + db + "DBW"+ offset + ")";    
     var S7Client = this.platform.S7Client;
     var log = this.log;
@@ -753,12 +963,11 @@ GenericS7.prototype = {
     //ensure PLC connection
     if (this.platform.S7ClientConnect()) {
         buf.writeInt16BE(valuePLC, 0);
-        // Write one real from DB asynchonousely...
         S7Client.WriteArea(S7Client.S7AreaDB, db, offset, 1, S7Client.S7WLWord, buf, function(err) {
           if(err) {
             log.error(logprefix, "WriteArea failed #" + String(err) + " - " + S7Client.ErrorText(err));
             S7Client.Disconnect();
-            callback(err);
+            callback(new Error('PLC error'));
           }
           else {              
             if (typeof(valueMod) != "undefined")
@@ -770,6 +979,10 @@ GenericS7.prototype = {
               log.debug(logprefix , String(value));
             }  
             callback(null);
+            if (typeof(inform) != "undefined" && inform != null)
+            {
+              inform(value);
+            }               
           }
         });
     }
@@ -786,17 +999,99 @@ GenericS7.prototype = {
     var value = 0;
     var valuePLC = 0;
     //ensure PLC connection
-    if (this.platform.S7ClientConnect()) {
-        // Write one real from DB asynchonousely...
-        
+    if (this.platform.S7ClientConnect()) {       
         S7Client.ReadArea(S7Client.S7AreaDB, db, offset, 1, S7Client.S7WLWord, function(err, res) {
           if(err) {
             log.error(logprefix, "ReadArea failed #" + String(err) + " - " + S7Client.ErrorText(err));
             S7Client.Disconnect();
-            callback(err);
+            callback(new Error('PLC error'));
           }
           else {              
             valuePLC = res.readInt16BE(0);
+            if (typeof(valueMod) != "undefined")
+            {
+              value = valueMod(valuePLC);
+              log.debug(logprefix , String(value) + "<-" + String(valuePLC));
+            }            
+            else
+            {
+              value = valuePLC;
+              log.debug(logprefix , String(value));
+            }            
+            callback(null, value);
+          }
+        });
+    }
+    else {
+        callback(new Error('PLC not connected'));
+    }
+  },
+
+
+
+  //////////////////////////////////////////////////////////////////////////////
+  // DInt
+  //////////////////////////////////////////////////////////////////////////////
+  setDInt: function(value, callback, db, offset, characteristic, inform, valueMod) {
+    var logprefix = "[" + this.name + "] " + characteristic + ": %s (setDInt DB" + db + "DBD"+ offset + ")";    
+    var S7Client = this.platform.S7Client;
+    var log = this.log;
+    var name = this.name;
+    var buf = this.buf
+    var valuePLC = value;
+
+    if (typeof(valueMod) != "undefined")
+    {
+      valuePLC = valueMod(value);
+    }
+    //ensure PLC connection
+    if (this.platform.S7ClientConnect()) {
+        buf.writeInt32BE(valuePLC, 0);
+        S7Client.WriteArea(S7Client.S7AreaDB, db, offset, 1, S7Client.S7WLDWord, buf, function(err) {
+          if(err) {
+            log.error(logprefix, "WriteArea failed #" + String(err) + " - " + S7Client.ErrorText(err));
+            S7Client.Disconnect();
+            callback(new Error('PLC error'));
+          }
+          else {              
+            if (typeof(valueMod) != "undefined")
+            {
+              log.debug(logprefix , String(value) + "->" + String(valuePLC));
+            }            
+            else
+            {
+              log.debug(logprefix , String(value));
+            }  
+            callback(null);
+            if (typeof(inform) != "undefined" && inform != null)
+            {
+              inform(value);
+            }               
+          }
+        });
+    }
+    else {
+        callback(new Error('PLC not connected'));
+    }
+  },
+    
+  getDInt: function(callback, db, offset, characteristic, valueMod) {
+    var logprefix = "[" + this.name + "] " + characteristic + ": %s (getDInt DB" + db + "DBD"+ offset + ")";    
+    var S7Client = this.platform.S7Client;
+    var log = this.log;
+    var name = this.name;
+    var value = 0;
+    var valuePLC = 0;
+    //ensure PLC connection
+    if (this.platform.S7ClientConnect()) {
+        S7Client.ReadArea(S7Client.S7AreaDB, db, offset, 1, S7Client.S7WLDWord, function(err, res) {
+          if(err) {
+            log.error(logprefix, "ReadArea failed #" + String(err) + " - " + S7Client.ErrorText(err));
+            S7Client.Disconnect();
+            callback(new Error('PLC error'));
+          }
+          else {              
+            valuePLC = res.readInt32BE(0);
             if (typeof(valueMod) != "undefined")
             {
               value = valueMod(valuePLC);
