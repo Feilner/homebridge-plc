@@ -12,10 +12,10 @@ module.exports = function(homebridge) {
   Characteristic = homebridge.hap.Characteristic;
   UUIDGen = homebridge.hap.uuid;
   PlatformAccessory = homebridge.platformAccessory;
-  homebridge.registerPlatform(platformName, 'S7', S7Platform);
+  homebridge.registerPlatform(platformName, 'PLC', PLC_Platform);
 }
 
-function S7Platform(log, config) {
+function PLC_Platform(log, config) {
     this.log = log;
     this.config = config;
     this.S7Client = new snap7.S7Client();
@@ -23,16 +23,16 @@ function S7Platform(log, config) {
     this.S7ClientConnect();
 }
 
-S7Platform.prototype = {    
+PLC_Platform.prototype = {    
     accessories: function(callback) {
         var log = this.log;
         var s7PlatformAccessories = [];
-        log("Add S7 accessories...");
+        log("Add PLC accessories...");
         //create accessory for each configuration
         this.config.accessories.forEach((config, index) => {
             log("[" + String(index+1) + "/" + this.config.accessories.length + "] " + config.name + " (" +  config.accessory + ")" );
             //call accessory construction
-            var accessory = new GenericS7(this, config);
+            var accessory = new GenericPLCAccessory(this, config);
             s7PlatformAccessories.push(accessory);
         });
         callback(s7PlatformAccessories);
@@ -56,7 +56,6 @@ S7Platform.prototype = {
 
             if (!this.isConnectOngoing == true) {
               this.isConnectOngoing = true;
-                //PLC connection asynchonousely...
                 var ok = S7Client.ConnectTo(ip, rack, slot);
                 this.isConnectOngoing = false;
                 if(ok) {
@@ -78,7 +77,7 @@ S7Platform.prototype = {
 
 
 
-function GenericS7(platform, config) {
+function GenericPLCAccessory(platform, config) {
   this.platform = platform;
   this.log = platform.log;
   this.name = config.name;
@@ -88,7 +87,7 @@ function GenericS7(platform, config) {
   ////////////////////////////////////////////////////////////////
   // Lightbulb
   ////////////////////////////////////////////////////////////////
-  if (config.accessory == 'S7_LightBulb') {   
+  if (config.accessory == 'PLC_PLC_LightBulb') {   
     this.service =  new Service.Lightbulb(this.name);
     this.accessory.addService(this.service);
 
@@ -142,7 +141,7 @@ function GenericS7(platform, config) {
   ////////////////////////////////////////////////////////////////
   // Outlet
   ////////////////////////////////////////////////////////////////    
-  else if (config.accessory == 'S7_Outlet') {   
+  else if (config.accessory == 'PLC_Outlet') {   
     this.service =  new Service.Outlet(this.name);
     this.accessory.addService(this.service);
 
@@ -178,7 +177,7 @@ function GenericS7(platform, config) {
   ////////////////////////////////////////////////////////////////
   // Switch
   ////////////////////////////////////////////////////////////////    
-  else if (config.accessory == 'S7_Switch') {   
+  else if (config.accessory == 'PLC_Switch') {   
     this.service =  new Service.Switch(this.name);
     this.accessory.addService(this.service);
 
@@ -213,7 +212,7 @@ function GenericS7(platform, config) {
   ////////////////////////////////////////////////////////////////
   // TemperatureSensor
   //////////////////////////////////////////////////////////////// 
-  else if (config.accessory == 'S7_TemperatureSensor') {   
+  else if (config.accessory == 'PLC_TemperatureSensor') {   
     this.service =  new Service.TemperatureSensor(this.name);
     this.accessory.addService(this.service);
 
@@ -233,7 +232,7 @@ function GenericS7(platform, config) {
   ////////////////////////////////////////////////////////////////
   // HumiditySensor
   //////////////////////////////////////////////////////////////// 
-  else if (config.accessory == 'S7_HumiditySensor') {   
+  else if (config.accessory == 'PLC_HumiditySensor') {   
     this.service =  new Service.HumiditySensor(this.name);
     this.accessory.addService(this.service);
 
@@ -253,7 +252,7 @@ function GenericS7(platform, config) {
   ////////////////////////////////////////////////////////////////
   // Thermostat
   ////////////////////////////////////////////////////////////////  
-  else if (config.accessory == 'S7_Thermostat'){
+  else if (config.accessory == 'PLC_Thermostat'){
     this.service = new Service.Thermostat(this.name);
     this.accessory.addService(this.service);
 
@@ -319,8 +318,8 @@ function GenericS7(platform, config) {
  ////////////////////////////////////////////////////////////////
   // Window and WindowCovering
   ////////////////////////////////////////////////////////////////    
-  else if (config.accessory == 'S7_Window' ||config.accessory == 'S7_WindowCovering'){ 
-    if (config.accessory == 'S7_Window')
+  else if (config.accessory == 'PLC_Window' ||config.accessory == 'PLC_WindowCovering'){ 
+    if (config.accessory == 'PLC_Window')
     {
       this.service = new Service.Window(this.name);
     }
@@ -405,7 +404,7 @@ function GenericS7(platform, config) {
   ////////////////////////////////////////////////////////////////
   // OccupancySensor
   ////////////////////////////////////////////////////////////////   
-  else if (config.accessory == 'S7_OccupancySensor'){
+  else if (config.accessory == 'PLC_OccupancySensor'){
     this.service = new Service.OccupancySensor(this.name);
     this.accessory.addService(this.service);
 
@@ -419,7 +418,7 @@ function GenericS7(platform, config) {
   ////////////////////////////////////////////////////////////////
   // MotionSensor
   ////////////////////////////////////////////////////////////////   
-  else if (config.accessory == 'S7_MotionSensor'){
+  else if (config.accessory == 'PLC_MotionSensor'){
     this.service = new Service.OccupancySensor(this.name);
     this.accessory.addService(this.service);
 
@@ -433,7 +432,7 @@ function GenericS7(platform, config) {
   ////////////////////////////////////////////////////////////////
   // Faucet
   ////////////////////////////////////////////////////////////////   
-  else if (config.accessory == 'S7_Faucet'){
+  else if (config.accessory == 'PLC_Faucet'){
     this.service =  new Service.Faucet(this.name);
     this.accessory.addService(this.service);
 
@@ -465,9 +464,9 @@ function GenericS7(platform, config) {
     }
   }  
   ////////////////////////////////////////////////////////////////
-  // S7_SecuritySystem
+  // SecuritySystem
   ////////////////////////////////////////////////////////////////   
-  else if (config.accessory == 'S7_SecuritySystem'){
+  else if (config.accessory == 'PLC_SecuritySystem'){
     this.service = new Service.SecuritySystem(this.name);
     this.accessory.addService(this.service);
 
@@ -492,9 +491,9 @@ function GenericS7(platform, config) {
       )}.bind(this));        
   }  
   ////////////////////////////////////////////////////////////////
-  // S7_Valve
+  // Valve
   ////////////////////////////////////////////////////////////////   
-  else if (config.accessory == 'S7_Valve'){
+  else if (config.accessory == 'PLC_Valve'){
     this.service = new Service.Valve(this.name);
     this.accessory.addService(this.service);
 
@@ -591,10 +590,10 @@ function GenericS7(platform, config) {
     }      
   }    
   ////////////////////////////////////////////////////////////////
-  // S7_StatelessProgrammableSwitch
+  // StatelessProgrammableSwitch
   ////////////////////////////////////////////////////////////////   
   /*
-  else if (config.accessory == 'S7_StatelessProgrammableSwitch'){
+  else if (config.accessory == 'PLC_StatelessProgrammableSwitch'){
     this.service = new Service.StatelessProgrammableSwitch(this.name);
     this.accessory.addService(this.service);
 
@@ -626,7 +625,7 @@ function GenericS7(platform, config) {
 
 }
 
-GenericS7.prototype = {
+GenericPLCAccessory.prototype = {
 
   getServices: function() {
     return [this.accessory.getService(Service.AccessoryInformation), this.service];
