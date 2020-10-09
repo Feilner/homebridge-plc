@@ -73,10 +73,6 @@ PLC_Platform.prototype = {
 }
 
 
-
-
-
-
 function GenericPLCAccessory(platform, config) {
   this.platform = platform;
   this.log = platform.log;
@@ -87,7 +83,7 @@ function GenericPLCAccessory(platform, config) {
   ////////////////////////////////////////////////////////////////
   // Lightbulb
   ////////////////////////////////////////////////////////////////
-  if (config.accessory == 'PLC_PLC_LightBulb') {   
+  if (config.accessory == 'PLC_LightBulb') {   
     this.service =  new Service.Lightbulb(this.name);
     this.accessory.addService(this.service);
 
