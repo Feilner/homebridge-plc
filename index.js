@@ -7,7 +7,7 @@ var snap7 = require('node-snap7');
 
 //Exports
 module.exports = function(homebridge) {
-  var platformName = 'homebridge-s7-plc';
+  var platformName = 'homebridge-plc';
   Service = homebridge.hap.Service;
   Characteristic = homebridge.hap.Characteristic;
   UUIDGen = homebridge.hap.uuid;
@@ -36,8 +36,19 @@ PLC_Platform.prototype = {
             s7PlatformAccessories.push(accessory);
         });
         callback(s7PlatformAccessories);
+
+        if (this.config.enablePolling) {
+          log("Enable polling...");
+          setInterval(function(param) {this.pollLoop( s7PlatformAccessories)}.bind(this),1000);
+        }
+        log("Init done!")
     },
     
+     pollLoop: function(s7PlatformAccessories)  {
+      s7PlatformAccessories.forEach((accessory) => {
+        accessory.poll();
+      });
+    },
 
     //PLC connection check function
     S7ClientConnect: function() {
@@ -79,6 +90,7 @@ function GenericPLCAccessory(platform, config) {
   this.name = config.name;
   this.buf = Buffer.alloc(4);
   var uuid = UUIDGen.generate(config.name + config.accessory);
+  this.config = config;
   this.accessory = new PlatformAccessory(this.name, uuid); 
   ////////////////////////////////////////////////////////////////
   // Lightbulb
@@ -324,6 +336,19 @@ function GenericPLCAccessory(platform, config) {
       this.service = new Service.WindowCovering(this.name);
     }
     this.accessory.addService(this.service);
+    this.lastTargetPos = 0;
+
+    var informFunction = function(value){this.service.getCharacteristic(Characteristic.CurrentPosition).updateValue(value) }.bind(this);
+
+    if (platform.config.enablePolling) {
+        if (config.adaptivePolling) {
+          this.pollActive = false;          
+          this.pollInterval =  config.pollInterval || 10;
+          this.pollCounter = this.pollInterval;
+          this.log.debug("Adaptive polling enabled interval " + this.pollInterval + "s");
+          informFunction = function(value){ this.lastTargetPos = value; this.pollActive = true; }.bind(this);
+        }
+    }
 
     var modFunction = this.plain_0_100;
     if ('invert' in config && config.invert) {
@@ -351,7 +376,7 @@ function GenericPLCAccessory(platform, config) {
           config.db, 
           config.set_TargetPosition,
           'set TargetPosition',
-          function(value){this.service.getCharacteristic(Characteristic.CurrentPosition).updateValue(value) }.bind(this),
+          informFunction,
           modFunction          
           )}.bind(this));
       }
@@ -466,6 +491,18 @@ function GenericPLCAccessory(platform, config) {
     this.service = new Service.SecuritySystem(this.name);
     this.accessory.addService(this.service);
 
+    var informFunction = function(value){this.service.getCharacteristic(Characteristic.SecuritySystemCurrentState).updateValue(value) }.bind(this);
+
+    if (platform.config.enablePolling) {
+      if (config.enablePolling) {
+        this.pollActive = true;          
+        this.pollInterval =  config.pollInterval || 10;
+        this.pollCounter = this.pollInterval;
+        informFunction = null;
+        this.log.debug("Adaptive polling enabled interval " + this.pollInterval + "s");
+      }
+    } 
+
     this.service.getCharacteristic(Characteristic.SecuritySystemCurrentState)
       .on('get', function(callback) {this.getByte(callback, 
         config.db, 
@@ -483,7 +520,7 @@ function GenericPLCAccessory(platform, config) {
         config.db, 
         config.set_SecuritySystemTargetState,
         "set SecuritySystemTargetState",
-        function(value){this.service.getCharacteristic(Characteristic.SecuritySystemCurrentState).updateValue(value) }.bind(this),        
+        informFunction,        
       )}.bind(this));        
   }  
   ////////////////////////////////////////////////////////////////
@@ -557,7 +594,7 @@ function GenericPLCAccessory(platform, config) {
         'poll InUse'
         )}.bind(this),5000);
     }
-*/
+  */
 
 
     if ('get_RemainingDuration' in config) {   
@@ -622,6 +659,48 @@ function GenericPLCAccessory(platform, config) {
 }
 
 GenericPLCAccessory.prototype = {
+
+  poll: function() {
+    if (this.config.enablePolling || this.config.adaptivePolling) {
+      if (this.pollActive && --this.pollCounter <= 0)
+      {
+        this.pollCounter = this.pollInterval;
+        this.log.debug("[" + this.name + "] Execute polling...");
+
+
+        if (this.config.accessory == 'PLC_WindowCovering') {
+          this.service.getCharacteristic(Characteristic.CurrentPosition).getValue(function(err, value) {
+            if (!err) {              
+              if( this.lastTargetPos == value) {
+                this.pollActive = false;
+                this.log.debug( "[" + this.name + "] reached target position disable polling: " + value);  
+              }
+              else
+              {
+                this.log.debug( "[" + this.name + "] continue polling: " + this.lastTargetPos +" != " + value); 
+              }            
+              this.service.getCharacteristic(Characteristic.CurrentPosition).updateValue(value);
+            }
+          }.bind(this));
+        }
+        else if (this.config.accessory == 'PLC_SecuritySystem') {      
+          // get the current target system state and update the value.
+          this.service.getCharacteristic(Characteristic.SecuritySystemTargetState).getValue(function(err, value) {
+            if (!err) {                          
+              this.service.getCharacteristic(Characteristic.SecuritySystemTargetState).updateValue(value);
+            }
+          }.bind(this));
+          // get the current system state and update the value.
+          this.service.getCharacteristic(Characteristic.SecuritySystemCurrentState).getValue(function(err, value) {
+            if (!err) {                          
+              this.service.getCharacteristic(Characteristic.SecuritySystemCurrentState).updateValue(value);
+            }
+          }.bind(this));
+
+        }
+      }
+    }
+  },
 
   getServices: function() {
     return [this.accessory.getService(Service.AccessoryInformation), this.service];
