@@ -4,12 +4,18 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+
+## [1.0.5] - 2020-10-11
+### Added
+- Platform `PLC`: Polling mode that enables background task poll accessories. New configuration `enablePolling`
+- Accessory: `PLC_WindowCovering`: Adaptive polling when moving blinds. New configuration `adaptivePolling` and `pollInterval`
+- Accessory: `PLC_SecuritySystem`: Polling to detect changes. New configuration `enablePolling` and `pollInterval`
+
 ## [1.0.4] - 2020-10-09
 ### Fixed 
 - Rename failed for LightBulb
   
 ## [1.0.3] - 2020-10-09
-
 ### Changed 
 - ACTION Necessary!!!
 - Change name of plugin from `S7` to `PLC`. Please rename your configuration. 
@@ -22,7 +28,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - Accessory StatelessProgrammableSwitch
 - Accessory SecuritySystem
-
 
 ## [1.0.2] - 2020-10-04
 ### Added 

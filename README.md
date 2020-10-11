@@ -36,6 +36,7 @@ Parameters:
   - `ip`: the IPv4 address of the PLC
   - `rack`: the rack number of the PLC typically 0
   - `slot`: the slot number of the PLC for S7 300/400 typically `2`, for 1200/1500 typically `1` 
+  - `enablePolling`: when set to `true` a background task is executed every second enable polling for the accessories
   
 
 ## Accessories
@@ -119,7 +120,9 @@ shutters or blinds
 - `name`: unique name of the accessory 
 - `manufacturer`: (optional) description
 - `db`: s7 data base number e.g. `4` for `DB4`
-- `invert`: set to 1 to inverts the meanings of the values from `0:closed 100:open` to `100:closed 0:open`
+- `invert`: (optional) set to `true` to inverts the meanings of the values from `0:closed 100:open` to `100:closed 0:open`
+- `adaptivePolling`:  (optional) hen set to `true` the current position will be polled until target position is reached. Polling starts with set target position from home app. This will show the shutter as opening... or closing... in the home app. Otherwise the new target position is directly pushed as new current position.
+- `pollInterval` (optional) poll interval in seconds. Default value is `10` seconds.
 - `get_CurrentPosition`: offset to get current position S7 type `Byte` e.g. `0` for `DB4DBB0`  
 - `get_TargetPosition`: (optional for windows) offset to get target position S7 type `Byte` e.g. `1` for `DB4DBB1`  
 - `set_TargetPosition`: (optional for windows) offset to set current position S7 type `Byte` e.g. `2` for `DB4DBB2` (can have same value as set_TargetPosition)
@@ -187,6 +190,10 @@ alarm system
     - `1`: armed away from home
     - `2`: armed night 
     - `3`: disarmed
+- `enablePolling`:  (optional) when set to `true` the current State of the security system will be polled. When disabled a set of the target system state will push it also as current system state. 
+- `pollInterval` (optional) poll interval in seconds. Default value is `10` seconds.
+
+
 
 ### Valve as `PLC_Valve`
 valve configurable as generic valve, irrigation, shower head or water faucet
@@ -209,7 +216,6 @@ valve configurable as generic valve, irrigation, shower head or water faucet
     - `set_SetDuration`: (optional) duration 0..3600 sec S7 type `Time` e.g. `14` for `DB4DBD14`
     - `get_RemainingDuration`: (optional) duration 0..3600 sec S7 type `Time` e.g. `18` for `DB4DBD18`
 
-
 ### Button as `PLC_StatelessProgrammableSwitch`
 stateless switch from PLC to HomeKit to trigger actions in homekit only works with control center e.g. AppleTV (Thus not yet tested)
 - `name`: unique name of the accessory 
@@ -222,7 +228,6 @@ stateless switch from PLC to HomeKit to trigger actions in homekit only works wi
     - I have no idea what to send when there was no press!?
 
 
-
 #### Config.json Example
     {
         "platforms": [
@@ -231,6 +236,7 @@ stateless switch from PLC to HomeKit to trigger actions in homekit only works wi
             "ip": "10.10.10.32",
             "rack": 0,
             "slot": 2,
+            "enablePolling": true;
             "accessories": [
                 {
                     "accessory": "PLC_LightBulb",
@@ -304,7 +310,9 @@ stateless switch from PLC to HomeKit to trigger actions in homekit only works wi
                     "name": "myRoom Blind",
                     "manufacturer": "ground floor",
                     "db": 2602,
-                    "invert": 1,
+                    "invert": true,
+                    "adaptivePolling": true,
+                    "pollInterval": 10,
                     "get_CurrentPosition": 0,
                     "get_TargetPosition": 1,
                     "set_TargetPosition": 1,
@@ -312,13 +320,14 @@ stateless switch from PLC to HomeKit to trigger actions in homekit only works wi
                     "set_HoldPosition": 10.4
                 },
                 {
-                    "accessory": "PLC_StatelessProgrammableSwitch",
-                    "name": "test ",
-                    "manufacturer": "DG",
+                    "accessory": "PLC_SecuritySystem",
+                    "name": "AlarmSystem",
                     "db": 2,
-                    "get_SecuritySystemCurrentState": 0,
-                    "set_SecuritySystemTargetState": 1,
-                    "get_SecuritySystemTargetState": 1
+                    "enablePolling": true,
+                    "pollInterval": 60,
+                    "get_SecuritySystemCurrentState": 1,
+                    "set_SecuritySystemTargetState": 2,
+                    "get_SecuritySystemTargetState": 2
                 },
 
                 {
