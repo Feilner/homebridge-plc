@@ -134,27 +134,6 @@ shutters or blinds as well sensors for windows and doors
     - `2`: stop
 - `set_HoldPosition`: (optional): offset and bit set to 1 to stop movement. (Seems not to be used) when not defined writes will be ignoredS7 type `Bool` PLC has to set to 0 e.g. `55.1` for `DB4DBX55.1`
 
-### Windows as `PLC_Window`
-
-- `name`: unique name of the accessory 
-- `manufacturer`: (optional) description
-- `db`: s7 data base number e.g. `4` for `DB4`
-- `invert`: (optional) set to `true` to inverts the meanings of the values from `0:closed 100:open` to `100:closed 0:open`
-- `mapGet`: (optional) define mapping array for get position. The PLC value is used as index into the table. e.g. `[0, 25, 100]` which maps the PLC value `0->0 1->25 2->100` this this is useful e.g. for window open state.
-- `adaptivePolling`:  (optional) hen set to `true` the current position will be polled until target position is reached. Polling starts with set target position from home app. This will show the shutter as opening... or closing... in the home app. Otherwise the new target position is directly pushed as new current position.
-- `pollInterval` (optional) poll interval in seconds. Default value is `10` seconds.
-- `get_CurrentPosition`: offset to get current position S7 type `Byte` e.g. `0` for `DB4DBB0`  
-- if one of the (optional) target position settings need specified all are needed. If not specified it os not movable ans sticks to current position.
-  - `get_TargetPosition`: (optional) offset to get target position S7 type `Byte` e.g. `1` for `DB4DBB1`  
-  - `set_TargetPosition`: (optional) offset to set current position S7 type `Byte` e.g. `2` for `DB4DBB2` (can have same value as set_TargetPosition)
-- `get_PositionState`: (optional) offset to current movement state if not defined fixed `2`is returned S7 type `Byte` e.g. `3` for `DB4DBB3`    
-    - `0`: down
-    - `1`: up
-    - `2`: stop
-- `set_HoldPosition`: (optional): offset and bit set to 1 to stop movement. (Seems not to be used) when not defined writes will be ignoredS7 type `Bool` PLC has to set to 0 e.g. `55.1` for `DB4DBX55.1`
-
-
-
 ### Occupancy Sensor as `PLC_OccupancySensor`
 presence detection sensor
 - `name`: unique name of the accessory 
@@ -280,6 +259,8 @@ Lock mechanism (not yet clear how to use changes are welcome)
 
 
 #### Config.json Example
+Note: The example is just an example it contains also some optional settings
+
     {
         "platforms": [
             {
@@ -363,7 +344,9 @@ Lock mechanism (not yet clear how to use changes are welcome)
                     "db": 2602,
                     "invert": true,
                     "adaptivePolling": true,
-                    "pollInterval": 10,
+                    "adaptivePollingInterval" 1,
+                    "enablePolling" : true;
+                    "pollInterval" : 180,                    
                     "get_CurrentPosition": 0,
                     "get_TargetPosition": 1,
                     "set_TargetPosition": 1,
@@ -374,6 +357,8 @@ Lock mechanism (not yet clear how to use changes are welcome)
                     "accessory": "PLC_Window",
                     "name": "Window",
                     "manufacturer": "ground floor",
+                    "enablePolling" : true;
+                    "pollInterval" : 60,                    
                     "db": 2008,
                     "get_CurrentPosition": 5,
                     "mapGet": [
@@ -386,13 +371,15 @@ Lock mechanism (not yet clear how to use changes are welcome)
                     "accessory": "PLC_Door",
                     "name": "Door",
                     "manufacturer": "ground floor",
+                    "enablePolling" : true;
+                    "pollInterval" : 10,
                     "db": 2008,
                     "get_CurrentPosition": 49,
                     "mapGet": [
                         0,
                         100
                     ]
-                },                          
+                },                       
                 {
                     "accessory": "PLC_SecuritySystem",
                     "name": "AlarmSystem",

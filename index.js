@@ -280,18 +280,21 @@ function GenericPLCAccessory(platform, config) {
         'get CurrentHeatingCoolingState'
         )}.bind(this));
     }
-  this.service.getCharacteristic(Characteristic.TargetHeatingCoolingState)
-  .on('get', function(callback) {this.getDummy(callback,
-    3, // currently return fixed value off=0, heat=1, cool=2, automatic=3
-    'get TargetHeatingCoolingState'
-    )}.bind(this))
-  .on('set', function(value, callback) {this.setDummy(value, callback, 
-    'set TargetHeatingCoolingState'
-    )}.bind(this));  
+
+    this.service.getCharacteristic(Characteristic.TargetHeatingCoolingState)
+    .on('get', function(callback) {this.getDummy(callback,
+      3, // currently return fixed value off=0, heat=1, cool=2, automatic=3
+      'get TargetHeatingCoolingState'
+      )}.bind(this))
+    .on('set', function(value, callback) {this.setDummy(value, callback, 
+      'set TargetHeatingCoolingState',
+      // stick to fixed value
+      function(value){ this.service.getCharacteristic(Characteristic.TargetHeatingCoolingState).updateValue(3); }.bind(this)
+      )}.bind(this));  
 
     this.service.getCharacteristic(Characteristic.TemperatureDisplayUnits)
     .on('get', function(callback) {this.getDummy(callback,
-      0, // currently return fixed value celsium=0, fareneinheit=1
+      0, // currently return fixed value celsius=0, fahrenheit=1
       'get TemperatureDisplayUnits'
       )}.bind(this))
     .on('set', function(value, callback) {this.setDummy(value, callback, 
@@ -344,13 +347,22 @@ function GenericPLCAccessory(platform, config) {
 
     var informFunction = function(value){this.service.getCharacteristic(Characteristic.CurrentPosition).updateValue(value) }.bind(this);
 
-    if (platform.config.enablePolling) {
-        if (config.adaptivePolling) {
-          this.pollActive = false;          
+    if ('enablePolling' in platform.config && platform.config.enablePolling) {
+        if ('adaptivePolling' in config && config.adaptivePolling) {          
+          // high frequency polling during home app tirggerd movement
+          this.adaptivePollActive = false;      
+          this.adaptivePollingInterval =  config.adaptivePollingInterval || 1;
+          this.pollCounter = this.adaptivePollingInterval;
+          this.log.debug("Adaptive polling enabled interval " + this.adaptivePollingInterval + "s");
+          // When execution set save target position and enable polling with high frequency
+          informFunction = function(value){ this.lastTargetPos = value; this.pollCounter = this.adaptivePollingInterval; this.adaptivePollActive = true; }.bind(this);
+        }
+        if ('enablePolling' in config && config.enablePolling)  {
+          // low freqency polling in background
+          this.pollActive = true;          
           this.pollInterval =  config.pollInterval || 10;
           this.pollCounter = this.pollInterval;
-          this.log.debug("Adaptive polling enabled interval " + this.pollInterval + "s");
-          informFunction = function(value){ this.lastTargetPos = value; this.pollActive = true; }.bind(this);
+          this.log.debug("Polling enabled interval " + this.pollInterval + "s");          
         }
     }
 
@@ -751,23 +763,25 @@ GenericPLCAccessory.prototype = {
 
   poll: function() {
     if (this.config.enablePolling || this.config.adaptivePolling) {
-      if (this.pollActive && --this.pollCounter <= 0)
+      if ((this.pollActive || this.adaptivePollActive  ) && --this.pollCounter <= 0)
       {
         this.pollCounter = this.pollInterval;
         this.log.debug("[" + this.name + "] Execute polling...");
 
-
         if (this.config.accessory == 'PLC_WindowCovering') {
           this.service.getCharacteristic(Characteristic.CurrentPosition).getValue(function(err, value) {
             if (!err) {              
-              if( this.lastTargetPos == value) {
-                this.pollActive = false;
-                this.log.debug( "[" + this.name + "] reached target position disable polling: " + value);  
-              }
-              else
-              {
-                this.log.debug( "[" + this.name + "] continue polling: " + this.lastTargetPos +" != " + value); 
-              }            
+              if (this.adaptivePollActive )  {
+                if( this.lastTargetPos == value) {
+                  this.adaptivePollActive = false;
+                  this.log.debug( "[" + this.name + "] reached target position disable adaptive polling: " + value);  
+                }
+                else
+                {
+                  this.pollCounter = this.adaptivePollingInterval;
+                  this.log.debug( "[" + this.name + "] continue adaptive polling (" + this.pollCounter + "s): " + this.lastTargetPos +" != " + value); 
+                }    
+              }        
               this.service.getCharacteristic(Characteristic.CurrentPosition).updateValue(value);
             }
           }.bind(this));

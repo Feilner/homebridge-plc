@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 *mind the rename from S7 to PLC from version 1.0.3*
 
+## [1.0.7] - 2020-10-12
+### CHANGED 
+- `PLC_WindowCovering`, `PLC_Window` and `PLC_Door` got additionally to the `adaptivePolling` which polls the current state during movement a possibility to enable with `enablePolling` polling at with  lower frequency the current sate. Thus the option `pollInterval` changed its meaning it now defines the frequency for the `enablePolling` wile `adaptivePollingInterval` defines the frequency for the `adaptivePolling`.
+  
 ## [1.0.6] - 2020-10-12
 ### Added
 - Accessory `PLC_StatelessProgrammableSwitch` is now functional
