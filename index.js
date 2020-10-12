@@ -324,16 +324,20 @@ function GenericPLCAccessory(platform, config) {
   }  
  
  ////////////////////////////////////////////////////////////////
-  // Window and WindowCovering
+  // Window, WindowCovering and Door
   ////////////////////////////////////////////////////////////////    
-  else if (config.accessory == 'PLC_Window' ||config.accessory == 'PLC_WindowCovering'){ 
+  else if (config.accessory == 'PLC_Window' || config.accessory == 'PLC_WindowCovering' || config.accessory == 'PLC_Door'){ 
     if (config.accessory == 'PLC_Window')
     {
       this.service = new Service.Window(this.name);
     }
-    else
+    else if (config.accessory == 'PLC_WindowCovering')
     {
       this.service = new Service.WindowCovering(this.name);
+    }
+    else
+    {
+      this.service = new Service.Door(this.name);
     }
     this.accessory.addService(this.service);
     this.lastTargetPos = 0;
@@ -350,10 +354,17 @@ function GenericPLCAccessory(platform, config) {
         }
     }
 
-    var modFunction = this.plain_0_100;
+    var modFunctionGet = this.plain_0_100;
+    var modFunctionSet = this.plain_0_100;    
     if ('invert' in config && config.invert) {
-      modFunction = this.invert_0_100;
+      modFunctionGet = this.invert_0_100;
+      modFunctionSet = this.invert_0_100;
     }
+    
+    if ('mapGet' in config && config.mapGet) {
+      modFunctionGet = function(value){return this.mapFunction(value, config.mapGet);}.bind(this);
+    }
+
 
     // create handlers for required characteristics
     this.service.getCharacteristic(Characteristic.CurrentPosition)
@@ -361,35 +372,47 @@ function GenericPLCAccessory(platform, config) {
         config.db, 
         config.get_CurrentPosition,        
         'get CurrentPosition',
-        modFunction
+        modFunctionGet
         )}.bind(this));
 
-    if ('get_TargetPosition' in config) {        
+    if ('get_TargetPosition' in config) {      
+      // Windows or WindowCover can be electrically moved  
       this.service.getCharacteristic(Characteristic.TargetPosition)
         .on('get', function(callback) {this.getByte(callback, 
           config.db, 
           config.get_TargetPosition,
           'get TargetPosition',
-          modFunction
+          modFunctionGet
           )}.bind(this))
         .on('set', function(value, callback) {this.setByte(value, callback, 
           config.db, 
           config.set_TargetPosition,
           'set TargetPosition',
           informFunction,
-          modFunction          
+          modFunctionSet          
           )}.bind(this));
       }
       else
       {
+        // Not possible give a target position always use current position as target position.
         this.service.getCharacteristic(Characteristic.TargetPosition)
-          .on('get', function(callback) {this.getDummy(callback, 
-            0,
-            'get TargetPosition'
-            )}.bind(this))
-          .on('set', function(value, callback) {this.setDummy(value, callback, 
-            'set TargetPosition'
-            )}.bind(this));
+        .on('get', function(callback) {this.getByte(callback, 
+          config.db, 
+          config.get_CurrentPosition,  // always use current position as target position      
+          'get CurrentPosition',
+          modFunctionGet
+          )}.bind(this))
+        .on('set', function(value, callback) {this.setDummy(value, callback, 
+          'set TargetPosition',
+          function(value){
+            // ignore new target value instead get current value and use it target position 
+            this.service.getCharacteristic(Characteristic.CurrentPosition).getValue(function(err, value) {
+              if (!err) {                                     
+                this.service.getCharacteristic(Characteristic.TargetPosition).updateValue(value);
+              }
+            }.bind(this));            
+           }.bind(this)
+          )}.bind(this));
       }
     if ('get_PositionState' in config) {
       this.service.getCharacteristic(Characteristic.PositionState)
@@ -499,7 +522,7 @@ function GenericPLCAccessory(platform, config) {
         this.pollInterval =  config.pollInterval || 10;
         this.pollCounter = this.pollInterval;
         informFunction = null;
-        this.log.debug("Adaptive polling enabled interval " + this.pollInterval + "s");
+        this.log.debug("Polling enabled interval " + this.pollInterval + "s");
       }
     } 
 
@@ -573,29 +596,6 @@ function GenericPLCAccessory(platform, config) {
         'get ValveType'
         )}.bind(this));
     }
-  /*  
-
-    if ('InUse' in config) {   
-      this.service.getCharacteristic(Characteristic.InUse)
-        .on('get', function(callback) {this.getDummy(callback,
-          config.InUse,
-        'get InUse'
-        )}.bind(this));        
-    }
-
-    
-
-    if ('get_InUse' in config) {   
-
-      setInterval(function() {this.getBit( 
-        function(err, value){this.service.getCharacteristic(Characteristic.InUse).updateValue(value) }.bind(this),
-        config.db, 
-        Math.floor(config.get_InUse), Math.floor((config.get_InUse*10)%10),
-        'poll InUse'
-        )}.bind(this),5000);
-    }
-  */
-
 
     if ('get_RemainingDuration' in config) {   
       this.service.getCharacteristic(Characteristic.RemainingDuration)
@@ -624,11 +624,20 @@ function GenericPLCAccessory(platform, config) {
   }    
   ////////////////////////////////////////////////////////////////
   // StatelessProgrammableSwitch
-  ////////////////////////////////////////////////////////////////   
-  /*
+  ////////////////////////////////////////////////////////////////     
   else if (config.accessory == 'PLC_StatelessProgrammableSwitch'){
     this.service = new Service.StatelessProgrammableSwitch(this.name);
     this.accessory.addService(this.service);
+
+    if (platform.config.enablePolling) {
+      if (config.enablePolling) {
+        this.pollActive = true;          
+        this.pollInterval =  config.pollInterval || 10;
+        this.pollCounter = this.pollInterval;
+        informFunction = null;
+        this.log.debug("Polling enabled interval " + this.pollInterval + "s");
+      }
+    } 
 
     this.service.getCharacteristic(Characteristic.ProgrammableSwitchEvent)
       .on('get', function(callback) {this.getByte(callback, 
@@ -643,7 +652,87 @@ function GenericPLCAccessory(platform, config) {
         "get ServiceLabelIndex"
       )}.bind(this))
   }    
-      */      
+  ////////////////////////////////////////////////////////////////
+  // LockMechanism
+  ////////////////////////////////////////////////////////////////   
+  else if (config.accessory == 'PLC_LockMechanism'){
+    this.service = new Service.LockMechanism(this.name);
+    this.accessory.addService(this.service);
+
+    this.service.getCharacteristic(Characteristic.LockCurrentState)
+      .on('get', function(callback) {this.getByte(callback, 
+        config.db, 
+        config.get_LockCurrentState,
+        "get LockCurrentState"
+      )}.bind(this));
+
+      this.service.getCharacteristic(Characteristic.LockTargetState)
+      .on('get', function(callback) {this.getByte(callback, 
+        config.db, 
+        config.get_LockTargetState,
+        "get LockTargetState"
+      )}.bind(this))  
+      .on('set', function(value, callback) {this.setByte(value, callback, 
+        config.db, 
+        config.set_LockTargetState,
+        "set LockTargetState"
+      )}.bind(this));   
+  }       
+  ////////////////////////////////////////////////////////////////
+  // PLC_GarageDoorOpener
+  ////////////////////////////////////////////////////////////////   
+  else if (config.accessory == 'PLC_GarageDoorOpener'){
+    this.service = new Service.GarageDoorOpener(this.name);
+    this.accessory.addService(this.service);
+
+
+    this.service.getCharacteristic(Characteristic.CurrentDoorState)
+    .on('get', function(callback) {this.getByte(callback, 
+      config.db, 
+      config.get_CurrentDoorState,
+      "get CurrentDoorState"
+    )}.bind(this)) ;
+
+    this.service.getCharacteristic(Characteristic.TargetDoorState)
+    .on('get', function(callback) {this.getByte(callback, 
+      config.db, 
+      config.get_TargetDoorState,
+      "get TargetDoorState"
+    )}.bind(this))  
+    .on('set', function(value, callback) {this.setByte(value, callback, 
+      config.db, 
+      config.set_TargetDoorState,
+      "set TargetDoorState"
+      )}.bind(this));   
+   
+    this.service.getCharacteristic(Characteristic.LockCurrentState)
+    .on('get', function(callback) {this.getByte(callback, 
+      config.db, 
+      config.get_LockCurrentState,
+      "get LockCurrentState"
+    )}.bind(this));
+
+    this.service.getCharacteristic(Characteristic.LockTargetState)
+    .on('get', function(callback) {this.getByte(callback, 
+      config.db, 
+      config.get_LockTargetState,
+      "get LockTargetState"
+    )}.bind(this))  
+    .on('set', function(value, callback) {this.setByte(value, callback, 
+      config.db, 
+      config.set_LockTargetState,
+      "set LockTargetState"
+    )}.bind(this));   
+
+    this.service.getCharacteristic(Characteristic.ObstructionDetected)
+    .on('get', function(callback) {this.getBit(callback, 
+      config.db, 
+      Math.floor(config.get_ObstructionDetected), Math.floor((config.get_ObstructionDetected*10)%10),
+      'get ObstructionDetected'
+    )}.bind(this))    
+  }        
+
+
   else {
     this.log("Accessory "+ config.accessory + " is not defined.")
   }
@@ -698,6 +787,33 @@ GenericPLCAccessory.prototype = {
           }.bind(this));
 
         }
+        else if (this.config.accessory == 'PLC_StatelessProgrammableSwitch'){
+          this.getBit(function(err,value){
+              if(!err && value)
+              {                
+                this.getByte(function(err, event) {
+                  if (!err) {                          
+                    this.service.getCharacteristic(Characteristic.ProgrammableSwitchEvent).updateValue(event);
+                    this.log( "[" + this.name + "] Stateless switch event :" + event); 
+                    this.setBit(0,function(err){}, 
+                      this.config.db, 
+                      Math.floor(this.config.isEvent), Math.floor((this.config.isEvent*10)%10),
+                      'clear IsEvent');
+                  }
+                }.bind(this),
+                this.config.db,
+                this.config.get_ProgrammableSwitchEvent,
+                'read Event'
+                ),                
+                this.service.getCharacteristic(Characteristic.ProgrammableSwitchEvent).getValue();
+              }
+             }.bind(this), 
+            this.config.db, 
+            Math.floor(this.config.isEvent), Math.floor((this.config.isEvent*10)%10),
+            'poll isEvent'
+          )
+
+        }
       }
     }
   },
@@ -709,10 +825,25 @@ GenericPLCAccessory.prototype = {
   invert_0_100: function(value) {
     return 100-value;
   },
-  
+
   plain_0_100: function(value) {
     return value;
   },
+
+  mapFunction: function(value, map) {
+    var rv = 100;
+
+    if (value >= 0 && value < map.length) {
+      rv = map[value];
+    }
+    else
+    {
+      this.log.error("[mapFunction] value:" + value + " is out ouf range of mapping array with "+ map.length + " elements");
+    }
+    return rv;
+  },
+
+
 
   s7time2int: function(value){
     var val = Math.ceil(value/1000);

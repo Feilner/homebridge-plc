@@ -115,17 +115,19 @@ temperature sensor and temperature regulation
     - `3`: automatic
 - `set_TargetHeatingCoolingState` not yet supported writes are ignored
 
-### Shutters as `PLC_WindowCovering`
-shutters or blinds
+### Shutters as `PLC_WindowCovering`, windows as `PLC_Window` and doors as `PLC_Door`
+shutters or blinds as well sensors for windows and doors
 - `name`: unique name of the accessory 
 - `manufacturer`: (optional) description
 - `db`: s7 data base number e.g. `4` for `DB4`
 - `invert`: (optional) set to `true` to inverts the meanings of the values from `0:closed 100:open` to `100:closed 0:open`
+- `mapGet`: (optional) define mapping array for get position. The PLC value is used as index into the table. e.g. `[0, 25, 100]` which maps the PLC value `0->0 1->25 2->100` this this is useful e.g. for window open state.
 - `adaptivePolling`:  (optional) hen set to `true` the current position will be polled until target position is reached. Polling starts with set target position from home app. This will show the shutter as opening... or closing... in the home app. Otherwise the new target position is directly pushed as new current position.
 - `pollInterval` (optional) poll interval in seconds. Default value is `10` seconds.
 - `get_CurrentPosition`: offset to get current position S7 type `Byte` e.g. `0` for `DB4DBB0`  
-- `get_TargetPosition`: (optional for windows) offset to get target position S7 type `Byte` e.g. `1` for `DB4DBB1`  
-- `set_TargetPosition`: (optional for windows) offset to set current position S7 type `Byte` e.g. `2` for `DB4DBB2` (can have same value as set_TargetPosition)
+- if one of the (optional) target position settings need specified all are needed. If not specified it os not movable ans sticks to current position.
+  - `get_TargetPosition`: (optional) offset to get target position S7 type `Byte` e.g. `1` for `DB4DBB1`  
+  - `set_TargetPosition`: (optional) offset to set current position S7 type `Byte` e.g. `2` for `DB4DBB2` (can have same value as set_TargetPosition)
 - `get_PositionState`: (optional) offset to current movement state if not defined fixed `2`is returned S7 type `Byte` e.g. `3` for `DB4DBB3`    
     - `0`: down
     - `1`: up
@@ -133,20 +135,26 @@ shutters or blinds
 - `set_HoldPosition`: (optional): offset and bit set to 1 to stop movement. (Seems not to be used) when not defined writes will be ignoredS7 type `Bool` PLC has to set to 0 e.g. `55.1` for `DB4DBX55.1`
 
 ### Windows as `PLC_Window`
-sensors for windows
+
 - `name`: unique name of the accessory 
 - `manufacturer`: (optional) description
 - `db`: s7 data base number e.g. `4` for `DB4`
-- `invert`: set to 1 to inverts the meanings of the values from `0:closed 100:open` to `100:closed 0:open`
+- `invert`: (optional) set to `true` to inverts the meanings of the values from `0:closed 100:open` to `100:closed 0:open`
+- `mapGet`: (optional) define mapping array for get position. The PLC value is used as index into the table. e.g. `[0, 25, 100]` which maps the PLC value `0->0 1->25 2->100` this this is useful e.g. for window open state.
+- `adaptivePolling`:  (optional) hen set to `true` the current position will be polled until target position is reached. Polling starts with set target position from home app. This will show the shutter as opening... or closing... in the home app. Otherwise the new target position is directly pushed as new current position.
+- `pollInterval` (optional) poll interval in seconds. Default value is `10` seconds.
 - `get_CurrentPosition`: offset to get current position S7 type `Byte` e.g. `0` for `DB4DBB0`  
-- `get_TargetPosition`: (optional for windows) offset to get target position S7 type `Byte` e.g. `1` for `DB4DBB1`  
-- `set_TargetPosition`: (optional for windows) offset to set current position S7 type `Byte` e.g. `2` for `DB4DBB2` (can have same value as set_TargetPosition)
-- `get_PositionState`: (optional) offset to current movement state if not defined fixed `2` is returned S7 type `Byte` e.g. `3` for `DB4DBB3`    
+- if one of the (optional) target position settings need specified all are needed. If not specified it os not movable ans sticks to current position.
+  - `get_TargetPosition`: (optional) offset to get target position S7 type `Byte` e.g. `1` for `DB4DBB1`  
+  - `set_TargetPosition`: (optional) offset to set current position S7 type `Byte` e.g. `2` for `DB4DBB2` (can have same value as set_TargetPosition)
+- `get_PositionState`: (optional) offset to current movement state if not defined fixed `2`is returned S7 type `Byte` e.g. `3` for `DB4DBB3`    
     - `0`: down
     - `1`: up
     - `2`: stop
 - `set_HoldPosition`: (optional): offset and bit set to 1 to stop movement. (Seems not to be used) when not defined writes will be ignoredS7 type `Bool` PLC has to set to 0 e.g. `55.1` for `DB4DBX55.1`
-  
+
+
+
 ### Occupancy Sensor as `PLC_OccupancySensor`
 presence detection sensor
 - `name`: unique name of the accessory 
@@ -217,15 +225,58 @@ valve configurable as generic valve, irrigation, shower head or water faucet
     - `get_RemainingDuration`: (optional) duration 0..3600 sec S7 type `Time` e.g. `18` for `DB4DBD18`
 
 ### Button as `PLC_StatelessProgrammableSwitch`
-stateless switch from PLC to HomeKit to trigger actions in homekit only works with control center e.g. AppleTV (Thus not yet tested)
+stateless switch from PLC to home app. Trigger actions in home app only works with control center e.g. AppleTV or HomePod. 
+It will works only in polling mode! The PLC sets a bit that is regularly polled by homebridge after successful reading a 1 of the event the bit it will report the event and set the bit to 0. Change 0->1 is done by PLC change from 1->0 is done by homebridge!
 - `name`: unique name of the accessory 
 - `manufacturer`: (optional) description
 - `db`: s7 data base number e.g. `4` for `DB4`
-- `get_ProgrammableSwitchEvent`: offset to red current state of the switch S7 type `Byte` e.g. `3` for `DB4DBB3`  
+- `enablePolling`: is mandatory as well to enable polling mode on platform level
+- `pollInterval` (optional) poll interval in seconds. Default value is `10` seconds.
+- `isEvent` offset and bit that is polled when set to 1 by the PLC the event is read and the bit is set to 0 by homebridge S7 type `Bool` PLC has to set to 0 e.g. `55.1` for `DB4DBX55.1`
+- `get_ProgrammableSwitchEvent`: offset to red current event of the switch. This is reported towards home app S7 type `Byte` e.g. `3` for `DB4DBB3` 
     - `0`: single press
     - `1`: double press
     - `2`: long press
-    - I have no idea what to send when there was no press!?
+### Lock mechanism as `PLC_LockMechanism` (experimental)
+Lock mechanism (not yet clear how to use changes are welcome)
+  - `name`: unique name of the accessory 
+  - `manufacturer`: (optional) description
+  - `db`: s7 data base number e.g. `4` for `DB4`
+  - `get_LockCurrentState`: offset to read current state current state S7 type `Byte` e.g. `3` for `DB4DBB3` 
+    - `0`: unsecured
+    - `1`: secured
+    - `2`: jammed 
+    - `3`: unknown
+  - `get_LockTargetState`: offset to read target state current state S7 type `Byte` e.g. `3` for `DB4DBB3` 
+    - `0`: unsecured
+    - `1`: secured
+  - `set_LockTargetState`:  offset to write target state current state S7 type `Byte` e.g. `3` for `DB4DBB3` 
+    - `0`: unsecured
+    - `1`: secured
+### Lock mechanism as `PLC_GarageDoorOpener` (experimental)
+Lock mechanism (not yet clear how to use changes are welcome)
+  - `name`: unique name of the accessory 
+  - `manufacturer`: (optional) description
+  - `db`: s7 data base number e.g. `4` for `DB4`
+  - `get_ObstructionDetected` offset and bit to obfuscation detection true means that the door was blocked S7 type `Bool` PLC has to set to 0 e.g. `55.1` for `DB4DBX55.1`
+  - `get_CurrentDoorState`: offset to read current state current state S7 type `Byte` e.g. `3` for `DB4DBB3` 
+    - `0`: open
+    - `1`: closed
+    - `2`: opening 
+    - `3`: closing
+    - `4`: stopped
+  - `get_TargetDoorState`: offset to read target state current state S7 type `Byte` e.g. `3` for `DB4DBB3` 
+    - `0`: open
+    - `1`: closed
+  - `set_TargetDoorState`:  offset to write target state current state S7 type `Byte` e.g. `3` for `DB4DBB3` 
+    - `0`: open
+    - `1`: closed
+  - `get_LockTargetState`: offset to read target state current state S7 type `Byte` e.g. `3` for `DB4DBB3` 
+    - `0`: unsecured
+    - `1`: secured
+  - `set_LockTargetState`:  offset to write target state current state S7 type `Byte` e.g. `3` for `DB4DBB3` 
+    - `0`: unsecured
+    - `1`: secured
 
 
 #### Config.json Example
@@ -320,23 +371,68 @@ stateless switch from PLC to HomeKit to trigger actions in homekit only works wi
                     "set_HoldPosition": 10.4
                 },
                 {
+                    "accessory": "PLC_Window",
+                    "name": "Window",
+                    "manufacturer": "ground floor",
+                    "db": 2008,
+                    "get_CurrentPosition": 5,
+                    "mapGet": [
+                        0,
+                        25,
+                        100
+                    ]
+                },      
+                {
+                    "accessory": "PLC_Door",
+                    "name": "Door",
+                    "manufacturer": "ground floor",
+                    "db": 2008,
+                    "get_CurrentPosition": 49,
+                    "mapGet": [
+                        0,
+                        100
+                    ]
+                },                          
+                {
                     "accessory": "PLC_SecuritySystem",
                     "name": "AlarmSystem",
-                    "db": 2,
+                    "db": 1014,
                     "enablePolling": true,
                     "pollInterval": 60,
                     "get_SecuritySystemCurrentState": 1,
-                    "set_SecuritySystemTargetState": 2,
-                    "get_SecuritySystemTargetState": 2
+                    "set_SecuritySystemTargetState": 0,
+                    "get_SecuritySystemTargetState": 0
                 },
-
                 {
-                    /* Not yet tested */
                     "accessory": "PLC_StatelessProgrammableSwitch",
-                    "name": "NotYetTested",
-                    "db": 2,
-                    "get_ProgrammableSwitchEvent": 0
-                }                   
+                    "name": "Switch in the PLC",
+                    "enablePolling": true,
+                    "pollInterval": 30,
+                    "db": 12,
+                    "isEvent": 0.1,
+                    "get_ProgrammableSwitchEvent": 1
+                },
+                {
+                    "accessory": "PLC_LockMechanism",
+                    "name": "LockMechanism",
+                    "db": 13,
+                    "isEvent": 0.1,
+                    "get_LockCurrentState": 1,
+                    "get_LockTargetState": 2,
+                    "set_LockTargetState": 3
+                },
+                {
+                    "accessory": "PLC_GarageDoorOpener",
+                    "name": "GarageDoorOpener",
+                    "db": 14,
+                    "get_ObstructionDetected": 0.1,
+                    "get_CurrentDoorState": 1,
+                    "get_TargetDoorState": 2,
+                    "set_TargetDoorState": 2,
+                    "get_LockCurrentState": 3,
+                    "get_LockTargetState": 4,
+                    "set_LockTargetState": 4
+                }                           
             ]
         }
         ]
