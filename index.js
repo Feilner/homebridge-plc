@@ -475,7 +475,7 @@ function GenericPLCAccessory(platform, config) {
   // MotionSensor
   ////////////////////////////////////////////////////////////////   
   else if (config.accessory == 'PLC_MotionSensor'){
-    this.service = new Service.OccupancySensor(this.name);
+    this.service = new Service.MotionSensor(this.name);
     this.accessory.addService(this.service);
 
     this.service.getCharacteristic(Characteristic.MotionDetected)
