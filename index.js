@@ -366,8 +366,8 @@ function GenericPLCAccessory(platform, config) {
         }
     }
 
-    var modFunctionGet = this.plain_0_100;
-    var modFunctionSet = this.plain_0_100;    
+    var modFunctionGet = null;
+    var modFunctionSet = null;    
     if ('invert' in config && config.invert) {
       modFunctionGet = this.invert_0_100;
       modFunctionSet = this.invert_0_100;
@@ -464,6 +464,15 @@ function GenericPLCAccessory(platform, config) {
     this.service = new Service.OccupancySensor(this.name);
     this.accessory.addService(this.service);
 
+    if (platform.config.enablePolling) {
+      if (config.enablePolling) {
+        this.pollActive = true;          
+        this.pollInterval =  config.pollInterval || 10;
+        this.pollCounter = this.pollInterval;
+        this.log.debug("Polling enabled interval " + this.pollInterval + "s");
+      }
+    } 
+
     this.service.getCharacteristic(Characteristic.OccupancyDetected)
       .on('get', function(callback) {this.getBit(callback, 
         config.db, 
@@ -477,6 +486,15 @@ function GenericPLCAccessory(platform, config) {
   else if (config.accessory == 'PLC_MotionSensor'){
     this.service = new Service.MotionSensor(this.name);
     this.accessory.addService(this.service);
+
+    if (platform.config.enablePolling) {
+      if (config.enablePolling) {
+        this.pollActive = true;          
+        this.pollInterval =  config.pollInterval || 10;
+        this.pollCounter = this.pollInterval;
+        this.log.debug("Polling enabled interval " + this.pollInterval + "s");
+      }
+    } 
 
     this.service.getCharacteristic(Characteristic.MotionDetected)
       .on('get', function(callback) {this.getBit(callback, 
@@ -526,14 +544,37 @@ function GenericPLCAccessory(platform, config) {
     this.service = new Service.SecuritySystem(this.name);
     this.accessory.addService(this.service);
 
-    var informFunction = function(value){this.service.getCharacteristic(Characteristic.SecuritySystemCurrentState).updateValue(value) }.bind(this);
+    var informFunction = function(notUsed){
+      // get the current target system state and update the value.
+      this.service.getCharacteristic(Characteristic.SecuritySystemTargetState).getValue(function(err, value) {
+        if (!err) {                          
+          this.service.getCharacteristic(Characteristic.SecuritySystemTargetState).updateValue(value);
+        }
+      }.bind(this));
+      // get the current system state and update the value.
+      this.service.getCharacteristic(Characteristic.SecuritySystemCurrentState).getValue(function(err, value) {
+        if (!err) {                          
+          this.service.getCharacteristic(Characteristic.SecuritySystemCurrentState).updateValue(value);
+        }
+      }.bind(this));
+     }.bind(this);
+
+    var modFunctionGet = null;
+    var modFunctionSet = null;    
+
+    if ('mapSet' in config && config.mapSet) {
+      modFunctionSet = function(value){return this.mapFunction(value, config.mapSet);}.bind(this);
+    }
+    
+    if ('mapGet' in config && config.mapGet) {
+      modFunctionGet = function(value){return this.mapFunction(value, config.mapGet);}.bind(this);
+    }
 
     if (platform.config.enablePolling) {
       if (config.enablePolling) {
         this.pollActive = true;          
         this.pollInterval =  config.pollInterval || 10;
         this.pollCounter = this.pollInterval;
-        informFunction = null;
         this.log.debug("Polling enabled interval " + this.pollInterval + "s");
       }
     } 
@@ -542,20 +583,23 @@ function GenericPLCAccessory(platform, config) {
       .on('get', function(callback) {this.getByte(callback, 
         config.db, 
         config.get_SecuritySystemCurrentState,
-        "get SecuritySystemCurrentState"
+        "get SecuritySystemCurrentState",
+        modFunctionGet
       )}.bind(this))    
 
       this.service.getCharacteristic(Characteristic.SecuritySystemTargetState)
       .on('get', function(callback) {this.getByte(callback, 
         config.db, 
         config.get_SecuritySystemTargetState,
-        "get SecuritySystemTargetState"
+        "get SecuritySystemTargetState",
+        modFunctionGet
       )}.bind(this))  
       .on('set', function(value, callback) {this.setByte(value, callback, 
         config.db, 
         config.set_SecuritySystemTargetState,
         "set SecuritySystemTargetState",
         informFunction,        
+        modFunctionSet
       )}.bind(this));        
   }  
   ////////////////////////////////////////////////////////////////
@@ -799,8 +843,23 @@ GenericPLCAccessory.prototype = {
               this.service.getCharacteristic(Characteristic.SecuritySystemCurrentState).updateValue(value);
             }
           }.bind(this));
-
         }
+        else if (this.config.accessory == 'PLC_OccupancySensor') {      
+          // get the current target system state and update the value.
+          this.service.getCharacteristic(Characteristic.OccupancyDetected).getValue(function(err, value) {
+            if (!err) {                          
+              this.service.getCharacteristic(Characteristic.OccupancyDetected).updateValue(value);
+            }
+          }.bind(this));
+        }
+        else if (this.config.accessory == 'PLC_MotionSensor') {      
+          // get the current target system state and update the value.
+          this.service.getCharacteristic(Characteristic.MotionDetected).getValue(function(err, value) {
+            if (!err) {                          
+              this.service.getCharacteristic(Characteristic.MotionDetected).updateValue(value);
+            }
+          }.bind(this));
+        }        
         else if (this.config.accessory == 'PLC_StatelessProgrammableSwitch'){
           this.getBit(function(err,value){
               if(!err && value)
@@ -838,10 +897,6 @@ GenericPLCAccessory.prototype = {
 
   invert_0_100: function(value) {
     return 100-value;
-  },
-
-  plain_0_100: function(value) {
-    return value;
   },
 
   mapFunction: function(value, map) {
@@ -882,7 +937,7 @@ GenericPLCAccessory.prototype = {
     var log = this.log;    
     log.debug(logprefix , String(value));
     callback(null);
-    if (typeof(inform) != "undefined" && inform != null)
+    if (typeof(inform) != 'undefined' && inform)
     {
       inform(value);
     }       
@@ -928,7 +983,7 @@ GenericPLCAccessory.prototype = {
         else {
           log.debug(logprefix , String(value));
           callback(null);
-          if (typeof(inform) != "undefined" && inform != null)
+          if (typeof(inform) != 'undefined' && inform)
           {
             inform(value);
           }             
@@ -959,7 +1014,7 @@ GenericPLCAccessory.prototype = {
         else {
           log.debug(logprefix , String(value));
           callback(null);
-          if (typeof(inform) != "undefined" && inform != null)
+          if (typeof(inform) != 'undefined' && inform)
           {
             inform(value);
           }             
@@ -1011,7 +1066,7 @@ GenericPLCAccessory.prototype = {
     var buf = this.buf
     var valuePLC = value;
 
-    if (typeof(valueMod) != "undefined")
+    if (typeof(valueMod) != 'undefined' && valueMod)
     {
       valuePLC = valueMod(value);
     }
@@ -1025,7 +1080,7 @@ GenericPLCAccessory.prototype = {
             callback(new Error('PLC error'));
           }
           else {              
-            if (typeof(valueMod) != "undefined")
+            if (typeof(valueMod) != 'undefined' && valueMod)
             {
               log.debug(logprefix , String(value) + "->" + String(valuePLC));
             }            
@@ -1034,7 +1089,7 @@ GenericPLCAccessory.prototype = {
               log.debug(logprefix , String(value));
             }           
             callback(null);
-            if (typeof(inform) != "undefined" && inform != null)
+            if (typeof(inform) != 'undefined' && inform)
             {
               inform(value);
             }               
@@ -1062,7 +1117,7 @@ GenericPLCAccessory.prototype = {
           }
           else {              
             valuePLC = res.readFloatBE(0);
-            if (typeof(valueMod) != "undefined")
+            if (typeof(valueMod) != 'undefined' && valueMod)
             {
               value = valueMod(valuePLC);
               log.debug(logprefix , String(value) + "<-" + String(valuePLC));
@@ -1093,7 +1148,7 @@ GenericPLCAccessory.prototype = {
     var buf = this.buf    
     var valuePLC = value;
 
-    if (typeof(valueMod) != "undefined")
+    if (typeof(valueMod) != 'undefined' && valueMod)
     {
       valuePLC = valueMod(value);
     }
@@ -1107,7 +1162,7 @@ GenericPLCAccessory.prototype = {
             callback(new Error('PLC error'));
           }
           else {              
-            if (typeof(valueMod) != "undefined")
+            if (typeof(valueMod) != 'undefined' && valueMod)
             {
               log.debug(logprefix , String(value) + "->" + String(valuePLC));
             }            
@@ -1116,7 +1171,7 @@ GenericPLCAccessory.prototype = {
               log.debug(logprefix , String(value));
             }  
             callback(null);
-            if (typeof(inform) != "undefined" && inform != null)
+            if (typeof(inform) != 'undefined' && inform)
             {
               inform(value);
             }               
@@ -1144,7 +1199,7 @@ GenericPLCAccessory.prototype = {
           }
           else {              
             valuePLC = res[0];
-            if (typeof(valueMod) != "undefined")
+            if (typeof(valueMod) != 'undefined' && valueMod)
             {
               value = valueMod(valuePLC);
               log.debug(logprefix , String(value) + "<-" + String(valuePLC));
@@ -1176,7 +1231,7 @@ GenericPLCAccessory.prototype = {
     var buf = this.buf
     var valuePLC = value;
 
-    if (typeof(valueMod) != "undefined")
+    if (typeof(valueMod) != 'undefined' && valueMod)
     {
       valuePLC = valueMod(value);
     }
@@ -1190,7 +1245,7 @@ GenericPLCAccessory.prototype = {
             callback(new Error('PLC error'));
           }
           else {              
-            if (typeof(valueMod) != "undefined")
+            if (typeof(valueMod) != 'undefined' && valueMod)
             {
               log.debug(logprefix , String(value) + "->" + String(valuePLC));
             }            
@@ -1199,7 +1254,7 @@ GenericPLCAccessory.prototype = {
               log.debug(logprefix , String(value));
             }  
             callback(null);
-            if (typeof(inform) != "undefined" && inform != null)
+            if (typeof(inform) != 'undefined' && inform)
             {
               inform(value);
             }               
@@ -1228,7 +1283,7 @@ GenericPLCAccessory.prototype = {
           }
           else {              
             valuePLC = res.readInt16BE(0);
-            if (typeof(valueMod) != "undefined")
+            if (typeof(valueMod) != 'undefined' && valueMod)
             {
               value = valueMod(valuePLC);
               log.debug(logprefix , String(value) + "<-" + String(valuePLC));
@@ -1260,7 +1315,7 @@ GenericPLCAccessory.prototype = {
     var buf = this.buf
     var valuePLC = value;
 
-    if (typeof(valueMod) != "undefined")
+    if (typeof(valueMod) != 'undefined' && valueMod)
     {
       valuePLC = valueMod(value);
     }
@@ -1274,7 +1329,7 @@ GenericPLCAccessory.prototype = {
             callback(new Error('PLC error'));
           }
           else {              
-            if (typeof(valueMod) != "undefined")
+            if (typeof(valueMod) != 'undefined' && valueMod)
             {
               log.debug(logprefix , String(value) + "->" + String(valuePLC));
             }            
@@ -1283,7 +1338,7 @@ GenericPLCAccessory.prototype = {
               log.debug(logprefix , String(value));
             }  
             callback(null);
-            if (typeof(inform) != "undefined" && inform != null)
+            if (typeof(inform) != 'undefined' && inform)
             {
               inform(value);
             }               
@@ -1312,7 +1367,7 @@ GenericPLCAccessory.prototype = {
           }
           else {              
             valuePLC = res.readInt32BE(0);
-            if (typeof(valueMod) != "undefined")
+            if (typeof(valueMod) != 'undefined' && valueMod)
             {
               value = valueMod(valuePLC);
               log.debug(logprefix , String(value) + "<-" + String(valuePLC));
