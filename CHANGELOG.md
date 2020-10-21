@@ -6,7 +6,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 *mind the rename from S7 to PLC from version 1.0.3*
 
-## [1.0.8] - 2020-10-xx
+## [1.0.9] - 2020-10-21
 ### Added
 
 - Accessory: `PLC_OccupancySensor`: Add polling to detect changes. New configuration `enablePolling` and `pollInterval`
