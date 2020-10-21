@@ -139,9 +139,9 @@ function GenericPLCAccessory(platform, config) {
         'set Brightness'
         )}.bind(this))
         .setProps({
-          minValue: 20,
-          maxValue: 100,
-          minStep: 1
+          minValue: config.minValue || 20,
+          maxValue: config.maxValue || 100,
+          minStep: config.minStep || 1
       });        
     }    
   }
@@ -231,9 +231,9 @@ function GenericPLCAccessory(platform, config) {
       'get CurrentTemperature'
       )}.bind(this))
     .setProps({
-      minValue: -50,
-      maxValue: 50,
-      minStep: 0.1    
+      minValue: config.minValue || -50,
+      maxValue: config.maxValue || 50,
+      minStep: config.minStep || 0.5
     });
   }
 
@@ -251,9 +251,9 @@ function GenericPLCAccessory(platform, config) {
       'get CurrentRelativeHumidity'
       )}.bind(this))
     .setProps({
-      minValue: 0,
-      maxValue: 100,
-      minStep: 1    
+      minValue: config.minValue || 0,
+      maxValue: config.maxValue || 100,
+      minStep: config.minStep || 1
     });
   }
 
@@ -306,7 +306,7 @@ function GenericPLCAccessory(platform, config) {
         config.db, 
         config.get_CurrentTemperature,
         'get CurrentTemperature'
-        )}.bind(this));
+        )}.bind(this));       
 
       this.service.getCharacteristic(Characteristic.TargetTemperature)
       .on('get', function(callback) {this.getReal(callback, 
@@ -320,9 +320,9 @@ function GenericPLCAccessory(platform, config) {
         'set TargetTemperature'
         )}.bind(this))
         .setProps({
-          minValue: 20,
-          maxValue: 30,
-          minStep: 1
+          minValue: config.minValue || 15,
+          maxValue: config.maxValue || 27,
+          minStep: config.minStep || 0.5
       });                 
   }  
  
@@ -501,6 +501,29 @@ function GenericPLCAccessory(platform, config) {
         config.db, 
         Math.floor(config.get_MotionDetected), Math.floor((config.get_MotionDetected*10)%10),
         "get MotionDetected"
+      )}.bind(this))    
+  }  
+  ////////////////////////////////////////////////////////////////
+  // ContactSensor
+  ////////////////////////////////////////////////////////////////   
+  else if (config.accessory == 'PLC_ContactSensor'){
+    this.service = new Service.ContactSensor(this.name);
+    this.accessory.addService(this.service);
+
+    if (platform.config.enablePolling) {
+      if (config.enablePolling) {
+        this.pollActive = true;          
+        this.pollInterval =  config.pollInterval || 10;
+        this.pollCounter = this.pollInterval;
+        this.log.debug("Polling enabled interval " + this.pollInterval + "s");
+      }
+    } 
+
+    this.service.getCharacteristic(Characteristic.ContactSensorState)
+      .on('get', function(callback) {this.getBit(callback, 
+        config.db, 
+        Math.floor(config.get_ContactSensorState), Math.floor((config.get_ContactSensorState*10)%10),
+        "get get_ContactSensorState"
       )}.bind(this))    
   }  
   ////////////////////////////////////////////////////////////////
@@ -860,6 +883,15 @@ GenericPLCAccessory.prototype = {
             }
           }.bind(this));
         }        
+        else if (this.config.accessory == 'PLC_ContactSensor') {      
+          // get the current target system state and update the value.
+          this.service.getCharacteristic(Characteristic.ContactSensorState).getValue(function(err, value) {
+            if (!err) {                          
+              this.service.getCharacteristic(Characteristic.ContactSensorState).updateValue(value);
+            }
+          }.bind(this));
+        }        
+
         else if (this.config.accessory == 'PLC_StatelessProgrammableSwitch'){
           this.getBit(function(err,value){
               if(!err && value)

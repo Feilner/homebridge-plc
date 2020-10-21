@@ -12,6 +12,7 @@ SIEMENS S7 PLC plugin for [Homebridge](https://homebridge.io)
   - S7 1500 see [Snap7 notes](http://snap7.sourceforge.net/snap7_client.html#1200_1500)
   - and compatible PLCs e.g. Yaskawa or VIPA
 - Tested with S7-300 compatible PLC
+- Implementation is based on documentation of the [Homebridge API](https://developers.homebridge.io) 
 
 
 # Installation
@@ -54,6 +55,10 @@ normal light
   - `set_Off`: offset and bit set to 1 when switching off S7 type `Bool` PLC has to set to 0 e.g. `55.2` for `DB4DBX55.2`   
 - `get_Brightness`: (optional) get brightness value S7 type `Byte` e.g. `56` for `DB4DBB56`    
 - `set_Brightness`: (optional but required when `get_Brightness` is defined) set brightness value S7 type `Byte` e.g. `57` for `DB4DBB57`    
+- brightness range definitions (optional)
+  - `minValue` default value: 20
+  - `maxValue` default value: 100
+  - `minStep` default value: 1 
 
 ### Outlet as `PLC_Outlet`
 outlet possible to show also as ventilator or light
@@ -85,6 +90,10 @@ normal temperature sensor
 - `manufacturer`: (optional) description
 - `db`: s7 data base number e.g. `4` for `DB4`
 - `get_CurrentTemperature`: offset to get current temperature S7 type `Real` e.g. `55` for `DB4DBD55`  
+- temperature range (optional)
+  - `minValue` default value: -50
+  - `maxValue` default value: 50
+  - `minStep` default value: 0.5 
 
 ### Humidity Sensor as `PLC_HumiditySensor`: 
 normal humidity sensor 
@@ -92,6 +101,11 @@ normal humidity sensor
 - `manufacturer`: (optional) description
 - `db`: s7 data base number e.g. `4` for `DB4`
 - `CurrentRelativeHumidity`: offset to get current humidity S7 type `Real` e.g. `55` for `DB4DBD55` 
+- humidity range (optional)
+  - `minValue` default value: 0
+  - `maxValue` default value: 100
+  - `minStep` default value: 1 
+
 
 ### Thermostat as `PLC_Thermostat`
 temperature sensor and temperature regulation
@@ -103,6 +117,10 @@ temperature sensor and temperature regulation
 - `get_CurrentTemperature`: offset to get current temperature S7 type `Real` e.g. `0` for `DB4DBD0`  
 - `get_TargetTemperature`: offset to get target temperature S7 type `Real` e.g. `4` for `DB4DBD4`  
 - `set_TargetTemperature`: offset to set current temperature S7 type `Real` e.g. `4` for `DB4DBD4` (can have same value as get_TargetTemperature)
+- target temperature range definitions (optional)
+  - `minValue` default value: 15
+  - `maxValue` default value: 27
+  - `minStep` default value: 1
 - `get_CurrentHeaterCoolerState`: (optional) current heating/cooling state when not present fixed `1` is used S7 type `Byte` e.g. `8` for `DB4DBB58`    
     - `0`: inactive
     - `1`: idle
@@ -114,6 +132,7 @@ temperature sensor and temperature regulation
     - `2`: cool
     - `3`: automatic
 - `set_TargetHeatingCoolingState` not yet supported writes are ignored
+
 
 ### Shutters as `PLC_WindowCovering`, windows as `PLC_Window` and doors as `PLC_Door`
 shutters or blinds as well sensors for windows and doors
@@ -142,6 +161,8 @@ presence detection sensor
 - `enablePolling`: (optional) when set to `true` the current state o will be polled. It is mandatory as well to enable polling mode on platform level.
 - `pollInterval` (optional) poll interval in seconds. Default value is `10` seconds.
 - `get_OccupancyDetected`: offset and bit get the current status S7 type `Bool` e.g. `55.0` for `DB4DBX55.0`        
+    - `false`: no occupancy
+    - `true`: occupancy detected    
 
 ### Motion Sensor as `PLC_MotionSensor`
 movement detection sensor
@@ -150,7 +171,20 @@ movement detection sensor
 - `db`: s7 data base number e.g. `4` for `DB4`
 - `enablePolling`: (optional) when set to `true` the current state o will be polled. It is mandatory as well to enable polling mode on platform level.
 - `pollInterval` (optional) poll interval in seconds. Default value is `10` seconds.
-- `get_MotionDetected`: offset and bit get the current status S7 type `Bool` e.g. `55.0` for `DB4DBX55.0`        
+- `get_MotionDetected`: offset and bit get the current status S7 type `Bool` e.g. `55.0` for `DB4DBX55.0`     
+    - `false`: no motion
+    - `true`: motion detected    
+
+### Motion Sensor as `PLC_ContactSensor`
+contact sensor
+- `name`: unique name of the accessory 
+- `manufacturer`: (optional) description
+- `db`: s7 data base number e.g. `4` for `DB4`
+- `enablePolling`: (optional) when set to `true` the current state o will be polled. It is mandatory as well to enable polling mode on platform level.
+- `pollInterval` (optional) poll interval in seconds. Default value is `10` seconds.
+- `get_ContactSensorState`: offset and bit get the current status S7 type `Bool` e.g. `55.0` for `DB4DBX55.0`     
+    - `false`: closed
+    - `true`: open
 
 ### Faucet as `PLC_Faucet`
 watering for the garden 
@@ -349,7 +383,7 @@ Note: The example is just an example it contains also some optional settings
                     "invert": true,
                     "adaptivePolling": true,
                     "adaptivePollingInterval" 1,
-                    "enablePolling" : true;
+                    "enablePolling" : true,
                     "pollInterval" : 180,                    
                     "get_CurrentPosition": 0,
                     "get_TargetPosition": 1,
@@ -361,7 +395,7 @@ Note: The example is just an example it contains also some optional settings
                     "accessory": "PLC_Window",
                     "name": "Window",
                     "manufacturer": "ground floor",
-                    "enablePolling" : true;
+                    "enablePolling" : true,
                     "pollInterval" : 60,                    
                     "db": 2008,
                     "get_CurrentPosition": 5,
@@ -375,7 +409,7 @@ Note: The example is just an example it contains also some optional settings
                     "accessory": "PLC_Door",
                     "name": "Door",
                     "manufacturer": "ground floor",
-                    "enablePolling" : true;
+                    "enablePolling" : true,
                     "pollInterval" : 10,
                     "db": 2008,
                     "get_CurrentPosition": 49,
@@ -384,6 +418,14 @@ Note: The example is just an example it contains also some optional settings
                         100
                     ]
                 },                       
+                {
+                    "accessory": "PLC_ContactSensor",
+                    "name": "ContactSensor Test",
+                    "enablePolling": true,
+                    "pollInterval": 5,
+                    "db": 6094,
+                    "get_ContactSensorState": 0
+                },                
                 {
                     "accessory": "PLC_SecuritySystem",
                     "name": "AlarmSystem",

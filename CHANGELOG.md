@@ -8,8 +8,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [1.0.8] - 2020-10-xx
 ### Added
-- Accessory: `PLC_OccupancySensor`: Polling to detect changes. New configuration `enablePolling` and `pollInterval`
-- Accessory: `PLC_MotionSensor`: Polling to detect changes. New configuration `enablePolling` and `pollInterval`
+
+- Accessory: `PLC_OccupancySensor`: Add polling to detect changes. New configuration `enablePolling` and `pollInterval`
+- Accessory: `PLC_MotionSensor`: Add polling to detect changes. New configuration `enablePolling` and `pollInterval`
+- Accessory: `PLC_ContactSensor` added.
+- Accessory: `PLC_TemperatureSensor` Add option `minValue`, `maxValue` `minStep`
+- Accessory: `PLC_HumiditySensor` Add option `minValue`, `maxValue` `minStep`
+- Accessory: `PLC_LightBulb` Add option `minValue`, `maxValue` `minStep`
+- Accessory: `PLC_Thermostat` Add option `minValue`, `maxValue` `minStep` and changed default setting
 
 ### Changed
 - Accessory `PLC_SecuritySystem` a set of target state will do a single get of target and current state
