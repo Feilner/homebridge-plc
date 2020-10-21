@@ -6,11 +6,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 *mind the rename from S7 to PLC from version 1.0.3*
 
+## [1.0.9] - 2020-10-21
+### Added
+
+- Accessory: `PLC_OccupancySensor`: Add polling to detect changes. New configuration `enablePolling` and `pollInterval`
+- Accessory: `PLC_MotionSensor`: Add polling to detect changes. New configuration `enablePolling` and `pollInterval`
+- Accessory: `PLC_ContactSensor` added.
+- Accessory: `PLC_TemperatureSensor` Add option `minValue`, `maxValue` `minStep`
+- Accessory: `PLC_HumiditySensor` Add option `minValue`, `maxValue` `minStep`
+- Accessory: `PLC_LightBulb` Add option `minValue`, `maxValue` `minStep`
+- Accessory: `PLC_Thermostat` Add option `minValue`, `maxValue` `minStep` and changed default setting
+
+### Changed
+- Accessory `PLC_SecuritySystem` a set of target state will do a single get of target and current state
+
 ## [1.0.8] - 2020-10-14
-### FIXED `PLC_MotionSensor` was not functional
+### Fixed `PLC_MotionSensor` was not functional
 
 ## [1.0.7] - 2020-10-12
-### CHANGED 
+### Changed 
 - `PLC_WindowCovering`, `PLC_Window` and `PLC_Door` got additionally to the `adaptivePolling` which polls the current state during movement a possibility to enable with `enablePolling` polling at with  lower frequency the current sate. Thus the option `pollInterval` changed its meaning it now defines the frequency for the `enablePolling` wile `adaptivePollingInterval` defines the frequency for the `adaptivePolling`.
   
 ## [1.0.6] - 2020-10-12
