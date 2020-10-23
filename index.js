@@ -7,39 +7,49 @@ var snap7 = require('node-snap7');
 
 //Exports
 module.exports = function(homebridge) {
-  var platformName = 'homebridge-plc';
   Service = homebridge.hap.Service;
   Characteristic = homebridge.hap.Characteristic;
   UUIDGen = homebridge.hap.uuid;
   PlatformAccessory = homebridge.platformAccessory;
-  homebridge.registerPlatform(platformName, 'PLC', PLC_Platform);
+  homebridge.registerPlatform('homebridge-plc', 'PLC', PLC_Platform, true);
 }
 
-function PLC_Platform(log, config) {
+function PLC_Platform(log, config, api) {
     this.log = log;
     this.config = config;
+    this.api = api;
+    this.s7PlatformAccessories = [];
     this.S7Client = new snap7.S7Client();
     this.isConnectOngoing = false;
     this.S7ClientConnect();
-}
+    }
 
 PLC_Platform.prototype = {
     accessories: function(callback) {
         var log = this.log;
-        var s7PlatformAccessories = [];
         log("Add PLC accessories...");
         //create accessory for each configuration
         this.config.accessories.forEach((config, index) => {
             log("[" + String(index+1) + "/" + this.config.accessories.length + "] " + config.name + " (" +  config.accessory + ")" );
             //call accessory construction
             var accessory = new GenericPLCAccessory(this, config);
-            s7PlatformAccessories.push(accessory);
+            this.s7PlatformAccessories.push(accessory);
         });
-        callback(s7PlatformAccessories);
+        callback(this.s7PlatformAccessories);
 
         if (this.config.enablePolling) {
           log("Enable polling...");
-          setInterval(function(param) {this.pollLoop( s7PlatformAccessories)}.bind(this),1000);
+          setInterval(function(param) {this.pollLoop( this.s7PlatformAccessories)}.bind(this),1000);
+        }
+
+        if (this.config.enablePush) {
+          this.port = this.config.port || 8888;
+          this.api.on('didFinishLaunching', () => {
+              this.log('Enable push server...');
+              this.listener = require('http').createServer((req, res) => this.httpListener(req, res));
+              this.listener.listen(this.port);
+              this.log('listening on port ' + this.port);
+          });
         }
         log("Init done!")
     },
@@ -49,6 +59,80 @@ PLC_Platform.prototype = {
         accessory.poll();
       });
     },
+
+    httpListener: function(req, res) {
+      let data = '';
+      let url = '';
+      let id = null;
+
+      if (req.method == 'POST') {
+          req.on('data', (chunk) => {
+              data += chunk;
+          });
+          req.on('end', () => {
+              this.log('Received POST and body data:');
+              this.log(data.toString());
+              url = require('url').parse(req.url, true);
+              id = url.query.id;            
+              if (id) {
+                var found = false;
+                this.s7PlatformAccessories.forEach((accessory) => {
+                  if(id == accessory.config.id){
+                    this.log( "[" + accessory.config.name + "] Trigger received ");
+                    found = true;
+                    accessory.updatePush();
+                  }                
+                });
+                if( ! found) {
+                  this.log('Unknown ID: ' + id + " The known IDs are:");
+                  this.s7PlatformAccessories.forEach((accessory) => {
+                    if(accessory.config.id){
+                      this.log(accessory.config.id + " => " + accessory.config.name);
+                    }
+                  });
+                }
+              }
+              else
+              {
+                this.log.error("Received HTTP GET with ID in header!");
+                this.log.error(url);
+              }              
+          });
+      }
+      if (req.method == 'GET') {
+          req.on('end', () => {
+              url = require('url').parse(req.url, true); // will parse parameters into query string
+              id = url.query.id;            
+              if (id) {
+                var found = false;
+                this.s7PlatformAccessories.forEach((accessory) => {
+                  if(id == accessory.config.id){
+                    this.log( "[" + accessory.config.name + "] Trigger received ");
+                    found = true;
+                    accessory.updatePoll();
+                  }                
+                });
+                if( ! found) {
+                  this.log('Unknown ID: ' + id + " The known IDs are:");
+                  this.s7PlatformAccessories.forEach((accessory) => {
+                    if(accessory.config.id){
+                      this.log(accessory.config.id + " => " + accessory.config.name);
+                    }
+                  });
+                }
+              }
+              else
+              {
+                this.log.error("Received HTTP GET with ID in header!");
+                this.log.error(url);
+              }              
+          });
+      }
+      res.writeHead(200, { 'Content-Type': 'text/plain' });
+      res.end();
+
+  },
+
 
     //PLC connection check function
     S7ClientConnect: function() {
@@ -834,92 +918,111 @@ GenericPLCAccessory.prototype = {
       {
         this.pollCounter = this.pollInterval;
         this.log.debug("[" + this.name + "] Execute polling...");
-
-        if (this.config.accessory == 'PLC_WindowCovering') {
-          this.service.getCharacteristic(Characteristic.CurrentPosition).getValue(function(err, value) {
-            if (!err) {
-              if (this.adaptivePollActive )  {
-                if( this.lastTargetPos == value) {
-                  this.adaptivePollActive = false;
-                  this.log.debug( "[" + this.name + "] reached target position disable adaptive polling: " + value);
-                }
-                else
-                {
-                  this.pollCounter = this.adaptivePollingInterval;
-                  this.log.debug( "[" + this.name + "] continue adaptive polling (" + this.pollCounter + "s): " + this.lastTargetPos +" != " + value);
-                }
-              }
-              this.service.getCharacteristic(Characteristic.CurrentPosition).updateValue(value);
-            }
-          }.bind(this));
-        }
-        else if (this.config.accessory == 'PLC_SecuritySystem') {
-          // get the current target system state and update the value.
-          this.service.getCharacteristic(Characteristic.SecuritySystemTargetState).getValue(function(err, value) {
-            if (!err) {
-              this.service.getCharacteristic(Characteristic.SecuritySystemTargetState).updateValue(value);
-            }
-          }.bind(this));
-          // get the current system state and update the value.
-          this.service.getCharacteristic(Characteristic.SecuritySystemCurrentState).getValue(function(err, value) {
-            if (!err) {
-              this.service.getCharacteristic(Characteristic.SecuritySystemCurrentState).updateValue(value);
-            }
-          }.bind(this));
-        }
-        else if (this.config.accessory == 'PLC_OccupancySensor') {
-          // get the current target system state and update the value.
-          this.service.getCharacteristic(Characteristic.OccupancyDetected).getValue(function(err, value) {
-            if (!err) {
-              this.service.getCharacteristic(Characteristic.OccupancyDetected).updateValue(value);
-            }
-          }.bind(this));
-        }
-        else if (this.config.accessory == 'PLC_MotionSensor') {
-          // get the current target system state and update the value.
-          this.service.getCharacteristic(Characteristic.MotionDetected).getValue(function(err, value) {
-            if (!err) {
-              this.service.getCharacteristic(Characteristic.MotionDetected).updateValue(value);
-            }
-          }.bind(this));
-        }
-        else if (this.config.accessory == 'PLC_ContactSensor') {
-          // get the current target system state and update the value.
-          this.service.getCharacteristic(Characteristic.ContactSensorState).getValue(function(err, value) {
-            if (!err) {
-              this.service.getCharacteristic(Characteristic.ContactSensorState).updateValue(value);
-            }
-          }.bind(this));
-        }
-
-        else if (this.config.accessory == 'PLC_StatelessProgrammableSwitch'){
-          this.getBit(function(err,value){
-              if(!err && value)
-              {
-                this.getByte(function(err, event) {
-                  if (!err) {
-                    this.service.getCharacteristic(Characteristic.ProgrammableSwitchEvent).updateValue(event);
-                    this.log( "[" + this.name + "] Stateless switch event :" + event);
-                    this.setBit(0,function(err){},
-                      this.config.db,
-                      Math.floor(this.config.isEvent), Math.floor((this.config.isEvent*10)%10),
-                      'clear IsEvent');
-                  }
-                }.bind(this),
-                this.config.db,
-                this.config.get_ProgrammableSwitchEvent,
-                'read Event'
-                ),
-                this.service.getCharacteristic(Characteristic.ProgrammableSwitchEvent).getValue();
-              }
-             }.bind(this),
-            this.config.db,
-            Math.floor(this.config.isEvent), Math.floor((this.config.isEvent*10)%10),
-            'poll isEvent'
-          )
-
-        }
+        this.updatePoll();
       }
+    }
+  },
+
+  updatePush: function(value)
+  { 
+    if (this.config.accessory == 'PLC_LightBulb') {
+      this.log.debug( "[" + this.name + "] New value: " + value);
+      this.service.getCharacteristic(Characteristic.On).updateValue(value);
+    }   
+  },
+
+  updatePoll: function()
+  { 
+    if (this.config.accessory == 'PLC_LightBulb') {
+      this.service.getCharacteristic(Characteristic.On).getValue(function(err, value) {
+        if (!err) {
+          this.service.getCharacteristic(Characteristic.On).updateValue(value);
+        }
+      }.bind(this));      
+    }   
+    else if (this.config.accessory == 'PLC_WindowCovering') {
+      this.service.getCharacteristic(Characteristic.CurrentPosition).getValue(function(err, value) {
+        if (!err) {
+          if (this.adaptivePollActive )  {
+            if( this.lastTargetPos == value) {
+              this.adaptivePollActive = false;
+              this.log.debug( "[" + this.name + "] reached target position disable adaptive polling: " + value);
+            }
+            else
+            {
+              this.pollCounter = this.adaptivePollingInterval;
+              this.log.debug( "[" + this.name + "] continue adaptive polling (" + this.pollCounter + "s): " + this.lastTargetPos +" != " + value);
+            }
+          }
+          this.service.getCharacteristic(Characteristic.CurrentPosition).updateValue(value);
+        }
+      }.bind(this));
+    }
+    else if (this.config.accessory == 'PLC_SecuritySystem') {
+      // get the current target system state and update the value.
+      this.service.getCharacteristic(Characteristic.SecuritySystemTargetState).getValue(function(err, value) {
+        if (!err) {
+          this.service.getCharacteristic(Characteristic.SecuritySystemTargetState).updateValue(value);
+        }
+      }.bind(this));
+      // get the current system state and update the value.
+      this.service.getCharacteristic(Characteristic.SecuritySystemCurrentState).getValue(function(err, value) {
+        if (!err) {
+          this.service.getCharacteristic(Characteristic.SecuritySystemCurrentState).updateValue(value);
+        }
+      }.bind(this));
+    }
+    else if (this.config.accessory == 'PLC_OccupancySensor') {
+      // get the current target system state and update the value.
+      this.service.getCharacteristic(Characteristic.OccupancyDetected).getValue(function(err, value) {
+        if (!err) {
+          this.service.getCharacteristic(Characteristic.OccupancyDetected).updateValue(value);
+        }
+      }.bind(this));
+    }
+    else if (this.config.accessory == 'PLC_MotionSensor') {
+      // get the current target system state and update the value.
+      this.service.getCharacteristic(Characteristic.MotionDetected).getValue(function(err, value) {
+        if (!err) {
+          this.service.getCharacteristic(Characteristic.MotionDetected).updateValue(value);
+        }
+      }.bind(this));
+    }
+    else if (this.config.accessory == 'PLC_ContactSensor') {
+      // get the current target system state and update the value.
+      this.service.getCharacteristic(Characteristic.ContactSensorState).getValue(function(err, value) {
+        if (!err) {
+          this.service.getCharacteristic(Characteristic.ContactSensorState).updateValue(value);
+        }
+      }.bind(this));
+    }
+
+    else if (this.config.accessory == 'PLC_StatelessProgrammableSwitch'){
+      this.getBit(function(err,value){
+          if(!err && value)
+          {
+            this.getByte(function(err, event) {
+              if (!err) {
+                this.service.getCharacteristic(Characteristic.ProgrammableSwitchEvent).updateValue(event);
+                this.log( "[" + this.name + "] Stateless switch event :" + event);
+                this.setBit(0,function(err){},
+                  this.config.db,
+                  Math.floor(this.config.isEvent), Math.floor((this.config.isEvent*10)%10),
+                  'clear IsEvent');
+              }
+            }.bind(this),
+            this.config.db,
+            this.config.get_ProgrammableSwitchEvent,
+            'read Event'
+            ),
+            this.service.getCharacteristic(Characteristic.ProgrammableSwitchEvent).getValue();
+          }
+         }.bind(this),
+        this.config.db,
+        Math.floor(this.config.isEvent), Math.floor((this.config.isEvent*10)%10),
+        'poll isEvent'
+      )
+
     }
   },
 
