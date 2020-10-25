@@ -5,10 +5,16 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 *mind the rename from S7 to PLC from version 1.0.3*
+## [1.0.10] - 2020-10-21
+### Added
+- Support to push updated variables from the PLC to the homebridge-plc plug in by a http request
+
+### Changed
+- Accessory `PLC_WindowCovering`, `PLC_Window` and `PLC_Door` need to define new option `forceCurrentPosition` to maintain current behaviour! 
+
 
 ## [1.0.9] - 2020-10-21
 ### Added
-
 - Accessory: `PLC_OccupancySensor`: Add polling to detect changes. New configuration `enablePolling` and `pollInterval`
 - Accessory: `PLC_MotionSensor`: Add polling to detect changes. New configuration `enablePolling` and `pollInterval`
 - Accessory: `PLC_ContactSensor` added.

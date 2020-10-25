@@ -100,7 +100,7 @@ normal humidity sensor
 - `name`: unique name of the accessory 
 - `manufacturer`: (optional) description
 - `db`: s7 data base number e.g. `4` for `DB4`
-- `CurrentRelativeHumidity`: offset to get current humidity S7 type `Real` e.g. `55` for `DB4DBD55` 
+- `get_CurrentRelativeHumidity`: offset to get current humidity S7 type `Real` e.g. `55` for `DB4DBD55` 
 - humidity range (optional)
   - `minValue` default value: 0
   - `maxValue` default value: 100
@@ -145,8 +145,8 @@ shutters or blinds as well sensors for windows and doors
 - `pollInterval` (optional) poll interval in seconds. Default value is `10` seconds.
 - `get_CurrentPosition`: offset to get current position S7 type `Byte` e.g. `0` for `DB4DBB0`  
 - if one of the (optional) target position settings need specified all are needed. If not specified it os not movable ans sticks to current position.
-  - `get_TargetPosition`: (optional) offset to get target position S7 type `Byte` e.g. `1` for `DB4DBB1`  
-  - `set_TargetPosition`: (optional) offset to set current position S7 type `Byte` e.g. `2` for `DB4DBB2` (can have same value as set_TargetPosition)
+  - `get_TargetPosition`: (optional) offset to get target position S7 type `Byte` e.g. `1` for `DB4DBB1`  (can have same value as set_TargetPosition)
+  - `set_TargetPosition`: (optional) offset to set current position S7 type `Byte` e.g. `2` for `DB4DBB2` (can have same value as get_TargetPosition)
 - `get_PositionState`: (optional) offset to current movement state if not defined fixed `2`is returned S7 type `Byte` e.g. `3` for `DB4DBB3`    
     - `0`: down
     - `1`: up

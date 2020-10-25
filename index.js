@@ -11,7 +11,7 @@ module.exports = function(homebridge) {
   Characteristic = homebridge.hap.Characteristic;
   UUIDGen = homebridge.hap.uuid;
   PlatformAccessory = homebridge.platformAccessory;
-  homebridge.registerPlatform('homebridge-plc', 'PLC', PLC_Platform, true);
+  homebridge.registerPlatform('homebridge-plc', 'PLC', PLC_Platform);
 }
 
 function PLC_Platform(log, config, api) {
@@ -43,7 +43,7 @@ PLC_Platform.prototype = {
         }
 
         if (this.config.enablePush) {
-          this.port = this.config.port || 8888;
+          this.port = this.config.port || 8080;
           this.api.on('didFinishLaunching', () => {
               this.log('Enable push server...');
               this.listener = require('http').createServer((req, res) => this.httpListener(req, res));
@@ -71,61 +71,62 @@ PLC_Platform.prototype = {
           });
           req.on('end', () => {
               this.log('Received POST and body data:');
-              this.log(data.toString());
-              url = require('url').parse(req.url, true);
-              id = url.query.id;            
-              if (id) {
-                var found = false;
-                this.s7PlatformAccessories.forEach((accessory) => {
-                  if(id == accessory.config.id){
-                    this.log( "[" + accessory.config.name + "] Trigger received ");
-                    found = true;
-                    accessory.updatePush();
-                  }                
-                });
-                if( ! found) {
-                  this.log('Unknown ID: ' + id + " The known IDs are:");
-                  this.s7PlatformAccessories.forEach((accessory) => {
-                    if(accessory.config.id){
-                      this.log(accessory.config.id + " => " + accessory.config.name);
-                    }
-                  });
-                }
-              }
-              else
-              {
-                this.log.error("Received HTTP GET with ID in header!");
-                this.log.error(url);
-              }              
+              this.log(data.toString());             
           });
       }
-      if (req.method == 'GET') {
+      else if (req.method == 'GET') {
+        req.on('end', () => {
+            url = require('url').parse(req.url, true); // will parse parameters into query string
+            id = url.query.id;            
+            if (id) {
+              var found = false;
+              this.s7PlatformAccessories.forEach((accessory) => {
+                if(id == accessory.config.id){
+                  this.log( "[" + accessory.config.name + "] Trigger received ");
+                  found = true;
+                  accessory.updatePoll();
+                }                
+              });
+              if( ! found) {
+                this.log('Unknown ID: ' + id + " The known IDs are:");
+                this.s7PlatformAccessories.forEach((accessory) => {
+                  if(accessory.config.id){
+                    this.log(accessory.config.id + " => " + accessory.config.name);
+                  }
+                });
+              }
+            }
+            else
+            {
+              this.log.error("Received HTTP GET with ID in header!");
+              this.log.error(url);
+            }              
+        });
+      }
+      else if (req.method == 'PUT') {
           req.on('end', () => {
               url = require('url').parse(req.url, true); // will parse parameters into query string
-              id = url.query.id;            
-              if (id) {
-                var found = false;
+              if ('db' in url.query && 'offset' in url.query && 'value' in url.query) {
+                this.log.debug("[HTTP PUT] Received push update for accessory:" + url.query.db + " offset:" + url.query.offset +" value:" + url.query.value);
+                var db = parseInt(url.query.db);
+                var offset = parseInt(url.query.offset);
+                var value = url.query.value;
+                var handled = false;
                 this.s7PlatformAccessories.forEach((accessory) => {
-                  if(id == accessory.config.id){
-                    this.log( "[" + accessory.config.name + "] Trigger received ");
-                    found = true;
-                    accessory.updatePoll();
-                  }                
+                  if (accessory.config.db == db) {                    
+                    handled = accessory.updatePush(offset, value) || handled;
+                  }
                 });
-                if( ! found) {
-                  this.log('Unknown ID: ' + id + " The known IDs are:");
-                  this.s7PlatformAccessories.forEach((accessory) => {
-                    if(accessory.config.id){
-                      this.log(accessory.config.id + " => " + accessory.config.name);
-                    }
-                  });
-                }
+                if(!handled) {
+                  this.log.error("[HTTP PUT] No matching accessory found for db:" + url.query.db + " offset:" + url.query.offset +" value:" + url.query.value);
+                }                            
+
               }
               else
               {
-                this.log.error("Received HTTP GET with ID in header!");
+                this.log.error("Received HTTP PUT must contain db, offset and value!");
                 this.log.error(url);
-              }              
+              }
           });
       }
       res.writeHead(200, { 'Content-Type': 'text/plain' });
@@ -176,13 +177,20 @@ function GenericPLCAccessory(platform, config) {
   var uuid = UUIDGen.generate(config.name + config.accessory);
   this.config = config;
   this.accessory = new PlatformAccessory(this.name, uuid);
+
+  if ('enablePolling' in platform.config && platform.config.enablePolling && config.enablePolling) {
+      this.pollActive = true;
+      this.pollInterval =  config.pollInterval || 10;
+      this.pollCounter = this.pollInterval;
+      this.log.debug("Polling enabled interval " + this.pollInterval + "s");
+  }
+
   ////////////////////////////////////////////////////////////////
   // Lightbulb
   ////////////////////////////////////////////////////////////////
   if (config.accessory == 'PLC_LightBulb') {
     this.service =  new Service.Lightbulb(this.name);
     this.accessory.addService(this.service);
-
     if ('set_Off' in config) {
       this.service.getCharacteristic(Characteristic.On)
         .on('get', function(callback) {this.getBit(callback,
@@ -429,7 +437,12 @@ function GenericPLCAccessory(platform, config) {
     this.accessory.addService(this.service);
     this.lastTargetPos = 0;
 
-    var informFunction = function(value){this.service.getCharacteristic(Characteristic.CurrentPosition).updateValue(value) }.bind(this);
+    // default do nothing after set of target postion
+    var informFunction = function(value){}.bind(this);
+
+    if ('forceCurrentPosition' in config && config.forceCurrentPosition) {
+      informFunction = function(value){this.service.getCharacteristic(Characteristic.CurrentPosition).updateValue(value) }.bind(this);
+    }
 
     if ('enablePolling' in platform.config && platform.config.enablePolling) {
         if ('adaptivePolling' in config && config.adaptivePolling) {
@@ -441,26 +454,18 @@ function GenericPLCAccessory(platform, config) {
           // When execution set save target position and enable polling with high frequency
           informFunction = function(value){ this.lastTargetPos = value; this.pollCounter = this.adaptivePollingInterval; this.adaptivePollActive = true; }.bind(this);
         }
-        if ('enablePolling' in config && config.enablePolling)  {
-          // low freqency polling in background
-          this.pollActive = true;
-          this.pollInterval =  config.pollInterval || 10;
-          this.pollCounter = this.pollInterval;
-          this.log.debug("Polling enabled interval " + this.pollInterval + "s");
-        }
     }
 
-    var modFunctionGet = null;
-    var modFunctionSet = null;
+    this.modFunctionGet = this.plain;
+    this.modFunctionSet = this.plain;
     if ('invert' in config && config.invert) {
-      modFunctionGet = this.invert_0_100;
-      modFunctionSet = this.invert_0_100;
+      this.modFunctionGet = this.invert_0_100;
+      this.modFunctionSet = this.invert_0_100;
     }
 
     if ('mapGet' in config && config.mapGet) {
-      modFunctionGet = function(value){return this.mapFunction(value, config.mapGet);}.bind(this);
+      this.modFunctionGet = function(value){return this.mapFunction(value, config.mapGet);}.bind(this);
     }
-
 
     // create handlers for required characteristics
     this.service.getCharacteristic(Characteristic.CurrentPosition)
@@ -468,7 +473,7 @@ function GenericPLCAccessory(platform, config) {
         config.db,
         config.get_CurrentPosition,
         'get CurrentPosition',
-        modFunctionGet
+        this.modFunctionGet
         )}.bind(this));
 
     if ('get_TargetPosition' in config) {
@@ -478,14 +483,14 @@ function GenericPLCAccessory(platform, config) {
           config.db,
           config.get_TargetPosition,
           'get TargetPosition',
-          modFunctionGet
+          this.modFunctionGet
           )}.bind(this))
         .on('set', function(value, callback) {this.setByte(value, callback,
           config.db,
           config.set_TargetPosition,
           'set TargetPosition',
           informFunction,
-          modFunctionSet
+          this.modFunctionSet
           )}.bind(this));
       }
       else
@@ -496,7 +501,7 @@ function GenericPLCAccessory(platform, config) {
           config.db,
           config.get_CurrentPosition,  // always use current position as target position
           'get CurrentPosition',
-          modFunctionGet
+          this.modFunctionGet
           )}.bind(this))
         .on('set', function(value, callback) {this.setDummy(value, callback,
           'set TargetPosition',
@@ -666,8 +671,8 @@ function GenericPLCAccessory(platform, config) {
       }.bind(this));
      }.bind(this);
 
-    var modFunctionGet = null;
-    var modFunctionSet = null;
+    this.modFunctionGet = this.plain;
+    this.modFunctionSet = this.plain;
 
     if ('mapSet' in config && config.mapSet) {
       modFunctionSet = function(value){return this.mapFunction(value, config.mapSet);}.bind(this);
@@ -797,7 +802,6 @@ function GenericPLCAccessory(platform, config) {
         this.pollActive = true;
         this.pollInterval =  config.pollInterval || 10;
         this.pollCounter = this.pollInterval;
-        informFunction = null;
         this.log.debug("Polling enabled interval " + this.pollInterval + "s");
       }
     }
@@ -923,24 +927,186 @@ GenericPLCAccessory.prototype = {
     }
   },
 
-  updatePush: function(value)
+  updatePush: function(offset, value)
   { 
-    if (this.config.accessory == 'PLC_LightBulb') {
-      this.log.debug( "[" + this.name + "] New value: " + value);
-      this.service.getCharacteristic(Characteristic.On).updateValue(value);
+    rv = false;
+    //this.log.debug("["+ this.name +"] ("+ this.config.accessory +") Received updatePush offset:" + offset + " value:" + value);
+    if (this.config.accessory == 'PLC_LightBulb' ||
+        this.config.accessory == 'PLC_Outlet' ||
+        this.config.accessory == 'PLC_Switch') {      
+      if (this.config.get_On == offset)
+      {
+        this.log.debug( "[" + this.name + "] Push On :" + value);
+        this.service.getCharacteristic(Characteristic.On).updateValue(value);
+        rv = true;
+      }      
+      if (this.config.accessory == 'PLC_LightBulb' && this.config.get_Brightness == offset)
+      {
+        this.log.debug( "[" + this.name + "] Push Brightness:" + value);
+        this.service.getCharacteristic(Characteristic.Brightness).updateValue(value);
+        rv = true;
+      }
+    }
+    else if (this.config.accessory == 'PLC_TemperatureSensor'){
+      if (this.config.get_CurrentTemperature == offset)
+      {
+        this.log.debug( "[" + this.name + "] Push CurrentTemperature:" + value);
+        this.service.getCharacteristic(Characteristic.CurrentTemperature).updateValue(value);
+        rv = true;
+      } 
     }   
+    else if (this.config.accessory == 'PLC_HumiditySensor'){
+      if (this.config.get_CurrentRelativeHumidity == offset)
+      {
+        this.log.debug( "[" + this.name + "] Push CurrentRelativeHumidity:" + value);
+        this.service.getCharacteristic(Characteristic.CurrentRelativeHumidity).updateValue(value);
+        rv = true;
+      } 
+    }     
+    else if (this.config.accessory == 'PLC_Window' || this.config.accessory == 'PLC_WindowCovering' || this.config.accessory == 'PLC_Door'){
+      var has_get_TargetPosition = ('get_TargetPosition' in this.config)
+      if (this.config.get_CurrentPosition == offset)
+      {
+        if(!has_get_TargetPosition) {
+          this.log.debug( "[" + this.name + "] Push TargetPosition:" + String(this.modFunctionGet(value)) + "<-" + String(value));
+          this.service.getCharacteristic(Characteristic.TargetPosition).updateValue(this.modFunctionGet(value));          
+        }
+        this.log.debug( "[" + this.name + "] Push CurrentPosition:" + String(this.modFunctionGet(value)) + "<-" + String(value));
+        this.service.getCharacteristic(Characteristic.CurrentPosition).updateValue(this.modFunctionGet(value));
+        rv = true;
+      }
+      if ( this.config.get_TargetPosition == offset)
+      {
+        this.log.debug( "[" + this.name + "] Push TargetPosition:" + String(this.modFunctionGet(value)) + "<-" + String(value));
+        this.service.getCharacteristic(Characteristic.TargetPosition).updateValue(this.modFunctionGet(value));
+        rv = true;
+      }     
+      if (this.config.get_PositionState == offset)
+      {
+        this.log.debug( "[" + this.name + "] Push PositionState:" + value);
+        this.service.getCharacteristic(Characteristic.PositionState).updateValue(value);
+        rv = true;
+      }            
+    }
+    else if (this.config.accessory == 'PLC_Thermostat'){
+      if (this.config.get_CurrentTemperature == offset)
+      {
+        this.log.debug( "[" + this.name + "] Push CurrentTemperature :" + value);
+        this.service.getCharacteristic(Characteristic.CurrentTemperature).updateValue(value);
+        rv = true;
+      } 
+      if (this.config.get_TargetTemperature == offset)
+      {
+        this.log.debug( "[" + this.name + "] Push TargetTemperature :" + value);
+        this.service.getCharacteristic(Characteristic.TargetTemperature).updateValue(value);
+        rv = true;
+      }       
+    }   
+    else if (this.config.accessory == 'PLC_OccupancySensor'){
+      if (this.config.get_OccupancyDetected == offset)
+      {
+        this.log.debug( "[" + this.name + "] Push OccupancyDetected:" + value);
+        this.service.getCharacteristic(Characteristic.OccupancyDetected).updateValue(value);
+        rv = true;
+      } 
+    }    
+    else if (this.config.accessory == 'PLC_MotionSensor'){
+      if (this.config.get_MotionDetected == offset)
+      {
+        this.log.debug( "[" + this.name + "] Push MotionDetected:" + value);
+        this.service.getCharacteristic(Characteristic.MotionDetected).updateValue(value);
+        rv = true;
+      } 
+    }            
+    else if (this.config.accessory == 'PLC_ContactSensor'){
+      if (this.config.get_ContactSensorState == offset)
+      {
+        this.log.debug( "[" + this.name + "] Push ContactSensorState:" + value);
+        this.service.getCharacteristic(Characteristic.ContactSensorState).updateValue(value);
+        rv = true;
+      } 
+    }             
+    else if (this.config.accessory == 'PLC_Faucet' || 
+             this.config.accessory == 'PLC_Valve' ){
+      if (this.config.get_Active == offset)
+      {
+        this.log.debug( "[" + this.name + "] Push Active:" + value);
+        this.service.getCharacteristic(Characteristic.Active).updateValue(value);
+        rv = true;
+      } 
+    }               
+    else if (this.config.accessory == 'PLC_SecuritySystem'){
+      if (this.config.get_SecuritySystemCurrentState == offset)
+      {
+        this.log.debug( "[" + this.name + "] Push SecuritySystemCurrentState:" + String(this.modFunctionGet(value)) + "<-" + String(value));
+        this.service.getCharacteristic(Characteristic.SecuritySystemCurrentState).updateValue(this.modFunctionGet(value));
+        rv = true;
+      } 
+      if (this.config.get_SecuritySystemTargetState == offset)
+      {
+        this.log.debug( "[" + this.name + "] Push SecuritySystemTargetState:" + String(this.modFunctionGet(value)) + "<-" + String(value));
+        this.service.getCharacteristic(Characteristic.SecuritySystemTargetState).updateValue(this.modFunctionGet(value));
+        rv = true;
+      }       
+    } 
+    else if (this.config.accessory == 'PLC_StatelessProgrammableSwitch'){
+      if (this.config.get_ProgrammableSwitchEvent == offset)
+      {
+        this.log.debug( "[" + this.name + "] Push ProgrammableSwitchEvent:" + value);
+        this.service.getCharacteristic(Characteristic.ProgrammableSwitchEvent).updateValue(value);
+        rv = true;
+      } 
+    }  
+    else if (this.config.accessory == 'PLC_LockMechanism '){
+      if (this.config.get_LockCurrentState == offset)
+      {
+        this.log.debug( "[" + this.name + "] Push LockCurrentState:" + value);
+        this.service.getCharacteristic(Characteristic.LockCurrentState).updateValue(value);
+        rv = true;
+      } 
+      if (this.config.get_LockTargetState == offset)
+      {
+        this.log.debug( "[" + this.name + "] Push LockTargetState:" + value);
+        this.service.getCharacteristic(Characteristic.LockTargetState).updateValue(value);
+        rv = true;
+      }       
+    }      
+    else if (this.config.accessory == 'PLC_GarageDoorOpener  '){
+      if (this.config.get_CurrentDoorState == offset)
+      {
+        this.log.debug( "[" + this.name + "] Push CurrentDoorState:" + value);
+        this.service.getCharacteristic(Characteristic.CurrentDoorState).updateValue(value);
+        rv = true;
+      } 
+      if (this.config.get_TargetDoorState == offset)
+      {
+        this.log.debug( "[" + this.name + "] Push TargetDoorState:" + value);
+        this.service.getCharacteristic(Characteristic.TargetDoorState).updateValue(value);
+        rv = true;
+      }            
+      if (this.config.get_LockTargetState == offset)
+      {
+        this.log.debug( "[" + this.name + "] Push LockTargetState:" + value);
+        this.service.getCharacteristic(Characteristic.LockTargetState).updateValue(value);
+        rv = true;
+      }       
+    }      
+
+    return rv;    
   },
 
   updatePoll: function()
   { 
-    if (this.config.accessory == 'PLC_LightBulb') {
+    if (this.config.accessory == 'PLC_LightBulb' ||
+    this.config.accessory == 'PLC_Outlet' ||
+    this.config.accessory == 'PLC_Switch') {  
       this.service.getCharacteristic(Characteristic.On).getValue(function(err, value) {
         if (!err) {
           this.service.getCharacteristic(Characteristic.On).updateValue(value);
         }
       }.bind(this));      
     }   
-    else if (this.config.accessory == 'PLC_WindowCovering') {
+    else if (config.accessory == 'PLC_Window' || config.accessory == 'PLC_WindowCovering' || config.accessory == 'PLC_Door'){
       this.service.getCharacteristic(Characteristic.CurrentPosition).getValue(function(err, value) {
         if (!err) {
           if (this.adaptivePollActive )  {
@@ -1028,6 +1194,10 @@ GenericPLCAccessory.prototype = {
 
   getServices: function() {
     return [this.accessory.getService(Service.AccessoryInformation), this.service];
+  },
+
+  plain: function(value) {
+    return value;
   },
 
   invert_0_100: function(value) {
@@ -1520,6 +1690,7 @@ GenericPLCAccessory.prototype = {
         callback(new Error('PLC not connected'));
     }
   }
+
 
 }
 
