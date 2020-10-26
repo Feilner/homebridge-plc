@@ -74,40 +74,14 @@ PLC_Platform.prototype = {
               this.log(data.toString());             
           });
       }
-      else if (req.method == 'GET') {
-        req.on('end', () => {
-            url = require('url').parse(req.url, true); // will parse parameters into query string
-            id = url.query.id;            
-            if (id) {
-              var found = false;
-              this.s7PlatformAccessories.forEach((accessory) => {
-                if(id == accessory.config.id){
-                  this.log( "[" + accessory.config.name + "] Trigger received ");
-                  found = true;
-                  accessory.updatePoll();
-                }                
-              });
-              if( ! found) {
-                this.log('Unknown ID: ' + id + " The known IDs are:");
-                this.s7PlatformAccessories.forEach((accessory) => {
-                  if(accessory.config.id){
-                    this.log(accessory.config.id + " => " + accessory.config.name);
-                  }
-                });
-              }
-            }
-            else
-            {
-              this.log.error("Received HTTP GET with ID in header!");
-              this.log.error(url);
-            }              
-        });
-      }
-      else if (req.method == 'PUT') {
+      else if (req.method == 'PUT' || req.method == 'GET') {
+          var doLog = (req.method == 'GET');
           req.on('end', () => {
               url = require('url').parse(req.url, true); // will parse parameters into query string
-              if ('db' in url.query && 'offset' in url.query && 'value' in url.query) {
-                this.log.debug("[HTTP PUT] Received push update for accessory:" + url.query.db + " offset:" + url.query.offset +" value:" + url.query.value);
+              if ('push' in url.query && 'db' in url.query && 'offset' in url.query && 'value' in url.query) {
+                if(doLog) {
+                  this.log.debug("[HTTP Push] Received update for accessory:" + url.query.db + " offset:" + url.query.offset +" value:" + url.query.value);
+                }
                 var db = parseInt(url.query.db);
                 var offset = parseInt(url.query.offset);
                 var value = url.query.value;
@@ -117,12 +91,12 @@ PLC_Platform.prototype = {
                     handled = accessory.updatePush(offset, value) || handled;
                   }
                 });
-                if(!handled) {
+                if(!handled && doLog) {
                   this.log.error("[HTTP PUT] No matching accessory found for db:" + url.query.db + " offset:" + url.query.offset +" value:" + url.query.value);
                 }                            
 
               }
-              else
+              else if(doLog)
               {
                 this.log.error("Received HTTP PUT must contain db, offset and value!");
                 this.log.error(url);
@@ -553,15 +527,6 @@ function GenericPLCAccessory(platform, config) {
     this.service = new Service.OccupancySensor(this.name);
     this.accessory.addService(this.service);
 
-    if (platform.config.enablePolling) {
-      if (config.enablePolling) {
-        this.pollActive = true;
-        this.pollInterval =  config.pollInterval || 10;
-        this.pollCounter = this.pollInterval;
-        this.log.debug("Polling enabled interval " + this.pollInterval + "s");
-      }
-    }
-
     this.service.getCharacteristic(Characteristic.OccupancyDetected)
       .on('get', function(callback) {this.getBit(callback,
         config.db,
@@ -576,15 +541,6 @@ function GenericPLCAccessory(platform, config) {
     this.service = new Service.MotionSensor(this.name);
     this.accessory.addService(this.service);
 
-    if (platform.config.enablePolling) {
-      if (config.enablePolling) {
-        this.pollActive = true;
-        this.pollInterval =  config.pollInterval || 10;
-        this.pollCounter = this.pollInterval;
-        this.log.debug("Polling enabled interval " + this.pollInterval + "s");
-      }
-    }
-
     this.service.getCharacteristic(Characteristic.MotionDetected)
       .on('get', function(callback) {this.getBit(callback,
         config.db,
@@ -598,15 +554,6 @@ function GenericPLCAccessory(platform, config) {
   else if (config.accessory == 'PLC_ContactSensor'){
     this.service = new Service.ContactSensor(this.name);
     this.accessory.addService(this.service);
-
-    if (platform.config.enablePolling) {
-      if (config.enablePolling) {
-        this.pollActive = true;
-        this.pollInterval =  config.pollInterval || 10;
-        this.pollCounter = this.pollInterval;
-        this.log.debug("Polling enabled interval " + this.pollInterval + "s");
-      }
-    }
 
     this.service.getCharacteristic(Characteristic.ContactSensorState)
       .on('get', function(callback) {this.getBit(callback,
@@ -680,15 +627,6 @@ function GenericPLCAccessory(platform, config) {
 
     if ('mapGet' in config && config.mapGet) {
       modFunctionGet = function(value){return this.mapFunction(value, config.mapGet);}.bind(this);
-    }
-
-    if (platform.config.enablePolling) {
-      if (config.enablePolling) {
-        this.pollActive = true;
-        this.pollInterval =  config.pollInterval || 10;
-        this.pollCounter = this.pollInterval;
-        this.log.debug("Polling enabled interval " + this.pollInterval + "s");
-      }
     }
 
     this.service.getCharacteristic(Characteristic.SecuritySystemCurrentState)
@@ -797,15 +735,6 @@ function GenericPLCAccessory(platform, config) {
     this.service = new Service.StatelessProgrammableSwitch(this.name);
     this.accessory.addService(this.service);
 
-    if (platform.config.enablePolling) {
-      if (config.enablePolling) {
-        this.pollActive = true;
-        this.pollInterval =  config.pollInterval || 10;
-        this.pollCounter = this.pollInterval;
-        this.log.debug("Polling enabled interval " + this.pollInterval + "s");
-      }
-    }
-
     this.service.getCharacteristic(Characteristic.ProgrammableSwitchEvent)
       .on('get', function(callback) {this.getByte(callback,
         config.db,
@@ -878,6 +807,13 @@ function GenericPLCAccessory(platform, config) {
       config.get_LockCurrentState,
       "get LockCurrentState"
     )}.bind(this));
+
+    this.service.getCharacteristic(Characteristic.LockCurrentState)
+      .on('get', function(callback) {this.getByte(callback,
+        config.db,
+        config.get_LockCurrentState,
+        "get LockCurrentState"
+      )}.bind(this));
 
     this.service.getCharacteristic(Characteristic.LockTargetState)
     .on('get', function(callback) {this.getByte(callback,
@@ -1026,14 +962,33 @@ GenericPLCAccessory.prototype = {
         rv = true;
       } 
     }             
-    else if (this.config.accessory == 'PLC_Faucet' || 
-             this.config.accessory == 'PLC_Valve' ){
+    else if (this.config.accessory == 'PLC_Faucet'){
       if (this.config.get_Active == offset)
       {
         this.log.debug( "[" + this.name + "] Push Active:" + value);
         this.service.getCharacteristic(Characteristic.Active).updateValue(value);
         rv = true;
-      } 
+      }       
+    }    
+    else if (this.config.accessory == 'PLC_Valve'){
+      if (this.config.get_Active == offset)
+      {
+        this.log.debug( "[" + this.name + "] Push Active:" + value);
+        this.service.getCharacteristic(Characteristic.Active).updateValue(value);
+        rv = true;
+      }    
+      if (this.config.get_SetDuration == offset)
+      {
+        this.log.debug( "[" + this.name + "] Push SetDuration:" + value);
+        this.service.getCharacteristic(Characteristic.SetDuration).updateValue(value);
+        rv = true;
+      }   
+      if (this.config.get_RemainingDuration == offset)
+      {
+        this.log.debug( "[" + this.name + "] Push RemainingDuration:" + value);
+        this.service.getCharacteristic(Characteristic.RemainingDuration).updateValue(value);
+        rv = true;
+      }                  
     }               
     else if (this.config.accessory == 'PLC_SecuritySystem'){
       if (this.config.get_SecuritySystemCurrentState == offset)
@@ -1090,6 +1045,12 @@ GenericPLCAccessory.prototype = {
         this.service.getCharacteristic(Characteristic.LockTargetState).updateValue(value);
         rv = true;
       }       
+      if (this.config.get_LockCurrentState == offset)
+      {
+        this.log.debug( "[" + this.name + "] Push LockCurrentState:" + value);
+        this.service.getCharacteristic(Characteristic.LockCurrentState).updateValue(value);
+        rv = true;
+      }          
     }      
 
     return rv;    
@@ -1162,7 +1123,102 @@ GenericPLCAccessory.prototype = {
         }
       }.bind(this));
     }
-
+    else if (this.config.accessory == 'PLC_TemperatureSensor') {
+      // get the current target system state and update the value.
+      this.service.getCharacteristic(Characteristic.TemperatureSensor).getValue(function(err, value) {
+        if (!err) {
+          this.service.getCharacteristic(Characteristic.TemperatureSensor).updateValue(value);
+        }
+      }.bind(this));
+    }
+    else if (this.config.accessory == 'PLC_HumiditySensor') {
+      // get the current target system state and update the value.
+      this.service.getCharacteristic(Characteristic.HumiditySensor).getValue(function(err, value) {
+        if (!err) {
+          this.service.getCharacteristic(Characteristic.HumiditySensor).updateValue(value);
+        }
+      }.bind(this));
+    } 
+    else if (this.config.accessory == 'PLC_Thermostat') {
+      // get the current target system state and update the value.
+      this.service.getCharacteristic(Characteristic.TemperatureSensor).getValue(function(err, value) {
+        if (!err) {
+          this.service.getCharacteristic(Characteristic.TemperatureSensor).updateValue(value);
+        }
+      }.bind(this));
+      this.service.getCharacteristic(Characteristic.TargetTemperature).getValue(function(err, value) {
+        if (!err) {
+          this.service.getCharacteristic(Characteristic.TargetTemperature).updateValue(value);
+        }
+      }.bind(this));     
+      this.service.getCharacteristic(Characteristic.CurrentHeaterCoolerState).getValue(function(err, value) {
+        if (!err) {
+          this.service.getCharacteristic(Characteristic.CurrentHeaterCoolerState).updateValue(value);
+        }
+      }.bind(this));   
+      this.service.getCharacteristic(Characteristic.TargetHeatingCoolingState).getValue(function(err, value) {
+        if (!err) {
+          this.service.getCharacteristic(Characteristic.TargetHeatingCoolingState).updateValue(value);
+        }
+      }.bind(this));                
+    }   
+    else if (this.config.accessory == 'PLC_Faucet') {
+      // get the current target system state and update the value.
+      this.service.getCharacteristic(Characteristic.Active).getValue(function(err, value) {
+        if (!err) {
+          this.service.getCharacteristic(Characteristic.Active).updateValue(value);
+        }
+      }.bind(this));
+    }     
+    else if (this.config.accessory == 'PLC_Valve') {
+      // get the current target system state and update the value.
+      this.service.getCharacteristic(Characteristic.Active).getValue(function(err, value) {
+        if (!err) {
+          this.service.getCharacteristic(Characteristic.Active).updateValue(value);
+        }
+      }.bind(this));
+    }    
+    else if (this.config.accessory == 'PLC_LockMechanism') {
+      // get the current target system state and update the value.
+      this.service.getCharacteristic(Characteristic.LockCurrentState).getValue(function(err, value) {
+        if (!err) {
+          this.service.getCharacteristic(Characteristic.LockCurrentState).updateValue(value);
+        }
+      }.bind(this));
+      this.service.getCharacteristic(Characteristic.LockTargetState).getValue(function(err, value) {
+        if (!err) {
+          this.service.getCharacteristic(Characteristic.LockTargetState).updateValue(value);
+        }
+      }.bind(this));
+    }    
+    else if (this.config.accessory == 'PLC_GarageDoorOpener') {
+      // get the current target system state and update the value.
+      this.service.getCharacteristic(Characteristic.CurrentDoorState).getValue(function(err, value) {
+        if (!err) {
+          this.service.getCharacteristic(Characteristic.CurrentDoorState).updateValue(value);
+        }
+      }.bind(this));
+      this.service.getCharacteristic(Characteristic.ObstructionDetected).getValue(function(err, value) {
+        if (!err) {
+          this.service.getCharacteristic(Characteristic.ObstructionDetected).updateValue(value);
+        }
+      }.bind(this));
+      this.service.getCharacteristic(Characteristic.TargetDoorState).getValue(function(err, value) {
+        if (!err) {
+          this.service.getCharacteristic(Characteristic.TargetDoorState).updateValue(value);
+        }
+      }.bind(this));      
+      this.service.getCharacteristic(Characteristic.LockTargetState).getValue(function(err, value) {
+        if (!err) {
+          this.service.getCharacteristic(Characteristic.LockTargetState).updateValue(value);
+        }
+      }.bind(this));          
+      this.service.getCharacteristic(Characteristic.LockCurrentState).getValue(function(err, value) {
+        if (!err) {
+          this.service.getCharacteristic(Characteristic.LockCurrentState).updateValue(value);
+        }
+      }.bind(this));              
+    }                
     else if (this.config.accessory == 'PLC_StatelessProgrammableSwitch'){
       this.getBit(function(err,value){
           if(!err && value)

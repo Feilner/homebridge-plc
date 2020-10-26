@@ -141,7 +141,8 @@ shutters or blinds as well sensors for windows and doors
 - `db`: s7 data base number e.g. `4` for `DB4`
 - `invert`: (optional) set to `true` to inverts the meanings of the values from `0:closed 100:open` to `100:closed 0:open`
 - `mapGet`: (optional) define mapping array for get position. The PLC value is used as index into the table. e.g. `[0, 25, 100]` which maps the PLC value `0->0 1->25 2->100` this this is useful e.g. for window open state.
-- `adaptivePolling`:  (optional) hen set to `true` the current position will be polled until target position is reached. Polling starts with set target position from home app. This will show the shutter as opening... or closing... in the home app. Otherwise the new target position is directly pushed as new current position.
+- `adaptivePolling`:  (optional) when set to `true` the current position will be polled until target position is reached. Polling starts with set target position from home app. This allows to show the shutter as opening... or closing... in the home app during movement. 
+- `forceCurrentPosition` (optional) when set to `true` the new position of a `set_TargetPosition` is directly pushed as new current position. This shows in the in the app as directly reached the target position. This is recommended when not using `adaptivePolling` or pushing the new values.
 - `pollInterval` (optional) poll interval in seconds. Default value is `10` seconds.
 - `get_CurrentPosition`: offset to get current position S7 type `Byte` e.g. `0` for `DB4DBB0`  
 - if one of the (optional) target position settings need specified all are needed. If not specified it os not movable ans sticks to current position.
@@ -288,6 +289,11 @@ Lock mechanism (not yet clear how to use changes are welcome)
   - `set_TargetDoorState`:  offset to write target state current state S7 type `Byte` e.g. `3` for `DB4DBB3` 
     - `0`: open
     - `1`: closed
+  - `get_LockCurrentState`: offset to read current state current state S7 type `Byte` e.g. `3` for `DB4DBB3` 
+    - `0`: unsecured
+    - `1`: secured
+    - `2`: jammed 
+    - `3`: unknown
   - `get_LockTargetState`: offset to read target state current state S7 type `Byte` e.g. `3` for `DB4DBB3` 
     - `0`: unsecured
     - `1`: secured

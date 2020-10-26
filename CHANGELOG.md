@@ -8,9 +8,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [1.0.10] - 2020-10-21
 ### Added
 - Support to push updated variables from the PLC to the homebridge-plc plug in by a http request
+- Poll support for all supported accessories. (Please inform me if one is not working as expected)
 
 ### Changed
 - Accessory `PLC_WindowCovering`, `PLC_Window` and `PLC_Door` need to define new option `forceCurrentPosition` to maintain current behaviour! 
+
+### Fixed
+- Accessory `PLC_GarageDoorOpener` add missing `get_LockCurrentState` 
 
 
 ## [1.0.9] - 2020-10-21
