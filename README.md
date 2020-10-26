@@ -13,8 +13,8 @@ SIEMENS S7 PLC plugin for [Homebridge](https://homebridge.io)
   - and compatible PLCs e.g. Yaskawa or VIPA
 - Tested with S7-300 compatible PLC
 - Implementation is based on documentation of the [Homebridge API](https://developers.homebridge.io) 
-- Supports polling from homebridge-plc plugin to PLC
-- Supports push from PLC to homebridge-plc plugin
+- Supports **polling** from homebridge-plc plugin to PLC by per accessory defined interval
+- Supports **push** from PLC to homebridge-plc plugin by http PUT/GET
 
 
 # Installation
@@ -145,7 +145,7 @@ shutters or blinds as well sensors for windows and doors
 - `invert`: (optional) set to `true` to inverts the meanings of the values from `0:closed 100:open` to `100:closed 0:open`
 - `mapGet`: (optional) define mapping array for get position. The PLC value is used as index into the table. e.g. `[0, 25, 100]` which maps the PLC value `0->0 1->25 2->100` this this is useful e.g. for window open state.
 - `adaptivePolling`:  (optional) when set to `true` the current position will be polled until target position is reached. Polling starts with set target position from home app. This allows to show the shutter as opening... or closing... in the home app during movement. 
-- `forceCurrentPosition` (optional) when set to `true` the new position of a `set_TargetPosition` is directly pushed as new current position. This shows in the in the app as directly reached the target position. This is recommended when not using `adaptivePolling` or pushing the new values.
+- `forceCurrentPosition` (optional) when set to `true` the position set by `set_TargetPosition` is directly used as  current position. By this it seems in tha home app as the target position was directly reached. This is recommended when not using `adaptivePolling` or pushing the value from the plc.
 - `pollInterval` (optional) poll interval in seconds. Default value is `10` seconds.
 - `get_CurrentPosition`: offset to get current position S7 type `Byte` e.g. `0` for `DB4DBB0`  
 - if one of the (optional) target position settings need specified all are needed. If not specified it os not movable ans sticks to current position.
@@ -495,7 +495,7 @@ Note: The example is just an example it contains also some optional settings
 
 # Update of values
 The home app does not regularly poll for updates of values. Only when switching rooms or close/open the app the actual values are requested.
-This behaviour is even the case when a AppleTV or HomePod is configured as control center.
+This behavior is even the case when a AppleTV or HomePod is configured as control center.
 There are three possible ways to workaround this.
 
 1. That's ok for your
@@ -503,7 +503,7 @@ There are three possible ways to workaround this.
 3. You enable the push mode and instrument your PLC code to send the values
 
 ## Poll values form PLC
-To enable this you have to set `"enablePolling": true;` platform level and on each individual acessory with individual interval in seconds.
+To enable this you have to set `"enablePolling": true;` platform level and on each individual accessory with individual interval in seconds.
     `"enablePolling": true, "pollInterval": 30,`
     
     
@@ -512,15 +512,20 @@ To enable this you have to set `"enablePolling": true;` platform level and on ea
 It possible to send updates of values directly from the plc to the homebridge-plc plugin. This is especially useful when you want notifications form your home app about open/close of doors or just a faster response e.g. with PLC_StatelessProgrammableSwitch.
 To enable this you have to set `"enablePolling": true,` platform level and optional the `port`. 
 
-The push is done by an http request to the configured port. To to have no additional configuration on the PLC the interface only reqires the only the data base number `db`, the offset within the db `offset` and the new data as `value`. All information are submitted within the URL. 
+The push is done by an http request to the configured port with the keyword `push`. To to have no additional configuration to be synced between PLC and homebrige-plc plugin. The PLC the interface only requires the data base number `db`, the offset within the db `offset`. The value new submitted with `value` is assigned to all matching definitions. In example when using the same PLC destination e.g. for get_SecuritySystemCurrentState and get_SecuritySystemTargetState the value is used for both.
+The All information are submitted within the URL. 
 
-The Request has to be done as HTTP `PUT` or `GET` operation. There will be no logging when doing a `PUT` operation while there will be detailed ouput when duing a `GET` operation. This in especially inteded for testing with the browser as the browser performs a `GET` operation per default.
+The Request has to be done as HTTP `PUT` or `GET` operation. There will be no logging when doing a `PUT` operation while there will be detailed output when during a `GET` operation. This in especially intended for testing with the browser as the browser performs a `GET` operation per default.
 
 ### Format
 Example for float values when trigger from browser
   
-  http://homebridgeIp:8080/?db=3&offset=22&value=12.5
+  http://homebridgeIp:8080/?push&db=3&offset=22&value=12.5
   
 Example for bool values when trigger from browser 
   
-  http://homebridgeIp:8080/?db=5&offset=5.1&value=1
+  http://homebridgeIp:8080/?push&db=5&offset=5.1&value=1
+
+Example for byte values when trigger from browser 
+  
+  http://homebridgeIp:8080/?push&db=2&offset=3&value=255
