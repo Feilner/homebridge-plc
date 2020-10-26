@@ -13,6 +13,8 @@ SIEMENS S7 PLC plugin for [Homebridge](https://homebridge.io)
   - and compatible PLCs e.g. Yaskawa or VIPA
 - Tested with S7-300 compatible PLC
 - Implementation is based on documentation of the [Homebridge API](https://developers.homebridge.io) 
+- Supports polling from homebridge-plc plugin to PLC
+- Supports push from PLC to homebridge-plc plugin
 
 
 # Installation
@@ -38,8 +40,9 @@ Parameters:
   - `rack`: the rack number of the PLC typically 0
   - `slot`: the slot number of the PLC for S7 300/400 typically `2`, for 1200/1500 typically `1` 
   - `enablePolling`: when set to `true` a background task is executed every second enable polling for the accessories
+  - `enablePush`: when set to `true` a the configured `port` is opened to push updates of values form plc to the plugin 
+  - `port`: port for http requests default `8080`
   
-
 ## Accessories
 - In the platform, you can declare different types of accessories currently supported:
 ### LightBulb as `PLC_LightBulb`
@@ -312,7 +315,7 @@ Note: The example is just an example it contains also some optional settings
             "ip": "10.10.10.32",
             "rack": 0,
             "slot": 2,
-            "enablePolling": true;
+            "enablePolling": true,
             "accessories": [
                 {
                     "accessory": "PLC_LightBulb",
@@ -489,3 +492,35 @@ Note: The example is just an example it contains also some optional settings
         }
         ]
     }
+
+# Update of values
+The home app does not regularly poll for updates of values. Only when switching rooms or close/open the app the actual values are requested.
+This behaviour is even the case when a AppleTV or HomePod is configured as control center.
+There are three possible ways to workaround this.
+
+1. That's ok for your
+2. You enable the polling mode 
+3. You enable the push mode and instrument your PLC code to send the values
+
+## Poll values form PLC
+To enable this you have to set `"enablePolling": true;` platform level and on each individual acessory with individual interval in seconds.
+    `"enablePolling": true, "pollInterval": 30,`
+    
+    
+## Push values from PLC
+
+It possible to send updates of values directly from the plc to the homebridge-plc plugin. This is especially useful when you want notifications form your home app about open/close of doors or just a faster response e.g. with PLC_StatelessProgrammableSwitch.
+To enable this you have to set `"enablePolling": true,` platform level and optional the `port`. 
+
+The push is done by an http request to the configured port. To to have no additional configuration on the PLC the interface only reqires the only the data base number `db`, the offset within the db `offset` and the new data as `value`. All information are submitted within the URL. 
+
+The Request has to be done as HTTP `PUT` or `GET` operation. There will be no logging when doing a `PUT` operation while there will be detailed ouput when duing a `GET` operation. This in especially inteded for testing with the browser as the browser performs a `GET` operation per default.
+
+### Format
+Example for float values when trigger from browser
+  
+  http://homebridgeIp:8080/?db=3&offset=22&value=12.5
+  
+Example for bool values when trigger from browser 
+  
+  http://homebridgeIp:8080/?db=5&offset=5.1&value=1
