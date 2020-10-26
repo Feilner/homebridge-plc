@@ -4,10 +4,9 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-*mind the rename from S7 to PLC from version 1.0.3*
-## [1.0.10] - 2020-10-21
+## [1.0.10] - 2020-10-26
 ### Added
-- Support to push updated variables from the PLC to the homebridge-plc plug in by a http request
+- **Push support** from the PLC to the homebridge-plc plug in by a http request
 - Poll support for all supported accessories. (Please inform me if one is not working as expected)
 
 ### Changed
@@ -15,7 +14,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 - Accessory `PLC_GarageDoorOpener` add missing `get_LockCurrentState` 
-
 
 ## [1.0.9] - 2020-10-21
 ### Added

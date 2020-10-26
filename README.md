@@ -529,3 +529,18 @@ Example for bool values when trigger from browser
 Example for byte values when trigger from browser 
   
   http://homebridgeIp:8080/?push&db=2&offset=3&value=255
+  
+
+# Test & Release
+
+## Local test
+The easiest is to open the terminal from homebridge delete the `index.js` file of this plugin, open nano and past in the new content.
+Afterwards the Homebridge can be restarted.
+The delete and open of hte index.js file can be done by the following command line.
+
+`rm node_modules/homebridge-plc/index.js && nano node_modules/homebridge-plc/index.js`
+
+
+## Publish npm package
+
+`npm publish --access public`
