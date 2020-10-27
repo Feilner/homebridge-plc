@@ -1067,7 +1067,7 @@ GenericPLCAccessory.prototype = {
         }
       }.bind(this));      
     }   
-    else if (config.accessory == 'PLC_Window' || config.accessory == 'PLC_WindowCovering' || config.accessory == 'PLC_Door'){
+    else if (this.config.accessory == 'PLC_Window' || this.config.accessory == 'PLC_WindowCovering' || this.config.accessory == 'PLC_Door'){
       this.service.getCharacteristic(Characteristic.CurrentPosition).getValue(function(err, value) {
         if (!err) {
           if (this.adaptivePollActive )  {
