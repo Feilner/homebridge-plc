@@ -92,13 +92,13 @@ PLC_Platform.prototype = {
                   }
                 });
                 if(!handled && doLog) {
-                  this.log.error("[HTTP PUT] No matching accessory found for db:" + url.query.db + " offset:" + url.query.offset +" value:" + url.query.value);
+                  this.log.error("[HTTP Push] No matching accessory found for db:" + url.query.db + " offset:" + url.query.offset +" value:" + url.query.value);
                 }                            
 
               }
               else if(doLog)
               {
-                this.log.error("Received HTTP PUT must contain db, offset and value!");
+                this.log.error("Received HTTP Push must contain push, db, offset and value!");
                 this.log.error(url);
               }
           });
@@ -411,7 +411,7 @@ function GenericPLCAccessory(platform, config) {
     this.accessory.addService(this.service);
     this.lastTargetPos = 0;
 
-    // default do nothing after set of target postion
+    // default do nothing after set of target position
     var informFunction = function(value){}.bind(this);
 
     if ('forceCurrentPosition' in config && config.forceCurrentPosition) {
@@ -755,24 +755,89 @@ function GenericPLCAccessory(platform, config) {
     this.service = new Service.LockMechanism(this.name);
     this.accessory.addService(this.service);
 
+    if ('forceCurrentState' in config && config.forceCurrentState) {
+      informFunction = function(value){this.service.getCharacteristic(Characteristic.LockCurrentState).updateValue(value) }.bind(this);
+    }
+
+    this.modFunctionGet = this.plain;
+    this.modFunctionSet = this.plain;
+
     this.service.getCharacteristic(Characteristic.LockCurrentState)
       .on('get', function(callback) {this.getByte(callback,
         config.db,
         config.get_LockCurrentState,
-        "get LockCurrentState"
+        "get LockCurrentState",
+        this.modFunctionGet
       )}.bind(this));
 
       this.service.getCharacteristic(Characteristic.LockTargetState)
       .on('get', function(callback) {this.getByte(callback,
         config.db,
         config.get_LockTargetState,
-        "get LockTargetState"
+        "get LockTargetState",
+        this.modFunctionGet
       )}.bind(this))
       .on('set', function(value, callback) {this.setByte(value, callback,
         config.db,
         config.set_LockTargetState,
-        "set LockTargetState"
+        "set LockTargetState",
+        informFunction,
+        this.modFunctionSet
       )}.bind(this));
+  }
+  ////////////////////////////////////////////////////////////////
+  // PLC_LockMechanismBool
+  ////////////////////////////////////////////////////////////////
+  else if (config.accessory == 'PLC_LockMechanismBool'){
+    this.service = new Service.LockMechanism(this.name);
+    this.accessory.addService(this.service);
+
+    if ('forceCurrentState' in config && config.forceCurrentState) {
+      informFunction = function(value){this.service.getCharacteristic(Characteristic.LockCurrentState).updateValue(value) }.bind(this);
+    }
+
+    this.modFunctionGet = function(value){return (value ? 0 : 1);}.bind(this);
+    this.modFunctionSet = function(value){return (value ? 0 : 1);}.bind(this);
+
+    this.service.getCharacteristic(Characteristic.LockCurrentState)
+      .on('get', function(callback) {this.getBit(callback,
+        config.db,
+        Math.floor(config.get_LockCurrentState), Math.floor((config.get_LockCurrentState*10)%10),
+        "get LockCurrentState",
+        this.modFunctionGet
+      )}.bind(this));
+
+    if ('set_Unsecured' in config) {
+      this.service.getCharacteristic(Characteristic.LockTargetState)
+      .on('get', function(callback) {this.getBit(callback,
+        config.db,
+        Math.floor(config.get_LockTargetState), Math.floor((config.get_LockTargetState*10)%10),
+        "get LockTargetState",
+        this.modFunctionGet
+      )}.bind(this))
+      .on('set', function(value, callback) { this.setOnOffBit(value, callback,
+        config.db,
+        Math.floor(config.set_Secured), Math.floor((config.set_Secured*10)%10),
+        Math.floor(config.set_Unsecured), Math.floor((config.set_Unsecured*10)%10),
+        'set LockTargetState',
+        informFunction
+      )}.bind(this));
+    } else {
+      this.service.getCharacteristic(Characteristic.LockTargetState)
+      .on('get', function(callback) {this.getBit(callback,
+        config.db,
+        Math.floor(config.get_LockTargetState), Math.floor((config.get_LockTargetState*10)%10),
+        "get LockTargetState",
+        this.modFunctionGet
+      )}.bind(this))
+      .on('set', function(value, callback) {this.setBit(value, callback,
+        config.db,
+        Math.floor(config.set_LockTargetState), Math.floor((config.set_LockTargetState*10)%10),
+        "set LockTargetState",
+        informFunction,
+        this.modFunctionSet
+      )}.bind(this));
+    }      
   }
   ////////////////////////////////////////////////////////////////
   // PLC_GarageDoorOpener
@@ -872,7 +937,7 @@ GenericPLCAccessory.prototype = {
         this.config.accessory == 'PLC_Switch') {      
       if (this.config.get_On == offset)
       {
-        this.log.debug( "[" + this.name + "] Push On :" + value);
+        this.log.debug( "[" + this.name + "] Push On:" + value);
         this.service.getCharacteristic(Characteristic.On).updateValue(value);
         rv = true;
       }      
@@ -904,17 +969,17 @@ GenericPLCAccessory.prototype = {
       if (this.config.get_CurrentPosition == offset)
       {
         if(!has_get_TargetPosition) {
-          this.log.debug( "[" + this.name + "] Push TargetPosition:" + String(this.modFunctionGet(value)) + "<-" + String(value));
-          this.service.getCharacteristic(Characteristic.TargetPosition).updateValue(this.modFunctionGet(value));          
+          this.log.debug( "[" + this.name + "] Push TargetPosition:" + String(this.modFunctionGet(parseInt(value))) + "<-" + String(value));
+          this.service.getCharacteristic(Characteristic.TargetPosition).updateValue(this.modFunctionGet(parseInt(value)));          
         }
-        this.log.debug( "[" + this.name + "] Push CurrentPosition:" + String(this.modFunctionGet(value)) + "<-" + String(value));
-        this.service.getCharacteristic(Characteristic.CurrentPosition).updateValue(this.modFunctionGet(value));
+        this.log.debug( "[" + this.name + "] Push CurrentPosition:" + String(this.modFunctionGet(parseInt(value))) + "<-" + String(value));
+        this.service.getCharacteristic(Characteristic.CurrentPosition).updateValue(this.modFunctionGet(parseInt(value)));
         rv = true;
       }
       if ( this.config.get_TargetPosition == offset)
       {
-        this.log.debug( "[" + this.name + "] Push TargetPosition:" + String(this.modFunctionGet(value)) + "<-" + String(value));
-        this.service.getCharacteristic(Characteristic.TargetPosition).updateValue(this.modFunctionGet(value));
+        this.log.debug( "[" + this.name + "] Push TargetPosition:" + String(this.modFunctionGet(parseInt(value))) + "<-" + String(value));
+        this.service.getCharacteristic(Characteristic.TargetPosition).updateValue(this.modFunctionGet(parseInt(value)));
         rv = true;
       }     
       if (this.config.get_PositionState == offset)
@@ -993,14 +1058,14 @@ GenericPLCAccessory.prototype = {
     else if (this.config.accessory == 'PLC_SecuritySystem'){
       if (this.config.get_SecuritySystemCurrentState == offset)
       {
-        this.log.debug( "[" + this.name + "] Push SecuritySystemCurrentState:" + String(this.modFunctionGet(value)) + "<-" + String(value));
-        this.service.getCharacteristic(Characteristic.SecuritySystemCurrentState).updateValue(this.modFunctionGet(value));
+        this.log.debug( "[" + this.name + "] Push SecuritySystemCurrentState:" + String(this.modFunctionGet(parseInt(value))) + "<-" + String(value));
+        this.service.getCharacteristic(Characteristic.SecuritySystemCurrentState).updateValue(this.modFunctionGet(parseInt(value)));
         rv = true;
       } 
       if (this.config.get_SecuritySystemTargetState == offset)
       {
-        this.log.debug( "[" + this.name + "] Push SecuritySystemTargetState:" + String(this.modFunctionGet(value)) + "<-" + String(value));
-        this.service.getCharacteristic(Characteristic.SecuritySystemTargetState).updateValue(this.modFunctionGet(value));
+        this.log.debug( "[" + this.name + "] Push SecuritySystemTargetState:" + String(this.modFunctionGet(parseInt(value))) + "<-" + String(value));
+        this.service.getCharacteristic(Characteristic.SecuritySystemTargetState).updateValue(this.modFunctionGet(parseInt(value)));
         rv = true;
       }       
     } 
@@ -1012,21 +1077,21 @@ GenericPLCAccessory.prototype = {
         rv = true;
       } 
     }  
-    else if (this.config.accessory == 'PLC_LockMechanism '){
+    else if (this.config.accessory == 'PLC_LockMechanism' || this.config.accessory == 'PLC_LockMechanismBool'){
       if (this.config.get_LockCurrentState == offset)
       {
-        this.log.debug( "[" + this.name + "] Push LockCurrentState:" + value);
-        this.service.getCharacteristic(Characteristic.LockCurrentState).updateValue(value);
+        this.log.debug( "[" + this.name + "] Push LockCurrentState:" + + String(this.modFunctionGet(parseInt(value))) + "<-" + String(value));
+        this.service.getCharacteristic(Characteristic.LockCurrentState).updateValue(this.modFunctionGet(parseInt(value)));
         rv = true;
       } 
       if (this.config.get_LockTargetState == offset)
       {
-        this.log.debug( "[" + this.name + "] Push LockTargetState:" + value);
-        this.service.getCharacteristic(Characteristic.LockTargetState).updateValue(value);
+        this.log.debug( "[" + this.name + "] Push LockTargetState:" + + String(this.modFunctionGet(parseInt(value))) + "<-" + String(value));
+        this.service.getCharacteristic(Characteristic.LockTargetState).updateValue(this.modFunctionGet(parseInt(value)));
         rv = true;
       }       
-    }      
-    else if (this.config.accessory == 'PLC_GarageDoorOpener  '){
+    }       
+    else if (this.config.accessory == 'PLC_GarageDoorOpener'){
       if (this.config.get_CurrentDoorState == offset)
       {
         this.log.debug( "[" + this.name + "] Push CurrentDoorState:" + value);
@@ -1178,7 +1243,7 @@ GenericPLCAccessory.prototype = {
         }
       }.bind(this));
     }    
-    else if (this.config.accessory == 'PLC_LockMechanism') {
+    else if (this.config.accessory == 'PLC_LockMechanism' || this.config.accessory == 'PLC_LockMechanismBool') {
       // get the current target system state and update the value.
       this.service.getCharacteristic(Characteristic.LockCurrentState).getValue(function(err, value) {
         if (!err) {
@@ -1356,16 +1421,23 @@ GenericPLCAccessory.prototype = {
     }
   },
 
-  setBit: function(value, callback, db, offset, bit, characteristic, inform) {
+  setBit: function(value, callback, db, offset, bit, characteristic, inform, valueMod) {
     //Set single bit depending on value
     var logprefix = "[" + this.name + "] " + characteristic + ": %s (setBit DB" + db + "DBX"+ offset + "." + bit + ")";
     var S7Client = this.platform.S7Client;
     var buf = this.buf;
     var log = this.log;
     var name = this.name;
+    var valuePLC = value;
+
+    if (typeof(valueMod) != 'undefined' && valueMod)
+    {
+      valuePLC = valueMod(value);
+    }
+
     //ensure PLC connection
     if (this.platform.S7ClientConnect()) {
-      this.buf[0] = value ? 1 : 0;
+      this.buf[0] = valuePLC ? 1 : 0;
       S7Client.WriteArea(S7Client.S7AreaDB, db, ((offset*8) + bit), 1, S7Client.S7WLBit, this.buf, function(err) {
         if(err) {
           log.error(logprefix, "WriteArea failed #" + String(err) + " - " + S7Client.ErrorText(err));
@@ -1373,7 +1445,14 @@ GenericPLCAccessory.prototype = {
           callback(new Error('PLC error'));
         }
         else {
-          log.debug(logprefix , String(value));
+          if (typeof(valueMod) != 'undefined' && valueMod)
+          {
+            log.debug(logprefix , String(value) + "->" + String(valuePLC));
+          }
+          else
+          {
+            log.debug(logprefix , String(value));
+          }
           callback(null);
           if (typeof(inform) != 'undefined' && inform)
           {
@@ -1388,7 +1467,7 @@ GenericPLCAccessory.prototype = {
   },
 
 
-  getBit: function(callback, db, offset, bit, characteristic) {
+  getBit: function(callback, db, offset, bit, characteristic, valueMod) {
     //read single bit
     var logprefix = "[" + this.name + "] " + characteristic + ": %s (getBit DB" + db + "DBX"+ offset + "." + bit + ")";
     var S7Client = this.platform.S7Client;
@@ -1405,8 +1484,17 @@ GenericPLCAccessory.prototype = {
           callback(err, 0);
         }
         else {
-          const value = ((res[0]) ? true : false);
-          log.debug(logprefix , String(value));
+          const valuePLC = ((res[0]) ? 1 : 0);
+          if (typeof(valueMod) != 'undefined' && valueMod)
+          {
+            value = valueMod(valuePLC);
+            log.debug(logprefix , String(value) + "<-" + String(valuePLC));
+          }
+          else
+          {
+            value = valuePLC;
+            log.debug(logprefix , String(value));
+          }
           callback(null, value);
         }
       });

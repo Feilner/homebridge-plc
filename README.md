@@ -159,7 +159,7 @@ shutters or blinds as well sensors for windows and doors
 - `mapGet`: (optional) define mapping array for get position. The PLC value is used as index into the table. e.g. `[0, 25, 100]` which maps the PLC value `0->0 1->25 2->100` this this is useful e.g. for window open state.
 - `adaptivePolling`:  (optional) when set to `true` the current position will be polled until target position is reached. Polling starts with set target position from home app. This allows to show the shutter as opening... or closing... in the home app during movement.
 - `adaptivePollingInterval` (optional) poll interval in seconds during high frequency polling. Default value is `1` second.
-- `forceCurrentPosition` (optional) when set to `true` the position set by `set_TargetPosition` is directly used as  current position. By this it seems in tha home app as the target position was directly reached. This is recommended when not using `adaptivePolling` or pushing the value from the plc.
+- `forceCurrentPosition` (optional) when set to `true` the position set by `set_TargetPosition` is directly used as current position. By this it seems in tha home app as the target position was directly reached. This is recommended when not using `adaptivePolling` or pushing the value from the plc.
 - `enablePolling`: (optional) when set to `true` the current state will be polled. It is mandatory as well to enable polling mode on platform level.
 - `pollInterval` (optional) poll interval in seconds. Default value is `10` seconds.
 - `get_CurrentPosition`: offset to get current position S7 type `Byte` e.g. `0` for `DB4DBB0`
@@ -285,6 +285,7 @@ Lock mechanism (not yet clear how to use changes are welcome)
   - `db`: s7 data base number e.g. `4` for `DB4`
   - `enablePolling`: (optional) when set to `true` the current state will be polled. It is mandatory as well to enable polling mode on platform level.
   - `pollInterval` (optional) poll interval in seconds. Default value is `10` seconds.
+  - `forceCurrentState`: (optional) when set to `true` the position set by `set_LockTargetState` is directly used as current state. By this it seems in tha home app as the target state was directly reached. This is recommended when not using `enablePolling` or pushing the value from the plc.
   - `get_LockCurrentState`: offset to read current state current state S7 type `Byte` e.g. `3` for `DB4DBB3`
     - `0`: unsecured
     - `1`: secured
@@ -296,6 +297,29 @@ Lock mechanism (not yet clear how to use changes are welcome)
   - `set_LockTargetState`:  offset to write target state current state S7 type `Byte` e.g. `3` for `DB4DBB3`
     - `0`: unsecured
     - `1`: secured
+
+### Lock mechanism as `PLC_LockMechanismBool`
+Lock mechanism implemented as bool on the PLC. **NOTE: The convention `0`:closed/secured  `1`:open/unsecured**
+  - `name`: unique name of the accessory
+  - `manufacturer`: (optional) description
+  - `db`: s7 data base number e.g. `4` for `DB4`
+  - `enablePolling`: (optional) when set to `true` the current state will be polled. It is mandatory as well to enable polling mode on platform level.
+  - `pollInterval` (optional) poll interval in seconds. Default value is `10` seconds.
+  - `forceCurrentState`: (optional) when set to `true` the position set by `set_LockTargetState` is directly used as current state. By this it seems in tha home app as the target state was directly reached. This is recommended when not using `enablePolling` or pushing the value from the plc.
+  - `get_LockCurrentState`: offset to read current state current state S7 type `Bool` e.g. `3.1` for `DB4DBB3`
+    - `0`: secured
+    - `1`: unsecured
+  - `get_LockTargetState`: offset to read target state current state S7 type `Bool` e.g. `3.1` for `DB4DBB3`
+    - `0`: secured
+    - `1`: unsecured
+  - Single Bit for secure/unsecured:
+    - `set_LockTargetState`:  offset to write target state current state S7 type `Bool` e.g. `3.1` for `DB4DBB3`
+      - `0`: secured
+      - `1`: unsecured
+  - Separate Bits for secure/unsecured: 
+    - `set_Secured`: offset and bit set to 1 when switching to target state secured S7 type `Bool` PLC has to set to 0 e.g. `3.3` for `DB4DBX55.1`
+    - `set_Unsecured`: offset and bit set to 1 when switching to target state unsecured S7 type `Bool` PLC has to set to 0 e.g. `3.4` for `DB4DBX55.2`
+  
 
 ### Lock mechanism as `PLC_GarageDoorOpener` (experimental)
 Lock mechanism (not yet clear how to use changes are welcome)
