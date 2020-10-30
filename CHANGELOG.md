@@ -4,6 +4,21 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+
+## [1.0.13] - 2020-10-30
+
+### Added
+- Possibility to control PLC devices via http request (experimental)
+
+### Fixed
+- Push notifications from PLC where not correctly handled when the bit address is not *.0
+
+## [1.0.12] - 2020-10-27
+
+### Added
+- Accessory `PLC_LockMechanismBool`
+- Accessory `PLC_LockMechanism` got new option `forceCurrentState`
+
 ## [1.0.11] - 2020-10-27
 ### Fixed
 - Accessory `PLC_WindowCovering`, `PLC_Window` and `PLC_Door` causes a reboot during poll mode
@@ -14,10 +29,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Poll support for all supported accessories. (Please inform me if one is not working as expected)
 
 ### Changed
-- Accessory `PLC_WindowCovering`, `PLC_Window` and `PLC_Door` need to define new option `forceCurrentPosition` to maintain current behaviour! 
+- Accessory `PLC_WindowCovering`, `PLC_Window` and `PLC_Door` need to define new option `forceCurrentPosition` to maintain current behaviour!
 
 ### Fixed
-- Accessory `PLC_GarageDoorOpener` add missing `get_LockCurrentState` 
+- Accessory `PLC_GarageDoorOpener` add missing `get_LockCurrentState`
 
 ## [1.0.9] - 2020-10-21
 ### Added
@@ -36,18 +51,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed `PLC_MotionSensor` was not functional
 
 ## [1.0.7] - 2020-10-12
-### Changed 
+### Changed
 - `PLC_WindowCovering`, `PLC_Window` and `PLC_Door` got additionally to the `adaptivePolling` which polls the current state during movement a possibility to enable with `enablePolling` polling at with  lower frequency the current sate. Thus the option `pollInterval` changed its meaning it now defines the frequency for the `enablePolling` wile `adaptivePollingInterval` defines the frequency for the `adaptivePolling`.
-  
+
 ## [1.0.6] - 2020-10-12
 ### Added
 - Accessory `PLC_StatelessProgrammableSwitch` is now functional
 - Accessory `PLC_Door` added
 - Accessory `PLC_GarageDoorOpener` added (experimental state)
 - Accessory `PLC_LockMechanism` added (experimental state)
-- New configuration option `mapGet` for `PLC_WindowCovering`, `PLC_Window` and `PLC_Door` to map custom values 
+- New configuration option `mapGet` for `PLC_WindowCovering`, `PLC_Window` and `PLC_Door` to map custom values
 
-### Fixed 
+### Fixed
 - `PLC_WindowCovering`, `PLC_Window` and `PLC_Door` when target settings are not defined (not electric movable). Writes are ignored instead current value is pushed as target value as get after a set operation
 
 
@@ -58,17 +73,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Accessory: `PLC_SecuritySystem`: Polling to detect changes. New configuration `enablePolling` and `pollInterval`
 
 ## [1.0.4] - 2020-10-09
-### Fixed 
+### Fixed
 - Rename failed for LightBulb
-  
+
 ## [1.0.3] - 2020-10-09
-### Changed 
+### Changed
 - ACTION Necessary!!!
-- Change name of plugin from `S7` to `PLC`. Please rename your configuration. 
-- Remove prefix `S7_` from all accessories. Remove ist e.g. by STRG-H replace `S7_` by `PLC_` 
+- Change name of plugin from `S7` to `PLC`. Please rename your configuration.
+- Remove prefix `S7_` from all accessories. Remove ist e.g. by STRG-H replace `S7_` by `PLC_`
 - Fix spelling in parameter from `set_Deactive` to `set_Deactivate`
 
-### Fixed 
+### Fixed
 - Accessory Window and WindowCovering will shown as moving permanent (target position is now pushed immediately as current position)
 
 ### Added
@@ -76,15 +91,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Accessory SecuritySystem
 
 ## [1.0.2] - 2020-10-04
-### Added 
+### Added
 - single bit on/off for S7_LightBulb S7_Outlet and S7_Faucet
 
 ## [1.0.1] - 2020-10-04
-### Fixed 
+### Fixed
 - finalize name change
 
 ## [1.0.0] - 2020-10-04
-### Fixed 
+### Fixed
 - change name of plugin from homebridge-S7_PLC to homebridge-plc homebridge denied to install
 
 ## [0.0.1] - 2020-10-04

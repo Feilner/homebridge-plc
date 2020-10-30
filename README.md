@@ -15,7 +15,7 @@ SIEMENS S7 PLC plugin for [Homebridge](https://homebridge.io)
 - Implementation is based on documentation of the [Homebridge API](https://developers.homebridge.io)
 - Supports **polling** from homebridge-plc plugin to PLC by per accessory defined interval
 - Supports **push** from PLC to homebridge-plc plugin by http PUT/GET
-
+- Supports **control** of PLC accessories by http PUT/GET (experimental)
 
 # Installation
 
@@ -41,6 +41,7 @@ Parameters:
   - `slot`: the slot number of the PLC for S7 300/400 typically `2`, for 1200/1500 typically `1`
   - `enablePolling`: when set to `true` a background task is executed every second enable polling for the accessories
   - `enablePush`: when set to `true` a the configured `port` is opened to push updates of values form plc to the plugin
+  - `enableControl`: when set to `true` a the configured `port` is opened to control accessories by http request
   - `port`: port for http requests default `8080`
 
 ## Accessories
@@ -159,7 +160,7 @@ shutters or blinds as well sensors for windows and doors
 - `mapGet`: (optional) define mapping array for get position. The PLC value is used as index into the table. e.g. `[0, 25, 100]` which maps the PLC value `0->0 1->25 2->100` this this is useful e.g. for window open state.
 - `adaptivePolling`:  (optional) when set to `true` the current position will be polled until target position is reached. Polling starts with set target position from home app. This allows to show the shutter as opening... or closing... in the home app during movement.
 - `adaptivePollingInterval` (optional) poll interval in seconds during high frequency polling. Default value is `1` second.
-- `forceCurrentPosition` (optional) when set to `true` the position set by `set_TargetPosition` is directly used as  current position. By this it seems in tha home app as the target position was directly reached. This is recommended when not using `adaptivePolling` or pushing the value from the plc.
+- `forceCurrentPosition` (optional) when set to `true` the position set by `set_TargetPosition` is directly used as current position. By this it seems in tha home app as the target position was directly reached. This is recommended when not using `adaptivePolling` or pushing the value from the plc.
 - `enablePolling`: (optional) when set to `true` the current state will be polled. It is mandatory as well to enable polling mode on platform level.
 - `pollInterval` (optional) poll interval in seconds. Default value is `10` seconds.
 - `get_CurrentPosition`: offset to get current position S7 type `Byte` e.g. `0` for `DB4DBB0`
@@ -285,6 +286,7 @@ Lock mechanism (not yet clear how to use changes are welcome)
   - `db`: s7 data base number e.g. `4` for `DB4`
   - `enablePolling`: (optional) when set to `true` the current state will be polled. It is mandatory as well to enable polling mode on platform level.
   - `pollInterval` (optional) poll interval in seconds. Default value is `10` seconds.
+  - `forceCurrentState`: (optional) when set to `true` the position set by `set_LockTargetState` is directly used as current state. By this it seems in tha home app as the target state was directly reached. This is recommended when not using `enablePolling` or pushing the value from the plc.
   - `get_LockCurrentState`: offset to read current state current state S7 type `Byte` e.g. `3` for `DB4DBB3`
     - `0`: unsecured
     - `1`: secured
@@ -296,6 +298,29 @@ Lock mechanism (not yet clear how to use changes are welcome)
   - `set_LockTargetState`:  offset to write target state current state S7 type `Byte` e.g. `3` for `DB4DBB3`
     - `0`: unsecured
     - `1`: secured
+
+### Lock mechanism as `PLC_LockMechanismBool`
+Lock mechanism implemented as bool on the PLC. **NOTE: The convention `0`:closed/secured  `1`:open/unsecured**
+  - `name`: unique name of the accessory
+  - `manufacturer`: (optional) description
+  - `db`: s7 data base number e.g. `4` for `DB4`
+  - `enablePolling`: (optional) when set to `true` the current state will be polled. It is mandatory as well to enable polling mode on platform level.
+  - `pollInterval` (optional) poll interval in seconds. Default value is `10` seconds.
+  - `forceCurrentState`: (optional) when set to `true` the position set by `set_LockTargetState` is directly used as current state. By this it seems in tha home app as the target state was directly reached. This is recommended when not using `enablePolling` or pushing the value from the plc.
+  - `get_LockCurrentState`: offset to read current state current state S7 type `Bool` e.g. `3.1` for `DB4DBB3`
+    - `0`: secured
+    - `1`: unsecured
+  - `get_LockTargetState`: offset to read target state current state S7 type `Bool` e.g. `3.1` for `DB4DBB3`
+    - `0`: secured
+    - `1`: unsecured
+  - Single Bit for secure/unsecured:
+    - `set_LockTargetState`:  offset to write target state current state S7 type `Bool` e.g. `3.1` for `DB4DBB3`
+      - `0`: secured
+      - `1`: unsecured
+  - Separate Bits for secure/unsecured: 
+    - `set_Secured`: offset and bit set to 1 when switching to target state secured S7 type `Bool` PLC has to set to 0 e.g. `3.3` for `DB4DBX55.1`
+    - `set_Unsecured`: offset and bit set to 1 when switching to target state unsecured S7 type `Bool` PLC has to set to 0 e.g. `3.4` for `DB4DBX55.2`
+  
 
 ### Lock mechanism as `PLC_GarageDoorOpener` (experimental)
 Lock mechanism (not yet clear how to use changes are welcome)
@@ -535,15 +560,42 @@ To enable this you have to set `"enablePolling": true;` platform level and on ea
 ## Push values from PLC
 
 It possible to send updates of values directly from the plc to the homebridge-plc plugin. This is especially useful when you want notifications form your home app about open/close of doors or just a faster response e.g. with PLC_StatelessProgrammableSwitch.
-To enable this you have to set `"enablePolling": true,` platform level and optional the `port`.
+To enable this you have to set `"enablePush": true,` platform level and optional the `port`.
 
-The push is done by an http request to the configured port with the keyword `push`. To to have no additional configuration to be synced between PLC and homebrige-plc plugin. The PLC the interface only requires the data base number `db`, the offset within the db `offset`. The value new submitted with `value` is assigned to all matching definitions. In example when using the same PLC destination e.g. for get_SecuritySystemCurrentState and get_SecuritySystemTargetState the value is used for both.
-The All information are submitted within the URL.
+The push takes place via an http request to the configured port with the keyword "push". In order to avoid that additional configurations between the PLC and the Homebrige-plc-Plugin have to be synchronized, the interface is kept very simple. The interface that the PLC operates consists only of the keyword 'push', the database number 'db', the address within the db 'offset' and the value 'value'.
+The value is assigned to all matching ('db' and 'offset') get_* accessory configurations. All information is transmitted within the URL and in decimal. 
 
+For example the push from the PLC is done as 'http://homebridgeIp:8080/?push&db=1014&offset=1&value=3' 
+With the following configuration:
+
+    {
+        "platforms": [
+            {
+            "platform": "PLC",
+            "ip": "10.10.10.32",
+            "rack": 0,
+            "slot": 2,
+            "enablePush": true,
+            "accessories": [
+                {
+                    "accessory": "PLC_SecuritySystem",
+                    "name": "AlarmSystem",
+                    "db": 1014,
+                    "get_SecuritySystemCurrentState": 1,
+                    "set_SecuritySystemTargetState": 1,
+                    "get_SecuritySystemTargetState": 1
+                }
+             ]
+          }
+        ]
+      }
+         
+The value '3' disarmed will be used for both for get_SecuritySystemCurrentState as well as get_SecuritySystemTargetState.
+         
 The Request has to be done as HTTP `PUT` or `GET` operation. There will be no logging when doing a `PUT` operation while there will be detailed output when during a `GET` operation. This in especially intended for testing with the browser as the browser performs a `GET` operation per default.
 
 ### Format
-Example for float values when trigger from browser
+Example for float values when trigger from browser:
 
   http://homebridgeIp:8080/?push&db=3&offset=22&value=12.5
 
@@ -555,6 +607,48 @@ Example for byte values when trigger from browser
 
   http://homebridgeIp:8080/?push&db=2&offset=3&value=255
 
+# Control of PLC accessories
+
+It´s also possible to control PLC accessories via HTTP `PUT` or `GET` operation. This might be useful for integration into other automation systems.
+To enable this you have to set `"enableControl": true,` platform level and optional the `port`.
+
+**NOTE: It is currently not possible to query the current state**
+
+The interface that the PLC operates consists only of the keyword 'control', the database number 'db', the address within the db 'offset' and the value 'value'.
+The value is assigned to the matching ('db' and 'offset') set_* accessory configurations. For accessories with separate on/off configurations e.g. PLC_LightBulb set_On/set_Off the set_On has to be uses.  All information is transmitted within the URL and in decimal. 
+
+The Request has to be done as HTTP `PUT` or `GET` operation. There will be no logging when doing a `PUT` operation while there will be detailed output when during a `GET` operation. This in especially intended for testing with the browser as the browser performs a `GET` operation per default.
+
+### Format
+Example to switch a light bulb on from browser:
+
+    {
+        "platforms": [
+            {
+            "platform": "PLC",
+            "ip": "10.10.10.32",
+            "rack": 0,
+            "slot": 2,
+            "enableControl": true,
+            "accessories": [
+                {
+                    "accessory": "PLC_LightBulb",
+                    "name": "Light ",
+                    "db": 6096,
+                    "set_On": 1.1,
+                    "set_Off": 1.0,
+                    "get_On": 0.0
+                }
+             ]
+          }
+        ]
+      }
+
+  http://homebridgeIp:8080/?push&db=6096&offset=1.1&value=1
+
+Example to switch a light bulb off from browser:
+
+  http://homebridgeIp:8080/?push&db=6096&offset=1.1&value=0
 
 # Test & Release
 
