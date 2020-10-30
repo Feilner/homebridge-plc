@@ -559,15 +559,39 @@ To enable this you have to set `"enablePolling": true;` platform level and on ea
 ## Push values from PLC
 
 It possible to send updates of values directly from the plc to the homebridge-plc plugin. This is especially useful when you want notifications form your home app about open/close of doors or just a faster response e.g. with PLC_StatelessProgrammableSwitch.
-To enable this you have to set `"enablePolling": true,` platform level and optional the `port`.
+To enable this you have to set `"enablePush": true,` platform level and optional the `port`.
 
-The push is done by an http request to the configured port with the keyword `push`. To to have no additional configuration to be synced between PLC and homebrige-plc plugin. The PLC the interface only requires the data base number `db`, the offset within the db `offset`. The value new submitted with `value` is assigned to all matching definitions. In example when using the same PLC destination e.g. for get_SecuritySystemCurrentState and get_SecuritySystemTargetState the value is used for both.
-The All information are submitted within the URL.
+The push takes place via an http request to the configured port with the keyword "push". In order to avoid that additional configurations between the PLC and the Homebrige-plc-Plugin have to be synchronized, the interface is kept very simple. The interface that the PLC operates consists only of the keyword 'push', the database number 'db', the address within the db 'offset' and the value 'value'.
+The value is assigned to all matching ('db' and 'offset') get_* accessory configurations. All information is transmitted within the URL and in decimal. 
 
+For example the push from the PLC is done as 'http://homebridgeIp:8080/?push&db=1014&offset=1&value=3' 
+With the following configuration:
+
+    {
+        "platforms": [
+            {
+            "platform": "PLC",
+            "ip": "10.10.10.32",
+            "rack": 0,
+            "slot": 2,
+            "enablePush": true,
+            "accessories": [
+                {                {
+                    "accessory": "PLC_SecuritySystem",
+                    "name": "AlarmSystem",
+                    "db": 1014,
+                    "get_SecuritySystemCurrentState": 1,
+                    "set_SecuritySystemTargetState": 1,
+                    "get_SecuritySystemTargetState": 1
+                }
+         }
+         
+The value '3' disarmed will be used for both for get_SecuritySystemCurrentState as well as get_SecuritySystemTargetState.
+         
 The Request has to be done as HTTP `PUT` or `GET` operation. There will be no logging when doing a `PUT` operation while there will be detailed output when during a `GET` operation. This in especially intended for testing with the browser as the browser performs a `GET` operation per default.
 
 ### Format
-Example for float values when trigger from browser
+Example for float values when trigger from browser:
 
   http://homebridgeIp:8080/?push&db=3&offset=22&value=12.5
 
