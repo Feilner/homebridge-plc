@@ -78,7 +78,7 @@ PLC_Platform.prototype = {
           var doLog = (req.method == 'GET');
           req.on('end', () => {
               url = require('url').parse(req.url, true); // will parse parameters into query string
-              if (this.config.enableControl && 'push' in url.query && 'db' in url.query && 'offset' in url.query && 'value' in url.query) {
+              if (this.config.enablePush && 'push' in url.query && 'db' in url.query && 'offset' in url.query && 'value' in url.query) {
                 if(doLog) {
                   this.log.debug("[HTTP Push] Received update for accessory:" + url.query.db + " offset:" + url.query.offset +" value:" + url.query.value);
                 }
