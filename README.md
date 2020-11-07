@@ -26,14 +26,14 @@ SIEMENS S7 PLC plugin for [Homebridge](https://homebridge.io)
   * [Shutters as `PLC_WindowCovering`, windows as `PLC_Window` and doors as `PLC_Door`](#PLC_Window)
   * [Occupancy Sensor as `PLC_OccupancySensor`](#PLC_OccupancySensor)
   * [Motion Sensor as `PLC_MotionSensor`](#PLC_MotionSensor)
-  * [Motion Sensor as `PLC_ContactSensor`](#PLC_ContactSensor)
+  * [Contact Sensor as `PLC_ContactSensor`](#PLC_ContactSensor)
   * [Security System as `PLC_SecuritySystem`](#PLC_SecuritySystem)
   * [Faucet as `PLC_Faucet`](#PLC_Faucet)
   * [Valve as `PLC_Valve`](#PLC_Valve)
   * [Button as `PLC_StatelessProgrammableSwitch`](#PLC_StatelessProgrammableSwitch)
   * [Lock mechanism as `PLC_LockMechanism`](#PLC_LockMechanism)
   * [Boolean lock mechanism as `PLC_LockMechanismBool`](#PLC_LockMechanismBool)
-  * [Garage door as `PLC_GarageDoorOpener` (experimental)](#PLC_GarageDoorOpener)
+  * [Garage door as `PLC_GarageDoorOpener`](#PLC_GarageDoorOpener)
 
 
 # Installation
@@ -43,7 +43,7 @@ SIEMENS S7 PLC plugin for [Homebridge](https://homebridge.io)
 	- Edit `config.json` to add the plc platform and its accessories.
 	- Run Homebridge
 
-- Install via Homebridge Web UI
+- Install via Homebridge UI
 	- Search for `plc` on the plugin screen of [config-ui-x](https://github.com/oznu/homebridge-config-ui-x) .
 	- Find `homebridge-plc`
 	- Click install.
@@ -55,19 +55,19 @@ SIEMENS S7 PLC plugin for [Homebridge](https://homebridge.io)
 
 The plugin is configured as single platform by defining a `PLC` platform.
 Parameters:
-	- `ip`: the IPv4 address of the PLC
-	- `rack`: the rack number of the PLC typically 0
-	- `slot`: the slot number of the PLC for S7 300/400 typically `2`, for 1200/1500 typically `1`
-	- `enablePolling`: when set to `true` a background task is executed every second enable polling for the accessories
-	- `enablePush`: when set to `true` a the configured `port` is opened to push updates of values form plc to the plugin
-	- `enableControl`: when set to `true` a the configured `port` is opened to control accessories by http request
-	- `port`: port for http requests default `8080`
+- `ip`: the IPv4 address of the PLC
+- `rack`: the rack number of the PLC typically 0
+- `slot`: the slot number of the PLC for S7 300/400 typically `2`, for 1200/1500 typically `1`
+- `enablePolling`: when set to `true` a background task is executed every second enable polling for the accessories
+- `enablePush`: when set to `true` a the configured `port` is opened to push updates of values form plc to the plugin
+- `enableControl`: when set to `true` a the configured `port` is opened to control accessories by http request
+- `port`: port for http requests default `8080`
 
-## <a name='Accessories'></a>Accessories
+## Accessories
 - In the platform, you can declare different types of accessories currently supported:
 
 ### <a name='PLC_LightBulb'></a>LightBulb as `PLC_LightBulb`
-normal light
+normal light [see also PLC example](doc/simple_lightbulb_example.png)
 - `name`: unique name of the accessory
 - `manufacturer`: (optional) description
 - `db`: s7 data base number e.g. `4` for `DB4`
@@ -214,7 +214,7 @@ movement detection sensor
 		- `false`: no motion
 		- `true`: motion detected
 
-### <a name='PLC_ContactSensor'></a>Motion Sensor as `PLC_ContactSensor`
+### <a name='PLC_ContactSensor'></a>Contact Sensor as `PLC_ContactSensor`
 contact sensor
 - `name`: unique name of the accessory
 - `manufacturer`: (optional) description
