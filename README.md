@@ -225,9 +225,7 @@ contact sensor
 		- `false`: closed
 		- `true`: open
 
-
-
-###  Security System as `PLC_SecuritySystem`:
+### <a name='PLC_SecuritySystem'></a>Security System as `PLC_SecuritySystem`:
 alarm system
 - `name`: unique name of the accessory
 - `manufacturer`: (optional) description
@@ -320,7 +318,7 @@ Lock mechanism (not yet clear how to use changes are welcome)
   - `0`: unsecured
   - `1`: secured
 
-###  2.16. <a name='PLC_LockMechanismBool'></a>Boolean lock mechanism as `PLC_LockMechanismBool`
+### <a name='PLC_LockMechanismBool'></a>Boolean lock mechanism as `PLC_LockMechanismBool`
 Lock mechanism implemented as bool on the PLC. **NOTE: The convention `0`:closed/secured  `1`:open/unsecured**
 - `name`: unique name of the accessory
 - `manufacturer`: (optional) description
@@ -343,7 +341,7 @@ Lock mechanism implemented as bool on the PLC. **NOTE: The convention `0`:closed
 	- `set_Unsecured`: offset and bit set to 1 when switching to target state unsecured S7 type `Bool` PLC has to set to 0 e.g. `3.4` for `DB4DBX55.2`
 
 
-###  2.17. <a name='PLC_GarageDoorOpener'></a>Garage door as `PLC_GarageDoorOpener` (experimental)
+### <a name='PLC_GarageDoorOpener'></a>Garage door as `PLC_GarageDoorOpener` (experimental)
 Lock mechanism (not yet clear how to use changes are welcome)
 - `name`: unique name of the accessory
 - `manufacturer`: (optional) description
