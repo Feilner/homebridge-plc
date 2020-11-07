@@ -67,7 +67,7 @@ Parameters:
 - In the platform, you can declare different types of accessories currently supported:
 
 ### <a name='PLC_LightBulb'></a>LightBulb as `PLC_LightBulb`
-normal light [see also PLC example](doc/simple_lightbulb_example.png)
+normal light see also PLC example for [single bit](doc/ligtbulb_plc_example_SingleBit.png) and [separate bits](doc/ligtbulb_plc_example_SeperatedBit.png)
 - `name`: unique name of the accessory
 - `manufacturer`: (optional) description
 - `db`: s7 data base number e.g. `4` for `DB4`
