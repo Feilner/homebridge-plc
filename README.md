@@ -11,11 +11,32 @@ SIEMENS S7 PLC plugin for [Homebridge](https://homebridge.io)
 	- S7 1200 see [Snap7 notes](http://snap7.sourceforge.net/snap7_client.html#1200_1500)
 	- S7 1500 see [Snap7 notes](http://snap7.sourceforge.net/snap7_client.html#1200_1500)
 	- and compatible PLCs e.g. Yaskawa or VIPA
-- Tested with S7-300 compatible PLC
+- Tested with S7-300 compatible PLC and S7-1200
 - Implementation is based on documentation of the [Homebridge API](https://developers.homebridge.io)
-- Supports **polling** from homebridge-plc plugin to PLC by per accessory defined interval
-- Supports **push** from PLC to homebridge-plc plugin by http PUT/GET
-- Supports **control** of PLC accessories by http PUT/GET (experimental)
+- Supports [**polling**](#poll) from homebridge-plc plugin to PLC by per accessory defined interval
+- Supports [**push**](#push) from PLC to homebridge-plc plugin by http PUT/GET
+- Supports [**control**](#control) of PLC accessories by http PUT/GET (experimental)
+- Supported Accessories:
+  * [LightBulb as `PLC_LightBulb`](#PLC_LightBulb)
+  * [Outlet as `PLC_Outlet`](#PLC_Outlet)
+  * [Switch as `PLC_Switch`](#PLC_Switch)
+  * [Temperature Sensor as `PLC_TemperatureSensor`](#PLC_TemperatureSensor)
+  * [Humidity Sensor as `PLC_HumiditySensor`](#PLC_HumiditySensor)
+  * [Thermostat as `PLC_Thermostat`](#PLC_Thermostat)
+  * [Shutter as `PLC_WindowCovering`,](#PLC_Window)
+  * [Window as `PLC_Window`](#PLC_Window)
+  * [Door as `PLC_Door`](#PLC_Window)
+  * [Occupancy Sensor as `PLC_OccupancySensor`](#PLC_OccupancySensor)
+  * [Motion Sensor as `PLC_MotionSensor`](#PLC_MotionSensor)
+  * [Contact Sensor as `PLC_ContactSensor`](#PLC_ContactSensor)
+  * [Security System as `PLC_SecuritySystem`](#PLC_SecuritySystem)
+  * [Faucet as `PLC_Faucet`](#PLC_Faucet)
+  * [Valve as `PLC_Valve`](#PLC_Valve)
+  * [Button as `PLC_StatelessProgrammableSwitch`](#PLC_StatelessProgrammableSwitch)
+  * [Lock mechanism as `PLC_LockMechanism`](#PLC_LockMechanism)
+  * [Boolean lock mechanism as `PLC_LockMechanismBool`](#PLC_LockMechanismBool)
+  * [Garage door as `PLC_GarageDoorOpener`](#PLC_GarageDoorOpener)
+
 
 # Installation
 
@@ -24,7 +45,7 @@ SIEMENS S7 PLC plugin for [Homebridge](https://homebridge.io)
 	- Edit `config.json` to add the plc platform and its accessories.
 	- Run Homebridge
 
-- Install via Homebridge Web UI
+- Install via Homebridge UI
 	- Search for `plc` on the plugin screen of [config-ui-x](https://github.com/oznu/homebridge-config-ui-x) .
 	- Find `homebridge-plc`
 	- Click install.
@@ -36,19 +57,19 @@ SIEMENS S7 PLC plugin for [Homebridge](https://homebridge.io)
 
 The plugin is configured as single platform by defining a `PLC` platform.
 Parameters:
-	- `ip`: the IPv4 address of the PLC
-	- `rack`: the rack number of the PLC typically 0
-	- `slot`: the slot number of the PLC for S7 300/400 typically `2`, for 1200/1500 typically `1`
-	- `enablePolling`: when set to `true` a background task is executed every second enable polling for the accessories
-	- `enablePush`: when set to `true` a the configured `port` is opened to push updates of values form plc to the plugin
-	- `enableControl`: when set to `true` a the configured `port` is opened to control accessories by http request
-	- `port`: port for http requests default `8080`
+- `ip`: the IPv4 address of the PLC
+- `rack`: the rack number of the PLC typically 0
+- `slot`: the slot number of the PLC for S7 300/400 typically `2`, for 1200/1500 typically `1`
+- `enablePolling`: when set to `true` a background task is executed every second enable polling for the accessories
+- `enablePush`: when set to `true` a the configured `port` is opened to push updates of values form plc to the plugin
+- `enableControl`: when set to `true` a the configured `port` is opened to control accessories by http request
+- `port`: port for http requests default `8080`
 
 ## Accessories
 - In the platform, you can declare different types of accessories currently supported:
 
-### LightBulb as `PLC_LightBulb`
-normal light
+### <a name='PLC_LightBulb'></a>LightBulb as `PLC_LightBulb`
+normal light see also simple PLC example for [single bit](doc/ligtbulb_plc_example_SingleBit.png) and [separate bits](doc/ligtbulb_plc_example_SeperatedBit.png)
 - `name`: unique name of the accessory
 - `manufacturer`: (optional) description
 - `db`: s7 data base number e.g. `4` for `DB4`
@@ -58,8 +79,8 @@ normal light
 - Single Bit for on/off:
 	- `set_On`: offset and bit set to 1/0 when switching on/off S7 type `Bool` PLC  e.g. `55.0` for `DB4DBX55.0` could be same as get_On
 - Separate Bits for on/off:
-	- `set_On`: offset and bit set to 1 when switching on S7 type `Bool` PLC has to set to 0 e.g. `55.1` for `DB4DBX55.1`
-	- `set_Off`: offset and bit set to 1 when switching off S7 type `Bool` PLC has to set to 0 e.g. `55.2` for `DB4DBX55.2`
+	- `set_On`: offset and bit set to 1 when switching on S7 type `Bool` **PLC has to set to 0** e.g. `55.1` for `DB4DBX55.1`
+	- `set_Off`: offset and bit set to 1 when switching off S7 type `Bool` **PLC has to set to 0** e.g. `55.2` for `DB4DBX55.2`
 - `get_Brightness`: (optional) get brightness value S7 type `Byte` e.g. `56` for `DB4DBB56`
 - `set_Brightness`: (optional but required when `get_Brightness` is defined) set brightness value S7 type `Byte` e.g. `57` for `DB4DBB57`
 - brightness range definitions (optional)
@@ -67,7 +88,7 @@ normal light
 	- `maxValue` default value: 100
 	- `minStep` default value: 1
 
-### Outlet as `PLC_Outlet`
+### <a name='PLC_Outlet'></a>Outlet as `PLC_Outlet`
 outlet possible to show also as ventilator or light
 - `name`: unique name of the accessory
 - `manufacturer`: (optional) description
@@ -78,10 +99,10 @@ outlet possible to show also as ventilator or light
 - Single Bit for on/off:
 		- `set_On`: offset and bit set to 1/0 when switching on/off S7 type `Bool` PLC  e.g. `55.0` for `DB4DBX55.0` could be same as get_On
 - Separate Bits for on/off:
-		- `set_On`: offset and bit set to 1 when switching on S7 type `Bool` PLC has to set to 0 e.g. `55.1` for `DB4DBX55.1`
-		- `set_Off`: offset and bit set to 1 when switching off S7 type `Bool` PLC has to set to 0 e.g. `55.2` for `DB4DBX55.2`
+		- `set_On`: offset and bit set to 1 when switching on S7 type `Bool` **PLC has to set to 0** e.g. `55.1` for `DB4DBX55.1`
+		- `set_Off`: offset and bit set to 1 when switching off S7 type `Bool` **PLC has to set to 0** e.g. `55.2` for `DB4DBX55.2`
 
-### Switch as `PLC_Switch`
+### <a name='PLC_Switch'></a>Switch as `PLC_Switch`
  switch possible to show also as ventilator or light
 - `name`: unique name of the accessory
 - `manufacturer`: (optional) description
@@ -92,10 +113,10 @@ outlet possible to show also as ventilator or light
 - Single Bit for on/off:
 		- `set_On`: offset and bit set to 1/0 when switching on/off S7 type `Bool` PLC  e.g. `55.0` for `DB4DBX55.0` could be same as get_On
 - Separate Bits for on/off:
-		- `set_On`: offset and bit set to 1 when switching on S7 type `Bool` PLC has to set to 0 e.g. `55.1` for `DB4DBX55.1`
-		- `set_Off`: offset and bit set to 1 when switching off S7 type `Bool` PLC has to set to 0 e.g. `55.2` for `DB4DBX55.2`
+		- `set_On`: offset and bit set to 1 when switching on S7 type `Bool` **PLC has to set to 0** e.g. `55.1` for `DB4DBX55.1`
+		- `set_Off`: offset and bit set to 1 when switching off S7 type `Bool` **PLC has to set to 0** e.g. `55.2` for `DB4DBX55.2`
 
-### Temperature Sensor as `PLC_TemperatureSensor`:
+### <a name='PLC_TemperatureSensor'></a>Temperature Sensor as `PLC_TemperatureSensor`
 normal temperature sensor
 - `name`: unique name of the accessory
 - `manufacturer`: (optional) description
@@ -108,7 +129,7 @@ normal temperature sensor
 	- `maxValue` default value: 50
 	- `minStep` default value: 0.5
 
-### Humidity Sensor as `PLC_HumiditySensor`:
+### <a name='PLC_HumiditySensor'></a>Humidity Sensor as `PLC_HumiditySensor`:
 normal humidity sensor
 - `name`: unique name of the accessory
 - `manufacturer`: (optional) description
@@ -122,7 +143,7 @@ normal humidity sensor
 	- `minStep` default value: 1
 
 
-### Thermostat as `PLC_Thermostat`
+### <a name='PLC_Thermostat'></a>Thermostat as `PLC_Thermostat`
 temperature sensor and temperature regulation
 - `name`: unique name of the accessory
 - `manufacturer`: (optional) description
@@ -151,7 +172,7 @@ temperature sensor and temperature regulation
 - `set_TargetHeatingCoolingState` not yet supported writes are ignored
 
 
-### Shutters as `PLC_WindowCovering`, windows as `PLC_Window` and doors as `PLC_Door`
+### <a name='PLC_Window'></a>Shutters as `PLC_WindowCovering`, windows as `PLC_Window` and doors as `PLC_Door`
 shutters or blinds as well sensors for windows and doors
 - `name`: unique name of the accessory
 - `manufacturer`: (optional) description
@@ -171,9 +192,9 @@ shutters or blinds as well sensors for windows and doors
 		- `0`: down
 		- `1`: up
 		- `2`: stop
-- `set_HoldPosition`: (optional): offset and bit set to 1 to stop movement. (Seems not to be used) when not defined writes will be ignoredS7 type `Bool` PLC has to set to 0 e.g. `55.1` for `DB4DBX55.1`
+- `set_HoldPosition`: (optional): offset and bit set to 1 to stop movement. (Seems not to be used) when not defined writes will be ignoredS7 type `Bool` **PLC has to set to 0** e.g. `55.1` for `DB4DBX55.1`
 
-### Occupancy Sensor as `PLC_OccupancySensor`
+### <a name='PLC_OccupancySensor'></a>Occupancy Sensor as `PLC_OccupancySensor`
 presence detection sensor
 - `name`: unique name of the accessory
 - `manufacturer`: (optional) description
@@ -184,7 +205,7 @@ presence detection sensor
 		- `false`: no occupancy
 		- `true`: occupancy detected
 
-### Motion Sensor as `PLC_MotionSensor`
+### <a name='PLC_MotionSensor'></a>Motion Sensor as `PLC_MotionSensor`
 movement detection sensor
 - `name`: unique name of the accessory
 - `manufacturer`: (optional) description
@@ -195,7 +216,7 @@ movement detection sensor
 		- `false`: no motion
 		- `true`: motion detected
 
-### Motion Sensor as `PLC_ContactSensor`
+### <a name='PLC_ContactSensor'></a>Contact Sensor as `PLC_ContactSensor`
 contact sensor
 - `name`: unique name of the accessory
 - `manufacturer`: (optional) description
@@ -206,9 +227,7 @@ contact sensor
 		- `false`: closed
 		- `true`: open
 
-
-
-###  Security System as `PLC_SecuritySystem`:
+### <a name='PLC_SecuritySystem'></a>Security System as `PLC_SecuritySystem`:
 alarm system
 - `name`: unique name of the accessory
 - `manufacturer`: (optional) description
@@ -230,7 +249,7 @@ alarm system
 - `mapGet`: (optional) define mapping array for get security system state. The PLC value is used as index into the table. e.g. `[3, 1]` which maps the PLC value `0->3 1->2` when the PLC supports only two states with `0:disarmed` and `1:armed` and `2:alarm`.
 - `mapSet`: (optional) define mapping array for set security system state. The home app value is used as index into the table. e.g. `[1, 1, 1, 0, 2]` which maps the PLC value `0->1 1->1 2->1, 3->0, 4->2` when the PLC supports only two states with `0:disarmed` and `1:armed` and `2:alarm`.
 
-### Faucet as `PLC_Faucet`
+### <a name='PLC_Faucet'></a>Faucet as `PLC_Faucet`
 watering for the garden
 - `name`: unique name of the accessory
 - `manufacturer`: (optional) description
@@ -241,10 +260,10 @@ watering for the garden
 - Single Bit for on/off:
 		- `set_Active`: offset and bit set to 1/0 when switching on/off S7 type `Bool` PLC  e.g. `55.0` for `DB4DBX55.0` could be same as get_Active
 - Separate Bits for on/off:
-		- `set_Active`: offset and bit set to 1 when switching on S7 type `Bool` PLC has to set to 0 e.g. `55.1` for `DB4DBX55.1`
-		- `set_Deactivate`: offset and bit set to 1 when switching off S7 type `Bool` PLC has to set to 0 e.g. `55.2` for `DB4DBX55.2`
+		- `set_Active`: offset and bit set to 1 when switching on S7 type `Bool` **PLC has to set to 0** e.g. `55.1` for `DB4DBX55.1`
+		- `set_Deactivate`: offset and bit set to 1 when switching off S7 type `Bool` **PLC has to set to 0** e.g. `55.2` for `DB4DBX55.2`
 
-### Valve as `PLC_Valve`
+### <a name='PLC_Valve'></a>Valve as `PLC_Valve`
 valve configurable as generic valve, irrigation, shower head or water faucet
 - `name`: unique name of the accessory
 - `manufacturer`: (optional) description
@@ -260,14 +279,14 @@ valve configurable as generic valve, irrigation, shower head or water faucet
 - Single Bit for on/off:
 		- `set_Active`: offset and bit set to 1/0 when switching on/off S7 type `Bool` PLC  e.g. `55.0` for `DB4DBX55.0` could be same as get_Active
 - Separate Bits for on/off:
-		- `set_Active`: offset and bit set to 1 when switching on S7 type `Bool` PLC has to set to 0 e.g. `55.1` for `DB4DBX55.1`
-		- `set_Deactivate`: offset and bit set to 1 when switching off S7 type `Bool` PLC has to set to 0 e.g. `55.2` for `DB4DBX55.2`
+		- `set_Active`: offset and bit set to 1 when switching on S7 type `Bool` **PLC has to set to 0** e.g. `55.1` for `DB4DBX55.1`
+		- `set_Deactivate`: offset and bit set to 1 when switching off S7 type `Bool` **PLC has to set to 0** e.g. `55.2` for `DB4DBX55.2`
 - if one of the (optional) duration settings need specified all are needed
 		- `get_SetDuration`: (optional) duration 0..3600 sec S7 type `Time` e.g. `10` for `DB4DBD10`
 		- `set_SetDuration`: (optional) duration 0..3600 sec S7 type `Time` e.g. `14` for `DB4DBD14`
 		- `get_RemainingDuration`: (optional) duration 0..3600 sec S7 type `Time` e.g. `18` for `DB4DBD18`
 
-### Button as `PLC_StatelessProgrammableSwitch`
+### <a name='PLC_StatelessProgrammableSwitch'></a>Button as `PLC_StatelessProgrammableSwitch`
 stateless switch from PLC to home app. Trigger actions in home app only works with control center e.g. AppleTV or HomePod.
 It will works only in polling mode! The PLC sets a bit that is regularly polled by homebridge after successful reading a 1 of the event the bit it will report the event and set the bit to 0. Change 0->1 is done by PLC change from 1->0 is done by homebridge!
 - `name`: unique name of the accessory
@@ -275,86 +294,86 @@ It will works only in polling mode! The PLC sets a bit that is regularly polled 
 - `db`: s7 data base number e.g. `4` for `DB4`
 - `enablePolling`: (optional) when set to `true` the current state will be polled. It is mandatory as well to enable polling mode on platform level.
 - `pollInterval` (optional) poll interval in seconds. Default value is `10` seconds.
-- `isEvent` offset and bit that is polled when set to 1 by the PLC the event is read and the bit is set to 0 by homebridge S7 type `Bool` PLC has to set to 0 e.g. `55.1` for `DB4DBX55.1`
+- `isEvent` offset and bit that is polled when set to 1 by the PLC the event is read and the bit is set to 0 by homebridge S7 type `Bool` **PLC has to set to 0** e.g. `55.1` for `DB4DBX55.1`
 - `get_ProgrammableSwitchEvent`: offset to red current event of the switch. This is reported towards home app S7 type `Byte` e.g. `3` for `DB4DBB3`
 		- `0`: single press
 		- `1`: double press
 		- `2`: long press
 
-### Lock mechanism as `PLC_LockMechanism` (experimental)
+### <a name='PLC_LockMechanism'></a>Lock mechanism as `PLC_LockMechanism` 
 Lock mechanism (not yet clear how to use changes are welcome)
-	- `name`: unique name of the accessory
-	- `manufacturer`: (optional) description
-	- `db`: s7 data base number e.g. `4` for `DB4`
-	- `enablePolling`: (optional) when set to `true` the current state will be polled. It is mandatory as well to enable polling mode on platform level.
-	- `pollInterval` (optional) poll interval in seconds. Default value is `10` seconds.
-	- `forceCurrentState`: (optional) when set to `true` the position set by `set_LockTargetState` is directly used as current state. By this it seems in tha home app as the target state was directly reached. This is recommended when not using `enablePolling` or pushing the value from the plc.
-	- `get_LockCurrentState`: offset to read current state current state S7 type `Byte` e.g. `3` for `DB4DBB3`
-		- `0`: unsecured
-		- `1`: secured
-		- `2`: jammed
-		- `3`: unknown
-	- `get_LockTargetState`: offset to read target state current state S7 type `Byte` e.g. `3` for `DB4DBB3`
-		- `0`: unsecured
-		- `1`: secured
-	- `set_LockTargetState`:  offset to write target state current state S7 type `Byte` e.g. `3` for `DB4DBB3`
-		- `0`: unsecured
-		- `1`: secured
+  - `name`: unique name of the accessory
+  - `manufacturer`: (optional) description
+  - `db`: s7 data base number e.g. `4` for `DB4`
+  - `enablePolling`: (optional) when set to `true` the current state will be polled. It is mandatory as well to enable polling mode on platform level.
+  - `pollInterval` (optional) poll interval in seconds. Default value is `10` seconds.
+  - `forceCurrentState`: (optional) when set to `true` the position set by `set_LockTargetState` is directly used as current state. By this it seems in tha home app as the target state was directly reached. This is recommended when not using `enablePolling` or pushing the value from the plc.
+  - `get_LockCurrentState`: offset to read current state current state S7 type `Byte` e.g. `3` for `DB4DBB3`
+  	- `0`: unsecured
+  	- `1`: secured
+  	- `2`: jammed
+  	- `3`: unknown
+- `get_LockTargetState`: offset to read target state current state S7 type `Byte` e.g. `3` for `DB4DBB3`
+- `0`: unsecured
+  - `1`: secured
+- `set_LockTargetState`:  offset to write target state current state S7 type `Byte` e.g. `3` for `DB4DBB3`
+  - `0`: unsecured
+  - `1`: secured
 
-### Lock mechanism as `PLC_LockMechanismBool`
+### <a name='PLC_LockMechanismBool'></a>Boolean lock mechanism as `PLC_LockMechanismBool`
 Lock mechanism implemented as bool on the PLC. **NOTE: The convention `0`:closed/secured  `1`:open/unsecured**
-	- `name`: unique name of the accessory
-	- `manufacturer`: (optional) description
-	- `db`: s7 data base number e.g. `4` for `DB4`
-	- `enablePolling`: (optional) when set to `true` the current state will be polled. It is mandatory as well to enable polling mode on platform level.
-	- `pollInterval` (optional) poll interval in seconds. Default value is `10` seconds.
-	- `forceCurrentState`: (optional) when set to `true` the position set by `set_LockTargetState` is directly used as current state. By this it seems in tha home app as the target state was directly reached. This is recommended when not using `enablePolling` or pushing the value from the plc.
-	- `get_LockCurrentState`: offset to read current state current state S7 type `Bool` e.g. `3.1` for `DB4DBB3`
+- `name`: unique name of the accessory
+- `manufacturer`: (optional) description
+- `db`: s7 data base number e.g. `4` for `DB4`
+- `enablePolling`: (optional) when set to `true` the current state will be polled. t is mandatory as well to enable polling mode on platform level.
+- `pollInterval` (optional) poll interval in seconds. Default value is `10` seconds.
+- `forceCurrentState`: (optional) when set to `true` the position set by set_LockTargetState` is directly used as current state. By this it seems in tha ome app as the target state was directly reached. This is recommended when not sing `enablePolling` or pushing the value from the plc.
+- `get_LockCurrentState`: offset to read current state current state S7 type `Bool` .g. `3.1` for `DB4DBB3`
+	- `0`: secured
+	- `1`: unsecured
+- `get_LockTargetState`: offset to read target state current state S7 type `Bool` e.. `3.1` for `DB4DBB3`
+	- `0`: secured
+	- `1`: unsecured
+- Single Bit for secure/unsecured:
+	- `set_LockTargetState`:  offset to write target state current state S7 type `Bool` e.g. `3.1` for `DB4DBB3`
 		- `0`: secured
 		- `1`: unsecured
-	- `get_LockTargetState`: offset to read target state current state S7 type `Bool` e.g. `3.1` for `DB4DBB3`
-		- `0`: secured
-		- `1`: unsecured
-	- Single Bit for secure/unsecured:
-		- `set_LockTargetState`:  offset to write target state current state S7 type `Bool` e.g. `3.1` for `DB4DBB3`
-			- `0`: secured
-			- `1`: unsecured
-	- Separate Bits for secure/unsecured:
-		- `set_Secured`: offset and bit set to 1 when switching to target state secured S7 type `Bool` PLC has to set to 0 e.g. `3.3` for `DB4DBX55.1`
-		- `set_Unsecured`: offset and bit set to 1 when switching to target state unsecured S7 type `Bool` PLC has to set to 0 e.g. `3.4` for `DB4DBX55.2`
+- Separate Bits for secure/unsecured:
+  - `set_Secured`: offset and bit set to 1 when switching to target state secured S7 type `Bool` **PLC has to set to 0** e.g. `3.3` for `DB4DBX55.1`
+	- `set_Unsecured`: offset and bit set to 1 when switching to target state unsecured S7 type `Bool` **PLC has to set to 0** e.g. `3.4` for `DB4DBX55.2`
 
 
-### Lock mechanism as `PLC_GarageDoorOpener` (experimental)
+### <a name='PLC_GarageDoorOpener'></a>Garage door as `PLC_GarageDoorOpener` (experimental)
 Lock mechanism (not yet clear how to use changes are welcome)
-	- `name`: unique name of the accessory
-	- `manufacturer`: (optional) description
-	- `db`: s7 data base number e.g. `4` for `DB4`
-	- `enablePolling`: (optional) when set to `true` the current state will be polled. It is mandatory as well to enable polling mode on platform level.
-	- `pollInterval` (optional) poll interval in seconds. Default value is `10` seconds.
-	- `get_ObstructionDetected` offset and bit to obfuscation detection true means that the door was blocked S7 type `Bool` PLC has to set to 0 e.g. `55.1` for `DB4DBX55.1`
-	- `get_CurrentDoorState`: offset to read current state current state S7 type `Byte` e.g. `3` for `DB4DBB3`
-		- `0`: open
-		- `1`: closed
-		- `2`: opening
-		- `3`: closing
-		- `4`: stopped
-	- `get_TargetDoorState`: offset to read target state current state S7 type `Byte` e.g. `3` for `DB4DBB3`
-		- `0`: open
-		- `1`: closed
-	- `set_TargetDoorState`:  offset to write target state current state S7 type `Byte` e.g. `3` for `DB4DBB3`
-		- `0`: open
-		- `1`: closed
-	- `get_LockCurrentState`: offset to read current state current state S7 type `Byte` e.g. `3` for `DB4DBB3`
-		- `0`: unsecured
-		- `1`: secured
-		- `2`: jammed
-		- `3`: unknown
-	- `get_LockTargetState`: offset to read target state current state S7 type `Byte` e.g. `3` for `DB4DBB3`
-		- `0`: unsecured
-		- `1`: secured
-	- `set_LockTargetState`:  offset to write target state current state S7 type `Byte` e.g. `3` for `DB4DBB3`
-		- `0`: unsecured
-		- `1`: secured
+- `name`: unique name of the accessory
+- `manufacturer`: (optional) description
+- `db`: s7 data base number e.g. `4` for `DB4`
+- `enablePolling`: (optional) when set to `true` the current state will be polled. It is mandatory as well to enable polling mode on platform level.
+- `pollInterval` (optional) poll interval in seconds. Default value is `10` seconds.
+- `get_ObstructionDetected` offset and bit to obfuscation detection true means that the door was blocked S7 type `Bool` **PLC has to set to 0** e.g. `55.1` for `DB4DBX55.1`
+- `get_CurrentDoorState`: offset to read current state current state S7 type `Byte` e.g. `3` for `DB4DBB3`
+	- `0`: open
+	- `1`: closed
+	- `2`: opening
+	- `3`: closing
+	- `4`: stopped
+- `get_TargetDoorState`: offset to read target state current state S7 type `Byte` e.g. `3` for `DB4DBB3`
+	- `0`: open
+	- `1`: closed
+- `set_TargetDoorState`:  offset to write target state current state S7 type `Byte` e.g. `3` for `DB4DBB3`
+	- `0`: open
+	- `1`: closed
+- `get_LockCurrentState`: offset to read current state current state S7 type `Byte` e.g. `3` for `DB4DBB3`
+	- `0`: unsecured
+	- `1`: secured
+	- `2`: jammed
+	- `3`: unknown
+- `get_LockTargetState`: offset to read target state current state S7 type `Byte` e.g. `3` for `DB4DBB3`
+	- `0`: unsecured
+	- `1`: secured
+- `set_LockTargetState`:  offset to write target state current state S7 type `Byte` e.g. `3` for `DB4DBB3`
+	- `0`: unsecured
+	- `1`: secured
 
 
 #### config.json Example
@@ -597,12 +616,12 @@ There are three possible ways to workaround this.
 2. You enable the polling mode
 3. You enable the push mode and instrument your PLC code to send the values
 
-## Poll values form PLC
+## <a name='poll'></a>Poll values form PLC
 To enable this you have to set `"enablePolling": true;` platform level and on each individual accessory with individual interval in seconds.
 		`"enablePolling": true, "pollInterval": 30,`
 
 
-## Push values from PLC
+## <a name='push'></a>Push values from PLC
 
 It possible to send updates of values directly from the plc to the homebridge-plc plugin. This is especially useful when you want notifications form your home app about open/close of doors or just a faster response e.g. with PLC_StatelessProgrammableSwitch.
 To enable this you have to set `"enablePush": true,` platform level and optional the `port`.
@@ -652,7 +671,7 @@ Example for byte values when trigger from browser
 
 	http://homebridgeIp:8080/?push&db=2&offset=3&value=255
 
-# Control of PLC accessories
+# <a name='control'></a>Control of PLC accessories
 
 It´s also possible to control PLC accessories via HTTP `PUT` or `GET` operation. This might be useful for integration into other automation systems.
 To enable this you have to set `"enableControl": true,` platform level and optional the `port`.
@@ -664,7 +683,7 @@ The value is assigned to the matching ('db' and 'offset') set_* accessory config
 
 The Request has to be done as HTTP `PUT` or `GET` operation. There will be no logging when doing a `PUT` operation while there will be detailed output when during a `GET` operation. This in especially intended for testing with the browser as the browser performs a `GET` operation per default.
 
-### Format
+###  4.2. <a name='Format-1'></a>Format
 Example to switch a light bulb on from browser:
 
 		{
@@ -704,7 +723,7 @@ The delete and open of hte index.js file can be done by the following command li
 
 `rm node_modules/homebridge-plc/index.js && nano node_modules/homebridge-plc/index.js`
 
-
 ## Publish npm package
 
 `npm publish --access public`
+
