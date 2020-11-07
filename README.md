@@ -23,7 +23,9 @@ SIEMENS S7 PLC plugin for [Homebridge](https://homebridge.io)
   * [Temperature Sensor as `PLC_TemperatureSensor`](#PLC_TemperatureSensor)
   * [Humidity Sensor as `PLC_HumiditySensor`](#PLC_HumiditySensor)
   * [Thermostat as `PLC_Thermostat`](#PLC_Thermostat)
-  * [Shutters as `PLC_WindowCovering`, windows as `PLC_Window` and doors as `PLC_Door`](#PLC_Window)
+  * [Shutter as `PLC_WindowCovering`,](#PLC_Window)
+  * [Window as `PLC_Window`](#PLC_Window)
+  * [Door as `PLC_Door`](#PLC_Window)
   * [Occupancy Sensor as `PLC_OccupancySensor`](#PLC_OccupancySensor)
   * [Motion Sensor as `PLC_MotionSensor`](#PLC_MotionSensor)
   * [Contact Sensor as `PLC_ContactSensor`](#PLC_ContactSensor)
@@ -67,7 +69,7 @@ Parameters:
 - In the platform, you can declare different types of accessories currently supported:
 
 ### <a name='PLC_LightBulb'></a>LightBulb as `PLC_LightBulb`
-normal light see also PLC example for [single bit](doc/ligtbulb_plc_example_SingleBit.png) and [separate bits](doc/ligtbulb_plc_example_SeperatedBit.png)
+normal light see also simple PLC example for [single bit](doc/ligtbulb_plc_example_SingleBit.png) and [separate bits](doc/ligtbulb_plc_example_SeperatedBit.png)
 - `name`: unique name of the accessory
 - `manufacturer`: (optional) description
 - `db`: s7 data base number e.g. `4` for `DB4`
@@ -77,8 +79,8 @@ normal light see also PLC example for [single bit](doc/ligtbulb_plc_example_Sing
 - Single Bit for on/off:
 	- `set_On`: offset and bit set to 1/0 when switching on/off S7 type `Bool` PLC  e.g. `55.0` for `DB4DBX55.0` could be same as get_On
 - Separate Bits for on/off:
-	- `set_On`: offset and bit set to 1 when switching on S7 type `Bool` PLC has to set to 0 e.g. `55.1` for `DB4DBX55.1`
-	- `set_Off`: offset and bit set to 1 when switching off S7 type `Bool` PLC has to set to 0 e.g. `55.2` for `DB4DBX55.2`
+	- `set_On`: offset and bit set to 1 when switching on S7 type `Bool` **PLC has to set to 0** e.g. `55.1` for `DB4DBX55.1`
+	- `set_Off`: offset and bit set to 1 when switching off S7 type `Bool` **PLC has to set to 0** e.g. `55.2` for `DB4DBX55.2`
 - `get_Brightness`: (optional) get brightness value S7 type `Byte` e.g. `56` for `DB4DBB56`
 - `set_Brightness`: (optional but required when `get_Brightness` is defined) set brightness value S7 type `Byte` e.g. `57` for `DB4DBB57`
 - brightness range definitions (optional)
@@ -97,8 +99,8 @@ outlet possible to show also as ventilator or light
 - Single Bit for on/off:
 		- `set_On`: offset and bit set to 1/0 when switching on/off S7 type `Bool` PLC  e.g. `55.0` for `DB4DBX55.0` could be same as get_On
 - Separate Bits for on/off:
-		- `set_On`: offset and bit set to 1 when switching on S7 type `Bool` PLC has to set to 0 e.g. `55.1` for `DB4DBX55.1`
-		- `set_Off`: offset and bit set to 1 when switching off S7 type `Bool` PLC has to set to 0 e.g. `55.2` for `DB4DBX55.2`
+		- `set_On`: offset and bit set to 1 when switching on S7 type `Bool` **PLC has to set to 0** e.g. `55.1` for `DB4DBX55.1`
+		- `set_Off`: offset and bit set to 1 when switching off S7 type `Bool` **PLC has to set to 0** e.g. `55.2` for `DB4DBX55.2`
 
 ### <a name='PLC_Switch'></a>Switch as `PLC_Switch`
  switch possible to show also as ventilator or light
@@ -111,8 +113,8 @@ outlet possible to show also as ventilator or light
 - Single Bit for on/off:
 		- `set_On`: offset and bit set to 1/0 when switching on/off S7 type `Bool` PLC  e.g. `55.0` for `DB4DBX55.0` could be same as get_On
 - Separate Bits for on/off:
-		- `set_On`: offset and bit set to 1 when switching on S7 type `Bool` PLC has to set to 0 e.g. `55.1` for `DB4DBX55.1`
-		- `set_Off`: offset and bit set to 1 when switching off S7 type `Bool` PLC has to set to 0 e.g. `55.2` for `DB4DBX55.2`
+		- `set_On`: offset and bit set to 1 when switching on S7 type `Bool` **PLC has to set to 0** e.g. `55.1` for `DB4DBX55.1`
+		- `set_Off`: offset and bit set to 1 when switching off S7 type `Bool` **PLC has to set to 0** e.g. `55.2` for `DB4DBX55.2`
 
 ### <a name='PLC_TemperatureSensor'></a>Temperature Sensor as `PLC_TemperatureSensor`
 normal temperature sensor
@@ -190,7 +192,7 @@ shutters or blinds as well sensors for windows and doors
 		- `0`: down
 		- `1`: up
 		- `2`: stop
-- `set_HoldPosition`: (optional): offset and bit set to 1 to stop movement. (Seems not to be used) when not defined writes will be ignoredS7 type `Bool` PLC has to set to 0 e.g. `55.1` for `DB4DBX55.1`
+- `set_HoldPosition`: (optional): offset and bit set to 1 to stop movement. (Seems not to be used) when not defined writes will be ignoredS7 type `Bool` **PLC has to set to 0** e.g. `55.1` for `DB4DBX55.1`
 
 ### <a name='PLC_OccupancySensor'></a>Occupancy Sensor as `PLC_OccupancySensor`
 presence detection sensor
@@ -258,8 +260,8 @@ watering for the garden
 - Single Bit for on/off:
 		- `set_Active`: offset and bit set to 1/0 when switching on/off S7 type `Bool` PLC  e.g. `55.0` for `DB4DBX55.0` could be same as get_Active
 - Separate Bits for on/off:
-		- `set_Active`: offset and bit set to 1 when switching on S7 type `Bool` PLC has to set to 0 e.g. `55.1` for `DB4DBX55.1`
-		- `set_Deactivate`: offset and bit set to 1 when switching off S7 type `Bool` PLC has to set to 0 e.g. `55.2` for `DB4DBX55.2`
+		- `set_Active`: offset and bit set to 1 when switching on S7 type `Bool` **PLC has to set to 0** e.g. `55.1` for `DB4DBX55.1`
+		- `set_Deactivate`: offset and bit set to 1 when switching off S7 type `Bool` **PLC has to set to 0** e.g. `55.2` for `DB4DBX55.2`
 
 ### <a name='PLC_Valve'></a>Valve as `PLC_Valve`
 valve configurable as generic valve, irrigation, shower head or water faucet
@@ -277,8 +279,8 @@ valve configurable as generic valve, irrigation, shower head or water faucet
 - Single Bit for on/off:
 		- `set_Active`: offset and bit set to 1/0 when switching on/off S7 type `Bool` PLC  e.g. `55.0` for `DB4DBX55.0` could be same as get_Active
 - Separate Bits for on/off:
-		- `set_Active`: offset and bit set to 1 when switching on S7 type `Bool` PLC has to set to 0 e.g. `55.1` for `DB4DBX55.1`
-		- `set_Deactivate`: offset and bit set to 1 when switching off S7 type `Bool` PLC has to set to 0 e.g. `55.2` for `DB4DBX55.2`
+		- `set_Active`: offset and bit set to 1 when switching on S7 type `Bool` **PLC has to set to 0** e.g. `55.1` for `DB4DBX55.1`
+		- `set_Deactivate`: offset and bit set to 1 when switching off S7 type `Bool` **PLC has to set to 0** e.g. `55.2` for `DB4DBX55.2`
 - if one of the (optional) duration settings need specified all are needed
 		- `get_SetDuration`: (optional) duration 0..3600 sec S7 type `Time` e.g. `10` for `DB4DBD10`
 		- `set_SetDuration`: (optional) duration 0..3600 sec S7 type `Time` e.g. `14` for `DB4DBD14`
@@ -292,7 +294,7 @@ It will works only in polling mode! The PLC sets a bit that is regularly polled 
 - `db`: s7 data base number e.g. `4` for `DB4`
 - `enablePolling`: (optional) when set to `true` the current state will be polled. It is mandatory as well to enable polling mode on platform level.
 - `pollInterval` (optional) poll interval in seconds. Default value is `10` seconds.
-- `isEvent` offset and bit that is polled when set to 1 by the PLC the event is read and the bit is set to 0 by homebridge S7 type `Bool` PLC has to set to 0 e.g. `55.1` for `DB4DBX55.1`
+- `isEvent` offset and bit that is polled when set to 1 by the PLC the event is read and the bit is set to 0 by homebridge S7 type `Bool` **PLC has to set to 0** e.g. `55.1` for `DB4DBX55.1`
 - `get_ProgrammableSwitchEvent`: offset to red current event of the switch. This is reported towards home app S7 type `Byte` e.g. `3` for `DB4DBB3`
 		- `0`: single press
 		- `1`: double press
@@ -337,8 +339,8 @@ Lock mechanism implemented as bool on the PLC. **NOTE: The convention `0`:closed
 		- `0`: secured
 		- `1`: unsecured
 - Separate Bits for secure/unsecured:
-  - `set_Secured`: offset and bit set to 1 when switching to target state secured S7 type `Bool` PLC has to set to 0 e.g. `3.3` for `DB4DBX55.1`
-	- `set_Unsecured`: offset and bit set to 1 when switching to target state unsecured S7 type `Bool` PLC has to set to 0 e.g. `3.4` for `DB4DBX55.2`
+  - `set_Secured`: offset and bit set to 1 when switching to target state secured S7 type `Bool` **PLC has to set to 0** e.g. `3.3` for `DB4DBX55.1`
+	- `set_Unsecured`: offset and bit set to 1 when switching to target state unsecured S7 type `Bool` **PLC has to set to 0** e.g. `3.4` for `DB4DBX55.2`
 
 
 ### <a name='PLC_GarageDoorOpener'></a>Garage door as `PLC_GarageDoorOpener` (experimental)
@@ -348,7 +350,7 @@ Lock mechanism (not yet clear how to use changes are welcome)
 - `db`: s7 data base number e.g. `4` for `DB4`
 - `enablePolling`: (optional) when set to `true` the current state will be polled. It is mandatory as well to enable polling mode on platform level.
 - `pollInterval` (optional) poll interval in seconds. Default value is `10` seconds.
-- `get_ObstructionDetected` offset and bit to obfuscation detection true means that the door was blocked S7 type `Bool` PLC has to set to 0 e.g. `55.1` for `DB4DBX55.1`
+- `get_ObstructionDetected` offset and bit to obfuscation detection true means that the door was blocked S7 type `Bool` **PLC has to set to 0** e.g. `55.1` for `DB4DBX55.1`
 - `get_CurrentDoorState`: offset to read current state current state S7 type `Byte` e.g. `3` for `DB4DBB3`
 	- `0`: open
 	- `1`: closed
