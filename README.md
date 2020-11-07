@@ -114,7 +114,7 @@ outlet possible to show also as ventilator or light
 		- `set_On`: offset and bit set to 1 when switching on S7 type `Bool` PLC has to set to 0 e.g. `55.1` for `DB4DBX55.1`
 		- `set_Off`: offset and bit set to 1 when switching off S7 type `Bool` PLC has to set to 0 e.g. `55.2` for `DB4DBX55.2`
 
-### Temperature Sensor as `PLC_TemperatureSensor`:
+### <a name='PLC_TemperatureSensor'></a>Temperature Sensor as `PLC_TemperatureSensor`
 normal temperature sensor
 - `name`: unique name of the accessory
 - `manufacturer`: (optional) description
@@ -127,7 +127,7 @@ normal temperature sensor
 	- `maxValue` default value: 50
 	- `minStep` default value: 0.5
 
-### Humidity Sensor as `PLC_HumiditySensor`:
+### <a name='PLC_HumiditySensor'></a>Humidity Sensor as `PLC_HumiditySensor`:
 normal humidity sensor
 - `name`: unique name of the accessory
 - `manufacturer`: (optional) description
