@@ -70,6 +70,8 @@ Parameters:
 
 ### <a name='PLC_LightBulb'></a>LightBulb as `PLC_LightBulb`
 normal light see also simple PLC example for [single bit](doc/ligtbulb_plc_example_SingleBit.png) and [separate bits](doc/ligtbulb_plc_example_SeperatedBit.png)
+
+![homebridge pic](doc/lightbulb.png)
 - `name`: unique name of the accessory
 - `manufacturer`: (optional) description
 - `db`: s7 data base number e.g. `4` for `DB4`
@@ -90,6 +92,8 @@ normal light see also simple PLC example for [single bit](doc/ligtbulb_plc_examp
 
 ### <a name='PLC_Outlet'></a>Outlet as `PLC_Outlet`
 outlet possible to show also as ventilator or light
+
+![homebridge pic](doc/outlet.png)
 - `name`: unique name of the accessory
 - `manufacturer`: (optional) description
 - `db`: s7 data base number e.g. `4` for `DB4`
@@ -104,6 +108,8 @@ outlet possible to show also as ventilator or light
 
 ### <a name='PLC_Switch'></a>Switch as `PLC_Switch`
  switch possible to show also as ventilator or light
+
+ ![homebridge pic](doc/switch.png)
 - `name`: unique name of the accessory
 - `manufacturer`: (optional) description
 - `db`: s7 data base number e.g. `4` for `DB4`
@@ -118,6 +124,8 @@ outlet possible to show also as ventilator or light
 
 ### <a name='PLC_TemperatureSensor'></a>Temperature Sensor as `PLC_TemperatureSensor`
 normal temperature sensor
+
+![homebridge pic](doc/temperature.png)
 - `name`: unique name of the accessory
 - `manufacturer`: (optional) description
 - `db`: s7 data base number e.g. `4` for `DB4`
@@ -131,6 +139,8 @@ normal temperature sensor
 
 ### <a name='PLC_HumiditySensor'></a>Humidity Sensor as `PLC_HumiditySensor`:
 normal humidity sensor
+
+![homebridge pic](doc/humidity.png)
 - `name`: unique name of the accessory
 - `manufacturer`: (optional) description
 - `db`: s7 data base number e.g. `4` for `DB4`
@@ -145,6 +155,8 @@ normal humidity sensor
 
 ### <a name='PLC_Thermostat'></a>Thermostat as `PLC_Thermostat`
 temperature sensor and temperature regulation
+
+![homebridge pic](doc/thermostat.png)
 - `name`: unique name of the accessory
 - `manufacturer`: (optional) description
 - `db`: s7 data base number e.g. `4` for `DB4`
@@ -174,6 +186,8 @@ temperature sensor and temperature regulation
 
 ### <a name='PLC_Window'></a>Shutters as `PLC_WindowCovering`, windows as `PLC_Window` and doors as `PLC_Door`
 shutters or blinds as well sensors for windows and doors
+
+![homebridge pic](doc/blind.png) ![homebridge pic](doc/window.png) ![homebridge pic](doc/door.png)
 - `name`: unique name of the accessory
 - `manufacturer`: (optional) description
 - `db`: s7 data base number e.g. `4` for `DB4`
@@ -196,6 +210,8 @@ shutters or blinds as well sensors for windows and doors
 
 ### <a name='PLC_OccupancySensor'></a>Occupancy Sensor as `PLC_OccupancySensor`
 presence detection sensor
+
+![homebridge pic](doc/occupancy.png)
 - `name`: unique name of the accessory
 - `manufacturer`: (optional) description
 - `db`: s7 data base number e.g. `4` for `DB4`
@@ -207,6 +223,8 @@ presence detection sensor
 
 ### <a name='PLC_MotionSensor'></a>Motion Sensor as `PLC_MotionSensor`
 movement detection sensor
+
+![homebridge pic](doc/motion.png)
 - `name`: unique name of the accessory
 - `manufacturer`: (optional) description
 - `db`: s7 data base number e.g. `4` for `DB4`
@@ -218,6 +236,8 @@ movement detection sensor
 
 ### <a name='PLC_ContactSensor'></a>Contact Sensor as `PLC_ContactSensor`
 contact sensor
+
+![homebridge pic](doc/contactsensor.png)
 - `name`: unique name of the accessory
 - `manufacturer`: (optional) description
 - `db`: s7 data base number e.g. `4` for `DB4`
@@ -229,6 +249,8 @@ contact sensor
 
 ### <a name='PLC_SecuritySystem'></a>Security System as `PLC_SecuritySystem`:
 alarm system
+
+![homebridge pic](doc/securitysystem.png)
 - `name`: unique name of the accessory
 - `manufacturer`: (optional) description
 - `db`: s7 data base number e.g. `4` for `DB4`
@@ -251,6 +273,8 @@ alarm system
 
 ### <a name='PLC_Faucet'></a>Faucet as `PLC_Faucet`
 watering for the garden
+
+![homebridge pic](doc/faucet.png)
 - `name`: unique name of the accessory
 - `manufacturer`: (optional) description
 - `db`: s7 data base number e.g. `4` for `DB4`
@@ -265,6 +289,8 @@ watering for the garden
 
 ### <a name='PLC_Valve'></a>Valve as `PLC_Valve`
 valve configurable as generic valve, irrigation, shower head or water faucet
+
+![homebridge pic](doc/valve.png)
 - `name`: unique name of the accessory
 - `manufacturer`: (optional) description
 - `db`: s7 data base number e.g. `4` for `DB4`
@@ -289,6 +315,8 @@ valve configurable as generic valve, irrigation, shower head or water faucet
 ### <a name='PLC_StatelessProgrammableSwitch'></a>Button as `PLC_StatelessProgrammableSwitch`
 stateless switch from PLC to home app. Trigger actions in home app only works with control center e.g. AppleTV or HomePod.
 It will works only in polling mode! The PLC sets a bit that is regularly polled by homebridge after successful reading a 1 of the event the bit it will report the event and set the bit to 0. Change 0->1 is done by PLC change from 1->0 is done by homebridge!
+
+![homebridge pic](doc/statelessswitch.png)
 - `name`: unique name of the accessory
 - `manufacturer`: (optional) description
 - `db`: s7 data base number e.g. `4` for `DB4`
@@ -302,6 +330,8 @@ It will works only in polling mode! The PLC sets a bit that is regularly polled 
 
 ### <a name='PLC_LockMechanism'></a>Lock mechanism as `PLC_LockMechanism` 
 Lock mechanism (not yet clear how to use changes are welcome)
+
+![homebridge pic](doc/lock.png)
   - `name`: unique name of the accessory
   - `manufacturer`: (optional) description
   - `db`: s7 data base number e.g. `4` for `DB4`
@@ -322,6 +352,8 @@ Lock mechanism (not yet clear how to use changes are welcome)
 
 ### <a name='PLC_LockMechanismBool'></a>Boolean lock mechanism as `PLC_LockMechanismBool`
 Lock mechanism implemented as bool on the PLC. **NOTE: The convention `0`:closed/secured  `1`:open/unsecured**
+
+![homebridge pic](doc/lockbool.png)
 - `name`: unique name of the accessory
 - `manufacturer`: (optional) description
 - `db`: s7 data base number e.g. `4` for `DB4`
@@ -345,6 +377,8 @@ Lock mechanism implemented as bool on the PLC. **NOTE: The convention `0`:closed
 
 ### <a name='PLC_GarageDoorOpener'></a>Garage door as `PLC_GarageDoorOpener` (experimental)
 Lock mechanism (not yet clear how to use changes are welcome)
+
+![homebridge pic](doc/garagedoor.png)
 - `name`: unique name of the accessory
 - `manufacturer`: (optional) description
 - `db`: s7 data base number e.g. `4` for `DB4`
@@ -540,7 +574,7 @@ Note: The example is just an example it contains also some optional settings. Fo
 					},
 					{
 						"accessory": "PLC_SecuritySystem",
-						"name": "AlarmSystem",
+						"name": "SecuritySystem",
 						"db": 12,
 						"enablePolling": true,
 						"pollInterval": 60,
