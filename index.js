@@ -714,7 +714,7 @@ function GenericPLCAccessory(platform, config) {
     if ('ValveType' in config) {
       this.service.getCharacteristic(Characteristic.ValveType)
         .on('get', function(callback) {this.getDummy(callback,
-          ValveType,
+        config.ValveType,
         'get ValveType'
         )}.bind(this));
     }
@@ -888,13 +888,6 @@ function GenericPLCAccessory(platform, config) {
       config.get_LockCurrentState,
       "get LockCurrentState"
     )}.bind(this));
-
-    this.service.getCharacteristic(Characteristic.LockCurrentState)
-      .on('get', function(callback) {this.getByte(callback,
-        config.db,
-        config.get_LockCurrentState,
-        "get LockCurrentState"
-      )}.bind(this));
 
     this.service.getCharacteristic(Characteristic.LockTargetState)
     .on('get', function(callback) {this.getByte(callback,
@@ -1307,25 +1300,25 @@ GenericPLCAccessory.prototype = {
     }
     else if (this.config.accessory == 'PLC_TemperatureSensor') {
       // get the current target system state and update the value.
-      this.service.getCharacteristic(Characteristic.TemperatureSensor).getValue(function(err, value) {
+      this.service.getCharacteristic(Characteristic.CurrentTemperature).getValue(function(err, value) {
         if (!err) {
-          this.service.getCharacteristic(Characteristic.TemperatureSensor).updateValue(value);
+          this.service.getCharacteristic(Characteristic.CurrentTemperature).updateValue(value);
         }
       }.bind(this));
     }
     else if (this.config.accessory == 'PLC_HumiditySensor') {
       // get the current target system state and update the value.
-      this.service.getCharacteristic(Characteristic.HumiditySensor).getValue(function(err, value) {
+      this.service.getCharacteristic(Characteristic.CurrentRelativeHumidity).getValue(function(err, value) {
         if (!err) {
-          this.service.getCharacteristic(Characteristic.HumiditySensor).updateValue(value);
+          this.service.getCharacteristic(Characteristic.CurrentRelativeHumidity).updateValue(value);
         }
       }.bind(this));
     }
     else if (this.config.accessory == 'PLC_Thermostat') {
       // get the current target system state and update the value.
-      this.service.getCharacteristic(Characteristic.TemperatureSensor).getValue(function(err, value) {
+      this.service.getCharacteristic(Characteristic.CurrentTemperature).getValue(function(err, value) {
         if (!err) {
-          this.service.getCharacteristic(Characteristic.TemperatureSensor).updateValue(value);
+          this.service.getCharacteristic(Characteristic.CurrentTemperature).updateValue(value);
         }
       }.bind(this));
       this.service.getCharacteristic(Characteristic.TargetTemperature).getValue(function(err, value) {
@@ -1519,8 +1512,8 @@ GenericPLCAccessory.prototype = {
       this.buf[0] = 1;
       S7Client.WriteArea(S7Client.S7AreaDB, db, ((offset*8) + bit), 1, S7Client.S7WLBit, this.buf, function(err) {
         if(err) {
-          log.error(logprefix, "WriteArea failed #" + String(err) + " - " + S7Client.ErrorText(err));
-          S7Client.Disconnect();
+          log.error(logprefix, "WriteArea failed #" + err.toString(16) + " - " + S7Client.ErrorText(err));
+          if(err & 0xFFFFF) {S7Client.Disconnect();}
           callback(new Error('PLC error'));
         }
         else {
@@ -1557,8 +1550,8 @@ GenericPLCAccessory.prototype = {
       this.buf[0] = valuePLC ? 1 : 0;
       S7Client.WriteArea(S7Client.S7AreaDB, db, ((offset*8) + bit), 1, S7Client.S7WLBit, this.buf, function(err) {
         if(err) {
-          log.error(logprefix, "WriteArea failed #" + String(err) + " - " + S7Client.ErrorText(err));
-          S7Client.Disconnect();
+          log.error(logprefix, "WriteArea failed #" + err.toString(16) + " - " + S7Client.ErrorText(err));
+          if(err & 0xFFFFF) {S7Client.Disconnect();}
           callback(new Error('PLC error'));
         }
         else {
@@ -1596,8 +1589,8 @@ GenericPLCAccessory.prototype = {
     if (this.platform.S7ClientConnect()) {
       S7Client.ReadArea(S7Client.S7AreaDB, db, ((offset*8) + bit), 1, S7Client.S7WLBit, function(err, res) {
         if(err) {
-          log.error(logprefix, "ReadArea failed #" + String(err) + " - " + S7Client.ErrorText(err));
-          S7Client.Disconnect();
+          log.error(logprefix, "ReadArea failed #" + err.toString(16) + " - " + S7Client.ErrorText(err));
+          if(err & 0xFFFFF) {S7Client.Disconnect();}
           callback(err, 0);
         }
         else {
@@ -1641,8 +1634,8 @@ GenericPLCAccessory.prototype = {
         buf.writeFloatBE(valuePLC, 0);
         S7Client.WriteArea(S7Client.S7AreaDB, db, offset, 1, S7Client.S7WLReal, buf, function(err) {
           if(err) {
-            log.error(logprefix, "WriteArea failed #" + String(err) + " - " + S7Client.ErrorText(err));
-            S7Client.Disconnect();
+            log.error(logprefix, "WriteArea failed #" + err.toString(16) + " - " + S7Client.ErrorText(err));
+            if(err & 0xFFFFF) {S7Client.Disconnect();}
             callback(new Error('PLC error'));
           }
           else {
@@ -1677,8 +1670,8 @@ GenericPLCAccessory.prototype = {
     if (this.platform.S7ClientConnect()) {
         S7Client.ReadArea(S7Client.S7AreaDB, db, offset, 1, S7Client.S7WLReal, function(err, res) {
           if(err) {
-            log.error(logprefix, "ReadArea failed #" + String(err) + " - " + S7Client.ErrorText(err));
-            S7Client.Disconnect();
+            log.error(logprefix, "ReadArea failed #" + err.toString(16) + " - " + S7Client.ErrorText(err));
+            if(err & 0xFFFFF) {S7Client.Disconnect();}
             callback(new Error('PLC error'));
           }
           else {
@@ -1723,8 +1716,8 @@ GenericPLCAccessory.prototype = {
         buf[0] = valuePLC;
         S7Client.WriteArea(S7Client.S7AreaDB, db, offset, 1, S7Client.S7WLByte, buf, function(err) {
           if(err) {
-            log.error(logprefix, "WriteArea failed #" + String(err) + " - " + S7Client.ErrorText(err));
-            S7Client.Disconnect();
+            log.error(logprefix, "WriteArea failed #" + err.toString(16) + " - " + S7Client.ErrorText(err));
+            if(err & 0xFFFFF) {S7Client.Disconnect();}
             callback(new Error('PLC error'));
           }
           else {
@@ -1759,8 +1752,8 @@ GenericPLCAccessory.prototype = {
     if (this.platform.S7ClientConnect()) {
         S7Client.ReadArea(S7Client.S7AreaDB, db, offset, 1, S7Client.S7WLByte, function(err, res) {
           if(err) {
-            log.error(logprefix, "ReadArea failed #" + String(err) + " - " + S7Client.ErrorText(err));
-            S7Client.Disconnect();
+            log.error(logprefix, "ReadArea failed #" + err.toString(16) + " - " + S7Client.ErrorText(err));
+            if(err & 0xFFFFF) {S7Client.Disconnect();}
             callback(new Error('PLC error'));
           }
           else {
@@ -1806,8 +1799,8 @@ GenericPLCAccessory.prototype = {
         buf.writeInt16BE(valuePLC, 0);
         S7Client.WriteArea(S7Client.S7AreaDB, db, offset, 1, S7Client.S7WLWord, buf, function(err) {
           if(err) {
-            log.error(logprefix, "WriteArea failed #" + String(err) + " - " + S7Client.ErrorText(err));
-            S7Client.Disconnect();
+            log.error(logprefix, "WriteArea failed #" + err.toString(16) + " - " + S7Client.ErrorText(err));
+            if(err & 0xFFFFF) {S7Client.Disconnect();}
             callback(new Error('PLC error'));
           }
           else {
@@ -1843,8 +1836,8 @@ GenericPLCAccessory.prototype = {
     if (this.platform.S7ClientConnect()) {
         S7Client.ReadArea(S7Client.S7AreaDB, db, offset, 1, S7Client.S7WLWord, function(err, res) {
           if(err) {
-            log.error(logprefix, "ReadArea failed #" + String(err) + " - " + S7Client.ErrorText(err));
-            S7Client.Disconnect();
+            log.error(logprefix, "ReadArea failed #" + err.toString(16) + " - " + S7Client.ErrorText(err));
+            if(err & 0xFFFFF) {S7Client.Disconnect();}
             callback(new Error('PLC error'));
           }
           else {
@@ -1890,8 +1883,8 @@ GenericPLCAccessory.prototype = {
         buf.writeInt32BE(valuePLC, 0);
         S7Client.WriteArea(S7Client.S7AreaDB, db, offset, 1, S7Client.S7WLDWord, buf, function(err) {
           if(err) {
-            log.error(logprefix, "WriteArea failed #" + String(err) + " - " + S7Client.ErrorText(err));
-            S7Client.Disconnect();
+            log.error(logprefix, "WriteArea failed #" + err.toString(16) + " - " + S7Client.ErrorText(err));
+            if(err & 0xFFFFF) {S7Client.Disconnect();}
             callback(new Error('PLC error'));
           }
           else {
@@ -1927,8 +1920,8 @@ GenericPLCAccessory.prototype = {
     if (this.platform.S7ClientConnect()) {
         S7Client.ReadArea(S7Client.S7AreaDB, db, offset, 1, S7Client.S7WLDWord, function(err, res) {
           if(err) {
-            log.error(logprefix, "ReadArea failed #" + String(err) + " - " + S7Client.ErrorText(err));
-            S7Client.Disconnect();
+            log.error(logprefix, "ReadArea failed #" + err.toString(16) + " - " + S7Client.ErrorText(err));            
+            if(err & 0xFFFFF) {S7Client.Disconnect();}
             callback(new Error('PLC error'));
           }
           else {
