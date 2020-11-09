@@ -314,7 +314,7 @@ Lock mechanism (not yet clear how to use changes are welcome)
   	- `2`: jammed
   	- `3`: unknown
 - `get_LockTargetState`: offset to read target state current state S7 type `Byte` e.g. `3` for `DB4DBB3`
-- `0`: unsecured
+  - `0`: unsecured
   - `1`: secured
 - `set_LockTargetState`:  offset to write target state current state S7 type `Byte` e.g. `3` for `DB4DBB3`
   - `0`: unsecured
@@ -329,18 +329,18 @@ Lock mechanism implemented as bool on the PLC. **NOTE: The convention `0`:closed
 - `pollInterval` (optional) poll interval in seconds. Default value is `10` seconds.
 - `forceCurrentState`: (optional) when set to `true` the position set by set_LockTargetState` is directly used as current state. By this it seems in tha ome app as the target state was directly reached. This is recommended when not sing `enablePolling` or pushing the value from the plc.
 - `get_LockCurrentState`: offset to read current state current state S7 type `Bool` .g. `3.1` for `DB4DBB3`
-	- `0`: secured
-	- `1`: unsecured
+  - `0`: secured
+  - `1`: unsecured
 - `get_LockTargetState`: offset to read target state current state S7 type `Bool` e.. `3.1` for `DB4DBB3`
 	- `0`: secured
 	- `1`: unsecured
 - Single Bit for secure/unsecured:
-	- `set_LockTargetState`:  offset to write target state current state S7 type `Bool` e.g. `3.1` for `DB4DBB3`
-		- `0`: secured
-		- `1`: unsecured
+  - `set_LockTargetState`:  offset to write target state current state S7 type `Bool` e.g. `3.1` for `DB4DBB3`
+    - `0`: secured
+    - `1`: unsecured
 - Separate Bits for secure/unsecured:
   - `set_Secured`: offset and bit set to 1 when switching to target state secured S7 type `Bool` **PLC has to set to 0** e.g. `3.3` for `DB4DBX55.1`
-	- `set_Unsecured`: offset and bit set to 1 when switching to target state unsecured S7 type `Bool` **PLC has to set to 0** e.g. `3.4` for `DB4DBX55.2`
+  - `set_Unsecured`: offset and bit set to 1 when switching to target state unsecured S7 type `Bool` **PLC has to set to 0** e.g. `3.4` for `DB4DBX55.2`
 
 
 ### <a name='PLC_GarageDoorOpener'></a>Garage door as `PLC_GarageDoorOpener` (experimental)
@@ -377,168 +377,176 @@ Lock mechanism (not yet clear how to use changes are welcome)
 
 
 #### config.json Example
-Note: The example is just an example it contains also some optional settings
-{	
-	"bridge": {
+Note: The example is just an example it contains also some optional settings. For testing purposes all accessories are set to one DB.
+
+	{	
+		"bridge": {
 			"name": "Homebridge DEMO",
 			"username": "0E:54:47:36:82:26",
 			"port": 52609,
 			"pin": "031-55-155"
-	},
-	"accessories": [],	
-	"platforms": [
-		{
+		},
+		"accessories": [],	
+		"platforms": [
+			{
 				"name": "Config",
-				"port": 80,
+				"port": 8080,
 				"platform": "config"
-		},				
-		{
-			"platform": "PLC",
-			"ip": "10.10.10.99",
-			"rack": 0,
-			"slot": 2,
-			"enablePolling": true,
-			"accessories": [
-				{
+			},
+			{
+				"platform": "PLC",
+				"ip": "10.10.10.32",
+				"rack": 0,
+				"slot": 2,
+				"enablePolling": true,
+				"accessories": [
+					{
 						"accessory": "PLC_LightBulb",
 						"name": "LightBulb0",
 						"manufacturer": "normal light bulb",
-						"db": 6061,
-						"get_On": 0.7,
-						"set_On": 1.1,
-						"set_Off": 1.7
-				},
-				{
+						"enablePolling": true,
+						"db": 12,
+						"get_On": 0.0,
+						"set_On": 0.1,
+						"set_Off": 0.2
+					},
+					{
 						"accessory": "PLC_LightBulb",
 						"name": "LightBulb1",
 						"manufacturer": "with dim function",
-						"db": 6062,
-						"get_On": 2.1,
-						"set_On": 2.2,
-						"set_Off": 2.3,
-						"get_Brightness": 4,
-						"set_Brightness": 4
-				},
-				{
+						"enablePolling": true,
+						"db": 12,
+						"get_On": 2.0,
+						"set_On": 2.1,
+						"set_Off": 2.2,
+						"get_Brightness": 1,
+						"set_Brightness": 1
+					},
+					{
 						"accessory": "PLC_LightBulb",
 						"name": "LightBulb2",
 						"manufacturer": "single bit for on/off",
-						"db": 6094,
-						"get_On": 1.1,
-						"set_On": 1.1
-				},
-				{
+						"enablePolling": true,
+						"db": 12,
+						"get_On": 2.3,
+						"set_On": 2.3
+					},
+					{
 						"accessory": "PLC_Outlet",
 						"name": "Outlet",
-						"db": 6107,
-						"get_On": 0.7,
-						"set_On": 1.1,
-						"set_Off": 1.7
-				},
-				{
+						"enablePolling": true,
+						"db": 12,
+						"get_On": 2.4,
+						"set_On": 2.5
+					},
+					{
 						"accessory": "PLC_Switch",
 						"name": "Switch",
-						"db": 6107,
-						"get_On": 0.7,
-						"set_On": 1.1,
-						"set_Off": 1.7
-				},
-				{
+						"enablePolling": true,
+						"db": 12,
+						"get_On": 2.6,
+						"set_On": 2.7,
+						"set_Off": 3.0
+					},
+					{
 						"accessory": "PLC_TemperatureSensor",
 						"name": "Temperature",
-						"db": 6107,
-						"get_CurrentTemperature": 55,
+						"db": 12,
+						"get_CurrentTemperature": 4,
 						"enablePolling": true,
 						"pollInterval": 60
-				},
-				{
+					},
+					{
 						"accessory": "PLC_HumiditySensor",
 						"name": "Humidity",
-						"db": 1901,
-						"get_CurrentRelativeHumidity": 55,
+						"db": 12,
+						"get_CurrentRelativeHumidity": 8,
 						"enablePolling": true,
-						"pollInterval": 16
-				},
-				{
+						"pollInterval": 120
+					},
+					{
 						"accessory": "PLC_Thermostat",
 						"name": "Thermostat",
 						"manufacturer": "ground floor",
-						"db": 6601,
-						"get_CurrentTemperature": 0,
-						"get_TargetTemperature": 4,
-						"set_TargetTemperature": 12,
-						"get_CurrentHeaterCoolerState": 10
-				},
-				{
+						"db": 12,
+						"enablePolling": true,
+						"get_CurrentTemperature": 12,
+						"get_TargetTemperature": 16,
+						"set_TargetTemperature": 16,
+						"get_CurrentHeaterCoolerState": 20
+					},
+					{
 						"accessory": "PLC_WindowCovering",
 						"name": "Blind",
 						"manufacturer": "ground floor",
-						"db": 2602,
+						"db": 12,
 						"invert": false,
 						"adaptivePolling": true,
 						"adaptivePollingInterval": 1,
 						"enablePolling": true,
 						"pollInterval": 180,
-						"get_CurrentPosition": 0,
-						"get_TargetPosition": 1,
+						"get_CurrentPosition": 21,
+						"get_TargetPosition": 22,
 						"set_TargetPosition": 1
-				},
-				{
+					},
+					{
 						"accessory": "PLC_Window",
 						"name": "Window",
 						"manufacturer": "ground floor",
 						"enablePolling": true,
 						"pollInterval": 60,
-						"db": 2008,
-						"get_CurrentPosition": 5,
+						"db": 12,
+						"get_CurrentPosition": 23,
 						"mapGet": [
 								0,
 								25,
 								100
 						]
-				},
-				{
+					},
+					{
 						"accessory": "PLC_Door",
 						"name": "Door",
 						"manufacturer": "ground floor",
 						"enablePolling": true,
 						"pollInterval": 10,
-						"db": 2008,
-						"get_CurrentPosition": 49,
+						"db": 12,
+						"get_CurrentPosition": 24,
 						"mapGet": [
 								0,
 								100
 						]
-				},
-				{
+					},
+					{
 						"accessory": "PLC_OccupancySensor",
 						"name": "Presence",
-						"db": 6510,
-						"get_OccupancyDetected": 24
-				},
-				{
+						"enablePolling": true,
+						"db": 12,
+						"get_OccupancyDetected": 25.0
+					},
+					{
 						"accessory": "PLC_MotionSensor",
 						"name": "Motion",
-						"db": 1902,
-						"get_MotionDetected": 0.5
-				},
-				{
+						"enablePolling": true,
+						"db": 12,
+						"get_MotionDetected": 25.1
+					},
+					{
 						"accessory": "PLC_ContactSensor",
 						"name": "ContactSensor",
 						"enablePolling": true,
 						"pollInterval": 5,
-						"db": 6094,
-						"get_ContactSensorState": 0
-				},
-				{
+						"db": 12,
+						"get_ContactSensorState": 25.2
+					},
+					{
 						"accessory": "PLC_SecuritySystem",
 						"name": "AlarmSystem",
-						"db": 1014,
+						"db": 12,
 						"enablePolling": true,
 						"pollInterval": 60,
-						"get_SecuritySystemCurrentState": 1,
-						"set_SecuritySystemTargetState": 0,
-						"get_SecuritySystemTargetState": 0,
+						"get_SecuritySystemCurrentState": 26,
+						"set_SecuritySystemTargetState": 27,
+						"get_SecuritySystemTargetState": 27,
 						"mapGet": [
 								1,
 								1,
@@ -552,59 +560,73 @@ Note: The example is just an example it contains also some optional settings
 								1,
 								3
 						]
-				},
-				{
+					},
+					{
 						"accessory": "PLC_Faucet",
 						"name": "Faucet",
-						"db": 6096,
-						"get_Active": 1.1,
-						"set_Active": 1.1
-				},
-				{
+						"enablePolling": true,
+						"db": 12,
+						"get_Active": 28.0,
+						"set_Active": 28.0
+					},
+					{
 						"accessory": "PLC_Valve",
 						"name": "Valve",
-						"db": 6096,
+						"db": 12,
+						"enablePolling": true,
 						"ValveType": 2,
-						"get_Active": 1.1,
-						"set_Active": 1.1,
-						"get_SetDuration": 4,
-						"set_SetDuration": 4,
-						"get_RemainingDuration": 8
-				},
-				{
+						"get_Active": 28.1,
+						"set_Active": 29.1,
+						"get_SetDuration": 30,
+						"set_SetDuration": 30,
+						"get_RemainingDuration": 34
+					},
+					{
 						"accessory": "PLC_StatelessProgrammableSwitch",
 						"name": "Stateless Switch",
 						"enablePolling": true,
 						"pollInterval": 30,
 						"db": 12,
-						"isEvent": 0.1,
-						"get_ProgrammableSwitchEvent": 1
-				},
-				{
+						"isEvent": 38,
+						"get_ProgrammableSwitchEvent": 
+					},
+					{
 						"accessory": "PLC_LockMechanism",
-						"name": "LockMechanism",
-						"db": 13,
+						"name": "Lock",
+						"db": 12,
+						"enablePolling": true,
 						"isEvent": 0.1,
-						"get_LockCurrentState": 1,
-						"get_LockTargetState": 2,
-						"set_LockTargetState": 3
-				},
-				{
+						"get_LockCurrentState": 39,
+						"get_LockTargetState": 40,
+						"set_LockTargetState": 40
+					},
+					{
+						"accessory": "PLC_LockMechanismBool",
+						"name": "LockBool",
+						"db": 12,
+						"enablePolling": true,
+						"isEvent": 0.1,
+						"get_LockCurrentState": 41.0,
+						"get_LockTargetState": 41.1,
+						"set_LockTargetState": 41.1
+					},
+					{
 						"accessory": "PLC_GarageDoorOpener",
-						"name": "GarageDoorOpener",
-						"db": 14,
-						"get_ObstructionDetected": 0.1,
-						"get_CurrentDoorState": 1,
-						"get_TargetDoorState": 2,
-						"set_TargetDoorState": 2,
-						"get_LockCurrentState": 3,
-						"get_LockTargetState": 4,
-						"set_LockTargetState": 4
-				}
-			]
-		}
-	]		
-}
+						"name": "GarageDoor",
+						"db": 12,
+						"enablePolling": true,
+						"get_ObstructionDetected": 41.2,
+						"get_CurrentDoorState": 42,
+						"get_TargetDoorState": 43,
+						"set_TargetDoorState": 43,
+						"get_LockCurrentState": 44,
+						"get_LockTargetState": 45,
+						"set_LockTargetState": 45
+					}
+				]
+			}
+		]
+	}
 
 # Update of values
 The home app does not regularly poll for updates of values. Only when switching rooms or close/open the app the actual values are requested.
