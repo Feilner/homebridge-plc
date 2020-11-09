@@ -1316,9 +1316,9 @@ GenericPLCAccessory.prototype = {
     }
     else if (this.config.accessory == 'PLC_Thermostat') {
       // get the current target system state and update the value.
-      this.service.getCharacteristic(Characteristic.TemperatureSensor).getValue(function(err, value) {
+      this.service.getCharacteristic(Characteristic.CurrentTemperature).getValue(function(err, value) {
         if (!err) {
-          this.service.getCharacteristic(Characteristic.TemperatureSensor).updateValue(value);
+          this.service.getCharacteristic(Characteristic.CurrentTemperature).updateValue(value);
         }
       }.bind(this));
       this.service.getCharacteristic(Characteristic.TargetTemperature).getValue(function(err, value) {
