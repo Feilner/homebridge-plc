@@ -714,7 +714,7 @@ function GenericPLCAccessory(platform, config) {
     if ('ValveType' in config) {
       this.service.getCharacteristic(Characteristic.ValveType)
         .on('get', function(callback) {this.getDummy(callback,
-          ValveType,
+          config.ValveType,
         'get ValveType'
         )}.bind(this));
     }
