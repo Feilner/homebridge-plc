@@ -889,13 +889,6 @@ function GenericPLCAccessory(platform, config) {
       "get LockCurrentState"
     )}.bind(this));
 
-    this.service.getCharacteristic(Characteristic.LockCurrentState)
-      .on('get', function(callback) {this.getByte(callback,
-        config.db,
-        config.get_LockCurrentState,
-        "get LockCurrentState"
-      )}.bind(this));
-
     this.service.getCharacteristic(Characteristic.LockTargetState)
     .on('get', function(callback) {this.getByte(callback,
       config.db,
@@ -1519,7 +1512,7 @@ GenericPLCAccessory.prototype = {
       this.buf[0] = 1;
       S7Client.WriteArea(S7Client.S7AreaDB, db, ((offset*8) + bit), 1, S7Client.S7WLBit, this.buf, function(err) {
         if(err) {
-          log.error(logprefix, "WriteArea failed #" + String(err,16) + " - " + S7Client.ErrorText(err));
+          log.error(logprefix, "WriteArea failed #" + err.toString(16) + " - " + S7Client.ErrorText(err));
           if(err & 0xFFFFF) {S7Client.Disconnect();}
           callback(new Error('PLC error'));
         }
@@ -1557,7 +1550,7 @@ GenericPLCAccessory.prototype = {
       this.buf[0] = valuePLC ? 1 : 0;
       S7Client.WriteArea(S7Client.S7AreaDB, db, ((offset*8) + bit), 1, S7Client.S7WLBit, this.buf, function(err) {
         if(err) {
-          log.error(logprefix, "WriteArea failed #" + String(err,16) + " - " + S7Client.ErrorText(err));
+          log.error(logprefix, "WriteArea failed #" + err.toString(16) + " - " + S7Client.ErrorText(err));
           if(err & 0xFFFFF) {S7Client.Disconnect();}
           callback(new Error('PLC error'));
         }
@@ -1596,7 +1589,7 @@ GenericPLCAccessory.prototype = {
     if (this.platform.S7ClientConnect()) {
       S7Client.ReadArea(S7Client.S7AreaDB, db, ((offset*8) + bit), 1, S7Client.S7WLBit, function(err, res) {
         if(err) {
-          log.error(logprefix, "ReadArea failed #" + String(err,16) + " - " + S7Client.ErrorText(err));
+          log.error(logprefix, "ReadArea failed #" + err.toString(16) + " - " + S7Client.ErrorText(err));
           if(err & 0xFFFFF) {S7Client.Disconnect();}
           callback(err, 0);
         }
@@ -1641,7 +1634,7 @@ GenericPLCAccessory.prototype = {
         buf.writeFloatBE(valuePLC, 0);
         S7Client.WriteArea(S7Client.S7AreaDB, db, offset, 1, S7Client.S7WLReal, buf, function(err) {
           if(err) {
-            log.error(logprefix, "WriteArea failed #" + String(err,16) + " - " + S7Client.ErrorText(err));
+            log.error(logprefix, "WriteArea failed #" + err.toString(16) + " - " + S7Client.ErrorText(err));
             if(err & 0xFFFFF) {S7Client.Disconnect();}
             callback(new Error('PLC error'));
           }
@@ -1677,7 +1670,7 @@ GenericPLCAccessory.prototype = {
     if (this.platform.S7ClientConnect()) {
         S7Client.ReadArea(S7Client.S7AreaDB, db, offset, 1, S7Client.S7WLReal, function(err, res) {
           if(err) {
-            log.error(logprefix, "ReadArea failed #" + String(err,16) + " - " + S7Client.ErrorText(err));
+            log.error(logprefix, "ReadArea failed #" + err.toString(16) + " - " + S7Client.ErrorText(err));
             if(err & 0xFFFFF) {S7Client.Disconnect();}
             callback(new Error('PLC error'));
           }
@@ -1723,7 +1716,7 @@ GenericPLCAccessory.prototype = {
         buf[0] = valuePLC;
         S7Client.WriteArea(S7Client.S7AreaDB, db, offset, 1, S7Client.S7WLByte, buf, function(err) {
           if(err) {
-            log.error(logprefix, "WriteArea failed #" + String(err,16) + " - " + S7Client.ErrorText(err));
+            log.error(logprefix, "WriteArea failed #" + err.toString(16) + " - " + S7Client.ErrorText(err));
             if(err & 0xFFFFF) {S7Client.Disconnect();}
             callback(new Error('PLC error'));
           }
@@ -1759,7 +1752,7 @@ GenericPLCAccessory.prototype = {
     if (this.platform.S7ClientConnect()) {
         S7Client.ReadArea(S7Client.S7AreaDB, db, offset, 1, S7Client.S7WLByte, function(err, res) {
           if(err) {
-            log.error(logprefix, "ReadArea failed #" + String(err,16) + " - " + S7Client.ErrorText(err));
+            log.error(logprefix, "ReadArea failed #" + err.toString(16) + " - " + S7Client.ErrorText(err));
             if(err & 0xFFFFF) {S7Client.Disconnect();}
             callback(new Error('PLC error'));
           }
@@ -1806,7 +1799,7 @@ GenericPLCAccessory.prototype = {
         buf.writeInt16BE(valuePLC, 0);
         S7Client.WriteArea(S7Client.S7AreaDB, db, offset, 1, S7Client.S7WLWord, buf, function(err) {
           if(err) {
-            log.error(logprefix, "WriteArea failed #" + String(err,16) + " - " + S7Client.ErrorText(err));
+            log.error(logprefix, "WriteArea failed #" + err.toString(16) + " - " + S7Client.ErrorText(err));
             if(err & 0xFFFFF) {S7Client.Disconnect();}
             callback(new Error('PLC error'));
           }
@@ -1843,7 +1836,7 @@ GenericPLCAccessory.prototype = {
     if (this.platform.S7ClientConnect()) {
         S7Client.ReadArea(S7Client.S7AreaDB, db, offset, 1, S7Client.S7WLWord, function(err, res) {
           if(err) {
-            log.error(logprefix, "ReadArea failed #" + String(err,16) + " - " + S7Client.ErrorText(err));
+            log.error(logprefix, "ReadArea failed #" + err.toString(16) + " - " + S7Client.ErrorText(err));
             if(err & 0xFFFFF) {S7Client.Disconnect();}
             callback(new Error('PLC error'));
           }
@@ -1890,7 +1883,7 @@ GenericPLCAccessory.prototype = {
         buf.writeInt32BE(valuePLC, 0);
         S7Client.WriteArea(S7Client.S7AreaDB, db, offset, 1, S7Client.S7WLDWord, buf, function(err) {
           if(err) {
-            log.error(logprefix, "WriteArea failed #" + String(err,16) + " - " + S7Client.ErrorText(err));
+            log.error(logprefix, "WriteArea failed #" + err.toString(16) + " - " + S7Client.ErrorText(err));
             if(err & 0xFFFFF) {S7Client.Disconnect();}
             callback(new Error('PLC error'));
           }
@@ -1927,7 +1920,7 @@ GenericPLCAccessory.prototype = {
     if (this.platform.S7ClientConnect()) {
         S7Client.ReadArea(S7Client.S7AreaDB, db, offset, 1, S7Client.S7WLDWord, function(err, res) {
           if(err) {
-            log.error(logprefix, "ReadArea failed #" + String(err,16) + " - " + S7Client.ErrorText(err));            
+            log.error(logprefix, "ReadArea failed #" + err.toString(16) + " - " + S7Client.ErrorText(err));            
             if(err & 0xFFFFF) {S7Client.Disconnect();}
             callback(new Error('PLC error'));
           }

@@ -23,7 +23,7 @@ SIEMENS S7 PLC plugin for [Homebridge](https://homebridge.io)
   * [Temperature Sensor as `PLC_TemperatureSensor`](#PLC_TemperatureSensor)
   * [Humidity Sensor as `PLC_HumiditySensor`](#PLC_HumiditySensor)
   * [Thermostat as `PLC_Thermostat`](#PLC_Thermostat)
-  * [Shutter as `PLC_WindowCovering`,](#PLC_Window)
+  * [Shutter as `PLC_WindowCovering`](#PLC_Window)
   * [Window as `PLC_Window`](#PLC_Window)
   * [Door as `PLC_Door`](#PLC_Window)
   * [Occupancy Sensor as `PLC_OccupancySensor`](#PLC_OccupancySensor)
@@ -378,8 +378,7 @@ Lock mechanism (not yet clear how to use changes are welcome)
 
 #### config.json Example
 Note: The example is just an example it contains also some optional settings
-{
-	{
+{	
 	"bridge": {
 			"name": "Homebridge DEMO",
 			"username": "0E:54:47:36:82:26",
