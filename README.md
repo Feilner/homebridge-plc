@@ -378,233 +378,233 @@ Lock mechanism (not yet clear how to use changes are welcome)
 
 #### config.json Example
 Note: The example is just an example it contains also some optional settings
-
+{
+	{
+	"bridge": {
+			"name": "Homebridge DEMO",
+			"username": "0E:54:47:36:82:26",
+			"port": 52609,
+			"pin": "031-55-155"
+	},
+	"accessories": [],	
+	"platforms": [
 		{
-		"bridge": {
-				"name": "Homebridge DEMO",
-				"username": "0E:54:47:36:82:26",
-				"port": 52609,
-				"pin": "031-55-155"
-		},
-		"platforms": [
+				"name": "Config",
+				"port": 80,
+				"platform": "config"
+		},				
+		{
+			"platform": "PLC",
+			"ip": "10.10.10.99",
+			"rack": 0,
+			"slot": 2,
+			"enablePolling": true,
+			"accessories": [
 				{
-						"platform": "PLC",
-						"ip": "10.10.10.99",
-						"rack": 0,
-						"slot": 2,
+						"accessory": "PLC_LightBulb",
+						"name": "LightBulb0",
+						"manufacturer": "normal light bulb",
+						"db": 6061,
+						"get_On": 0.7,
+						"set_On": 1.1,
+						"set_Off": 1.7
+				},
+				{
+						"accessory": "PLC_LightBulb",
+						"name": "LightBulb1",
+						"manufacturer": "with dim function",
+						"db": 6062,
+						"get_On": 2.1,
+						"set_On": 2.2,
+						"set_Off": 2.3,
+						"get_Brightness": 4,
+						"set_Brightness": 4
+				},
+				{
+						"accessory": "PLC_LightBulb",
+						"name": "LightBulb2",
+						"manufacturer": "single bit for on/off",
+						"db": 6094,
+						"get_On": 1.1,
+						"set_On": 1.1
+				},
+				{
+						"accessory": "PLC_Outlet",
+						"name": "Outlet",
+						"db": 6107,
+						"get_On": 0.7,
+						"set_On": 1.1,
+						"set_Off": 1.7
+				},
+				{
+						"accessory": "PLC_Switch",
+						"name": "Switch",
+						"db": 6107,
+						"get_On": 0.7,
+						"set_On": 1.1,
+						"set_Off": 1.7
+				},
+				{
+						"accessory": "PLC_TemperatureSensor",
+						"name": "Temperature",
+						"db": 6107,
+						"get_CurrentTemperature": 55,
 						"enablePolling": true,
-						"accessories": [
-								{
-										"accessory": "PLC_LightBulb",
-										"name": "LightBulb0",
-										"manufacturer": "normal light bulb",
-										"db": 6061,
-										"get_On": 0.7,
-										"set_On": 1.1,
-										"set_Off": 1.7
-								},
-								{
-										"accessory": "PLC_LightBulb",
-										"name": "LightBulb1",
-										"manufacturer": "with dim function",
-										"db": 6062,
-										"get_On": 2.1,
-										"set_On": 2.2,
-										"set_Off": 2.3,
-										"get_Brightness": 4,
-										"set_Brightness": 4
-								},
-								{
-										"accessory": "PLC_LightBulb",
-										"name": "LightBulb2",
-										"manufacturer": "single bit for on/off",
-										"db": 6094,
-										"get_On": 1.1,
-										"set_On": 1.1
-								},
-								{
-										"accessory": "PLC_Outlet",
-										"name": "Outlet",
-										"db": 6107,
-										"get_On": 0.7,
-										"set_On": 1.1,
-										"set_Off": 1.7
-								},
-								{
-										"accessory": "PLC_Switch",
-										"name": "Switch",
-										"db": 6107,
-										"get_On": 0.7,
-										"set_On": 1.1,
-										"set_Off": 1.7
-								},
-								{
-										"accessory": "PLC_TemperatureSensor",
-										"name": "Temperature",
-										"db": 6107,
-										"get_CurrentTemperature": 55,
-										"enablePolling": true,
-										"pollInterval": 60
-								},
-								{
-										"accessory": "PLC_HumiditySensor",
-										"name": "Humidity",
-										"db": 1901,
-										"get_CurrentRelativeHumidity": 55,
-										"enablePolling": true,
-										"pollInterval": 16
-								},
-								{
-										"accessory": "PLC_Thermostat",
-										"name": "Thermostat",
-										"manufacturer": "ground floor",
-										"db": 6601,
-										"get_CurrentTemperature": 0,
-										"get_TargetTemperature": 4,
-										"set_TargetTemperature": 12,
-										"get_CurrentHeaterCoolerState": 10
-								},
-								{
-										"accessory": "PLC_WindowCovering",
-										"name": "Blind",
-										"manufacturer": "ground floor",
-										"db": 2602,
-										"invert": false,
-										"adaptivePolling": true,
-										"adaptivePollingInterval": 1,
-										"enablePolling": true,
-										"pollInterval": 180,
-										"get_CurrentPosition": 0,
-										"get_TargetPosition": 1,
-										"set_TargetPosition": 1
-								},
-								{
-										"accessory": "PLC_Window",
-										"name": "Window",
-										"manufacturer": "ground floor",
-										"enablePolling": true,
-										"pollInterval": 60,
-										"db": 2008,
-										"get_CurrentPosition": 5,
-										"mapGet": [
-												0,
-												25,
-												100
-										]
-								},
-								{
-										"accessory": "PLC_Door",
-										"name": "Door",
-										"manufacturer": "ground floor",
-										"enablePolling": true,
-										"pollInterval": 10,
-										"db": 2008,
-										"get_CurrentPosition": 49,
-										"mapGet": [
-												0,
-												100
-										]
-								},
-								{
-										"accessory": "PLC_OccupancySensor",
-										"name": "Presence",
-										"db": 6510,
-										"get_OccupancyDetected": 24
-								},
-								{
-										"accessory": "PLC_MotionSensor",
-										"name": "Motion",
-										"db": 1902,
-										"get_MotionDetected": 0.5
-								},
-								{
-										"accessory": "PLC_ContactSensor",
-										"name": "ContactSensor",
-										"enablePolling": true,
-										"pollInterval": 5,
-										"db": 6094,
-										"get_ContactSensorState": 0
-								},
-								{
-										"accessory": "PLC_SecuritySystem",
-										"name": "AlarmSystem",
-										"db": 1014,
-										"enablePolling": true,
-										"pollInterval": 60,
-										"get_SecuritySystemCurrentState": 1,
-										"set_SecuritySystemTargetState": 0,
-										"get_SecuritySystemTargetState": 0,
-										"mapGet": [
-												1,
-												1,
-												1,
-												3,
-												4
-										],
-										"mapSet": [
-												1,
-												1,
-												1,
-												3
-										]
-								},
-								{
-										"accessory": "PLC_Faucet",
-										"name": "Faucet",
-										"db": 6096,
-										"get_Active": 1.1,
-										"set_Active": 1.1
-								},
-								{
-										"accessory": "PLC_Valve",
-										"name": "Valve",
-										"db": 6096,
-										"ValveType": 2,
-										"get_Active": 1.1,
-										"set_Active": 1.1,
-										"get_SetDuration": 4,
-										"set_SetDuration": 4,
-										"get_RemainingDuration": 8
-								},
-								{
-										"accessory": "PLC_StatelessProgrammableSwitch",
-										"name": "Stateless Switch",
-										"enablePolling": true,
-										"pollInterval": 30,
-										"db": 12,
-										"isEvent": 0.1,
-										"get_ProgrammableSwitchEvent": 1
-								},
-								{
-										"accessory": "PLC_LockMechanism",
-										"name": "LockMechanism",
-										"db": 13,
-										"isEvent": 0.1,
-										"get_LockCurrentState": 1,
-										"get_LockTargetState": 2,
-										"set_LockTargetState": 3
-								},
-								{
-										"accessory": "PLC_GarageDoorOpener",
-										"name": "GarageDoorOpener",
-										"db": 14,
-										"get_ObstructionDetected": 0.1,
-										"get_CurrentDoorState": 1,
-										"get_TargetDoorState": 2,
-										"set_TargetDoorState": 2,
-										"get_LockCurrentState": 3,
-										"get_LockTargetState": 4,
-										"set_LockTargetState": 4
-								}
+						"pollInterval": 60
+				},
+				{
+						"accessory": "PLC_HumiditySensor",
+						"name": "Humidity",
+						"db": 1901,
+						"get_CurrentRelativeHumidity": 55,
+						"enablePolling": true,
+						"pollInterval": 16
+				},
+				{
+						"accessory": "PLC_Thermostat",
+						"name": "Thermostat",
+						"manufacturer": "ground floor",
+						"db": 6601,
+						"get_CurrentTemperature": 0,
+						"get_TargetTemperature": 4,
+						"set_TargetTemperature": 12,
+						"get_CurrentHeaterCoolerState": 10
+				},
+				{
+						"accessory": "PLC_WindowCovering",
+						"name": "Blind",
+						"manufacturer": "ground floor",
+						"db": 2602,
+						"invert": false,
+						"adaptivePolling": true,
+						"adaptivePollingInterval": 1,
+						"enablePolling": true,
+						"pollInterval": 180,
+						"get_CurrentPosition": 0,
+						"get_TargetPosition": 1,
+						"set_TargetPosition": 1
+				},
+				{
+						"accessory": "PLC_Window",
+						"name": "Window",
+						"manufacturer": "ground floor",
+						"enablePolling": true,
+						"pollInterval": 60,
+						"db": 2008,
+						"get_CurrentPosition": 5,
+						"mapGet": [
+								0,
+								25,
+								100
 						]
 				},
 				{
-						"name": "Config",
-						"port": 80,
-						"platform": "config"
+						"accessory": "PLC_Door",
+						"name": "Door",
+						"manufacturer": "ground floor",
+						"enablePolling": true,
+						"pollInterval": 10,
+						"db": 2008,
+						"get_CurrentPosition": 49,
+						"mapGet": [
+								0,
+								100
+						]
+				},
+				{
+						"accessory": "PLC_OccupancySensor",
+						"name": "Presence",
+						"db": 6510,
+						"get_OccupancyDetected": 24
+				},
+				{
+						"accessory": "PLC_MotionSensor",
+						"name": "Motion",
+						"db": 1902,
+						"get_MotionDetected": 0.5
+				},
+				{
+						"accessory": "PLC_ContactSensor",
+						"name": "ContactSensor",
+						"enablePolling": true,
+						"pollInterval": 5,
+						"db": 6094,
+						"get_ContactSensorState": 0
+				},
+				{
+						"accessory": "PLC_SecuritySystem",
+						"name": "AlarmSystem",
+						"db": 1014,
+						"enablePolling": true,
+						"pollInterval": 60,
+						"get_SecuritySystemCurrentState": 1,
+						"set_SecuritySystemTargetState": 0,
+						"get_SecuritySystemTargetState": 0,
+						"mapGet": [
+								1,
+								1,
+								1,
+								3,
+								4
+						],
+						"mapSet": [
+								1,
+								1,
+								1,
+								3
+						]
+				},
+				{
+						"accessory": "PLC_Faucet",
+						"name": "Faucet",
+						"db": 6096,
+						"get_Active": 1.1,
+						"set_Active": 1.1
+				},
+				{
+						"accessory": "PLC_Valve",
+						"name": "Valve",
+						"db": 6096,
+						"ValveType": 2,
+						"get_Active": 1.1,
+						"set_Active": 1.1,
+						"get_SetDuration": 4,
+						"set_SetDuration": 4,
+						"get_RemainingDuration": 8
+				},
+				{
+						"accessory": "PLC_StatelessProgrammableSwitch",
+						"name": "Stateless Switch",
+						"enablePolling": true,
+						"pollInterval": 30,
+						"db": 12,
+						"isEvent": 0.1,
+						"get_ProgrammableSwitchEvent": 1
+				},
+				{
+						"accessory": "PLC_LockMechanism",
+						"name": "LockMechanism",
+						"db": 13,
+						"isEvent": 0.1,
+						"get_LockCurrentState": 1,
+						"get_LockTargetState": 2,
+						"set_LockTargetState": 3
+				},
+				{
+						"accessory": "PLC_GarageDoorOpener",
+						"name": "GarageDoorOpener",
+						"db": 14,
+						"get_ObstructionDetected": 0.1,
+						"get_CurrentDoorState": 1,
+						"get_TargetDoorState": 2,
+						"set_TargetDoorState": 2,
+						"get_LockCurrentState": 3,
+						"get_LockTargetState": 4,
+						"set_LockTargetState": 4
 				}
-		],
-		"accessories": []
+			]
+		}
+	]		
 }
 
 # Update of values
@@ -632,29 +632,29 @@ The value is assigned to all matching ('db' and 'offset') get_* accessory config
 For example the push from the PLC is done as 'http://homebridgeIp:8080/?push&db=1014&offset=1&value=3'
 With the following configuration:
 
-		{
-				"platforms": [
+	{
+		"platforms": [
+				{
+				"platform": "PLC",
+				"ip": "10.10.10.32",
+				"rack": 0,
+				"slot": 2,
+				"enablePush": true,
+				"accessories": [
 						{
-						"platform": "PLC",
-						"ip": "10.10.10.32",
-						"rack": 0,
-						"slot": 2,
-						"enablePush": true,
-						"accessories": [
-								{
-										"accessory": "PLC_SecuritySystem",
-										"name": "AlarmSystem",
-										"db": 1014,
-										"get_SecuritySystemCurrentState": 1,
-										"set_SecuritySystemTargetState": 1,
-										"get_SecuritySystemTargetState": 1
-								}
-						 ]
-					}
-				]
+								"accessory": "PLC_SecuritySystem",
+								"name": "AlarmSystem",
+								"db": 1014,
+								"get_SecuritySystemCurrentState": 1,
+								"set_SecuritySystemTargetState": 1,
+								"get_SecuritySystemTargetState": 1
+						}
+					]
 			}
+		]
+	}
 
-The value '3' disarmed will be used for both for get_SecuritySystemCurrentState as well as get_SecuritySystemTargetState.
+The value '3' disarmed will be used for both for 'get_SecuritySystemCurrentState' as well as 'get_SecuritySystemTargetState'.
 
 The Request has to be done as HTTP `PUT` or `GET` operation. There will be no logging when doing a `PUT` operation while there will be detailed output when during a `GET` operation. This in especially intended for testing with the browser as the browser performs a `GET` operation per default.
 
@@ -683,34 +683,34 @@ The value is assigned to the matching ('db' and 'offset') set_* accessory config
 
 The Request has to be done as HTTP `PUT` or `GET` operation. There will be no logging when doing a `PUT` operation while there will be detailed output when during a `GET` operation. This in especially intended for testing with the browser as the browser performs a `GET` operation per default.
 
-###  4.2. <a name='Format-1'></a>Format
-Example to switch a light bulb on from browser:
+### Format
+Example to switch a light bulb from browser. Lets say the light bulb has the following config:
+		
+	"platforms": [
+			{
+			"platform": "PLC",
+			"ip": "10.10.10.32",
+			"rack": 0,
+			"slot": 2,
+			"enableControl": true,
+			"accessories": [
+				{
+						"accessory": "PLC_LightBulb",
+						"name": "Light ",
+						"db": 6096,
+						"set_On": 1.1,
+						"set_Off": 1.0,
+						"get_On": 0.0
+				}
+			]
+		}
+	]			
 
-		{
-				"platforms": [
-						{
-						"platform": "PLC",
-						"ip": "10.10.10.32",
-						"rack": 0,
-						"slot": 2,
-						"enableControl": true,
-						"accessories": [
-								{
-										"accessory": "PLC_LightBulb",
-										"name": "Light ",
-										"db": 6096,
-										"set_On": 1.1,
-										"set_Off": 1.0,
-										"get_On": 0.0
-								}
-						 ]
-					}
-				]
-			}
+Use this to switch the light bulb on from browser:
 
 	http://homebridgeIp:8080/?push&db=6096&offset=1.1&value=1
 
-Example to switch a light bulb off from browser:
+Use this to switch the light bulb off from browser:
 
 	http://homebridgeIp:8080/?push&db=6096&offset=1.1&value=0
 
