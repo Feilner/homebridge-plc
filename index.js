@@ -1308,9 +1308,9 @@ GenericPLCAccessory.prototype = {
     }
     else if (this.config.accessory == 'PLC_HumiditySensor') {
       // get the current target system state and update the value.
-      this.service.getCharacteristic(Characteristic.HumiditySensor).getValue(function(err, value) {
+      this.service.getCharacteristic(Characteristic.CurrentRelativeHumidity).getValue(function(err, value) {
         if (!err) {
-          this.service.getCharacteristic(Characteristic.HumiditySensor).updateValue(value);
+          this.service.getCharacteristic(Characteristic.CurrentRelativeHumidity).updateValue(value);
         }
       }.bind(this));
     }
