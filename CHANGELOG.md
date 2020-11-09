@@ -4,11 +4,19 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.16] - 2020-11-09
+
+### Changed
+- Only disconnect to PLC on TCP errors mask 0x000fffff of snap7 error codes. Clint errors of PLC does no longer trigger reconnect
+
+### Changed
+- Documentation updated and added PLC examples
+
 ## [1.0.15] - 2020-11-07
 
 ### Changed
 - Documentation updated and added PLC examples
-- 
+
 ## [1.0.14] - 2020-11-06
 
 ### Fixed
