@@ -8,9 +8,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 - Only disconnect to PLC on TCP errors mask 0x000fffff of snap7 error codes. Clint errors of PLC does no longer trigger reconnect
+- Snap7 error codes are printed in hex values
+- Documentation extended
 
-### Changed
-- Documentation updated and added PLC examples
+### Fixed
+- Fix poll issue for `PLC_TemperatureSensor`, `PLC_HumiditySensor` and `PLC_Thermostat`
+- Fix double definition for `PLC_GarageDoorOpener`
 
 ## [1.0.15] - 2020-11-07
 
