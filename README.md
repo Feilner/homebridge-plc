@@ -17,25 +17,25 @@ SIEMENS S7 PLC plugin for [Homebridge](https://homebridge.io)
 - Supports [**push**](#push) from PLC to homebridge-plc plugin by http PUT/GET
 - Supports [**control**](#control) of PLC accessories by http PUT/GET (experimental)
 - Supported Accessories:
-  * [LightBulb as `PLC_LightBulb`](#PLC_LightBulb)
-  * [Outlet as `PLC_Outlet`](#PLC_Outlet)
-  * [Switch as `PLC_Switch`](#PLC_Switch)
-  * [Temperature Sensor as `PLC_TemperatureSensor`](#PLC_TemperatureSensor)
-  * [Humidity Sensor as `PLC_HumiditySensor`](#PLC_HumiditySensor)
-  * [Thermostat as `PLC_Thermostat`](#PLC_Thermostat)
-  * [Shutter as `PLC_WindowCovering`](#PLC_Window)
-  * [Window as `PLC_Window`](#PLC_Window)
-  * [Door as `PLC_Door`](#PLC_Window)
-  * [Occupancy Sensor as `PLC_OccupancySensor`](#PLC_OccupancySensor)
-  * [Motion Sensor as `PLC_MotionSensor`](#PLC_MotionSensor)
-  * [Contact Sensor as `PLC_ContactSensor`](#PLC_ContactSensor)
-  * [Security System as `PLC_SecuritySystem`](#PLC_SecuritySystem)
-  * [Faucet as `PLC_Faucet`](#PLC_Faucet)
-  * [Valve as `PLC_Valve`](#PLC_Valve)
-  * [Button as `PLC_StatelessProgrammableSwitch`](#PLC_StatelessProgrammableSwitch)
-  * [Lock mechanism as `PLC_LockMechanism`](#PLC_LockMechanism)
-  * [Boolean lock mechanism as `PLC_LockMechanismBool`](#PLC_LockMechanismBool)
-  * [Garage door as `PLC_GarageDoorOpener`](#PLC_GarageDoorOpener)
+	* [LightBulb as `PLC_LightBulb`](#PLC_LightBulb)
+	* [Outlet as `PLC_Outlet`](#PLC_Outlet)
+	* [Switch as `PLC_Switch`](#PLC_Switch)
+	* [Temperature Sensor as `PLC_TemperatureSensor`](#PLC_TemperatureSensor)
+	* [Humidity Sensor as `PLC_HumiditySensor`](#PLC_HumiditySensor)
+	* [Thermostat as `PLC_Thermostat`](#PLC_Thermostat)
+	* [Shutter as `PLC_WindowCovering`](#PLC_Window)
+	* [Window as `PLC_Window`](#PLC_Window)
+	* [Door as `PLC_Door`](#PLC_Window)
+	* [Occupancy Sensor as `PLC_OccupancySensor`](#PLC_OccupancySensor)
+	* [Motion Sensor as `PLC_MotionSensor`](#PLC_MotionSensor)
+	* [Contact Sensor as `PLC_ContactSensor`](#PLC_ContactSensor)
+	* [Security System as `PLC_SecuritySystem`](#PLC_SecuritySystem)
+	* [Faucet as `PLC_Faucet`](#PLC_Faucet)
+	* [Valve as `PLC_Valve`](#PLC_Valve)
+	* [Button as `PLC_StatelessProgrammableSwitch`](#PLC_StatelessProgrammableSwitch)
+	* [Lock mechanism as `PLC_LockMechanism`](#PLC_LockMechanism)
+	* [Boolean lock mechanism as `PLC_LockMechanismBool`](#PLC_LockMechanismBool)
+	* [Garage door as `PLC_GarageDoorOpener`](#PLC_GarageDoorOpener)
 
 
 # Installation
@@ -235,7 +235,7 @@ movement detection sensor
 		- `true`: motion detected
 
 ### <a name='PLC_ContactSensor'></a>Contact Sensor as `PLC_ContactSensor`
-contact sensor
+Generic contact sensor. The home app allows to display as window, door, blind/shutter, garage door or contact sensor.
 
 ![homebridge pic](doc/contactsensor.png)
 - `name`: unique name of the accessory
@@ -314,7 +314,7 @@ valve configurable as generic valve, irrigation, shower head or water faucet
 
 ### <a name='PLC_StatelessProgrammableSwitch'></a>Button as `PLC_StatelessProgrammableSwitch`
 stateless switch from PLC to home app. Trigger actions in home app only works with control center e.g. AppleTV or HomePod.
-It will works only in polling mode! The PLC sets a bit that is regularly polled by homebridge after successful reading a 1 of the event the bit it will report the event and set the bit to 0. Change 0->1 is done by PLC change from 1->0 is done by homebridge!
+It will works only in polling or push mode! The PLC sets a bit that is regularly polled by homebridge after successful reading a 1 of the event the bit it will report the event and set the bit to 0. Change 0->1 is done by PLC change from 1->0 is done by homebridge-plc! In push mode the new value is just pushed with the db and offset of `get_ProgrammableSwitchEvent`
 
 ![homebridge pic](doc/statelessswitch.png)
 - `name`: unique name of the accessory
@@ -322,33 +322,33 @@ It will works only in polling mode! The PLC sets a bit that is regularly polled 
 - `db`: s7 data base number e.g. `4` for `DB4`
 - `enablePolling`: (optional) when set to `true` the current state will be polled. It is mandatory as well to enable polling mode on platform level.
 - `pollInterval` (optional) poll interval in seconds. Default value is `10` seconds.
-- `isEvent` offset and bit that is polled when set to 1 by the PLC the event is read and the bit is set to 0 by homebridge S7 type `Bool` **PLC has to set to 0** e.g. `55.1` for `DB4DBX55.1`
-- `get_ProgrammableSwitchEvent`: offset to red current event of the switch. This is reported towards home app S7 type `Byte` e.g. `3` for `DB4DBB3`
+- `isEvent` offset and bit that is polled by homebridge-plc. **PLC has to set to `true`.**  When set to 1 the event is read from `get_ProgrammableSwitchEvent` and the bit is `false` by homebirdge-plc to confirm that the event is handled. S7 type `Bool` e.g. `55.1` for `DB4DBX55.1` (only used for polling)
+- `get_ProgrammableSwitchEvent`: offset to read current event of the switch. This is reported towards home app S7 type `Byte` e.g. `3` for `DB4DBB3`
 		- `0`: single press
 		- `1`: double press
 		- `2`: long press
 
-### <a name='PLC_LockMechanism'></a>Lock mechanism as `PLC_LockMechanism` 
+### <a name='PLC_LockMechanism'></a>Lock mechanism as `PLC_LockMechanism`
 Lock mechanism (not yet clear how to use changes are welcome)
 
 ![homebridge pic](doc/lock.png)
-  - `name`: unique name of the accessory
-  - `manufacturer`: (optional) description
-  - `db`: s7 data base number e.g. `4` for `DB4`
-  - `enablePolling`: (optional) when set to `true` the current state will be polled. It is mandatory as well to enable polling mode on platform level.
-  - `pollInterval` (optional) poll interval in seconds. Default value is `10` seconds.
-  - `forceCurrentState`: (optional) when set to `true` the position set by `set_LockTargetState` is directly used as current state. By this it seems in tha home app as the target state was directly reached. This is recommended when not using `enablePolling` or pushing the value from the plc.
-  - `get_LockCurrentState`: offset to read current state current state S7 type `Byte` e.g. `3` for `DB4DBB3`
-  	- `0`: unsecured
-  	- `1`: secured
-  	- `2`: jammed
-  	- `3`: unknown
+	- `name`: unique name of the accessory
+	- `manufacturer`: (optional) description
+	- `db`: s7 data base number e.g. `4` for `DB4`
+	- `enablePolling`: (optional) when set to `true` the current state will be polled. It is mandatory as well to enable polling mode on platform level.
+	- `pollInterval` (optional) poll interval in seconds. Default value is `10` seconds.
+	- `forceCurrentState`: (optional) when set to `true` the position set by `set_LockTargetState` is directly used as current state. By this it seems in tha home app as the target state was directly reached. This is recommended when not using `enablePolling` or pushing the value from the plc.
+	- `get_LockCurrentState`: offset to read current state current state S7 type `Byte` e.g. `3` for `DB4DBB3`
+		- `0`: unsecured
+		- `1`: secured
+		- `2`: jammed
+		- `3`: unknown
 - `get_LockTargetState`: offset to read target state current state S7 type `Byte` e.g. `3` for `DB4DBB3`
-  - `0`: unsecured
-  - `1`: secured
+	- `0`: unsecured
+	- `1`: secured
 - `set_LockTargetState`:  offset to write target state current state S7 type `Byte` e.g. `3` for `DB4DBB3`
-  - `0`: unsecured
-  - `1`: secured
+	- `0`: unsecured
+	- `1`: secured
 
 ### <a name='PLC_LockMechanismBool'></a>Boolean lock mechanism as `PLC_LockMechanismBool`
 Lock mechanism implemented as bool on the PLC. **NOTE: The convention `0`:closed/secured  `1`:open/unsecured**
@@ -361,18 +361,18 @@ Lock mechanism implemented as bool on the PLC. **NOTE: The convention `0`:closed
 - `pollInterval` (optional) poll interval in seconds. Default value is `10` seconds.
 - `forceCurrentState`: (optional) when set to `true` the position set by set_LockTargetState` is directly used as current state. By this it seems in tha ome app as the target state was directly reached. This is recommended when not sing `enablePolling` or pushing the value from the plc.
 - `get_LockCurrentState`: offset to read current state current state S7 type `Bool` .g. `3.1` for `DB4DBB3`
-  - `0`: secured
-  - `1`: unsecured
+	- `0`: secured
+	- `1`: unsecured
 - `get_LockTargetState`: offset to read target state current state S7 type `Bool` e.. `3.1` for `DB4DBB3`
 	- `0`: secured
 	- `1`: unsecured
 - Single Bit for secure/unsecured:
-  - `set_LockTargetState`:  offset to write target state current state S7 type `Bool` e.g. `3.1` for `DB4DBB3`
-    - `0`: secured
-    - `1`: unsecured
+	- `set_LockTargetState`:  offset to write target state current state S7 type `Bool` e.g. `3.1` for `DB4DBB3`
+		- `0`: secured
+		- `1`: unsecured
 - Separate Bits for secure/unsecured:
-  - `set_Secured`: offset and bit set to 1 when switching to target state secured S7 type `Bool` **PLC has to set to 0** e.g. `3.3` for `DB4DBX55.1`
-  - `set_Unsecured`: offset and bit set to 1 when switching to target state unsecured S7 type `Bool` **PLC has to set to 0** e.g. `3.4` for `DB4DBX55.2`
+	- `set_Secured`: offset and bit set to 1 when switching to target state secured S7 type `Bool` **PLC has to set to 0** e.g. `3.3` for `DB4DBX55.1`
+	- `set_Unsecured`: offset and bit set to 1 when switching to target state unsecured S7 type `Bool` **PLC has to set to 0** e.g. `3.4` for `DB4DBX55.2`
 
 
 ### <a name='PLC_GarageDoorOpener'></a>Garage door as `PLC_GarageDoorOpener` (experimental)
@@ -413,14 +413,14 @@ Lock mechanism (not yet clear how to use changes are welcome)
 #### config.json Example
 Note: The example is just an example it contains also some optional settings. For testing purposes all accessories are set to one DB.
 
-	{	
+	{
 		"bridge": {
 			"name": "Homebridge DEMO",
 			"username": "0E:54:47:36:82:26",
 			"port": 52609,
 			"pin": "031-55-155"
 		},
-		"accessories": [],	
+		"accessories": [],
 		"platforms": [
 			{
 				"name": "Config",
@@ -610,7 +610,7 @@ Note: The example is just an example it contains also some optional settings. Fo
 						"enablePolling": true,
 						"ValveType": 2,
 						"get_Active": 28.1,
-						"set_Active": 29.1,
+						"set_Active": 28.1,
 						"get_SetDuration": 30,
 						"set_SetDuration": 30,
 						"get_RemainingDuration": 34
@@ -619,17 +619,16 @@ Note: The example is just an example it contains also some optional settings. Fo
 						"accessory": "PLC_StatelessProgrammableSwitch",
 						"name": "Stateless Switch",
 						"enablePolling": true,
-						"pollInterval": 30,
+						"pollInterval": 10,
 						"db": 12,
-						"isEvent": 38,
-						"get_ProgrammableSwitchEvent": 
+						"isEvent": 29.2,
+						"get_ProgrammableSwitchEvent": 38
 					},
 					{
 						"accessory": "PLC_LockMechanism",
 						"name": "Lock",
 						"db": 12,
 						"enablePolling": true,
-						"isEvent": 0.1,
 						"get_LockCurrentState": 39,
 						"get_LockTargetState": 40,
 						"set_LockTargetState": 40
@@ -639,7 +638,6 @@ Note: The example is just an example it contains also some optional settings. Fo
 						"name": "LockBool",
 						"db": 12,
 						"enablePolling": true,
-						"isEvent": 0.1,
 						"get_LockCurrentState": 41.0,
 						"get_LockTargetState": 41.1,
 						"set_LockTargetState": 41.1
@@ -740,7 +738,7 @@ The Request has to be done as HTTP `PUT` or `GET` operation. There will be no lo
 
 ### Format
 Example to switch a light bulb from browser. Lets say the light bulb has the following config:
-		
+
 	"platforms": [
 			{
 			"platform": "PLC",
@@ -759,7 +757,7 @@ Example to switch a light bulb from browser. Lets say the light bulb has the fol
 				}
 			]
 		}
-	]			
+	]
 
 Use this to switch the light bulb on from browser:
 
