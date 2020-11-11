@@ -114,8 +114,24 @@ PLC_Platform.prototype = {
               }
               else if(doLog)
               {
-                this.log.error("Received HTTP Push must contain push or control, db, offset and value!");
-                this.log.error(url);
+                if (!this.config.enablePush && 'push' in url.query) {
+                  this.log.error("[HTTP Push] enablePush is not set in platform config!");
+                }
+                else if (!this.config.enableControl && 'control' in url.query) {
+                  this.log.error("[HTTP Control] enableControl is not set in platform config!");
+                }
+                else if (!('push' in url.query) && !('control' in url.query) ) {
+                  this.log.error("[HTTP Push/Control] neither push or control!");
+                }
+                else if (!('db' in url.query)) {
+                  this.log.error("[HTTP Push/Control] parameter db is missing!");
+                }
+                else if (!('offset' in url.query)) {
+                  this.log.error("[HTTP Push/Control] parameter offset is missing!");
+                }
+                else if (!('value' in url.query)) {
+                  this.log.error("[HTTP Push/Control] parameter value is missing!");
+                }
               }
           });
       }
