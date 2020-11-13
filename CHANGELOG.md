@@ -2,7 +2,14 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.0.17] - 2020-11-14
 
+### Changed
+- More detailed error log for http requests
+
+### Fixed
+- Fixed `PLC_LightBulb` brightness to be `Byte` value as documented. In fact is was a `Real` please change in PLC if you already use it.
+  
 ## [1.0.16] - 2020-11-09
 
 ### Changed

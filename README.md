@@ -724,6 +724,8 @@ Example for byte values when trigger from browser
 
 	http://homebridgeIp:8080/?push&db=2&offset=3&value=255
 
+**NOTE:** Chrome/Edge does at minimum two requests with different parameters resulting in some error messages. I recommend `Talend API Tester - Free Edition`	
+
 # <a name='control'></a>Control of PLC accessories
 
 It´s also possible to control PLC accessories via HTTP `PUT` or `GET` operation. This might be useful for integration into other automation systems.
@@ -766,6 +768,8 @@ Use this to switch the light bulb on from browser:
 Use this to switch the light bulb off from browser:
 
 	http://homebridgeIp:8080/?push&db=6096&offset=1.1&value=0
+
+**NOTE:** Chrome/Edge does at minimum two requests with different parameters resulting in some error messages. I recommend `Talend API Tester - Free Edition`	
 
 # Test & Release
 
