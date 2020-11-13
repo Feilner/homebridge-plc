@@ -226,12 +226,12 @@ function GenericPLCAccessory(platform, config) {
 
     if ('get_Brightness' in config) {
       this.service.getCharacteristic(Characteristic.Brightness)
-      .on('get', function(callback) {this.getReal(callback,
+      .on('get', function(callback) {this.getByte(callback,
         config.db,
         config.get_Brightness,
         'get Brightness'
         )}.bind(this))
-      .on('set', function(value, callback) {this.setReal(value, callback,
+      .on('set', function(value, callback) {this.setByte(value, callback,
         config.db,
         config.set_Brightness,
         'set Brightness'

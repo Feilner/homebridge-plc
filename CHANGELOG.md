@@ -14,6 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 - Fix poll issue for `PLC_TemperatureSensor`, `PLC_HumiditySensor` and `PLC_Thermostat`
 - Fix double definition for `PLC_GarageDoorOpener`
+- Fixed `PLC_LightBulb` brightness to be `Byte` value as documented. In fact is was a `Real` please change in PLC if you already use it
 
 ## [1.0.15] - 2020-11-07
 
