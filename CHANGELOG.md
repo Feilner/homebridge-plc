@@ -1,8 +1,26 @@
 # Changelog
+
 All notable changes to this project will be documented in this file.
 
-The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
-and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+## [1.0.17] - 2020-11-14
+
+### Changed
+- More detailed error log for http requests
+
+### Fixed
+- Fixed `PLC_LightBulb` brightness to be `Byte` value as documented. In fact is was a `Real` please change in PLC if you already use it.
+  
+## [1.0.16] - 2020-11-09
+
+### Changed
+- Only disconnect to PLC on TCP errors mask 0x000fffff of snap7 error codes. Clint errors of PLC does no longer trigger reconnect
+- Snap7 error codes are printed in hex values
+- Documentation extended
+
+### Fixed
+- Fix poll issue for `PLC_TemperatureSensor`, `PLC_HumiditySensor` and `PLC_Thermostat`
+- Fix double definition for `PLC_GarageDoorOpener`
+- Fixed `PLC_LightBulb` brightness to be `Byte` value as documented. In fact is was a `Real` please change in PLC if you already use it
 
 ## [1.0.16] - 2020-11-09
 
@@ -126,3 +144,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.0.1] - 2020-10-04
 ### Added
 - Initial Version
+
+
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
+and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
