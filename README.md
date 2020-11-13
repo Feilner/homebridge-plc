@@ -32,7 +32,7 @@ SIEMENS S7 PLC plugin for [Homebridge](https://homebridge.io)
 	* [Security System as `PLC_SecuritySystem`](#PLC_SecuritySystem)
 	* [Faucet as `PLC_Faucet`](#PLC_Faucet)
 	* [Valve as `PLC_Valve`](#PLC_Valve)
-	* [Button as `PLC_StatelessProgrammableSwitch`](#PLC_StatelessProgrammableSwitch)
+	* [Button attached to PLC as `PLC_StatelessProgrammableSwitch`](#PLC_StatelessProgrammableSwitch)
 	* [Lock mechanism as `PLC_LockMechanism`](#PLC_LockMechanism)
 	* [Boolean lock mechanism as `PLC_LockMechanismBool`](#PLC_LockMechanismBool)
 	* [Garage door as `PLC_GarageDoorOpener`](#PLC_GarageDoorOpener)
@@ -237,7 +237,7 @@ movement detection sensor
 ### <a name='PLC_ContactSensor'></a>Contact Sensor as `PLC_ContactSensor`
 Generic contact sensor. The home app allows to display as window, door, blind/shutter, garage door or contact sensor.
 
-![homebridge pic](doc/contactsensor.png)
+![homebridge pic](doc/contactsensor.png) ![homebridge pic](doc/blind.png) ![homebridge pic](doc/window.png) ![homebridge pic](doc/door.png) ![homebridge pic](doc/garagedoor.png)
 - `name`: unique name of the accessory
 - `manufacturer`: (optional) description
 - `db`: s7 data base number e.g. `4` for `DB4`
