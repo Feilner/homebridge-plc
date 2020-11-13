@@ -15,6 +15,17 @@ All notable changes to this project will be documented in this file.
 - Fix double definition for `PLC_GarageDoorOpener`
 - Fixed `PLC_LightBulb` brightness to be `Byte` value as documented. In fact is was a `Real` please change in PLC if you already use it
 
+## [1.0.16] - 2020-11-09
+
+### Changed
+- Only disconnect to PLC on TCP errors mask 0x000fffff of snap7 error codes. Clint errors of PLC does no longer trigger reconnect
+- Snap7 error codes are printed in hex values
+- Documentation extended
+
+### Fixed
+- Fix poll issue for `PLC_TemperatureSensor`, `PLC_HumiditySensor` and `PLC_Thermostat`
+- Fix double definition for `PLC_GarageDoorOpener`
+
 ## [1.0.15] - 2020-11-07
 
 ### Changed
