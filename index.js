@@ -878,7 +878,13 @@ function GenericPLCAccessory(platform, config) {
     this.service = new Service.GarageDoorOpener(this.name);
     this.accessory.addService(this.service);
 
+    // default do nothing after set of target position
+    var informDoorFunction = function(value){}.bind(this);
+    var informLockFunction = function(value){}.bind(this);
 
+    if ('forceCurrentState' in config && config.forceCurrentState) {
+      informFunction = function(value){this.service.getCharacteristic(Characteristic.CurrentDoorState).updateValue(value) }.bind(this);
+    }
     this.service.getCharacteristic(Characteristic.CurrentDoorState)
     .on('get', function(callback) {this.getByte(callback,
       config.db,
@@ -895,34 +901,25 @@ function GenericPLCAccessory(platform, config) {
     .on('set', function(value, callback) {this.setByte(value, callback,
       config.db,
       config.set_TargetDoorState,
-      "set TargetDoorState"
+      "set TargetDoorState",
+      informFunction
       )}.bind(this));
 
-    this.service.getCharacteristic(Characteristic.LockCurrentState)
-    .on('get', function(callback) {this.getByte(callback,
-      config.db,
-      config.get_LockCurrentState,
-      "get LockCurrentState"
-    )}.bind(this));
-
-    this.service.getCharacteristic(Characteristic.LockTargetState)
-    .on('get', function(callback) {this.getByte(callback,
-      config.db,
-      config.get_LockTargetState,
-      "get LockTargetState"
-    )}.bind(this))
-    .on('set', function(value, callback) {this.setByte(value, callback,
-      config.db,
-      config.set_LockTargetState,
-      "set LockTargetState"
-    )}.bind(this));
-
-    this.service.getCharacteristic(Characteristic.ObstructionDetected)
-    .on('get', function(callback) {this.getBit(callback,
-      config.db,
-      Math.floor(config.get_ObstructionDetected), Math.floor((config.get_ObstructionDetected*10)%10),
-      'get ObstructionDetected'
-    )}.bind(this))
+    if ('get_ObstructionDetected' in config) {  
+      this.service.getCharacteristic(Characteristic.ObstructionDetected)
+      .on('get', function(callback) {this.getBit(callback,
+        config.db,
+        Math.floor(config.get_ObstructionDetected), Math.floor((config.get_ObstructionDetected*10)%10),
+        'get ObstructionDetected'
+      )}.bind(this))
+    }
+    else{
+      this.service.getCharacteristic(Characteristic.ObstructionDetected)
+      .on('get', function(callback) {this.getDummy(callback,
+        0,
+        'get ObstructionDetected'
+      )}.bind(this))      
+    }
   }
 
 
@@ -1129,16 +1126,10 @@ GenericPLCAccessory.prototype = {
         this.service.getCharacteristic(Characteristic.TargetDoorState).updateValue(value);
         rv = true;
       }
-      if (this.config.get_LockTargetState == offset)
+      if (this.config.get_ObstructionDetected == offset)
       {
-        this.log.debug( "[" + this.name + "] Push LockTargetState:" + value);
-        this.service.getCharacteristic(Characteristic.LockTargetState).updateValue(value);
-        rv = true;
-      }
-      if (this.config.get_LockCurrentState == offset)
-      {
-        this.log.debug( "[" + this.name + "] Push LockCurrentState:" + value);
-        this.service.getCharacteristic(Characteristic.LockCurrentState).updateValue(value);
+        this.log.debug( "[" + this.name + "] Push ObstructionDetected:" + value);
+        this.service.getCharacteristic(Characteristic.TargetDoorState).updateValue(value);
         rv = true;
       }
     }
@@ -1397,16 +1388,6 @@ GenericPLCAccessory.prototype = {
       this.service.getCharacteristic(Characteristic.TargetDoorState).getValue(function(err, value) {
         if (!err) {
           this.service.getCharacteristic(Characteristic.TargetDoorState).updateValue(value);
-        }
-      }.bind(this));
-      this.service.getCharacteristic(Characteristic.LockTargetState).getValue(function(err, value) {
-        if (!err) {
-          this.service.getCharacteristic(Characteristic.LockTargetState).updateValue(value);
-        }
-      }.bind(this));
-      this.service.getCharacteristic(Characteristic.LockCurrentState).getValue(function(err, value) {
-        if (!err) {
-          this.service.getCharacteristic(Characteristic.LockCurrentState).updateValue(value);
         }
       }.bind(this));
     }
