@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.0.19] - 2020-11-xx
+
+### Added
+- new accessory `PLC_Doorbell`
+
 ## [1.0.18] - 2020-11-16
 
 ### Changed

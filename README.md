@@ -15,7 +15,7 @@ SIEMENS S7 PLC plugin for [Homebridge](https://homebridge.io)
 - Implementation is based on documentation of the [Homebridge API](https://developers.homebridge.io)
 - Supports [**polling**](#poll) from homebridge-plc plugin to PLC by per accessory defined interval
 - Supports [**push**](#push) from PLC to homebridge-plc plugin by http PUT/GET
-- Supports [**control**](#control) of PLC accessories by http PUT/GET (experimental)
+- Supports [**control**](#control) of PLC accessories by http PUT/GET
 - Supported Accessories:
 	* [LightBulb as `PLC_LightBulb`](#PLC_LightBulb)
 	* [Outlet as `PLC_Outlet`](#PLC_Outlet)
@@ -32,7 +32,8 @@ SIEMENS S7 PLC plugin for [Homebridge](https://homebridge.io)
 	* [Security System as `PLC_SecuritySystem`](#PLC_SecuritySystem)
 	* [Faucet as `PLC_Faucet`](#PLC_Faucet)
 	* [Valve as `PLC_Valve`](#PLC_Valve)
-	* [Button attached to PLC as `PLC_StatelessProgrammableSwitch`](#PLC_StatelessProgrammableSwitch)
+	* [Push button attached to PLC as `PLC_StatelessProgrammableSwitch`](#PLC_StatelessProgrammableSwitch)
+	* [Doorbell push button to PLC as `PLC_Doorbell`](#PLC_StatelessProgrammableSwitch)
 	* [Lock mechanism as `PLC_LockMechanism`](#PLC_LockMechanism)
 	* [Boolean lock mechanism as `PLC_LockMechanismBool`](#PLC_LockMechanismBool)
 	* [Garage door as `PLC_GarageDoorOpener`](#PLC_GarageDoorOpener)
@@ -312,7 +313,7 @@ valve configurable as generic valve, irrigation, shower head or water faucet
 		- `set_SetDuration`: (optional) duration 0..3600 sec S7 type `Time` e.g. `14` for `DB4DBD14`
 		- `get_RemainingDuration`: (optional) duration 0..3600 sec S7 type `Time` e.g. `18` for `DB4DBD18`
 
-### <a name='PLC_StatelessProgrammableSwitch'></a>Button as `PLC_StatelessProgrammableSwitch`
+### <a name='PLC_StatelessProgrammableSwitch'></a>Button as `PLC_StatelessProgrammableSwitch`, Doorbell as `PLC_Doorbell`
 stateless switch from PLC to home app. Trigger actions in home app only works with control center e.g. AppleTV or HomePod.
 It will works only in polling or push mode! The PLC sets a bit that is regularly polled by homebridge after successful reading a 1 of the event the bit it will report the event and set the bit to 0. Change 0->1 is done by PLC change from 1->0 is done by homebridge-plc! In push mode the new value is just pushed with the db and offset of `get_ProgrammableSwitchEvent`
 
@@ -351,7 +352,7 @@ Lock mechanism (not yet clear how to use changes are welcome)
 	- `1`: secured
 
 ### <a name='PLC_LockMechanismBool'></a>Boolean lock mechanism as `PLC_LockMechanismBool`
-Lock mechanism implemented as bool on the PLC. **NOTE: The convention `0`:closed/secured  `1`:open/unsecured**
+Lock mechanism implemented as bool on the PLC. **NOTE: The convention `0`=`false`: closed/secured  `1`=`true`: open/unsecured**
 
 ![homebridge pic](doc/lockbool.png)
 - `name`: unique name of the accessory
@@ -361,18 +362,18 @@ Lock mechanism implemented as bool on the PLC. **NOTE: The convention `0`:closed
 - `pollInterval` (optional) poll interval in seconds. Default value is `10` seconds.
 - `forceCurrentState`: (optional) when set to `true` the position set by `set_LockTargetState` is directly used as current state. By this it seems in the home app as the target state was directly reached. This is recommended when not sing `enablePolling` or pushing the value from the plc.
 - `get_LockCurrentState`: offset to read current state current state S7 type `Bool` .g. `3.1` for `DB4DBB3`
-	- `0`: secured
-	- `1`: unsecured
+	- `false`: secured
+	- `true`: unsecured
 - `get_LockTargetState`: offset to read target state current state S7 type `Bool` e.. `3.1` for `DB4DBB3`
-	- `0`: secured
-	- `1`: unsecured
+	- `false`: secured
+	- `true`: unsecured
 - Single Bit for secure/unsecured:
 	- `set_LockTargetState`:  offset to write target state current state S7 type `Bool` e.g. `3.1` for `DB4DBB3`
-		- `0`: secured
-		- `1`: unsecured
+		- `false`: secured
+		- `true`: unsecured
 - Separate Bits for secure/unsecured:
-	- `set_Secured`: offset and bit set to 1 when switching to target state secured S7 type `Bool` **PLC has to set to 0** e.g. `3.3` for `DB4DBX55.1`
-	- `set_Unsecured`: offset and bit set to 1 when switching to target state unsecured S7 type `Bool` **PLC has to set to 0** e.g. `3.4` for `DB4DBX55.2`
+	- `set_Secured`: offset and bit set to `true` when switching to target state secured S7 type `Bool` **PLC has to set to false** e.g. `3.3` for `DB4DBX55.1`
+	- `set_Unsecured`: offset and bit set to `true` when switching to target state unsecured S7 type `Bool` **PLC has to set to false** e.g. `3.4` for `DB4DBX55.2`
 
 
 ### <a name='PLC_GarageDoorOpener'></a>Garage door as `PLC_GarageDoorOpener`

@@ -15,163 +15,161 @@ module.exports = function(homebridge) {
 }
 
 function PLC_Platform(log, config, api) {
-    this.log = log;
-    this.config = config;
-    this.api = api;
-    this.s7PlatformAccessories = [];
-    this.S7Client = new snap7.S7Client();
-    this.isConnectOngoing = false;
-    this.S7ClientConnect();
-    }
+  this.log = log;
+  this.config = config;
+  this.api = api;
+  this.s7PlatformAccessories = [];
+  this.S7Client = new snap7.S7Client();
+  this.isConnectOngoing = false;
+  this.S7ClientConnect();
+}
 
 PLC_Platform.prototype = {
-    accessories: function(callback) {
-        var log = this.log;
-        log("Add PLC accessories...");
-        //create accessory for each configuration
-        this.config.accessories.forEach((config, index) => {
-            log("[" + String(index+1) + "/" + this.config.accessories.length + "] " + config.name + " (" +  config.accessory + ")" );
-            //call accessory construction
-            var accessory = new GenericPLCAccessory(this, config);
-            this.s7PlatformAccessories.push(accessory);
-        });
-        callback(this.s7PlatformAccessories);
-
-        if (this.config.enablePolling) {
-          log("Enable polling...");
-          setInterval(function(param) {this.pollLoop( this.s7PlatformAccessories)}.bind(this),1000);
-        }
-
-        if (this.config.enablePush || this.config.enableControl) {
-          this.port = this.config.port || 8080;
-          this.api.on('didFinishLaunching', () => {
-              this.log('Enable push server...');
-              this.listener = require('http').createServer((req, res) => this.httpListener(req, res));
-              this.listener.listen(this.port);
-              this.log('listening on port ' + this.port);
-          });
-        }
-        log("Init done!")
-    },
-
-     pollLoop: function(s7PlatformAccessories)  {
-      s7PlatformAccessories.forEach((accessory) => {
-        accessory.poll();
+  accessories: function(callback) {
+      var log = this.log;
+      log("Add PLC accessories...");
+      //create accessory for each configuration
+      this.config.accessories.forEach((config, index) => {
+          log("[" + String(index+1) + "/" + this.config.accessories.length + "] " + config.name + " (" +  config.accessory + ")" );
+          //call accessory construction
+          var accessory = new GenericPLCAccessory(this, config);
+          this.s7PlatformAccessories.push(accessory);
       });
-    },
+      callback(this.s7PlatformAccessories);
 
-    httpListener: function(req, res) {
-      let data = '';
-      let url = '';
-      let id = null;
-
-      if (req.method == 'POST') {
-          req.on('data', (chunk) => {
-              data += chunk;
-          });
-          req.on('end', () => {
-              this.log('Received POST and body data:');
-              this.log(data.toString());
-          });
+      if (this.config.enablePolling) {
+        log("Enable polling...");
+        setInterval(function(param) {this.pollLoop( this.s7PlatformAccessories)}.bind(this),1000);
       }
-      else if (req.method == 'PUT' || req.method == 'GET') {
-          var doLog = (req.method == 'GET');
-          req.on('end', () => {
-              url = require('url').parse(req.url, true); // will parse parameters into query string
-              if (this.config.enablePush && 'push' in url.query && 'db' in url.query && 'offset' in url.query && 'value' in url.query) {
-                if(doLog) {
-                  this.log.debug("[HTTP Push] Received update for accessory:" + url.query.db + " offset:" + url.query.offset +" value:" + url.query.value);
-                }
-                var db = parseInt(url.query.db);
-                var offset = parseFloat(url.query.offset);
-                var value = url.query.value;
-                var handled = false;
-                this.s7PlatformAccessories.forEach((accessory) => {
-                  if (accessory.config.db == db) {
-                    handled = accessory.updatePush(offset, value) || handled;
-                  }
-                });
-                if(!handled && doLog) {
-                  this.log.error("[HTTP Push] No matching accessory found for db:" + url.query.db + " offset:" + url.query.offset +" value:" + url.query.value);
-                }
-              }
-              else if (this.config.enableControl && 'control' in url.query && 'db' in url.query && 'offset' in url.query && 'value' in url.query) {
-                if(doLog) {
-                  this.log.debug("[HTTP Control] Received control request for accessory:" + url.query.db + " offset:" + url.query.offset +" value:" + url.query.value);
-                }
-                var db = parseInt(url.query.db);
-                var offset = parseFloat(url.query.offset);
-                var value = url.query.value;
-                var handled = false;
-                this.s7PlatformAccessories.forEach((accessory) => {
-                  if (accessory.config.db == db) {
-                    handled = accessory.updateControl(offset, value) || handled;
-                  }
-                });
-                if(!handled && doLog) {
-                  this.log.error("[HTTP Control] No matching accessory found for db:" + url.query.db + " offset:" + url.query.offset +" value:" + url.query.value);
-                }
-              }
-              else if(doLog)
-              {
-                if (!this.config.enablePush && 'push' in url.query) {
-                  this.log.error("[HTTP Push] enablePush is not set in platform config!");
-                }
-                else if (!this.config.enableControl && 'control' in url.query) {
-                  this.log.error("[HTTP Control] enableControl is not set in platform config!");
-                }
-                else if (!('push' in url.query) && !('control' in url.query) ) {
-                  this.log.error("[HTTP Push/Control] neither push or control!");
-                }
-                else if (!('db' in url.query)) {
-                  this.log.error("[HTTP Push/Control] parameter db is missing!");
-                }
-                else if (!('offset' in url.query)) {
-                  this.log.error("[HTTP Push/Control] parameter offset is missing!");
-                }
-                else if (!('value' in url.query)) {
-                  this.log.error("[HTTP Push/Control] parameter value is missing!");
-                }
-              }
-          });
-      }
-      res.writeHead(200, { 'Content-Type': 'text/plain' });
-      res.end();
 
+      if (this.config.enablePush || this.config.enableControl) {
+        this.port = this.config.port || 8080;
+        this.api.on('didFinishLaunching', () => {
+            this.log('Enable push server...');
+            this.listener = require('http').createServer((req, res) => this.httpListener(req, res));
+            this.listener.listen(this.port);
+            this.log('listening on port ' + this.port);
+        });
+      }
+      log("Init done!")
   },
+
+  pollLoop: function(s7PlatformAccessories)  {
+    s7PlatformAccessories.forEach((accessory) => {
+      accessory.poll();
+    });
+  },
+
+  httpListener: function(req, res) {
+    let data = '';
+    let url = '';
+    let id = null;
+
+    if (req.method == 'POST') {
+        req.on('data', (chunk) => {
+            data += chunk;
+        });
+        req.on('end', () => {
+            this.log('Received POST and body data:');
+            this.log(data.toString());
+        });
+    }
+    else if (req.method == 'PUT' || req.method == 'GET') {
+        var doLog = (req.method == 'GET');
+        req.on('end', () => {
+            url = require('url').parse(req.url, true); // will parse parameters into query string
+            if (this.config.enablePush && 'push' in url.query && 'db' in url.query && 'offset' in url.query && 'value' in url.query) {
+              if(doLog) {
+                this.log.debug("[HTTP Push] Received update for accessory:" + url.query.db + " offset:" + url.query.offset +" value:" + url.query.value);
+              }
+              var db = parseInt(url.query.db);
+              var offset = parseFloat(url.query.offset);
+              var value = url.query.value;
+              var handled = false;
+              this.s7PlatformAccessories.forEach((accessory) => {
+                if (accessory.config.db == db) {
+                  handled = accessory.updatePush(offset, value) || handled;
+                }
+              });
+              if(!handled && doLog) {
+                this.log.error("[HTTP Push] No matching accessory found for db:" + url.query.db + " offset:" + url.query.offset +" value:" + url.query.value);
+              }
+            }
+            else if (this.config.enableControl && 'control' in url.query && 'db' in url.query && 'offset' in url.query && 'value' in url.query) {
+              if(doLog) {
+                this.log.debug("[HTTP Control] Received control request for accessory:" + url.query.db + " offset:" + url.query.offset +" value:" + url.query.value);
+              }
+              var db = parseInt(url.query.db);
+              var offset = parseFloat(url.query.offset);
+              var value = url.query.value;
+              var handled = false;
+              this.s7PlatformAccessories.forEach((accessory) => {
+                if (accessory.config.db == db) {
+                  handled = accessory.updateControl(offset, value) || handled;
+                }
+              });
+              if(!handled && doLog) {
+                this.log.error("[HTTP Control] No matching accessory found for db:" + url.query.db + " offset:" + url.query.offset +" value:" + url.query.value);
+              }
+            }
+            else if(doLog)
+            {
+              if (!this.config.enablePush && 'push' in url.query) {
+                this.log.error("[HTTP Push] enablePush is not set in platform config!");
+              }
+              else if (!this.config.enableControl && 'control' in url.query) {
+                this.log.error("[HTTP Control] enableControl is not set in platform config!");
+              }
+              else if (!('push' in url.query) && !('control' in url.query) ) {
+                this.log.error("[HTTP Push/Control] neither push or control!");
+              }
+              else if (!('db' in url.query)) {
+                this.log.error("[HTTP Push/Control] parameter db is missing!");
+              }
+              else if (!('offset' in url.query)) {
+                this.log.error("[HTTP Push/Control] parameter offset is missing!");
+              }
+              else if (!('value' in url.query)) {
+                this.log.error("[HTTP Push/Control] parameter value is missing!");
+              }
+            }
+        });
+    }
+    res.writeHead(200, { 'Content-Type': 'text/plain' });
+    res.end();
+},
 
 
     //PLC connection check function
-    S7ClientConnect: function() {
-        var log = this.log;
-        var S7Client = this.S7Client;
-        var ip = this.config.ip;
-        var rack = this.config.rack;
-        var slot = this.config.slot;
-        var rv = false;
+  S7ClientConnect: function() {
+      var log = this.log;
+      var S7Client = this.S7Client;
+      var ip = this.config.ip;
+      var rack = this.config.rack;
+      var slot = this.config.slot;
+      var rv = false;
 
-        if (S7Client.Connected()) {
-          rv = true;
-        }
-        else {
-            log("Connecting to %s (%s:%s)", ip, rack, slot);
+      if (S7Client.Connected()) {
+        rv = true;
+      }
+      else {
+          log("Connecting to %s (%s:%s)", ip, rack, slot);
 
-            if (!this.isConnectOngoing == true) {
-              this.isConnectOngoing = true;
-                var ok = S7Client.ConnectTo(ip, rack, slot);
-                this.isConnectOngoing = false;
-                if(ok) {
-                  log("Connected to %s (%s:%s)", ip, rack, slot);
-                  rv = true;
-                }
-                else {
-                  log.error("Connection to %s (%s:%s) failed", ip, rack, slot);
-                }
-            }
-        }
-
-        return rv;
-    }
+          if (!this.isConnectOngoing == true) {
+            this.isConnectOngoing = true;
+              var ok = S7Client.ConnectTo(ip, rack, slot);
+              this.isConnectOngoing = false;
+              if(ok) {
+                log("Connected to %s (%s:%s)", ip, rack, slot);
+                rv = true;
+              }
+              else {
+                log.error("Connection to %s (%s:%s) failed", ip, rack, slot);
+              }
+          }
+      }
+    return rv;
+  }
 }
 
 
@@ -192,10 +190,24 @@ function GenericPLCAccessory(platform, config) {
   }
 
   ////////////////////////////////////////////////////////////////
-  // Lightbulb
+  // Lightbulb / Outlet / Switch
   ////////////////////////////////////////////////////////////////
-  if (config.accessory == 'PLC_LightBulb') {
+  if (config.accessory == 'PLC_LightBulb' || config.accessory == 'PLC_Outlet' || config.accessory == 'PLC_Switch') {
     this.service =  new Service.Lightbulb(this.name);
+
+    if (config.accessory == 'PLC_LightBulb')
+    {
+      this.service = new Service.Lightbulb(this.name);
+    }
+    else if (config.accessory == 'PLC_Outlet')
+    {
+      this.service = new Service.Outlet(this.name);
+    }
+    else
+    {
+      this.service = new Service.Switch(this.name);
+    }
+
     this.accessory.addService(this.service);
     if ('set_Off' in config) {
       this.service.getCharacteristic(Characteristic.On)
@@ -224,94 +236,25 @@ function GenericPLCAccessory(platform, config) {
         )}.bind(this));
     }
 
-    if ('get_Brightness' in config) {
-      this.service.getCharacteristic(Characteristic.Brightness)
-      .on('get', function(callback) {this.getByte(callback,
-        config.db,
-        config.get_Brightness,
-        'get Brightness'
-        )}.bind(this))
-      .on('set', function(value, callback) {this.setByte(value, callback,
-        config.db,
-        config.set_Brightness,
-        'set Brightness'
-        )}.bind(this))
-        .setProps({
-          minValue: config.minValue || 20,
-          maxValue: config.maxValue || 100,
-          minStep: config.minStep || 1
-      });
-    }
-  }
-
-  ////////////////////////////////////////////////////////////////
-  // Outlet
-  ////////////////////////////////////////////////////////////////
-  else if (config.accessory == 'PLC_Outlet') {
-    this.service =  new Service.Outlet(this.name);
-    this.accessory.addService(this.service);
-
-    if ('set_Off' in config) {
-      this.service.getCharacteristic(Characteristic.On)
-        .on('get', function(callback) {this.getBit(callback,
+    if (config.accessory == 'PLC_LightBulb') {
+      if ('get_Brightness' in config) {
+        this.service.getCharacteristic(Characteristic.Brightness)
+        .on('get', function(callback) {this.getByte(callback,
           config.db,
-          Math.floor(config.get_On), Math.floor((config.get_On*10)%10),
-          'get On'
-        )}.bind(this))
-        .on('set', function(powerOn, callback) { this.setOnOffBit(powerOn, callback,
+          config.get_Brightness,
+          'get Brightness'
+          )}.bind(this))
+        .on('set', function(value, callback) {this.setByte(value, callback,
           config.db,
-          Math.floor(config.set_On), Math.floor((config.set_On*10)%10),
-          Math.floor(config.set_Off), Math.floor((config.set_Off*10)%10),
-          'set On'
-        )}.bind(this));
-    } else {
-      this.service.getCharacteristic(Characteristic.On)
-        .on('get', function(callback) {this.getBit(callback,
-          config.db,
-          Math.floor(config.get_On), Math.floor((config.get_On*10)%10),
-          'get On'
-        )}.bind(this))
-        .on('set', function(powerOn, callback) { this.setBit(powerOn, callback,
-          config.db,
-          Math.floor(config.set_On), Math.floor((config.set_On*10)%10),
-          'set On'
-        )}.bind(this));
-    }
-  }
-
-
-  ////////////////////////////////////////////////////////////////
-  // Switch
-  ////////////////////////////////////////////////////////////////
-  else if (config.accessory == 'PLC_Switch') {
-    this.service =  new Service.Switch(this.name);
-    this.accessory.addService(this.service);
-
-    if ('set_Off' in config) {
-      this.service.getCharacteristic(Characteristic.On)
-        .on('get', function(callback) {this.getBit(callback,
-          config.db,
-          Math.floor(config.get_On), Math.floor((config.get_On*10)%10),
-          'get On'
-        )}.bind(this))
-        .on('set', function(powerOn, callback) { this.setOnOffBit(powerOn, callback,
-          config.db,
-          Math.floor(config.set_On), Math.floor((config.set_On*10)%10),
-          Math.floor(config.set_Off), Math.floor((config.set_Off*10)%10),
-          'set On'
-        )}.bind(this));
-    } else {
-      this.service.getCharacteristic(Characteristic.On)
-        .on('get', function(callback) {this.getBit(callback,
-          config.db,
-          Math.floor(config.get_On), Math.floor((config.get_On*10)%10),
-          'get On'
-        )}.bind(this))
-        .on('set', function(powerOn, callback) { this.setBit(powerOn, callback,
-          config.db,
-          Math.floor(config.set_On), Math.floor((config.set_On*10)%10),
-          'set On'
-        )}.bind(this));
+          config.set_Brightness,
+          'set Brightness'
+          )}.bind(this))
+          .setProps({
+            minValue: config.minValue || 20,
+            maxValue: config.maxValue || 100,
+            minStep: config.minStep || 1
+        });
+      }
     }
   }
 
@@ -424,7 +367,7 @@ function GenericPLCAccessory(platform, config) {
       });
   }
 
- ////////////////////////////////////////////////////////////////
+  ////////////////////////////////////////////////////////////////
   // Window, WindowCovering and Door
   ////////////////////////////////////////////////////////////////
   else if (config.accessory == 'PLC_Window' || config.accessory == 'PLC_WindowCovering' || config.accessory == 'PLC_Door'){
@@ -763,8 +706,14 @@ function GenericPLCAccessory(platform, config) {
   ////////////////////////////////////////////////////////////////
   // StatelessProgrammableSwitch
   ////////////////////////////////////////////////////////////////
-  else if (config.accessory == 'PLC_StatelessProgrammableSwitch'){
-    this.service = new Service.StatelessProgrammableSwitch(this.name);
+  else if (config.accessory == 'PLC_StatelessProgrammableSwitch' || config.accessory == 'PLC_Doorbell'){
+    
+    if (config.accessory == 'PLC_StatelessProgrammableSwitch' ){  
+      this.service = new Service.StatelessProgrammableSwitch(this.name);
+    }
+    else {
+      this.service = new Service.Doorbell(this.name);
+    }
     this.accessory.addService(this.service);
 
     this.service.getCharacteristic(Characteristic.ProgrammableSwitchEvent)
@@ -774,11 +723,13 @@ function GenericPLCAccessory(platform, config) {
         "get ProgrammableSwitchEvent"
       )}.bind(this));
 
+    if (config.accessory == 'PLC_StatelessProgrammableSwitch' ){  
       this.service.getCharacteristic(Characteristic.ServiceLabelIndex)
       .on('get', function(callback) {this.getDummy(callback,
         1,
         "get ServiceLabelIndex"
-      )}.bind(this))
+      )}.bind(this));
+    }
   }
   ////////////////////////////////////////////////////////////////
   // LockMechanism
@@ -1091,7 +1042,7 @@ GenericPLCAccessory.prototype = {
         rv = true;
       }
     }
-    else if (this.config.accessory == 'PLC_StatelessProgrammableSwitch'){
+    else if (this.config.accessory == 'PLC_StatelessProgrammableSwitch' || this.config.accessory == 'PLC_Doorbell'){
       if (this.config.get_ProgrammableSwitchEvent == offset)
       {
         this.log.debug( "[" + this.name + "] Push ProgrammableSwitchEvent:" + value);
@@ -1203,7 +1154,7 @@ GenericPLCAccessory.prototype = {
         rv = true;
       }
     }
-    else if (this.config.accessory == 'PLC_StatelessProgrammableSwitch'){
+    else if (this.config.accessory == 'PLC_StatelessProgrammableSwitch' || this.config.accessory == 'PLC_Doorbell'){
       if (this.config.set_ProgrammableSwitchEvent == offset)
       {
         this.log.debug( "[" + this.name + "] Control ProgrammableSwitchEvent:" + value);
@@ -1391,7 +1342,7 @@ GenericPLCAccessory.prototype = {
         }
       }.bind(this));
     }
-    else if (this.config.accessory == 'PLC_StatelessProgrammableSwitch'){
+    else if (this.config.accessory == 'PLC_StatelessProgrammableSwitch' || this.config.accessory == 'PLC_Doorbell'){
       this.getBit(function(err,value){
           if(!err && value)
           {
