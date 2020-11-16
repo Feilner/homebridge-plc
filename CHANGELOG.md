@@ -4,8 +4,9 @@ All notable changes to this project will be documented in this file.
 
 ## [1.0.18] - 2020-11-16
 
-### Added
-- option `forceLockState` and `forceDoorState` for `PLC_GarageDoorOpener`
+### Changed
+- added option `forceDoorState` for `PLC_GarageDoorOpener`
+- Home app seems does not to use the lock for `PLC_GarageDoorOpener`. Remove `get_LockCurrentState`, `get_LockTargetState` and `set_LockTargetState`
   
 ## [1.0.17] - 2020-11-14
 
