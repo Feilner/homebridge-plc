@@ -332,12 +332,12 @@ It will works only in polling or push mode! The PLC sets a bit that is regularly
 Lock mechanism (not yet clear how to use changes are welcome)
 
 ![homebridge pic](doc/lock.png)
-	- `name`: unique name of the accessory
-	- `manufacturer`: (optional) description
-	- `db`: s7 data base number e.g. `4` for `DB4`
-	- `enablePolling`: (optional) when set to `true` the current state will be polled. It is mandatory as well to enable polling mode on platform level.
-	- `pollInterval` (optional) poll interval in seconds. Default value is `10` seconds.
-	- `forceCurrentState`: (optional) when set to `true` the position set by `set_LockTargetState` is directly used as current state. By this it seems in tha home app as the target state was directly reached. This is recommended when not using `enablePolling` or pushing the value from the plc.
+- `name`: unique name of the accessory
+- `manufacturer`: (optional) description
+- `db`: s7 data base number e.g. `4` for `DB4`
+- `enablePolling`: (optional) when set to `true` the current state will be polled. It is mandatory as well to enable polling mode on platform level.
+- `pollInterval` (optional) poll interval in seconds. Default value is `10` seconds.
+- `forceCurrentState`: (optional) when set to `true` the position set by `set_LockTargetState` is directly used as current state. By this it seems in the home app as the target state was directly reached. This is recommended when not using `enablePolling` or pushing the value from the plc.
 	- `get_LockCurrentState`: offset to read current state current state S7 type `Byte` e.g. `3` for `DB4DBB3`
 		- `0`: unsecured
 		- `1`: secured
@@ -359,7 +359,7 @@ Lock mechanism implemented as bool on the PLC. **NOTE: The convention `0`:closed
 - `db`: s7 data base number e.g. `4` for `DB4`
 - `enablePolling`: (optional) when set to `true` the current state will be polled. t is mandatory as well to enable polling mode on platform level.
 - `pollInterval` (optional) poll interval in seconds. Default value is `10` seconds.
-- `forceCurrentState`: (optional) when set to `true` the position set by set_LockTargetState` is directly used as current state. By this it seems in tha ome app as the target state was directly reached. This is recommended when not sing `enablePolling` or pushing the value from the plc.
+- `forceCurrentState`: (optional) when set to `true` the position set by `set_LockTargetState` is directly used as current state. By this it seems in the home app as the target state was directly reached. This is recommended when not sing `enablePolling` or pushing the value from the plc.
 - `get_LockCurrentState`: offset to read current state current state S7 type `Bool` .g. `3.1` for `DB4DBB3`
 	- `0`: secured
 	- `1`: unsecured
@@ -384,7 +384,9 @@ Lock mechanism (not yet clear how to use changes are welcome)
 - `db`: s7 data base number e.g. `4` for `DB4`
 - `enablePolling`: (optional) when set to `true` the current state will be polled. It is mandatory as well to enable polling mode on platform level.
 - `pollInterval` (optional) poll interval in seconds. Default value is `10` seconds.
-- `get_ObstructionDetected` offset and bit to obfuscation detection true means that the door was blocked S7 type `Bool` **PLC has to set to 0** e.g. `55.1` for `DB4DBX55.1`
+- `forceLockState`: (optional) when set to `true` the position set by `set_LockTargetState` is directly used as current state. By this it seems in the home app as the target state was directly reached. This is recommended when not sing `enablePolling` or pushing the value from the plc.
+- `forceDoorState`: (optional) when set to `true` the position set by `set_TargetDoorState` is directly used as current state. By this it seems in the home app as the target state was directly reached. This is recommended when not sing `enablePolling` or pushing the value from the plc.
+- `get_ObstructionDetected` offset and bit to obfuscation detection true means that the door was blocked S7 type `Bool` e.g. `55.1` for `DB4DBX55.1`
 - `get_CurrentDoorState`: offset to read current state current state S7 type `Byte` e.g. `3` for `DB4DBB3`
 	- `0`: open
 	- `1`: closed

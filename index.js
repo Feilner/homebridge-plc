@@ -878,6 +878,16 @@ function GenericPLCAccessory(platform, config) {
     this.service = new Service.GarageDoorOpener(this.name);
     this.accessory.addService(this.service);
 
+    // default do nothing after set of target position
+    var informDoorFunction = function(value){}.bind(this);
+    var informLockFunction = function(value){}.bind(this);
+
+    if ('forceDoorState' in config && config.forceDoorState) {
+      informDoorFunction = function(value){this.service.getCharacteristic(Characteristic.CurrentDoorState).updateValue(value) }.bind(this);
+    }
+    if ('forceLockState' in config && config.forceLockState) {
+      informLockFunction = function(value){this.service.getCharacteristic(Characteristic.LockCurrentState).updateValue(value) }.bind(this);
+    }
 
     this.service.getCharacteristic(Characteristic.CurrentDoorState)
     .on('get', function(callback) {this.getByte(callback,
@@ -895,7 +905,8 @@ function GenericPLCAccessory(platform, config) {
     .on('set', function(value, callback) {this.setByte(value, callback,
       config.db,
       config.set_TargetDoorState,
-      "set TargetDoorState"
+      "set TargetDoorState",
+      informDoorFunction
       )}.bind(this));
 
     this.service.getCharacteristic(Characteristic.LockCurrentState)
@@ -914,7 +925,8 @@ function GenericPLCAccessory(platform, config) {
     .on('set', function(value, callback) {this.setByte(value, callback,
       config.db,
       config.set_LockTargetState,
-      "set LockTargetState"
+      "set LockTargetState",
+      informLockFunction,
     )}.bind(this));
 
     this.service.getCharacteristic(Characteristic.ObstructionDetected)
@@ -1129,16 +1141,16 @@ GenericPLCAccessory.prototype = {
         this.service.getCharacteristic(Characteristic.TargetDoorState).updateValue(value);
         rv = true;
       }
-      if (this.config.get_LockTargetState == offset)
-      {
-        this.log.debug( "[" + this.name + "] Push LockTargetState:" + value);
-        this.service.getCharacteristic(Characteristic.LockTargetState).updateValue(value);
-        rv = true;
-      }
       if (this.config.get_LockCurrentState == offset)
       {
         this.log.debug( "[" + this.name + "] Push LockCurrentState:" + value);
         this.service.getCharacteristic(Characteristic.LockCurrentState).updateValue(value);
+        rv = true;
+      }
+      if (this.config.get_LockTargetState == offset)
+      {
+        this.log.debug( "[" + this.name + "] Push LockTargetState:" + value);
+        this.service.getCharacteristic(Characteristic.LockTargetState).updateValue(value);
         rv = true;
       }
     }
