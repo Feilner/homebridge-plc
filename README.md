@@ -641,9 +641,6 @@ Note: The example is just an example it contains also some optional settings. Fo
 						"get_CurrentDoorState": 42,
 						"get_TargetDoorState": 43,
 						"set_TargetDoorState": 43,
-						"get_LockCurrentState": 44,
-						"get_LockTargetState": 45,
-						"set_LockTargetState": 45
 					}
 				]
 			}
