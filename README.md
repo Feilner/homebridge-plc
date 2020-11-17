@@ -13,7 +13,7 @@ SIEMENS S7 PLC plugin for [Homebridge](https://homebridge.io)
 	- and compatible PLCs e.g. Yaskawa or VIPA
 - Tested with S7-300 compatible PLC and S7-1200
 - Implementation is based on documentation of the [Homebridge API](https://developers.homebridge.io)
-- Supports [**polling**](#poll) from homebridge-plc plugin to PLC by per accessory defined interval
+- Supports [**polling**](#poll) of PLC from homebridge-plc plugin by per accessory defined interval
 - Supports [**push**](#push) from PLC to homebridge-plc plugin by http PUT/GET
 - Supports [**control**](#control) of PLC accessories by http PUT/GET
 - Supported Accessories:
@@ -46,7 +46,7 @@ SIEMENS S7 PLC plugin for [Homebridge](https://homebridge.io)
 	- Edit `config.json` to add the plc platform and its accessories.
 	- Run Homebridge
 
-- Install via Homebridge UI
+- Install via Homebridge UI (recommended)
 	- Search for `plc` on the plugin screen of [config-ui-x](https://github.com/oznu/homebridge-config-ui-x) .
 	- Find `homebridge-plc`
 	- Click install.
@@ -657,17 +657,40 @@ There are three possible ways to workaround this.
 2. You enable the polling mode
 3. You enable the push mode and instrument your PLC code to send the values
 
-## <a name='poll'></a>Poll values form PLC
-To enable this you have to set `"enablePolling": true;` platform level and on each individual accessory with individual interval in seconds.
-		`"enablePolling": true, "pollInterval": 30,`
+## <a name='poll'></a>Poll values form PLC by homebridge-PLC plugin
+To enable this you have to set `"enablePolling": true;` platform level and on each individual accessory with individual interval in seconds `"enablePolling": true, "pollInterval": 10,`
 
+Example to poll the contact sensor state every 10 seconds
+	{
+		"platforms": [
+				{
+				"platform": "PLC",
+				"ip": "10.10.10.32",
+				"rack": 0,
+				"slot": 2,
+				"enablePolling": true,
+				"accessories": [
+					{
+						"accessory": "PLC_ContactSensor",
+						"name": "ContactSensor",
+						"enablePolling": true,
+						"pollInterval": 10,
+						"db": 12,
+						"get_ContactSensorState": 25.2
+					}
+				]
+			}
+		]
+	}
 
-## <a name='push'></a>Push values from PLC
+## <a name='push'></a>Push values from PLC to homebridge-plc plugin
 
 It possible to send updates of values directly from the plc to the homebridge-plc plugin. This is especially useful when you want notifications form your home app about open/close of doors or just a faster response e.g. with PLC_StatelessProgrammableSwitch.
 To enable this you have to set `"enablePush": true,` platform level and optional the `port`.
 
-The push takes place via an http request to the configured port with the keyword "push". In order to avoid that additional configurations between the PLC and the Homebrige-plc-Plugin have to be synchronized, the interface is kept very simple. The interface that the PLC operates consists only of the keyword 'push', the database number 'db', the address within the db 'offset' and the value 'value'.
+The push takes place via an http request to the configured port with the keyword "push". In order to avoid that additional configurations to be shared between the PLC and the homebrige-plc-Plugin, the interface is kept very simple.
+The interface that the PLC has to use consists only of the keyword 'push', the database number 'db', the address within the db 'offset' and the value 'value'. This allows to on the PLC to create a simple interface to push changed values to the homebridge-plc plugin e.g. I created a FC with just one input of type `ANY` to push all kind of values.
+
 The value is assigned to all matching ('db' and 'offset') get_* accessory configurations. All information is transmitted within the URL and in decimal.
 
 For example the push from the PLC is done as 'http://homebridgeIp:8080/?push&db=1014&offset=1&value=3'
@@ -682,15 +705,15 @@ With the following configuration:
 				"slot": 2,
 				"enablePush": true,
 				"accessories": [
-						{
-								"accessory": "PLC_SecuritySystem",
-								"name": "AlarmSystem",
-								"db": 1014,
-								"get_SecuritySystemCurrentState": 1,
-								"set_SecuritySystemTargetState": 1,
-								"get_SecuritySystemTargetState": 1
-						}
-					]
+					{
+							"accessory": "PLC_SecuritySystem",
+							"name": "AlarmSystem",
+							"db": 1014,
+							"get_SecuritySystemCurrentState": 1,
+							"set_SecuritySystemTargetState": 1,
+							"get_SecuritySystemTargetState": 1
+					}
+				]
 			}
 		]
 	}
