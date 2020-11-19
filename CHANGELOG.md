@@ -6,6 +6,9 @@ All notable changes to this project will be documented in this file.
 
 ### Added
 - new accessory `PLC_Doorbell`
+### Fixed
+- `PLC_Thermostat` name of parameter corrected to `get_CurrentHeatingCoolingState` previous incorrect name `get_CurrentHeaterCoolerState`
+- `PLC_Thermostat` did not poll CurrentHeatingCoolingState when polling was enabled
 
 ## [1.0.18] - 2020-11-16
 

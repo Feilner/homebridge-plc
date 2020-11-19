@@ -36,7 +36,7 @@ PLC_Platform.prototype = {
           this.s7PlatformAccessories.push(accessory);
       });
       callback(this.s7PlatformAccessories);
-
+  
       if (this.config.enablePolling) {
         log("Enable polling...");
         setInterval(function(param) {this.pollLoop( this.s7PlatformAccessories)}.bind(this),1000);
@@ -305,11 +305,11 @@ function GenericPLCAccessory(platform, config) {
     this.service = new Service.Thermostat(this.name);
     this.accessory.addService(this.service);
 
-    if ('get_CurrentHeaterCoolerState' in config) {
+    if ('get_CurrentHeatingCoolingState' in config) {
       this.service.getCharacteristic(Characteristic.CurrentHeatingCoolingState)
       .on('get', function(callback) {this.getByte(callback,
         config.db,
-        config.get_CurrentHeaterCoolerState,
+        config.get_CurrentHeatingCoolingState,
         'get CurrentHeatingCoolingState'
         )}.bind(this));
     }
@@ -1284,9 +1284,9 @@ GenericPLCAccessory.prototype = {
           this.service.getCharacteristic(Characteristic.TargetTemperature).updateValue(value);
         }
       }.bind(this));
-      this.service.getCharacteristic(Characteristic.CurrentHeaterCoolerState).getValue(function(err, value) {
+      this.service.getCharacteristic(Characteristic.CurrentHeatingCoolingState).getValue(function(err, value) {
         if (!err) {
-          this.service.getCharacteristic(Characteristic.CurrentHeaterCoolerState).updateValue(value);
+          this.service.getCharacteristic(Characteristic.CurrentHeatingCoolingState).updateValue(value);
         }
       }.bind(this));
       this.service.getCharacteristic(Characteristic.TargetHeatingCoolingState).getValue(function(err, value) {
