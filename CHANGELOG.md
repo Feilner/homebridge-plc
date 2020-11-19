@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.0.19] - 2020-11-19
+
+### Added
+- new accessory `PLC_Doorbell`
+### Fixed
+- `PLC_Thermostat` name of parameter corrected to `get_CurrentHeatingCoolingState` previous incorrect name `get_CurrentHeaterCoolerState` *check your config*
+- `PLC_Thermostat` did not poll CurrentHeatingCoolingState when polling was enabled
+- `PLC_StatelessProgrammableSwitch` simulating switch event by control interface (http request) did not work
+
 ## [1.0.18] - 2020-11-16
 
 ### Changed
