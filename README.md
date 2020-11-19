@@ -172,7 +172,7 @@ temperature sensor and temperature regulation
 	- `minValue` default value: 15
 	- `maxValue` default value: 27
 	- `minStep` default value: 1
-- `get_CurrentHeaterCoolerState`: (optional) current heating/cooling state when not present fixed `1` is used S7 type `Byte` e.g. `8` for `DB4DBB58`
+- `get_CurrentHeatingCoolingState`: (optional) current heating/cooling state when not present fixed `1` is used S7 type `Byte` e.g. `8` for `DB4DBB58`
 		- `0`: inactive
 		- `1`: idle
 		- `2`: heating
@@ -186,7 +186,7 @@ temperature sensor and temperature regulation
 
 
 ### <a name='PLC_Window'></a>Shutters as `PLC_WindowCovering`, windows as `PLC_Window` and doors as `PLC_Door`
-shutters or blinds as well sensors for windows and doors
+motor driven blinds, windows and doors. Supports also manual driven blinds, windows and doors to show just the current position in percent. *Note:* If your sensor shows only open/close may also have a look at [`PLC_ContactSensor`](#PLC_ContactSensor).
 
 ![homebridge pic](doc/blind.png) ![homebridge pic](doc/window.png) ![homebridge pic](doc/door.png)
 - `name`: unique name of the accessory
@@ -498,7 +498,7 @@ Note: The example is just an example it contains also some optional settings. Fo
 						"get_CurrentTemperature": 12,
 						"get_TargetTemperature": 16,
 						"set_TargetTemperature": 16,
-						"get_CurrentHeaterCoolerState": 20
+						"get_CurrentHeatingCoolingState": 20
 					},
 					{
 						"accessory": "PLC_WindowCovering",
@@ -609,6 +609,15 @@ Note: The example is just an example it contains also some optional settings. Fo
 					{
 						"accessory": "PLC_StatelessProgrammableSwitch",
 						"name": "Stateless Switch",
+						"enablePolling": true,
+						"pollInterval": 10,
+						"db": 12,
+						"isEvent": 29.2,
+						"get_ProgrammableSwitchEvent": 38
+					},
+					{
+						"accessory": "PLC_Doorbell",
+						"name": "Doorbell",
 						"enablePolling": true,
 						"pollInterval": 10,
 						"db": 12,

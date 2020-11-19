@@ -441,29 +441,29 @@ function GenericPLCAccessory(platform, config) {
           informFunction,
           this.modFunctionSet
           )}.bind(this));
-      }
-      else
-      {
-        // Not possible give a target position always use current position as target position.
-        this.service.getCharacteristic(Characteristic.TargetPosition)
-        .on('get', function(callback) {this.getByte(callback,
-          config.db,
-          config.get_CurrentPosition,  // always use current position as target position
-          'get CurrentPosition',
-          this.modFunctionGet
-          )}.bind(this))
-        .on('set', function(value, callback) {this.setDummy(value, callback,
-          'set TargetPosition',
-          function(value){
-            // ignore new target value instead get current value and use it target position
-            this.service.getCharacteristic(Characteristic.CurrentPosition).getValue(function(err, value) {
-              if (!err) {
-                this.service.getCharacteristic(Characteristic.TargetPosition).updateValue(value);
-              }
-            }.bind(this));
-           }.bind(this)
-          )}.bind(this));
-      }
+    }
+    else
+    {
+      // Not possible give a target position always use current position as target position.
+      this.service.getCharacteristic(Characteristic.TargetPosition)
+      .on('get', function(callback) {this.getByte(callback,
+        config.db,
+        config.get_CurrentPosition,  // always use current position as target position
+        'get CurrentPosition',
+        this.modFunctionGet
+        )}.bind(this))
+      .on('set', function(value, callback) {this.setDummy(value, callback,
+        'set TargetPosition',
+        function(value){
+          // ignore new target value instead get current value and use it target position
+          this.service.getCharacteristic(Characteristic.CurrentPosition).getValue(function(err, value) {
+            if (!err) {
+              this.service.getCharacteristic(Characteristic.TargetPosition).updateValue(value);
+            }
+          }.bind(this));
+          }.bind(this)
+        )}.bind(this));
+    }
     if ('get_PositionState' in config) {
       this.service.getCharacteristic(Characteristic.PositionState)
         .on('get', function(callback) {this.getByte(callback,
@@ -1155,7 +1155,7 @@ GenericPLCAccessory.prototype = {
       }
     }
     else if (this.config.accessory == 'PLC_StatelessProgrammableSwitch' || this.config.accessory == 'PLC_Doorbell'){
-      if (this.config.set_ProgrammableSwitchEvent == offset)
+      if (this.config.get_ProgrammableSwitchEvent == offset)
       {
         this.log.debug( "[" + this.name + "] Control ProgrammableSwitchEvent:" + value);
         this.service.getCharacteristic(Characteristic.ProgrammableSwitchEvent).updateValue(value);
