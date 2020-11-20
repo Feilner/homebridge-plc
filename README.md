@@ -74,19 +74,19 @@ normal light see also simple PLC example for [single bit](doc/ligtbulb_plc_examp
 
 ![homebridge pic](doc/lightbulb.png)
 - `name`: unique name of the accessory
-- `manufacturer`: (optional) description
+- `manufacturer`: **(optional)** description
 - `db`: s7 data base number e.g. `4` for `DB4`
-- `enablePolling`: (optional) when set to `true` the current state will be polled. It is mandatory as well to enable polling mode on platform level.
-- `pollInterval` (optional) poll interval in seconds. Default value is `10` seconds.
+- `enablePolling`: **(optional)** when set to `true` the current state will be polled. It is mandatory as well to enable polling mode on platform level.
+- `pollInterval` **(optional)** poll interval in seconds. Default value is `10` seconds.
 - `get_On`: offset and bit get the current status S7 type `Bool` e.g. `55.0` for `DB4DBX55.0`
 - Single Bit for on/off:
 	- `set_On`: offset and bit set to 1/0 when switching on/off S7 type `Bool` PLC  e.g. `55.0` for `DB4DBX55.0` could be same as get_On
 - Separate Bits for on/off:
 	- `set_On`: offset and bit set to 1 when switching on S7 type `Bool` **PLC has to set to 0** e.g. `55.1` for `DB4DBX55.1`
 	- `set_Off`: offset and bit set to 1 when switching off S7 type `Bool` **PLC has to set to 0** e.g. `55.2` for `DB4DBX55.2`
-- `get_Brightness`: (optional) get brightness value S7 type `Byte` e.g. `56` for `DB4DBB56`
+- `get_Brightness`: **(optional)** get brightness value S7 type `Byte` e.g. `56` for `DB4DBB56`
 - `set_Brightness`: (optional but required when `get_Brightness` is defined) set brightness value S7 type `Byte` e.g. `57` for `DB4DBB57`
-- brightness range definitions (optional)
+- brightness range definitions **(optional)**
 	- `minValue` default value: 20
 	- `maxValue` default value: 100
 	- `minStep` default value: 1
@@ -96,13 +96,13 @@ outlet possible to show also as ventilator or light
 
 ![homebridge pic](doc/outlet.png)
 - `name`: unique name of the accessory
-- `manufacturer`: (optional) description
+- `manufacturer`: **(optional)** description
 - `db`: s7 data base number e.g. `4` for `DB4`
-- `enablePolling`: (optional) when set to `true` the current state will be polled. It is mandatory as well to enable polling mode on platform level.
-- `pollInterval` (optional) poll interval in seconds. Default value is `10` seconds.
+- `enablePolling`: **(optional)** when set to `true` the current state will be polled. It is mandatory as well to enable polling mode on platform level.
+- `pollInterval` **(optional)** poll interval in seconds. Default value is `10` seconds.
 - `get_On`: offset and bit get the current status S7 type `Bool` e.g. `55.0` for `DB4DBX55.0`
 - Single Bit for on/off:
-	- `set_On`: offset and bit set to 1/0 when switching on/off S7 type `Bool` PLC  e.g. `55.0` for `DB4DBX55.0` could be same as get_On
+  - `set_On`: offset and bit set to 1/0 when switching on/off S7 type `Bool` PLC  e.g. `55.0` for `DB4DBX55.0` could be same as get_On
 - Separate Bits for on/off:
   - `set_On`: offset and bit set to 1 when switching on S7 type `Bool` **PLC has to set to 0** e.g. `55.1` for `DB4DBX55.1`
   - `set_Off`: offset and bit set to 1 when switching off S7 type `Bool` **PLC has to set to 0** e.g. `55.2` for `DB4DBX55.2`
@@ -112,13 +112,13 @@ outlet possible to show also as ventilator or light
 
  ![homebridge pic](doc/switch.png)
 - `name`: unique name of the accessory
-- `manufacturer`: (optional) description
+- `manufacturer`: **(optional)** description
 - `db`: s7 data base number e.g. `4` for `DB4`
-- `enablePolling`: (optional) when set to `true` the current state will be polled. It is mandatory as well to enable polling mode on platform level.
-- `pollInterval` (optional) poll interval in seconds. Default value is `10` seconds.
+- `enablePolling`: **(optional)** when set to `true` the current state will be polled. It is mandatory as well to enable polling mode on platform level.
+- `pollInterval` **(optional)** poll interval in seconds. Default value is `10` seconds.
 - `get_On`: offset and bit get the current status S7 type `Bool` e.g. `55.0` for `DB4DBX55.0`
 - Single Bit for on/off:
-	- `set_On`: offset and bit set to 1/0 when switching on/off S7 type `Bool` PLC  e.g. `55.0` for `DB4DBX55.0` could be same as get_On
+  - `set_On`: offset and bit set to 1/0 when switching on/off S7 type `Bool` PLC  e.g. `55.0` for `DB4DBX55.0` could be same as get_On
 - Separate Bits for on/off:
   - `set_On`: offset and bit set to 1 when switching on S7 type `Bool` **PLC has to set to 0** e.g. `55.1` for `DB4DBX55.1`
   - `set_Off`: offset and bit set to 1 when switching off S7 type `Bool` **PLC has to set to 0** e.g. `55.2` for `DB4DBX55.2`
@@ -128,12 +128,12 @@ normal temperature sensor
 
 ![homebridge pic](doc/temperature.png)
 - `name`: unique name of the accessory
-- `manufacturer`: (optional) description
+- `manufacturer`: **(optional)** description
 - `db`: s7 data base number e.g. `4` for `DB4`
-- `enablePolling`: (optional) when set to `true` the current state will be polled. It is mandatory as well to enable polling mode on platform level.
-- `pollInterval` (optional) poll interval in seconds. Default value is `10` seconds.
+- `enablePolling`: **(optional)** when set to `true` the current state will be polled. It is mandatory as well to enable polling mode on platform level.
+- `pollInterval` **(optional)** poll interval in seconds. Default value is `10` seconds.
 - `get_CurrentTemperature`: offset to get current temperature S7 type `Real` e.g. `55` for `DB4DBD55`
-- temperature range (optional)
+- temperature range **(optional)**
 	- `minValue` default value: -50
 	- `maxValue` default value: 50
 	- `minStep` default value: 0.5
@@ -143,12 +143,12 @@ normal humidity sensor
 
 ![homebridge pic](doc/humidity.png)
 - `name`: unique name of the accessory
-- `manufacturer`: (optional) description
+- `manufacturer`: **(optional)** description
 - `db`: s7 data base number e.g. `4` for `DB4`
-- `enablePolling`: (optional) when set to `true` the current state will be polled. It is mandatory as well to enable polling mode on platform level.
-- `pollInterval` (optional) poll interval in seconds. Default value is `10` seconds.
+- `enablePolling`: **(optional)** when set to `true` the current state will be polled. It is mandatory as well to enable polling mode on platform level.
+- `pollInterval` **(optional)** poll interval in seconds. Default value is `10` seconds.
 - `get_CurrentRelativeHumidity`: offset to get current humidity S7 type `Real` e.g. `55` for `DB4DBD55`
-- humidity range (optional)
+- humidity range **(optional)**
 	- `minValue` default value: 0
 	- `maxValue` default value: 100
 	- `minStep` default value: 1
@@ -159,20 +159,20 @@ temperature sensor and temperature regulation
 
 ![homebridge pic](doc/thermostat.png)
 - `name`: unique name of the accessory
-- `manufacturer`: (optional) description
+- `manufacturer`: **(optional)** description
 - `db`: s7 data base number e.g. `4` for `DB4`
-- `enablePolling`: (optional) when set to `true` the current state will be polled. It is mandatory as well to enable polling mode on platform level.
-- `pollInterval` (optional) poll interval in seconds. Default value is `10` seconds.
+- `enablePolling`: **(optional)** when set to `true` the current state will be polled. It is mandatory as well to enable polling mode on platform level.
+- `pollInterval` **(optional)** poll interval in seconds. Default value is `10` seconds.
 - `get_CurrentTemperature`: offset to get current humidity S7 type `Real` e.g. `55` for `DB4DBD55`
 - S7 type `Byte` e.g. `56` for `DB4DBB56`
 - `get_CurrentTemperature`: offset to get current temperature S7 type `Real` e.g. `0` for `DB4DBD0`
 - `get_TargetTemperature`: offset to get target temperature S7 type `Real` e.g. `4` for `DB4DBD4`
 - `set_TargetTemperature`: offset to set current temperature S7 type `Real` e.g. `4` for `DB4DBD4` (can have same value as get_TargetTemperature)
-- target temperature range definitions (optional)
+- target temperature range definitions **(optional)**
 	- `minValue` default value: 15
 	- `maxValue` default value: 27
 	- `minStep` default value: 1
-- `get_CurrentHeatingCoolingState`: (optional) current heating/cooling state when not present fixed `1` is used S7 type `Byte` e.g. `8` for `DB4DBB58`
+- `get_CurrentHeatingCoolingState`: **(optional)** current heating/cooling state when not present fixed `1` is used S7 type `Byte` e.g. `8` for `DB4DBB58`
   - `0`: inactive
   - `1`: idle
   - `2`: heating
@@ -186,38 +186,38 @@ temperature sensor and temperature regulation
 
 
 ### <a name='PLC_Window'></a>Shutters as `PLC_WindowCovering`, windows as `PLC_Window` and doors as `PLC_Door`
-motor driven blinds, windows and doors. Supports also manual driven blinds, windows and doors to show just the current position in percent. *Note:* If your sensor shows only open/close may also have a look at [`PLC_ContactSensor`](#PLC_ContactSensor).
+motor driven blinds, windows and doors. Supports also manual driven blinds, windows and doors to show just the current position in percent. **Note:** If your sensor shows only open/close may also have a look at [`PLC_ContactSensor`](#PLC_ContactSensor).
 
 ![homebridge pic](doc/blind.png) ![homebridge pic](doc/window.png) ![homebridge pic](doc/door.png)
 - `name`: unique name of the accessory
-- `manufacturer`: (optional) description
+- `manufacturer`: **(optional)** description
 - `db`: s7 data base number e.g. `4` for `DB4`
-- `invert`: (optional) set to `true` to inverts the meanings of the values from `0:closed 100:open` to `100:closed 0:open`
-- `mapGet`: (optional) define mapping array for get position. The PLC value is used as index into the table. e.g. `[0, 25, 100]` which maps the PLC value `0->0 1->25 2->100` this this is useful e.g. for window open state.
-- `adaptivePolling`:  (optional) when set to `true` the current position will be polled until target position is reached. Polling starts with set target position from home app. This allows to show the shutter as opening... or closing... in the home app during movement.
-- `adaptivePollingInterval` (optional) poll interval in seconds during high frequency polling. Default value is `1` second.
-- `forceCurrentPosition` (optional) when set to `true` the position set by `set_TargetPosition` is directly used as current position. By this it seems in tha home app as the target position was directly reached. This is recommended when not using `adaptivePolling` or pushing the value from the plc.
-- `enablePolling`: (optional) when set to `true` the current state will be polled. It is mandatory as well to enable polling mode on platform level.
-- `pollInterval` (optional) poll interval in seconds. Default value is `10` seconds.
+- `invert`: **(optional)** set to `true` to inverts the meanings of the values from `0:closed 100:open` to `100:closed 0:open`
+- `mapGet`: **(optional)** define mapping array for get position. The PLC value is used as index into the table. e.g. `[0, 25, 100]` which maps the PLC value `0->0 1->25 2->100` this this is useful e.g. for window open state.
+- `adaptivePolling`:  **(optional)** when set to `true` the current position will be polled until target position is reached. Polling starts with set target position from home app. This allows to show the shutter as opening... or closing... in the home app during movement.
+- `adaptivePollingInterval` **(optional)** poll interval in seconds during high frequency polling. Default value is `1` second.
+- `forceCurrentPosition` **(optional)** when set to `true` the position set by `set_TargetPosition` is directly used as current position. By this it seems in tha home app as the target position was directly reached. This is recommended when not using `adaptivePolling` or pushing the value from the plc.
+- `enablePolling`: **(optional)** when set to `true` the current state will be polled. It is mandatory as well to enable polling mode on platform level.
+- `pollInterval` **(optional)** poll interval in seconds. Default value is `10` seconds.
 - `get_CurrentPosition`: offset to get current position S7 type `Byte` e.g. `0` for `DB4DBB0`
-- if one of the (optional) target position settings need specified all are needed. If not specified it os not movable ans sticks to current position.
-	- `get_TargetPosition`: (optional) offset to get target position S7 type `Byte` e.g. `1` for `DB4DBB1`  (can have same value as set_TargetPosition)
-	- `set_TargetPosition`: (optional) offset to set current position S7 type `Byte` e.g. `2` for `DB4DBB2` (can have same value as get_TargetPosition)
-- `get_PositionState`: (optional) offset to current movement state if not defined fixed `2`is returned S7 type `Byte` e.g. `3` for `DB4DBB3`
+- if one of the **(optional)** target position settings need specified all are needed. If not specified it os not movable ans sticks to current position.
+	- `get_TargetPosition`: **(optional)** offset to get target position S7 type `Byte` e.g. `1` for `DB4DBB1`  (can have same value as set_TargetPosition)
+	- `set_TargetPosition`: **(optional)** offset to set current position S7 type `Byte` e.g. `2` for `DB4DBB2` (can have same value as get_TargetPosition)
+- `get_PositionState`: **(optional)** offset to current movement state if not defined fixed `2`is returned S7 type `Byte` e.g. `3` for `DB4DBB3`
   - `0`: down
   - `1`: up
   - `2`: stop
-- `set_HoldPosition`: (optional): offset and bit set to 1 to stop movement. (Seems not to be used) when not defined writes will be ignoredS7 type `Bool` **PLC has to set to 0** e.g. `55.1` for `DB4DBX55.1`
+- `set_HoldPosition`: **(optional)**: offset and bit set to 1 to stop movement. (Seems not to be used) when not defined writes will be ignoredS7 type `Bool` **PLC has to set to 0** e.g. `55.1` for `DB4DBX55.1`
 
 ### <a name='PLC_OccupancySensor'></a>Occupancy Sensor as `PLC_OccupancySensor`
 presence detection sensor
 
 ![homebridge pic](doc/occupancy.png)
 - `name`: unique name of the accessory
-- `manufacturer`: (optional) description
+- `manufacturer`: **(optional)** description
 - `db`: s7 data base number e.g. `4` for `DB4`
-- `enablePolling`: (optional) when set to `true` the current state will be polled. It is mandatory as well to enable polling mode on platform level.
-- `pollInterval` (optional) poll interval in seconds. Default value is `10` seconds.
+- `enablePolling`: **(optional)** when set to `true` the current state will be polled. It is mandatory as well to enable polling mode on platform level.
+- `pollInterval` **(optional)** poll interval in seconds. Default value is `10` seconds.
 - `get_OccupancyDetected`: offset and bit get the current status S7 type `Bool` e.g. `55.0` for `DB4DBX55.0`
   - `false`: no occupancy
   - `true`: occupancy detected
@@ -227,10 +227,10 @@ movement detection sensor
 
 ![homebridge pic](doc/motion.png)
 - `name`: unique name of the accessory
-- `manufacturer`: (optional) description
+- `manufacturer`: **(optional)** description
 - `db`: s7 data base number e.g. `4` for `DB4`
-- `enablePolling`: (optional) when set to `true` the current state will be polled. It is mandatory as well to enable polling mode on platform level.
-- `pollInterval` (optional) poll interval in seconds. Default value is `10` seconds.
+- `enablePolling`: **(optional)** when set to `true` the current state will be polled. It is mandatory as well to enable polling mode on platform level.
+- `pollInterval` **(optional)** poll interval in seconds. Default value is `10` seconds.
 - `get_MotionDetected`: offset and bit get the current status S7 type `Bool` e.g. `55.0` for `DB4DBX55.0`
   - `false`: no motion
   - `true`: motion detected
@@ -240,10 +240,10 @@ Generic contact sensor. The home app allows to display as window, door, blind/sh
 
 ![homebridge pic](doc/contactsensor.png) ![homebridge pic](doc/blind.png) ![homebridge pic](doc/window.png) ![homebridge pic](doc/door.png) ![homebridge pic](doc/garagedoor.png)
 - `name`: unique name of the accessory
-- `manufacturer`: (optional) description
+- `manufacturer`: **(optional)** description
 - `db`: s7 data base number e.g. `4` for `DB4`
-- `enablePolling`: (optional) when set to `true` the current state will be polled. It is mandatory as well to enable polling mode on platform level.
-- `pollInterval` (optional) poll interval in seconds. Default value is `10` seconds.
+- `enablePolling`: **(optional)** when set to `true` the current state will be polled. It is mandatory as well to enable polling mode on platform level.
+- `pollInterval` **(optional)** poll interval in seconds. Default value is `10` seconds.
 - `get_ContactSensorState`: offset and bit get the current status S7 type `Bool` e.g. `55.0` for `DB4DBX55.0`
   - `false`: closed
   - `true`: open
@@ -253,10 +253,10 @@ alarm system
 
 ![homebridge pic](doc/securitysystem.png)
 - `name`: unique name of the accessory
-- `manufacturer`: (optional) description
+- `manufacturer`: **(optional)** description
 - `db`: s7 data base number e.g. `4` for `DB4`
-- `enablePolling`: (optional) when set to `true` the current state of the security system will be polled.
-- `pollInterval` (optional) poll interval in seconds. Default value is `10` seconds.
+- `enablePolling`: **(optional)** when set to `true` the current state of the security system will be polled.
+- `pollInterval` **(optional)** poll interval in seconds. Default value is `10` seconds.
 - `get_SecuritySystemCurrentState`: offset to current security system state S7 type `Byte` e.g. `3` for `DB4DBB3`
   - `0`: armed stay at home
   - `1`: armed away from home
@@ -269,18 +269,18 @@ alarm system
   - `1`: armed away from home
   - `2`: armed night
   - `3`: disarmed
-- `mapGet`: (optional) define mapping array for get security system state. The PLC value is used as index into the table. e.g. `[3, 1]` which maps the PLC value `0->3 1->2` when the PLC supports only two states with `0:disarmed` and `1:armed` and `2:alarm`.
-- `mapSet`: (optional) define mapping array for set security system state. The home app value is used as index into the table. e.g. `[1, 1, 1, 0, 2]` which maps the PLC value `0->1 1->1 2->1, 3->0, 4->2` when the PLC supports only two states with `0:disarmed` and `1:armed` and `2:alarm`.
+- `mapGet`: **(optional)** define mapping array for get security system state. The PLC value is used as index into the table. e.g. `[3, 1]` which maps the PLC value `0->3 1->2` when the PLC supports only two states with `0:disarmed` and `1:armed` and `2:alarm`.
+- `mapSet`: **(optional)** define mapping array for set security system state. The home app value is used as index into the table. e.g. `[1, 1, 1, 0, 2]` which maps the PLC value `0->1 1->1 2->1, 3->0, 4->2` when the PLC supports only two states with `0:disarmed` and `1:armed` and `2:alarm`.
 
 ### <a name='PLC_Faucet'></a>Faucet as `PLC_Faucet`
 watering for the garden
 
 ![homebridge pic](doc/faucet.png)
 - `name`: unique name of the accessory
-- `manufacturer`: (optional) description
+- `manufacturer`: **(optional)** description
 - `db`: s7 data base number e.g. `4` for `DB4`
-- `enablePolling`: (optional) when set to `true` the current state will be polled. It is mandatory as well to enable polling mode on platform level.
-- `pollInterval` (optional) poll interval in seconds. Default value is `10` seconds.
+- `enablePolling`: **(optional)** when set to `true` the current state will be polled. It is mandatory as well to enable polling mode on platform level.
+- `pollInterval` **(optional)** poll interval in seconds. Default value is `10` seconds.
 - `get_Active`: offset and bit get the current status S7 type `Bool` e.g. `55.0` for `DB4DBX55.0`
 - Single Bit for on/off:
 	- `set_Active`: offset and bit set to 1/0 when switching on/off S7 type `Bool` PLC  e.g. `55.0` for `DB4DBX55.0` could be same as get_Active
@@ -293,10 +293,10 @@ valve configurable as generic valve, irrigation, shower head or water faucet
 
 ![homebridge pic](doc/valve.png)
 - `name`: unique name of the accessory
-- `manufacturer`: (optional) description
+- `manufacturer`: **(optional)** description
 - `db`: s7 data base number e.g. `4` for `DB4`
-- `enablePolling`: (optional) when set to `true` the current state will be polled. It is mandatory as well to enable polling mode on platform level.
-- `pollInterval` (optional) poll interval in seconds. Default value is `10` seconds.
+- `enablePolling`: **(optional)** when set to `true` the current state will be polled. It is mandatory as well to enable polling mode on platform level.
+- `pollInterval` **(optional)** poll interval in seconds. Default value is `10` seconds.
 - `ValveType` configures the valve type that is returned
   - `0`: generic valve
   - `1`: irrigation
@@ -308,10 +308,10 @@ valve configurable as generic valve, irrigation, shower head or water faucet
 - Separate Bits for on/off:
   - `set_Active`: offset and bit set to 1 when switching on S7 type `Bool` **PLC has to set to 0** e.g. `55.1` for `DB4DBX55.1`
   - `set_Deactivate`: offset and bit set to 1 when switching off S7 type `Bool` **PLC has to set to 0** e.g. `55.2` for `DB4DBX55.2`
-- if one of the (optional) duration settings need specified all are needed
-  - `get_SetDuration`: (optional) duration 0..3600 sec S7 type `Time` e.g. `10` for `DB4DBD10`
-  - `set_SetDuration`: (optional) duration 0..3600 sec S7 type `Time` e.g. `14` for `DB4DBD14`
-  - `get_RemainingDuration`: (optional) duration 0..3600 sec S7 type `Time` e.g. `18` for `DB4DBD18`
+- if one of the **(optional)** duration settings need specified all are needed
+  - `get_SetDuration`: **(optional)** duration 0..3600 sec S7 type `Time` e.g. `10` for `DB4DBD10`
+  - `set_SetDuration`: **(optional)** duration 0..3600 sec S7 type `Time` e.g. `14` for `DB4DBD14`
+  - `get_RemainingDuration`: **(optional)** duration 0..3600 sec S7 type `Time` e.g. `18` for `DB4DBD18`
 
 ### <a name='PLC_StatelessProgrammableSwitch'></a>Button as `PLC_StatelessProgrammableSwitch`, Doorbell as `PLC_Doorbell`
 stateless switch from PLC to home app. Trigger actions in home app only works with control center e.g. AppleTV or HomePod.
@@ -319,10 +319,10 @@ It will works only in polling or push mode! The PLC sets a bit that is regularly
 
 ![homebridge pic](doc/statelessswitch.png)
 - `name`: unique name of the accessory
-- `manufacturer`: (optional) description
+- `manufacturer`: **(optional)** description
 - `db`: s7 data base number e.g. `4` for `DB4`
-- `enablePolling`: (optional) when set to `true` the current state will be polled. It is mandatory as well to enable polling mode on platform level.
-- `pollInterval` (optional) poll interval in seconds. Default value is `10` seconds.
+- `enablePolling`: **(optional)** when set to `true` the current state will be polled. It is mandatory as well to enable polling mode on platform level.
+- `pollInterval` **(optional)** poll interval in seconds. Default value is `10` seconds.
 - `isEvent` offset and bit that is polled by homebridge-plc. **PLC has to set to `true`.**  When set to 1 the event is read from `get_ProgrammableSwitchEvent` and the bit is `false` by homebirdge-plc to confirm that the event is handled. S7 type `Bool` e.g. `55.1` for `DB4DBX55.1` (only used for polling)
 - `get_ProgrammableSwitchEvent`: offset to read current event of the switch. This is reported towards home app S7 type `Byte` e.g. `3` for `DB4DBB3`
   - `0`: single press
@@ -334,11 +334,11 @@ Lock mechanism (not yet clear how to use changes are welcome)
 
 ![homebridge pic](doc/lock.png)
 - `name`: unique name of the accessory
-- `manufacturer`: (optional) description
+- `manufacturer`: **(optional)** description
 - `db`: s7 data base number e.g. `4` for `DB4`
-- `enablePolling`: (optional) when set to `true` the current state will be polled. It is mandatory as well to enable polling mode on platform level.
-- `pollInterval` (optional) poll interval in seconds. Default value is `10` seconds.
-- `forceCurrentState`: (optional) when set to `true` the position set by `set_LockTargetState` is directly used as current state. By this it seems in the home app as the target state was directly reached. This is recommended when not using `enablePolling` or pushing the value from the plc.
+- `enablePolling`: **(optional)** when set to `true` the current state will be polled. It is mandatory as well to enable polling mode on platform level.
+- `pollInterval` **(optional)** poll interval in seconds. Default value is `10` seconds.
+- `forceCurrentState`: **(optional)** when set to `true` the position set by `set_LockTargetState` is directly used as current state. By this it seems in the home app as the target state was directly reached. This is recommended when not using `enablePolling` or pushing the value from the plc.
 	- `get_LockCurrentState`: offset to read current state current state S7 type `Byte` e.g. `3` for `DB4DBB3`
 		- `0`: unsecured
 		- `1`: secured
@@ -356,11 +356,11 @@ Lock mechanism implemented as bool on the PLC. **NOTE: The convention `0`=`false
 
 ![homebridge pic](doc/lockbool.png)
 - `name`: unique name of the accessory
-- `manufacturer`: (optional) description
+- `manufacturer`: **(optional)** description
 - `db`: s7 data base number e.g. `4` for `DB4`
-- `enablePolling`: (optional) when set to `true` the current state will be polled. t is mandatory as well to enable polling mode on platform level.
-- `pollInterval` (optional) poll interval in seconds. Default value is `10` seconds.
-- `forceCurrentState`: (optional) when set to `true` the position set by `set_LockTargetState` is directly used as current state. By this it seems in the home app as the target state was directly reached. This is recommended when not sing `enablePolling` or pushing the value from the plc.
+- `enablePolling`: **(optional)** when set to `true` the current state will be polled. t is mandatory as well to enable polling mode on platform level.
+- `pollInterval` **(optional)** poll interval in seconds. Default value is `10` seconds.
+- `forceCurrentState`: **(optional)** when set to `true` the position set by `set_LockTargetState` is directly used as current state. By this it seems in the home app as the target state was directly reached. This is recommended when not sing `enablePolling` or pushing the value from the plc.
 - `get_LockCurrentState`: offset to read current state current state S7 type `Bool` .g. `3.1` for `DB4DBB3`
 	- `false`: secured
 	- `true`: unsecured
@@ -381,12 +381,12 @@ Lock mechanism (not yet clear how to use changes are welcome)
 
 ![homebridge pic](doc/garagedoor.png)
 - `name`: unique name of the accessory
-- `manufacturer`: (optional) description
+- `manufacturer`: **(optional)** description
 - `db`: s7 data base number e.g. `4` for `DB4`
-- `enablePolling`: (optional) when set to `true` the current state will be polled. It is mandatory as well to enable polling mode on platform level.
-- `pollInterval` (optional) poll interval in seconds. Default value is `10` seconds.
-- `forceCurrentState`: (optional) when set to `true` the position set by `set_TargetDoorState` is directly used as current state. By this it seems in the home app as the target state was directly reached. This is recommended when not sing `enablePolling` or pushing the value from the plc.
-- `get_ObstructionDetected` (optional) offset and bit to obfuscation detection true means that the door was blocked S7 type `Bool` e.g. `55.1` for `DB4DBX55.1`
+- `enablePolling`: **(optional)** when set to `true` the current state will be polled. It is mandatory as well to enable polling mode on platform level.
+- `pollInterval` **(optional)** poll interval in seconds. Default value is `10` seconds.
+- `forceCurrentState`: **(optional)** when set to `true` the position set by `set_TargetDoorState` is directly used as current state. By this it seems in the home app as the target state was directly reached. This is recommended when not sing `enablePolling` or pushing the value from the plc.
+- `get_ObstructionDetected` **(optional)** offset and bit to obfuscation detection true means that the door was blocked S7 type `Bool` e.g. `55.1` for `DB4DBX55.1`
 - `get_CurrentDoorState`: offset to read current state current state S7 type `Byte` e.g. `3` for `DB4DBB3`
 	- `0`: open
 	- `1`: closed
