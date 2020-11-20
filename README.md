@@ -102,10 +102,10 @@ outlet possible to show also as ventilator or light
 - `pollInterval` (optional) poll interval in seconds. Default value is `10` seconds.
 - `get_On`: offset and bit get the current status S7 type `Bool` e.g. `55.0` for `DB4DBX55.0`
 - Single Bit for on/off:
-		- `set_On`: offset and bit set to 1/0 when switching on/off S7 type `Bool` PLC  e.g. `55.0` for `DB4DBX55.0` could be same as get_On
+	- `set_On`: offset and bit set to 1/0 when switching on/off S7 type `Bool` PLC  e.g. `55.0` for `DB4DBX55.0` could be same as get_On
 - Separate Bits for on/off:
-		- `set_On`: offset and bit set to 1 when switching on S7 type `Bool` **PLC has to set to 0** e.g. `55.1` for `DB4DBX55.1`
-		- `set_Off`: offset and bit set to 1 when switching off S7 type `Bool` **PLC has to set to 0** e.g. `55.2` for `DB4DBX55.2`
+  - `set_On`: offset and bit set to 1 when switching on S7 type `Bool` **PLC has to set to 0** e.g. `55.1` for `DB4DBX55.1`
+  - `set_Off`: offset and bit set to 1 when switching off S7 type `Bool` **PLC has to set to 0** e.g. `55.2` for `DB4DBX55.2`
 
 ### <a name='PLC_Switch'></a>Switch as `PLC_Switch`
  switch possible to show also as ventilator or light
@@ -118,10 +118,10 @@ outlet possible to show also as ventilator or light
 - `pollInterval` (optional) poll interval in seconds. Default value is `10` seconds.
 - `get_On`: offset and bit get the current status S7 type `Bool` e.g. `55.0` for `DB4DBX55.0`
 - Single Bit for on/off:
-		- `set_On`: offset and bit set to 1/0 when switching on/off S7 type `Bool` PLC  e.g. `55.0` for `DB4DBX55.0` could be same as get_On
+	- `set_On`: offset and bit set to 1/0 when switching on/off S7 type `Bool` PLC  e.g. `55.0` for `DB4DBX55.0` could be same as get_On
 - Separate Bits for on/off:
-		- `set_On`: offset and bit set to 1 when switching on S7 type `Bool` **PLC has to set to 0** e.g. `55.1` for `DB4DBX55.1`
-		- `set_Off`: offset and bit set to 1 when switching off S7 type `Bool` **PLC has to set to 0** e.g. `55.2` for `DB4DBX55.2`
+  - `set_On`: offset and bit set to 1 when switching on S7 type `Bool` **PLC has to set to 0** e.g. `55.1` for `DB4DBX55.1`
+  - `set_Off`: offset and bit set to 1 when switching off S7 type `Bool` **PLC has to set to 0** e.g. `55.2` for `DB4DBX55.2`
 
 ### <a name='PLC_TemperatureSensor'></a>Temperature Sensor as `PLC_TemperatureSensor`
 normal temperature sensor
@@ -173,15 +173,15 @@ temperature sensor and temperature regulation
 	- `maxValue` default value: 27
 	- `minStep` default value: 1
 - `get_CurrentHeatingCoolingState`: (optional) current heating/cooling state when not present fixed `1` is used S7 type `Byte` e.g. `8` for `DB4DBB58`
-		- `0`: inactive
-		- `1`: idle
-		- `2`: heating
-		- `3`: cooling
+  - `0`: inactive
+  - `1`: idle
+  - `2`: heating
+  - `3`: cooling
 - `get_TargetHeatingCoolingState` not yet supported returns fixed `3`
-		- `0`: off
-		- `1`: heat
-		- `2`: cool
-		- `3`: automatic
+  - `0`: off
+  - `1`: heat
+  - `2`: cool
+  - `3`: automatic
 - `set_TargetHeatingCoolingState` not yet supported writes are ignored
 
 
@@ -204,9 +204,9 @@ motor driven blinds, windows and doors. Supports also manual driven blinds, wind
 	- `get_TargetPosition`: (optional) offset to get target position S7 type `Byte` e.g. `1` for `DB4DBB1`  (can have same value as set_TargetPosition)
 	- `set_TargetPosition`: (optional) offset to set current position S7 type `Byte` e.g. `2` for `DB4DBB2` (can have same value as get_TargetPosition)
 - `get_PositionState`: (optional) offset to current movement state if not defined fixed `2`is returned S7 type `Byte` e.g. `3` for `DB4DBB3`
-		- `0`: down
-		- `1`: up
-		- `2`: stop
+  - `0`: down
+  - `1`: up
+  - `2`: stop
 - `set_HoldPosition`: (optional): offset and bit set to 1 to stop movement. (Seems not to be used) when not defined writes will be ignoredS7 type `Bool` **PLC has to set to 0** e.g. `55.1` for `DB4DBX55.1`
 
 ### <a name='PLC_OccupancySensor'></a>Occupancy Sensor as `PLC_OccupancySensor`
@@ -219,8 +219,8 @@ presence detection sensor
 - `enablePolling`: (optional) when set to `true` the current state will be polled. It is mandatory as well to enable polling mode on platform level.
 - `pollInterval` (optional) poll interval in seconds. Default value is `10` seconds.
 - `get_OccupancyDetected`: offset and bit get the current status S7 type `Bool` e.g. `55.0` for `DB4DBX55.0`
-		- `false`: no occupancy
-		- `true`: occupancy detected
+  - `false`: no occupancy
+  - `true`: occupancy detected
 
 ### <a name='PLC_MotionSensor'></a>Motion Sensor as `PLC_MotionSensor`
 movement detection sensor
@@ -232,8 +232,8 @@ movement detection sensor
 - `enablePolling`: (optional) when set to `true` the current state will be polled. It is mandatory as well to enable polling mode on platform level.
 - `pollInterval` (optional) poll interval in seconds. Default value is `10` seconds.
 - `get_MotionDetected`: offset and bit get the current status S7 type `Bool` e.g. `55.0` for `DB4DBX55.0`
-		- `false`: no motion
-		- `true`: motion detected
+  - `false`: no motion
+  - `true`: motion detected
 
 ### <a name='PLC_ContactSensor'></a>Contact Sensor as `PLC_ContactSensor`
 Generic contact sensor. The home app allows to display as window, door, blind/shutter, garage door or contact sensor.
@@ -245,8 +245,8 @@ Generic contact sensor. The home app allows to display as window, door, blind/sh
 - `enablePolling`: (optional) when set to `true` the current state will be polled. It is mandatory as well to enable polling mode on platform level.
 - `pollInterval` (optional) poll interval in seconds. Default value is `10` seconds.
 - `get_ContactSensorState`: offset and bit get the current status S7 type `Bool` e.g. `55.0` for `DB4DBX55.0`
-		- `false`: closed
-		- `true`: open
+  - `false`: closed
+  - `true`: open
 
 ### <a name='PLC_SecuritySystem'></a>Security System as `PLC_SecuritySystem`:
 alarm system
@@ -255,20 +255,20 @@ alarm system
 - `name`: unique name of the accessory
 - `manufacturer`: (optional) description
 - `db`: s7 data base number e.g. `4` for `DB4`
-- `enablePolling`: (optional) when set to `true` the current state of the security system will be polled. When disabled a set of the target system state. will trigger a single get of the target and current state.
+- `enablePolling`: (optional) when set to `true` the current state of the security system will be polled.
 - `pollInterval` (optional) poll interval in seconds. Default value is `10` seconds.
 - `get_SecuritySystemCurrentState`: offset to current security system state S7 type `Byte` e.g. `3` for `DB4DBB3`
-		- `0`: armed stay at home
-		- `1`: armed away from home
-		- `2`: armed night
-		- `3`: disarmed
-		- `4`: alarm triggered
+  - `0`: armed stay at home
+  - `1`: armed away from home
+  - `2`: armed night
+  - `3`: disarmed
+  - `4`: alarm triggered
 - `set_SecuritySystemTargetState`: offset to set target security system state S7 type `Byte` e.g. `5` for `DB4DBB4`
 - `get_SecuritySystemTargetState`: offset to set target security system state S7 type `Byte` e.g. `6` for `DB4DBB6`
-		- `0`: armed stay at home
-		- `1`: armed away from home
-		- `2`: armed night
-		- `3`: disarmed
+  - `0`: armed stay at home
+  - `1`: armed away from home
+  - `2`: armed night
+  - `3`: disarmed
 - `mapGet`: (optional) define mapping array for get security system state. The PLC value is used as index into the table. e.g. `[3, 1]` which maps the PLC value `0->3 1->2` when the PLC supports only two states with `0:disarmed` and `1:armed` and `2:alarm`.
 - `mapSet`: (optional) define mapping array for set security system state. The home app value is used as index into the table. e.g. `[1, 1, 1, 0, 2]` which maps the PLC value `0->1 1->1 2->1, 3->0, 4->2` when the PLC supports only two states with `0:disarmed` and `1:armed` and `2:alarm`.
 
@@ -283,10 +283,10 @@ watering for the garden
 - `pollInterval` (optional) poll interval in seconds. Default value is `10` seconds.
 - `get_Active`: offset and bit get the current status S7 type `Bool` e.g. `55.0` for `DB4DBX55.0`
 - Single Bit for on/off:
-		- `set_Active`: offset and bit set to 1/0 when switching on/off S7 type `Bool` PLC  e.g. `55.0` for `DB4DBX55.0` could be same as get_Active
+	- `set_Active`: offset and bit set to 1/0 when switching on/off S7 type `Bool` PLC  e.g. `55.0` for `DB4DBX55.0` could be same as get_Active
 - Separate Bits for on/off:
-		- `set_Active`: offset and bit set to 1 when switching on S7 type `Bool` **PLC has to set to 0** e.g. `55.1` for `DB4DBX55.1`
-		- `set_Deactivate`: offset and bit set to 1 when switching off S7 type `Bool` **PLC has to set to 0** e.g. `55.2` for `DB4DBX55.2`
+	- `set_Active`: offset and bit set to 1 when switching on S7 type `Bool` **PLC has to set to 0** e.g. `55.1` for `DB4DBX55.1`
+	- `set_Deactivate`: offset and bit set to 1 when switching off S7 type `Bool` **PLC has to set to 0** e.g. `55.2` for `DB4DBX55.2`
 
 ### <a name='PLC_Valve'></a>Valve as `PLC_Valve`
 valve configurable as generic valve, irrigation, shower head or water faucet
@@ -298,20 +298,20 @@ valve configurable as generic valve, irrigation, shower head or water faucet
 - `enablePolling`: (optional) when set to `true` the current state will be polled. It is mandatory as well to enable polling mode on platform level.
 - `pollInterval` (optional) poll interval in seconds. Default value is `10` seconds.
 - `ValveType` configures the valve type that is returned
-		- `0`: generic valve
-		- `1`: irrigation
-		- `2`: shower head
-		- `3`: water faucet
+  - `0`: generic valve
+  - `1`: irrigation
+  - `2`: shower head
+  - `3`: water faucet
 - `get_Active`: offset and bit get the current status S7 type `Bool` e.g. `55.0` for `DB4DBX55.0`
 - Single Bit for on/off:
-		- `set_Active`: offset and bit set to 1/0 when switching on/off S7 type `Bool` PLC  e.g. `55.0` for `DB4DBX55.0` could be same as get_Active
+	- `set_Active`: offset and bit set to 1/0 when switching on/off S7 type `Bool` PLC  e.g. `55.0` for `DB4DBX55.0` could be same as get_Active
 - Separate Bits for on/off:
-		- `set_Active`: offset and bit set to 1 when switching on S7 type `Bool` **PLC has to set to 0** e.g. `55.1` for `DB4DBX55.1`
-		- `set_Deactivate`: offset and bit set to 1 when switching off S7 type `Bool` **PLC has to set to 0** e.g. `55.2` for `DB4DBX55.2`
+  - `set_Active`: offset and bit set to 1 when switching on S7 type `Bool` **PLC has to set to 0** e.g. `55.1` for `DB4DBX55.1`
+  - `set_Deactivate`: offset and bit set to 1 when switching off S7 type `Bool` **PLC has to set to 0** e.g. `55.2` for `DB4DBX55.2`
 - if one of the (optional) duration settings need specified all are needed
-		- `get_SetDuration`: (optional) duration 0..3600 sec S7 type `Time` e.g. `10` for `DB4DBD10`
-		- `set_SetDuration`: (optional) duration 0..3600 sec S7 type `Time` e.g. `14` for `DB4DBD14`
-		- `get_RemainingDuration`: (optional) duration 0..3600 sec S7 type `Time` e.g. `18` for `DB4DBD18`
+  - `get_SetDuration`: (optional) duration 0..3600 sec S7 type `Time` e.g. `10` for `DB4DBD10`
+  - `set_SetDuration`: (optional) duration 0..3600 sec S7 type `Time` e.g. `14` for `DB4DBD14`
+  - `get_RemainingDuration`: (optional) duration 0..3600 sec S7 type `Time` e.g. `18` for `DB4DBD18`
 
 ### <a name='PLC_StatelessProgrammableSwitch'></a>Button as `PLC_StatelessProgrammableSwitch`, Doorbell as `PLC_Doorbell`
 stateless switch from PLC to home app. Trigger actions in home app only works with control center e.g. AppleTV or HomePod.
@@ -325,9 +325,9 @@ It will works only in polling or push mode! The PLC sets a bit that is regularly
 - `pollInterval` (optional) poll interval in seconds. Default value is `10` seconds.
 - `isEvent` offset and bit that is polled by homebridge-plc. **PLC has to set to `true`.**  When set to 1 the event is read from `get_ProgrammableSwitchEvent` and the bit is `false` by homebirdge-plc to confirm that the event is handled. S7 type `Bool` e.g. `55.1` for `DB4DBX55.1` (only used for polling)
 - `get_ProgrammableSwitchEvent`: offset to read current event of the switch. This is reported towards home app S7 type `Byte` e.g. `3` for `DB4DBB3`
-		- `0`: single press
-		- `1`: double press
-		- `2`: long press
+  - `0`: single press
+  - `1`: double press
+  - `2`: long press
 
 ### <a name='PLC_LockMechanism'></a>Lock mechanism as `PLC_LockMechanism`
 Lock mechanism (not yet clear how to use changes are welcome)
