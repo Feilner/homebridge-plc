@@ -33,11 +33,11 @@ SIEMENS S7 PLC plugin for [Homebridge](https://homebridge.io)
 	* [Faucet as `PLC_Faucet`](#PLC_Faucet)
 	* [Valve as `PLC_Valve`](#PLC_Valve)
 	* [Push button attached to PLC as `PLC_StatelessProgrammableSwitch`](#PLC_StatelessProgrammableSwitch)
-	* [Doorbell push button to PLC as `PLC_Doorbell`](#PLC_StatelessProgrammableSwitch)
+	* [Doorbell push button attached to PLC as `PLC_Doorbell`](#PLC_StatelessProgrammableSwitch)
 	* [Lock mechanism as `PLC_LockMechanism`](#PLC_LockMechanism)
 	* [Boolean lock mechanism as `PLC_LockMechanismBool`](#PLC_LockMechanismBool)
 	* [Garage door as `PLC_GarageDoorOpener`](#PLC_GarageDoorOpener)
-
+    * [Smoke Sensor as `PLC_SmokeSensor`](#PLC_SmokeSensor)
 
 # Installation
 
@@ -85,7 +85,7 @@ normal light see also simple PLC example for [single bit](doc/ligtbulb_plc_examp
 	- `set_On`: offset and bit set to 1 when switching on S7 type `Bool` **PLC has to set to 0** e.g. `55.1` for `DB4DBX55.1`
 	- `set_Off`: offset and bit set to 1 when switching off S7 type `Bool` **PLC has to set to 0** e.g. `55.2` for `DB4DBX55.2`
 - `get_Brightness`: **(optional)** get brightness value S7 type `Byte` e.g. `56` for `DB4DBB56`
-- `set_Brightness`: (optional but required when `get_Brightness` is defined) set brightness value S7 type `Byte` e.g. `57` for `DB4DBB57`
+- `set_Brightness`:  **(optional but required when `get_Brightness` is defined)** set brightness value S7 type `Byte` e.g. `57` for `DB4DBB57`
 - brightness range definitions **(optional)**
 	- `minValue` default value: 20
 	- `maxValue` default value: 100
@@ -314,8 +314,13 @@ valve configurable as generic valve, irrigation, shower head or water faucet
   - `get_RemainingDuration`: **(optional)** duration 0..3600 sec S7 type `Time` e.g. `18` for `DB4DBD18`
 
 ### <a name='PLC_StatelessProgrammableSwitch'></a>Button as `PLC_StatelessProgrammableSwitch`, Doorbell as `PLC_Doorbell`
-stateless switch from PLC to home app. Trigger actions in home app only works with control center e.g. AppleTV or HomePod.
-It will works only in polling or push mode! The PLC sets a bit that is regularly polled by homebridge after successful reading a 1 of the event the bit it will report the event and set the bit to 0. Change 0->1 is done by PLC change from 1->0 is done by homebridge-plc! In push mode the new value is just pushed with the db and offset of `get_ProgrammableSwitchEvent`
+stateless switch from PLC to home app. 
+
+Trigger actions in home app only works with control center e.g. AppleTV or HomePod. [**Polling**](#poll) or [**push**](#push) from PLC required!
+
+[**Polling mode**](#poll) homebridge-plc polls `isEvent`. The PLC sets the bit to `true`. hombebridge-plc reads `get_ProgrammableSwitchEvent` and set the `isEvent` bit to `false`.
+
+[**Push mode**](#push) PLC informs homebridge-plc by http request with the value for `get_ProgrammableSwitchEvent`.
 
 ![homebridge pic](doc/statelessswitch.png)
 - `name`: unique name of the accessory
@@ -323,7 +328,7 @@ It will works only in polling or push mode! The PLC sets a bit that is regularly
 - `db`: s7 data base number e.g. `4` for `DB4`
 - `enablePolling`: **(optional)** when set to `true` the current state will be polled. It is mandatory as well to enable polling mode on platform level.
 - `pollInterval` **(optional)** poll interval in seconds. Default value is `10` seconds.
-- `isEvent` offset and bit that is polled by homebridge-plc. **PLC has to set to `true`.**  When set to 1 the event is read from `get_ProgrammableSwitchEvent` and the bit is `false` by homebirdge-plc to confirm that the event is handled. S7 type `Bool` e.g. `55.1` for `DB4DBX55.1` (only used for polling)
+- `isEvent` offset and bit that is polled by homebridge-plc. **PLC has to set to `true`.**  When `true` the event is read from `get_ProgrammableSwitchEvent` and set to  `false` by homebirdge-plc to confirm that the event is handled. S7 type `Bool` e.g. `55.1` for `DB4DBX55.1` (polling only, not used for push)
 - `get_ProgrammableSwitchEvent`: offset to read current event of the switch. This is reported towards home app S7 type `Byte` e.g. `3` for `DB4DBB3`
   - `0`: single press
   - `1`: double press
@@ -351,7 +356,7 @@ Lock mechanism (not yet clear how to use changes are welcome)
 	- `0`: unsecured
 	- `1`: secured
 
-### <a name='PLC_LockMechanismBool'></a>Boolean lock mechanism as `PLC_LockMechanismBool`
+### <a name='PLC_LockMechanismBool'></a>Boolean lock mechanism as ``
 Lock mechanism implemented as bool on the PLC. **NOTE: The convention `0`=`false`: closed/secured  `1`=`true`: open/unsecured**
 
 ![homebridge pic](doc/lockbool.png)
@@ -360,7 +365,7 @@ Lock mechanism implemented as bool on the PLC. **NOTE: The convention `0`=`false
 - `db`: s7 data base number e.g. `4` for `DB4`
 - `enablePolling`: **(optional)** when set to `true` the current state will be polled. t is mandatory as well to enable polling mode on platform level.
 - `pollInterval` **(optional)** poll interval in seconds. Default value is `10` seconds.
-- `forceCurrentState`: **(optional)** when set to `true` the position set by `set_LockTargetState` is directly used as current state. By this it seems in the home app as the target state was directly reached. This is recommended when not sing `enablePolling` or pushing the value from the plc.
+- `forceCurrentState`: **(optional)** when set to `true` the position set by `set_LockTargetState` is directly used as current state. By this it seems in the home app as the target state was directly reached. This is recommended when not using `enablePolling` or pushing the value from the plc.
 - `get_LockCurrentState`: offset to read current state current state S7 type `Bool` .g. `3.1` for `DB4DBB3`
 	- `false`: secured
 	- `true`: unsecured
@@ -372,12 +377,12 @@ Lock mechanism implemented as bool on the PLC. **NOTE: The convention `0`=`false
 		- `false`: secured
 		- `true`: unsecured
 - Separate Bits for secure/unsecured:
-	- `set_Secured`: offset and bit set to `true` when switching to target state secured S7 type `Bool` **PLC has to set to false** e.g. `3.3` for `DB4DBX55.1`
-	- `set_Unsecured`: offset and bit set to `true` when switching to target state unsecured S7 type `Bool` **PLC has to set to false** e.g. `3.4` for `DB4DBX55.2`
+	- `set_Secured`: offset and bit set to `true` when switching to target state secured S7 type `Bool` **PLC has to set to `false`** e.g. `3.3` for `DB4DBX55.1`
+	- `set_Unsecured`: offset and bit set to `true` when switching to target state unsecured S7 type `Bool` **PLC has to set to `false`** e.g. `3.4` for `DB4DBX55.2`
 
 
 ### <a name='PLC_GarageDoorOpener'></a>Garage door as `PLC_GarageDoorOpener`
-Lock mechanism (not yet clear how to use changes are welcome)
+Garage door
 
 ![homebridge pic](doc/garagedoor.png)
 - `name`: unique name of the accessory
@@ -385,20 +390,39 @@ Lock mechanism (not yet clear how to use changes are welcome)
 - `db`: s7 data base number e.g. `4` for `DB4`
 - `enablePolling`: **(optional)** when set to `true` the current state will be polled. It is mandatory as well to enable polling mode on platform level.
 - `pollInterval` **(optional)** poll interval in seconds. Default value is `10` seconds.
-- `forceCurrentState`: **(optional)** when set to `true` the position set by `set_TargetDoorState` is directly used as current state. By this it seems in the home app as the target state was directly reached. This is recommended when not sing `enablePolling` or pushing the value from the plc.
+- `forceCurrentState`: **(optional)** when set to `true` the position set by `set_TargetDoorState` is directly used as current state. By this it seems in the home app as the target state was directly reached. This is recommended when not using `enablePolling` or pushing the value from the plc.
 - `get_ObstructionDetected` **(optional)** offset and bit to obfuscation detection true means that the door was blocked S7 type `Bool` e.g. `55.1` for `DB4DBX55.1`
 - `get_CurrentDoorState`: offset to read current state current state S7 type `Byte` e.g. `3` for `DB4DBB3`
-	- `0`: open
-	- `1`: closed
-	- `2`: opening
-	- `3`: closing
-	- `4`: stopped
+  - `0`: open
+  - `1`: closed
+  - `2`: opening
+  - `3`: closing
+  - `4`: stopped
 - `get_TargetDoorState`: offset to read target state current state S7 type `Byte` e.g. `3` for `DB4DBB3`
-	- `0`: open
-	- `1`: closed
+  - `0`: open
+  - `1`: closed
 - `set_TargetDoorState`:  offset to write target state current state S7 type `Byte` e.g. `3` for `DB4DBB3`
-	- `0`: open
-	- `1`: closed
+  - `0`: open
+  - `1`: closed
+
+
+### <a name='PLC_SmokeSensor'></a>Smoke Sensor as `PLC_SmokeSensor`
+Fire alarm
+
+- `name`: unique name of the accessory
+- `manufacturer`: **(optional)** description
+- `db`: s7 data base number e.g. `4` for `DB4`
+- `enablePolling`: **(optional)** when set to `true` the current state will be polled. It is mandatory as well to enable polling mode on platform level.
+- `pollInterval`: **(optional)** poll interval in seconds. Default value is `10` seconds.
+- `get_SmokeDetected`: offset and bit to smoke detection. S7 type `Bool` e.g. `55.1` for `DB4DBX55.1`
+  - `false`: ok
+  - `true`: smoke detected  
+- `get_StatusTampered`: **(optional)** offset and bit to tamper detection. (Home app shows this only within the options) S7 type `Bool` e.g. `55.2` for `DB4DBX55.2`
+  - `false`: ok
+  - `true`: tampered 
+- `get_StatusLowBattery`: **(optional)** offset and bit to battery low detection. (Home app does not inform with push notification) S7 type `Bool` e.g. `55.3` for `DB4DBX55.3`
+  - `false`: ok
+  - `true`: battery low 
 
 
 #### config.json Example
@@ -651,7 +675,16 @@ Note: The example is just an example it contains also some optional settings. Fo
 						"get_CurrentDoorState": 42,
 						"get_TargetDoorState": 43,
 						"set_TargetDoorState": 43,
-					}
+					},
+					{
+						"accessory": "PLC_SmokeSensor",
+						"name": "SmokeSensor",
+						"db": 12,
+						"enablePolling": true,
+						"get_SmokeDetected": 44.0,
+						"get_StatusTampered": 44.1,
+						"get_StatusLowBattery": 44.2
+					}					
 				]
 			}
 		]
