@@ -816,11 +816,11 @@ Example to switch a light bulb from browser. Lets say the light bulb has the fol
 
 Use this to switch the light bulb on from browser:
 
-	http://homebridgeIp:8080/?push&db=6096&offset=1.1&value=1
+	http://homebridgeIp:8080/?control&db=6096&offset=1.1&value=1
 
 Use this to switch the light bulb off from browser:
 
-	http://homebridgeIp:8080/?push&db=6096&offset=1.1&value=0
+	http://homebridgeIp:8080/?control&db=6096&offset=1.1&value=0
 
 **NOTE:** Chrome/Edge does at minimum two requests with different parameters resulting in some error messages. I recommend `Talend API Tester - Free Edition`
 
