@@ -872,7 +872,38 @@ function GenericPLCAccessory(platform, config) {
       )}.bind(this))      
     }
   }
+ ////////////////////////////////////////////////////////////////
+  // PLC_SmokeSensor
+  ////////////////////////////////////////////////////////////////
+  else if (config.accessory == 'PLC_SmokeSensor'){
+    this.service = new Service.SmokeSensor(this.name);
+    this.accessory.addService(this.service);
 
+    this.service.getCharacteristic(Characteristic.SmokeDetected)
+    .on('get', function(callback) {this.getBit(callback,
+      config.db,
+      Math.floor(config.get_SmokeDetected), Math.floor((config.get_SmokeDetected*10)%10),
+      'get SmokeDetected'
+    )}.bind(this));    
+
+    if ('get_StatusTampered' in config) {  
+      this.service.getCharacteristic(Characteristic.StatusTampered)
+      .on('get', function(callback) {this.getBit(callback,
+        config.db,
+        Math.floor(config.get_StatusTampered), Math.floor((config.get_StatusTampered*10)%10),
+        'get StatusTampered'
+      )}.bind(this));
+    }
+
+    if ('get_StatusLowBattery' in config) {  
+      this.service.getCharacteristic(Characteristic.StatusLowBattery)
+      .on('get', function(callback) {this.getBit(callback,
+        config.db,
+        Math.floor(config.get_StatusLowBattery), Math.floor((config.get_StatusLowBattery*10)%10),
+        'get StatusLowBattery'
+      )}.bind(this));
+    }    
+  }
 
   else {
     this.log("Accessory "+ config.accessory + " is not defined.")
@@ -1084,6 +1115,26 @@ GenericPLCAccessory.prototype = {
         rv = true;
       }
     }
+    else if (this.config.accessory == 'PLC_SmokeSensor'){
+      if (this.config.get_SmokeDetected == offset)
+      {
+        this.log.debug( "[" + this.name + "] Push SmokeDetected:" + value);
+        this.service.getCharacteristic(Characteristic.SmokeDetected).updateValue(value);
+        rv = true;
+      }
+      if (this.config.get_StatusTampered == offset)
+      {
+        this.log.debug( "[" + this.name + "] Push SmokeDetected:" + value);
+        this.service.getCharacteristic(Characteristic.StatusTampered).updateValue(value);
+        rv = true;
+      }      
+      if (this.config.get_StatusLowBattery == offset)
+      {
+        this.log.debug( "[" + this.name + "] Push StatusLowBattery:" + value);
+        this.service.getCharacteristic(Characteristic.StatusLowBattery).updateValue(value);
+        rv = true;
+      }  
+    }        
 
     return rv;
   },
@@ -1367,8 +1418,25 @@ GenericPLCAccessory.prototype = {
         Math.floor(this.config.isEvent), Math.floor((this.config.isEvent*10)%10),
         'poll isEvent'
       )
-
     }
+    else if (this.config.accessory == 'PLC_SmokeSensor') {
+      // get the current target system state and update the value.
+      this.service.getCharacteristic(Characteristic.SmokeDetected).getValue(function(err, value) {
+        if (!err) {
+          this.service.getCharacteristic(Characteristic.SmokeDetected).updateValue(value);
+        }
+      }.bind(this));
+      this.service.getCharacteristic(Characteristic.StatusTampered).getValue(function(err, value) {
+        if (!err) {
+          this.service.getCharacteristic(Characteristic.StatusTampered).updateValue(value);
+        }
+      }.bind(this));
+      this.service.getCharacteristic(Characteristic.StatusLowBattery).getValue(function(err, value) {
+        if (!err) {
+          this.service.getCharacteristic(Characteristic.StatusLowBattery).updateValue(value);
+        }
+      }.bind(this));
+    }    
   },
 
   getServices: function() {
