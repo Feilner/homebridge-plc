@@ -1,9 +1,9 @@
 # Changelog
 
-## [1.0.20] - 2020-11-xx
+## [1.0.20] - 2020-12-23
 
 ### Added
-- added `PLC_SmokeSensor`
+- add `PLC_SmokeSensor`
   
 ## [1.0.19] - 2020-11-19
 
