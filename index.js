@@ -36,7 +36,7 @@ PLC_Platform.prototype = {
           this.s7PlatformAccessories.push(accessory);
       });
       callback(this.s7PlatformAccessories);
-  
+
       if (this.config.enablePolling) {
         log("Enable polling...");
         setInterval(function(param) {this.pollLoop( this.s7PlatformAccessories)}.bind(this),1000);
@@ -189,8 +189,8 @@ function GenericPLCAccessory(platform, config) {
       this.log.debug("Polling enabled interval " + this.pollInterval + "s");
   }
 
-  ////////////////////////////////////////////////////////////////
-  // Lightbulb / Outlet / Switch
+  // INIT handling ///////////////////////////////////////////////
+  // Lightbulb, Outlet, Switch
   ////////////////////////////////////////////////////////////////
   if (config.accessory == 'PLC_LightBulb' || config.accessory == 'PLC_Outlet' || config.accessory == 'PLC_Switch') {
     this.service =  new Service.Lightbulb(this.name);
@@ -258,7 +258,7 @@ function GenericPLCAccessory(platform, config) {
     }
   }
 
-  ////////////////////////////////////////////////////////////////
+  // INIT handling ///////////////////////////////////////////////
   // TemperatureSensor
   ////////////////////////////////////////////////////////////////
   else if (config.accessory == 'PLC_TemperatureSensor') {
@@ -278,7 +278,7 @@ function GenericPLCAccessory(platform, config) {
     });
   }
 
-  ////////////////////////////////////////////////////////////////
+  // INIT handling ///////////////////////////////////////////////
   // HumiditySensor
   ////////////////////////////////////////////////////////////////
   else if (config.accessory == 'PLC_HumiditySensor') {
@@ -298,7 +298,7 @@ function GenericPLCAccessory(platform, config) {
     });
   }
 
-  ////////////////////////////////////////////////////////////////
+  // INIT handling ///////////////////////////////////////////////
   // Thermostat
   ////////////////////////////////////////////////////////////////
   else if (config.accessory == 'PLC_Thermostat'){
@@ -367,7 +367,7 @@ function GenericPLCAccessory(platform, config) {
       });
   }
 
-  ////////////////////////////////////////////////////////////////
+  // INIT handling ///////////////////////////////////////////////
   // Window, WindowCovering and Door
   ////////////////////////////////////////////////////////////////
   else if (config.accessory == 'PLC_Window' || config.accessory == 'PLC_WindowCovering' || config.accessory == 'PLC_Door'){
@@ -495,7 +495,7 @@ function GenericPLCAccessory(platform, config) {
           )}.bind(this));
     }
   }
-  ////////////////////////////////////////////////////////////////
+  // INIT handling ///////////////////////////////////////////////
   // OccupancySensor
   ////////////////////////////////////////////////////////////////
   else if (config.accessory == 'PLC_OccupancySensor'){
@@ -509,7 +509,7 @@ function GenericPLCAccessory(platform, config) {
         "get OccupancyDetected"
       )}.bind(this))
   }
-  ////////////////////////////////////////////////////////////////
+  // INIT handling ///////////////////////////////////////////////
   // MotionSensor
   ////////////////////////////////////////////////////////////////
   else if (config.accessory == 'PLC_MotionSensor'){
@@ -523,7 +523,7 @@ function GenericPLCAccessory(platform, config) {
         "get MotionDetected"
       )}.bind(this))
   }
-  ////////////////////////////////////////////////////////////////
+  // INIT handling ///////////////////////////////////////////////
   // ContactSensor
   ////////////////////////////////////////////////////////////////
   else if (config.accessory == 'PLC_ContactSensor'){
@@ -537,7 +537,7 @@ function GenericPLCAccessory(platform, config) {
         "get get_ContactSensorState"
       )}.bind(this))
   }
-  ////////////////////////////////////////////////////////////////
+  // INIT handling ///////////////////////////////////////////////
   // Faucet
   ////////////////////////////////////////////////////////////////
   else if (config.accessory == 'PLC_Faucet'){
@@ -571,63 +571,7 @@ function GenericPLCAccessory(platform, config) {
         )}.bind(this));
     }
   }
-  ////////////////////////////////////////////////////////////////
-  // SecuritySystem
-  ////////////////////////////////////////////////////////////////
-  else if (config.accessory == 'PLC_SecuritySystem'){
-    this.service = new Service.SecuritySystem(this.name);
-    this.accessory.addService(this.service);
-
-    var informFunction = function(notUsed){
-      // get the current target system state and update the value.
-      this.service.getCharacteristic(Characteristic.SecuritySystemTargetState).getValue(function(err, value) {
-        if (!err) {
-          this.service.getCharacteristic(Characteristic.SecuritySystemTargetState).updateValue(value);
-        }
-      }.bind(this));
-      // get the current system state and update the value.
-      this.service.getCharacteristic(Characteristic.SecuritySystemCurrentState).getValue(function(err, value) {
-        if (!err) {
-          this.service.getCharacteristic(Characteristic.SecuritySystemCurrentState).updateValue(value);
-        }
-      }.bind(this));
-     }.bind(this);
-
-    this.modFunctionGet = this.plain;
-    this.modFunctionSet = this.plain;
-
-    if ('mapSet' in config && config.mapSet) {
-      modFunctionSet = function(value){return this.mapFunction(value, config.mapSet);}.bind(this);
-    }
-
-    if ('mapGet' in config && config.mapGet) {
-      modFunctionGet = function(value){return this.mapFunction(value, config.mapGet);}.bind(this);
-    }
-
-    this.service.getCharacteristic(Characteristic.SecuritySystemCurrentState)
-      .on('get', function(callback) {this.getByte(callback,
-        config.db,
-        config.get_SecuritySystemCurrentState,
-        "get SecuritySystemCurrentState",
-        modFunctionGet
-      )}.bind(this))
-
-      this.service.getCharacteristic(Characteristic.SecuritySystemTargetState)
-      .on('get', function(callback) {this.getByte(callback,
-        config.db,
-        config.get_SecuritySystemTargetState,
-        "get SecuritySystemTargetState",
-        modFunctionGet
-      )}.bind(this))
-      .on('set', function(value, callback) {this.setByte(value, callback,
-        config.db,
-        config.set_SecuritySystemTargetState,
-        "set SecuritySystemTargetState",
-        informFunction,
-        modFunctionSet
-      )}.bind(this));
-  }
-  ////////////////////////////////////////////////////////////////
+  // INIT handling ///////////////////////////////////////////////
   // Valve
   ////////////////////////////////////////////////////////////////
   else if (config.accessory == 'PLC_Valve'){
@@ -703,12 +647,68 @@ function GenericPLCAccessory(platform, config) {
         )}.bind(this));
     }
   }
+  // INIT handling ///////////////////////////////////////////////
+  // SecuritySystem
   ////////////////////////////////////////////////////////////////
-  // StatelessProgrammableSwitch
+  else if (config.accessory == 'PLC_SecuritySystem'){
+    this.service = new Service.SecuritySystem(this.name);
+    this.accessory.addService(this.service);
+
+    var informFunction = function(notUsed){
+      // get the current target system state and update the value.
+      this.service.getCharacteristic(Characteristic.SecuritySystemTargetState).getValue(function(err, value) {
+        if (!err) {
+          this.service.getCharacteristic(Characteristic.SecuritySystemTargetState).updateValue(value);
+        }
+      }.bind(this));
+      // get the current system state and update the value.
+      this.service.getCharacteristic(Characteristic.SecuritySystemCurrentState).getValue(function(err, value) {
+        if (!err) {
+          this.service.getCharacteristic(Characteristic.SecuritySystemCurrentState).updateValue(value);
+        }
+      }.bind(this));
+     }.bind(this);
+
+    this.modFunctionGet = this.plain;
+    this.modFunctionSet = this.plain;
+
+    if ('mapSet' in config && config.mapSet) {
+      modFunctionSet = function(value){return this.mapFunction(value, config.mapSet);}.bind(this);
+    }
+
+    if ('mapGet' in config && config.mapGet) {
+      modFunctionGet = function(value){return this.mapFunction(value, config.mapGet);}.bind(this);
+    }
+
+    this.service.getCharacteristic(Characteristic.SecuritySystemCurrentState)
+      .on('get', function(callback) {this.getByte(callback,
+        config.db,
+        config.get_SecuritySystemCurrentState,
+        "get SecuritySystemCurrentState",
+        modFunctionGet
+      )}.bind(this))
+
+      this.service.getCharacteristic(Characteristic.SecuritySystemTargetState)
+      .on('get', function(callback) {this.getByte(callback,
+        config.db,
+        config.get_SecuritySystemTargetState,
+        "get SecuritySystemTargetState",
+        modFunctionGet
+      )}.bind(this))
+      .on('set', function(value, callback) {this.setByte(value, callback,
+        config.db,
+        config.set_SecuritySystemTargetState,
+        "set SecuritySystemTargetState",
+        informFunction,
+        modFunctionSet
+      )}.bind(this));
+  }
+  // INIT handling ///////////////////////////////////////////////
+  // StatelessProgrammableSwitch, Doorbell
   ////////////////////////////////////////////////////////////////
   else if (config.accessory == 'PLC_StatelessProgrammableSwitch' || config.accessory == 'PLC_Doorbell'){
-    
-    if (config.accessory == 'PLC_StatelessProgrammableSwitch' ){  
+
+    if (config.accessory == 'PLC_StatelessProgrammableSwitch' ){
       this.service = new Service.StatelessProgrammableSwitch(this.name);
     }
     else {
@@ -723,7 +723,7 @@ function GenericPLCAccessory(platform, config) {
         "get ProgrammableSwitchEvent"
       )}.bind(this));
 
-    if (config.accessory == 'PLC_StatelessProgrammableSwitch' ){  
+    if (config.accessory == 'PLC_StatelessProgrammableSwitch' ){
       this.service.getCharacteristic(Characteristic.ServiceLabelIndex)
       .on('get', function(callback) {this.getDummy(callback,
         1,
@@ -731,7 +731,7 @@ function GenericPLCAccessory(platform, config) {
       )}.bind(this));
     }
   }
-  ////////////////////////////////////////////////////////////////
+  // INIT handling ///////////////////////////////////////////////
   // LockMechanism
   ////////////////////////////////////////////////////////////////
   else if (config.accessory == 'PLC_LockMechanism'){
@@ -768,8 +768,8 @@ function GenericPLCAccessory(platform, config) {
         this.modFunctionSet
       )}.bind(this));
   }
-  ////////////////////////////////////////////////////////////////
-  // PLC_LockMechanismBool
+  // INIT handling ///////////////////////////////////////////////
+  // LockMechanismBool
   ////////////////////////////////////////////////////////////////
   else if (config.accessory == 'PLC_LockMechanismBool'){
     this.service = new Service.LockMechanism(this.name);
@@ -822,7 +822,7 @@ function GenericPLCAccessory(platform, config) {
       )}.bind(this));
     }
   }
-  ////////////////////////////////////////////////////////////////
+  // INIT handling ///////////////////////////////////////////////
   // PLC_GarageDoorOpener
   ////////////////////////////////////////////////////////////////
   else if (config.accessory == 'PLC_GarageDoorOpener'){
@@ -856,24 +856,24 @@ function GenericPLCAccessory(platform, config) {
       informFunction
       )}.bind(this));
 
-    if ('get_ObstructionDetected' in config) {  
+    if ('get_ObstructionDetected' in config) {
       this.service.getCharacteristic(Characteristic.ObstructionDetected)
       .on('get', function(callback) {this.getBit(callback,
         config.db,
         Math.floor(config.get_ObstructionDetected), Math.floor((config.get_ObstructionDetected*10)%10),
         'get ObstructionDetected'
-      )}.bind(this))
+      )}.bind(this));
     }
     else{
       this.service.getCharacteristic(Characteristic.ObstructionDetected)
       .on('get', function(callback) {this.getDummy(callback,
         0,
         'get ObstructionDetected'
-      )}.bind(this))      
+      )}.bind(this));
     }
   }
- ////////////////////////////////////////////////////////////////
-  // PLC_SmokeSensor
+  // INIT handling ///////////////////////////////////////////////
+  // SmokeSensor
   ////////////////////////////////////////////////////////////////
   else if (config.accessory == 'PLC_SmokeSensor'){
     this.service = new Service.SmokeSensor(this.name);
@@ -884,9 +884,9 @@ function GenericPLCAccessory(platform, config) {
       config.db,
       Math.floor(config.get_SmokeDetected), Math.floor((config.get_SmokeDetected*10)%10),
       'get SmokeDetected'
-    )}.bind(this));    
+    )}.bind(this));
 
-    if ('get_StatusTampered' in config) {  
+    if ('get_StatusTampered' in config) {
       this.service.getCharacteristic(Characteristic.StatusTampered)
       .on('get', function(callback) {this.getBit(callback,
         config.db,
@@ -895,14 +895,14 @@ function GenericPLCAccessory(platform, config) {
       )}.bind(this));
     }
 
-    if ('get_StatusLowBattery' in config) {  
+    if ('get_StatusLowBattery' in config) {
       this.service.getCharacteristic(Characteristic.StatusLowBattery)
       .on('get', function(callback) {this.getBit(callback,
         config.db,
         Math.floor(config.get_StatusLowBattery), Math.floor((config.get_StatusLowBattery*10)%10),
         'get StatusLowBattery'
       )}.bind(this));
-    }    
+    }
   }
 
   else {
@@ -932,10 +932,19 @@ GenericPLCAccessory.prototype = {
     }
   },
 
+  ////////////////////////////////////////////////////////////////
+  ////////////////////////////////////////////////////////////////
+  // PUSH handling
+  ////////////////////////////////////////////////////////////////
+  ////////////////////////////////////////////////////////////////
   updatePush: function(offset, value)
   {
     rv = false;
     //this.log.debug("["+ this.name +"] ("+ this.config.accessory +") Received updatePush offset:" + offset + " value:" + value);
+
+    // PUSH handling ///////////////////////////////////////////////
+    // Lightbulb, Outlet, Switch
+    ////////////////////////////////////////////////////////////////
     if (this.config.accessory == 'PLC_LightBulb' ||
         this.config.accessory == 'PLC_Outlet' ||
         this.config.accessory == 'PLC_Switch') {
@@ -952,6 +961,9 @@ GenericPLCAccessory.prototype = {
         rv = true;
       }
     }
+    // PUSH handling ///////////////////////////////////////////////
+    // TemperatureSensor
+    ////////////////////////////////////////////////////////////////
     else if (this.config.accessory == 'PLC_TemperatureSensor'){
       if (this.config.get_CurrentTemperature == offset)
       {
@@ -960,6 +972,9 @@ GenericPLCAccessory.prototype = {
         rv = true;
       }
     }
+    // PUSH handling ///////////////////////////////////////////////
+    // HumiditySensor
+    ////////////////////////////////////////////////////////////////
     else if (this.config.accessory == 'PLC_HumiditySensor'){
       if (this.config.get_CurrentRelativeHumidity == offset)
       {
@@ -968,6 +983,26 @@ GenericPLCAccessory.prototype = {
         rv = true;
       }
     }
+    // PUSH handling ///////////////////////////////////////////////
+    // Thermostat
+    ////////////////////////////////////////////////////////////////
+    else if (this.config.accessory == 'PLC_Thermostat'){
+      if (this.config.get_CurrentTemperature == offset)
+      {
+        this.log.debug( "[" + this.name + "] Push CurrentTemperature :" + value);
+        this.service.getCharacteristic(Characteristic.CurrentTemperature).updateValue(value);
+        rv = true;
+      }
+      if (this.config.get_TargetTemperature == offset)
+      {
+        this.log.debug( "[" + this.name + "] Push TargetTemperature :" + value);
+        this.service.getCharacteristic(Characteristic.TargetTemperature).updateValue(value);
+        rv = true;
+      }
+    }
+    // PUSH handling ///////////////////////////////////////////////
+    // Window, WindowCovering and Door
+    ////////////////////////////////////////////////////////////////
     else if (this.config.accessory == 'PLC_Window' || this.config.accessory == 'PLC_WindowCovering' || this.config.accessory == 'PLC_Door'){
       var has_get_TargetPosition = ('get_TargetPosition' in this.config)
       if (this.config.get_CurrentPosition == offset)
@@ -993,20 +1028,9 @@ GenericPLCAccessory.prototype = {
         rv = true;
       }
     }
-    else if (this.config.accessory == 'PLC_Thermostat'){
-      if (this.config.get_CurrentTemperature == offset)
-      {
-        this.log.debug( "[" + this.name + "] Push CurrentTemperature :" + value);
-        this.service.getCharacteristic(Characteristic.CurrentTemperature).updateValue(value);
-        rv = true;
-      }
-      if (this.config.get_TargetTemperature == offset)
-      {
-        this.log.debug( "[" + this.name + "] Push TargetTemperature :" + value);
-        this.service.getCharacteristic(Characteristic.TargetTemperature).updateValue(value);
-        rv = true;
-      }
-    }
+    // PUSH handling ///////////////////////////////////////////////
+    // OccupancySensor
+    ////////////////////////////////////////////////////////////////
     else if (this.config.accessory == 'PLC_OccupancySensor'){
       if (this.config.get_OccupancyDetected == offset)
       {
@@ -1015,6 +1039,9 @@ GenericPLCAccessory.prototype = {
         rv = true;
       }
     }
+    // PUSH handling ///////////////////////////////////////////////
+    // MotionSensor
+    ////////////////////////////////////////////////////////////////
     else if (this.config.accessory == 'PLC_MotionSensor'){
       if (this.config.get_MotionDetected == offset)
       {
@@ -1023,6 +1050,9 @@ GenericPLCAccessory.prototype = {
         rv = true;
       }
     }
+    // PUSH handling ///////////////////////////////////////////////
+    // ContactSensor
+    ////////////////////////////////////////////////////////////////
     else if (this.config.accessory == 'PLC_ContactSensor'){
       if (this.config.get_ContactSensorState == offset)
       {
@@ -1031,6 +1061,9 @@ GenericPLCAccessory.prototype = {
         rv = true;
       }
     }
+    // PUSH handling ///////////////////////////////////////////////
+    // Faucet
+    ////////////////////////////////////////////////////////////////
     else if (this.config.accessory == 'PLC_Faucet'){
       if (this.config.get_Active == offset)
       {
@@ -1039,6 +1072,9 @@ GenericPLCAccessory.prototype = {
         rv = true;
       }
     }
+    // PUSH handling ///////////////////////////////////////////////
+    // Valve
+    ////////////////////////////////////////////////////////////////
     else if (this.config.accessory == 'PLC_Valve'){
       if (this.config.get_Active == offset)
       {
@@ -1059,6 +1095,9 @@ GenericPLCAccessory.prototype = {
         rv = true;
       }
     }
+    // PUSH handling ///////////////////////////////////////////////
+    // SecuritySystem
+    ////////////////////////////////////////////////////////////////
     else if (this.config.accessory == 'PLC_SecuritySystem'){
       if (this.config.get_SecuritySystemCurrentState == offset)
       {
@@ -1073,6 +1112,9 @@ GenericPLCAccessory.prototype = {
         rv = true;
       }
     }
+    // PUSH handling ///////////////////////////////////////////////
+    // StatelessProgrammableSwitch, Doorbell
+    ////////////////////////////////////////////////////////////////
     else if (this.config.accessory == 'PLC_StatelessProgrammableSwitch' || this.config.accessory == 'PLC_Doorbell'){
       if (this.config.get_ProgrammableSwitchEvent == offset)
       {
@@ -1081,6 +1123,9 @@ GenericPLCAccessory.prototype = {
         rv = true;
       }
     }
+    // PUSH handling ///////////////////////////////////////////////
+    // LockMechanism, LockMechanismBool
+    ////////////////////////////////////////////////////////////////
     else if (this.config.accessory == 'PLC_LockMechanism' || this.config.accessory == 'PLC_LockMechanismBool'){
       if (this.config.get_LockCurrentState == offset)
       {
@@ -1095,6 +1140,9 @@ GenericPLCAccessory.prototype = {
         rv = true;
       }
     }
+    // PUSH handling ///////////////////////////////////////////////
+    // GarageDoorOpener
+    ////////////////////////////////////////////////////////////////
     else if (this.config.accessory == 'PLC_GarageDoorOpener'){
       if (this.config.get_CurrentDoorState == offset)
       {
@@ -1115,6 +1163,9 @@ GenericPLCAccessory.prototype = {
         rv = true;
       }
     }
+    // PUSH handling ///////////////////////////////////////////////
+    // SmokeSensor
+    ////////////////////////////////////////////////////////////////
     else if (this.config.accessory == 'PLC_SmokeSensor'){
       if (this.config.get_SmokeDetected == offset)
       {
@@ -1127,22 +1178,30 @@ GenericPLCAccessory.prototype = {
         this.log.debug( "[" + this.name + "] Push SmokeDetected:" + value);
         this.service.getCharacteristic(Characteristic.StatusTampered).updateValue(value);
         rv = true;
-      }      
+      }
       if (this.config.get_StatusLowBattery == offset)
       {
         this.log.debug( "[" + this.name + "] Push StatusLowBattery:" + value);
         this.service.getCharacteristic(Characteristic.StatusLowBattery).updateValue(value);
         rv = true;
-      }  
-    }        
+      }
+    }
 
     return rv;
   },
 
+  ////////////////////////////////////////////////////////////////
+  ////////////////////////////////////////////////////////////////
+  // CONTROL handling
+  ////////////////////////////////////////////////////////////////
+  ////////////////////////////////////////////////////////////////
   updateControl: function(offset, value)
   {
     rv = false;
     //this.log.debug("["+ this.name +"] ("+ this.config.accessory +") Received updateControl offset:" + offset + " value:" + value);
+    // CONTROL handling ////////////////////////////////////////////
+    // Lightbulb, Outlet, Switch
+    ////////////////////////////////////////////////////////////////
     if (this.config.accessory == 'PLC_LightBulb' ||
         this.config.accessory == 'PLC_Outlet' ||
         this.config.accessory == 'PLC_Switch') {
@@ -1159,22 +1218,52 @@ GenericPLCAccessory.prototype = {
         rv = true;
       }
     }
-    else if (this.config.accessory == 'PLC_Window' || this.config.accessory == 'PLC_WindowCovering' || this.config.accessory == 'PLC_Door'){
-      var has_get_TargetPosition = ('set_TargetPosition' in this.config)
-      if (this.config.get_CurrentPosition == offset)
+    // CONTROL handling ////////////////////////////////////////////
+    // TemperatureSensor
+    ////////////////////////////////////////////////////////////////
+    // CONTROL handling ////////////////////////////////////////////
+    // HumiditySensor
+    ////////////////////////////////////////////////////////////////
+    // CONTROL handling ////////////////////////////////////////////
+    // Thermostat
+    ////////////////////////////////////////////////////////////////
+    else if (this.config.accessory == 'PLC_Thermostat'){
+      if (this.config.set_TargetTemperature == offset)
       {
-        if(!has_get_TargetPosition) {
-          this.log.debug( "[" + this.name + "] Push TargetPosition:" + String(value) + "->" + String(this.modFunctionSet(parseInt(value))));
-          this.service.getCharacteristic(Characteristic.TargetPosition).setValue(this.modFunctionSet(parseInt(value)));
-        }
-      }
-      if ( this.config.set_HoldPosition == offset)
-      {
-        this.log.debug( "[" + this.name + "] Push TargetPosition:" + String(value));
-        this.service.getCharacteristic(Characteristic.TargetPosition).setValue(this.modFunctionGet(parseInt(value)));
+        this.log.debug( "[" + this.name + "] Control TargetTemperature:" + value);
+        this.service.getCharacteristic(Characteristic.TargetTemperature).setValue(value);
         rv = true;
       }
     }
+    // CONTROL handling ////////////////////////////////////////////
+    // Window, WindowCovering and Door
+    ////////////////////////////////////////////////////////////////
+    else if (this.config.accessory == 'PLC_Window' || this.config.accessory == 'PLC_WindowCovering' || this.config.accessory == 'PLC_Door'){
+      if (this.config.set_TargetPosition == offset)
+      {
+          this.log.debug( "[" + this.name + "] Control TargetPosition:" + String(value) );
+          this.service.getCharacteristic(Characteristic.TargetPosition).setValue(value);
+      }
+      if ( this.config.set_HoldPosition == offset)
+      {
+        this.log.debug( "[" + this.name + "] Control HoldPosition:" + String(value));
+        this.service.getCharacteristic(Characteristic.HoldPosition).setValue(this.value);
+        rv = true;
+      }
+    }
+    // CONTROL handling ////////////////////////////////////////////
+    // OccupancySensor
+    ////////////////////////////////////////////////////////////////
+    // CONTROL handling ////////////////////////////////////////////
+    // MotionSensor
+    ////////////////////////////////////////////////////////////////
+    // CONTROL handling ////////////////////////////////////////////
+    // ContactSensor
+    ////////////////////////////////////////////////////////////////
+
+    // CONTROL handling ////////////////////////////////////////////
+    // Faucet
+    ////////////////////////////////////////////////////////////////
     else if (this.config.accessory == 'PLC_Faucet'){
       if (this.config.get_Active == offset)
       {
@@ -1183,6 +1272,9 @@ GenericPLCAccessory.prototype = {
         rv = true;
       }
     }
+    // CONTROL handling ////////////////////////////////////////////
+    // Valve
+    ////////////////////////////////////////////////////////////////
     else if (this.config.accessory == 'PLC_Valve'){
       if (this.config.get_Active == offset)
       {
@@ -1197,14 +1289,20 @@ GenericPLCAccessory.prototype = {
         rv = true;
       }
     }
+    // CONTROL handling ////////////////////////////////////////////
+    // SecuritySystem
+    ////////////////////////////////////////////////////////////////
     else if (this.config.accessory == 'PLC_SecuritySystem'){
       if (this.config.set_SecuritySystemTargetState == offset)
       {
-        this.log.debug( "[" + this.name + "] Control SecuritySystemTargetState:" + String(value) + "->" + String(this.modFunctionSet(parseInt(value))));
-        this.service.getCharacteristic(Characteristic.SecuritySystemTargetState).setValue(this.modFunctionSet(parseInt(value)));
+        this.log.debug( "[" + this.name + "] Control SecuritySystemTargetState:" + value);
+        this.service.getCharacteristic(Characteristic.SecuritySystemTargetState).setValue(value);
         rv = true;
       }
     }
+   // CONTROL handling ////////////////////////////////////////////
+    // StatelessProgrammableSwitch, Doorbell
+    ////////////////////////////////////////////////////////////////
     else if (this.config.accessory == 'PLC_StatelessProgrammableSwitch' || this.config.accessory == 'PLC_Doorbell'){
       if (this.config.get_ProgrammableSwitchEvent == offset)
       {
@@ -1213,6 +1311,9 @@ GenericPLCAccessory.prototype = {
         rv = true;
       }
     }
+    // CONTROL handling ////////////////////////////////////////////
+    // LockMechanism, LockMechanismBool
+    ////////////////////////////////////////////////////////////////
     else if (this.config.accessory == 'PLC_LockMechanism' || this.config.accessory == 'PLC_LockMechanismBool'){
       if (this.config.set_LockTargetState == offset)
       {
@@ -1221,6 +1322,9 @@ GenericPLCAccessory.prototype = {
         rv = true;
       }
     }
+    // CONTROL handling ////////////////////////////////////////////
+    // GarageDoorOpener
+    ////////////////////////////////////////////////////////////////
     else if (this.config.accessory == 'PLC_GarageDoorOpener'){
       if (this.config.set_TargetDoorState == offset)
       {
@@ -1234,14 +1338,24 @@ GenericPLCAccessory.prototype = {
         this.service.getCharacteristic(Characteristic.LockTargetState).setValue(value);
         rv = true;
       }
+    // CONTROL handling ////////////////////////////////////////////
+    // SmokeSensor
+    ////////////////////////////////////////////////////////////////
     }
 
     return rv;
   },
 
-
+  ////////////////////////////////////////////////////////////////
+  ////////////////////////////////////////////////////////////////
+  // POLL handling
+  ////////////////////////////////////////////////////////////////
+  ////////////////////////////////////////////////////////////////
   updatePoll: function()
   {
+    // POLL handling ///////////////////////////////////////////////
+    // Lightbulb, Outlet, Switch
+    ////////////////////////////////////////////////////////////////
     if (this.config.accessory == 'PLC_LightBulb' ||
     this.config.accessory == 'PLC_Outlet' ||
     this.config.accessory == 'PLC_Switch') {
@@ -1251,62 +1365,9 @@ GenericPLCAccessory.prototype = {
         }
       }.bind(this));
     }
-    else if (this.config.accessory == 'PLC_Window' || this.config.accessory == 'PLC_WindowCovering' || this.config.accessory == 'PLC_Door'){
-      this.service.getCharacteristic(Characteristic.CurrentPosition).getValue(function(err, value) {
-        if (!err) {
-          if (this.adaptivePollActive )  {
-            if( this.lastTargetPos == value) {
-              this.adaptivePollActive = false;
-              this.log.debug( "[" + this.name + "] reached target position disable adaptive polling: " + value);
-            }
-            else
-            {
-              this.pollCounter = this.adaptivePollingInterval;
-              this.log.debug( "[" + this.name + "] continue adaptive polling (" + this.pollCounter + "s): " + this.lastTargetPos +" != " + value);
-            }
-          }
-          this.service.getCharacteristic(Characteristic.CurrentPosition).updateValue(value);
-        }
-      }.bind(this));
-    }
-    else if (this.config.accessory == 'PLC_SecuritySystem') {
-      // get the current target system state and update the value.
-      this.service.getCharacteristic(Characteristic.SecuritySystemTargetState).getValue(function(err, value) {
-        if (!err) {
-          this.service.getCharacteristic(Characteristic.SecuritySystemTargetState).updateValue(value);
-        }
-      }.bind(this));
-      // get the current system state and update the value.
-      this.service.getCharacteristic(Characteristic.SecuritySystemCurrentState).getValue(function(err, value) {
-        if (!err) {
-          this.service.getCharacteristic(Characteristic.SecuritySystemCurrentState).updateValue(value);
-        }
-      }.bind(this));
-    }
-    else if (this.config.accessory == 'PLC_OccupancySensor') {
-      // get the current target system state and update the value.
-      this.service.getCharacteristic(Characteristic.OccupancyDetected).getValue(function(err, value) {
-        if (!err) {
-          this.service.getCharacteristic(Characteristic.OccupancyDetected).updateValue(value);
-        }
-      }.bind(this));
-    }
-    else if (this.config.accessory == 'PLC_MotionSensor') {
-      // get the current target system state and update the value.
-      this.service.getCharacteristic(Characteristic.MotionDetected).getValue(function(err, value) {
-        if (!err) {
-          this.service.getCharacteristic(Characteristic.MotionDetected).updateValue(value);
-        }
-      }.bind(this));
-    }
-    else if (this.config.accessory == 'PLC_ContactSensor') {
-      // get the current target system state and update the value.
-      this.service.getCharacteristic(Characteristic.ContactSensorState).getValue(function(err, value) {
-        if (!err) {
-          this.service.getCharacteristic(Characteristic.ContactSensorState).updateValue(value);
-        }
-      }.bind(this));
-    }
+    // POLL handling ///////////////////////////////////////////////
+    // TemperatureSensor
+    ////////////////////////////////////////////////////////////////
     else if (this.config.accessory == 'PLC_TemperatureSensor') {
       // get the current target system state and update the value.
       this.service.getCharacteristic(Characteristic.CurrentTemperature).getValue(function(err, value) {
@@ -1315,6 +1376,9 @@ GenericPLCAccessory.prototype = {
         }
       }.bind(this));
     }
+    // POLL handling ///////////////////////////////////////////////
+    // HumiditySensor
+    ////////////////////////////////////////////////////////////////
     else if (this.config.accessory == 'PLC_HumiditySensor') {
       // get the current target system state and update the value.
       this.service.getCharacteristic(Characteristic.CurrentRelativeHumidity).getValue(function(err, value) {
@@ -1323,6 +1387,9 @@ GenericPLCAccessory.prototype = {
         }
       }.bind(this));
     }
+    // POLL handling ///////////////////////////////////////////////
+    // Thermostat
+    ////////////////////////////////////////////////////////////////
     else if (this.config.accessory == 'PLC_Thermostat') {
       // get the current target system state and update the value.
       this.service.getCharacteristic(Characteristic.CurrentTemperature).getValue(function(err, value) {
@@ -1346,6 +1413,63 @@ GenericPLCAccessory.prototype = {
         }
       }.bind(this));
     }
+    // POLL handling ///////////////////////////////////////////////
+    // Window, WindowCovering and Door
+    ////////////////////////////////////////////////////////////////
+    else if (this.config.accessory == 'PLC_Window' || this.config.accessory == 'PLC_WindowCovering' || this.config.accessory == 'PLC_Door'){
+      this.service.getCharacteristic(Characteristic.CurrentPosition).getValue(function(err, value) {
+        if (!err) {
+          if (this.adaptivePollActive )  {
+            if( this.lastTargetPos == value) {
+              this.adaptivePollActive = false;
+              this.log.debug( "[" + this.name + "] reached target position disable adaptive polling: " + value);
+            }
+            else
+            {
+              this.pollCounter = this.adaptivePollingInterval;
+              this.log.debug( "[" + this.name + "] continue adaptive polling (" + this.pollCounter + "s): " + this.lastTargetPos +" != " + value);
+            }
+          }
+          this.service.getCharacteristic(Characteristic.CurrentPosition).updateValue(value);
+        }
+      }.bind(this));
+    }
+    // POLL handling ///////////////////////////////////////////////
+    // OccupancySensor
+    ////////////////////////////////////////////////////////////////
+    else if (this.config.accessory == 'PLC_OccupancySensor') {
+      // get the current target system state and update the value.
+      this.service.getCharacteristic(Characteristic.OccupancyDetected).getValue(function(err, value) {
+        if (!err) {
+          this.service.getCharacteristic(Characteristic.OccupancyDetected).updateValue(value);
+        }
+      }.bind(this));
+    }
+    // POLL handling ///////////////////////////////////////////////
+    // MotionSensor
+    ////////////////////////////////////////////////////////////////
+    else if (this.config.accessory == 'PLC_MotionSensor') {
+      // get the current target system state and update the value.
+      this.service.getCharacteristic(Characteristic.MotionDetected).getValue(function(err, value) {
+        if (!err) {
+          this.service.getCharacteristic(Characteristic.MotionDetected).updateValue(value);
+        }
+      }.bind(this));
+    }
+    // POLL handling ///////////////////////////////////////////////
+    // ContactSensor
+    ////////////////////////////////////////////////////////////////
+    else if (this.config.accessory == 'PLC_ContactSensor') {
+      // get the current target system state and update the value.
+      this.service.getCharacteristic(Characteristic.ContactSensorState).getValue(function(err, value) {
+        if (!err) {
+          this.service.getCharacteristic(Characteristic.ContactSensorState).updateValue(value);
+        }
+      }.bind(this));
+    }
+    // POLL handling ///////////////////////////////////////////////
+    // Faucet
+    ////////////////////////////////////////////////////////////////
     else if (this.config.accessory == 'PLC_Faucet') {
       // get the current target system state and update the value.
       this.service.getCharacteristic(Characteristic.Active).getValue(function(err, value) {
@@ -1354,6 +1478,9 @@ GenericPLCAccessory.prototype = {
         }
       }.bind(this));
     }
+    // POLL handling ///////////////////////////////////////////////
+    // Valve
+    ////////////////////////////////////////////////////////////////
     else if (this.config.accessory == 'PLC_Valve') {
       // get the current target system state and update the value.
       this.service.getCharacteristic(Characteristic.Active).getValue(function(err, value) {
@@ -1362,37 +1489,26 @@ GenericPLCAccessory.prototype = {
         }
       }.bind(this));
     }
-    else if (this.config.accessory == 'PLC_LockMechanism' || this.config.accessory == 'PLC_LockMechanismBool') {
+    // POLL handling ///////////////////////////////////////////////
+    // SecuritySystem
+    ////////////////////////////////////////////////////////////////
+    else if (this.config.accessory == 'PLC_SecuritySystem') {
       // get the current target system state and update the value.
-      this.service.getCharacteristic(Characteristic.LockCurrentState).getValue(function(err, value) {
+      this.service.getCharacteristic(Characteristic.SecuritySystemTargetState).getValue(function(err, value) {
         if (!err) {
-          this.service.getCharacteristic(Characteristic.LockCurrentState).updateValue(value);
+          this.service.getCharacteristic(Characteristic.SecuritySystemTargetState).updateValue(value);
         }
       }.bind(this));
-      this.service.getCharacteristic(Characteristic.LockTargetState).getValue(function(err, value) {
+      // get the current system state and update the value.
+      this.service.getCharacteristic(Characteristic.SecuritySystemCurrentState).getValue(function(err, value) {
         if (!err) {
-          this.service.getCharacteristic(Characteristic.LockTargetState).updateValue(value);
+          this.service.getCharacteristic(Characteristic.SecuritySystemCurrentState).updateValue(value);
         }
       }.bind(this));
     }
-    else if (this.config.accessory == 'PLC_GarageDoorOpener') {
-      // get the current target system state and update the value.
-      this.service.getCharacteristic(Characteristic.CurrentDoorState).getValue(function(err, value) {
-        if (!err) {
-          this.service.getCharacteristic(Characteristic.CurrentDoorState).updateValue(value);
-        }
-      }.bind(this));
-      this.service.getCharacteristic(Characteristic.ObstructionDetected).getValue(function(err, value) {
-        if (!err) {
-          this.service.getCharacteristic(Characteristic.ObstructionDetected).updateValue(value);
-        }
-      }.bind(this));
-      this.service.getCharacteristic(Characteristic.TargetDoorState).getValue(function(err, value) {
-        if (!err) {
-          this.service.getCharacteristic(Characteristic.TargetDoorState).updateValue(value);
-        }
-      }.bind(this));
-    }
+    // POLL handling ///////////////////////////////////////////////
+    // StatelessProgrammableSwitch, Doorbell
+    ////////////////////////////////////////////////////////////////
     else if (this.config.accessory == 'PLC_StatelessProgrammableSwitch' || this.config.accessory == 'PLC_Doorbell'){
       this.getBit(function(err,value){
           if(!err && value)
@@ -1419,6 +1535,46 @@ GenericPLCAccessory.prototype = {
         'poll isEvent'
       )
     }
+    // POLL handling ///////////////////////////////////////////////
+    // LockMechanism, LockMechanismBool
+    ////////////////////////////////////////////////////////////////
+    else if (this.config.accessory == 'PLC_LockMechanism' || this.config.accessory == 'PLC_LockMechanismBool') {
+      // get the current target system state and update the value.
+      this.service.getCharacteristic(Characteristic.LockCurrentState).getValue(function(err, value) {
+        if (!err) {
+          this.service.getCharacteristic(Characteristic.LockCurrentState).updateValue(value);
+        }
+      }.bind(this));
+      this.service.getCharacteristic(Characteristic.LockTargetState).getValue(function(err, value) {
+        if (!err) {
+          this.service.getCharacteristic(Characteristic.LockTargetState).updateValue(value);
+        }
+      }.bind(this));
+    }
+    // POLL handling ///////////////////////////////////////////////
+    // GarageDoorOpener
+    ////////////////////////////////////////////////////////////////
+    else if (this.config.accessory == 'PLC_GarageDoorOpener') {
+      // get the current target system state and update the value.
+      this.service.getCharacteristic(Characteristic.CurrentDoorState).getValue(function(err, value) {
+        if (!err) {
+          this.service.getCharacteristic(Characteristic.CurrentDoorState).updateValue(value);
+        }
+      }.bind(this));
+      this.service.getCharacteristic(Characteristic.ObstructionDetected).getValue(function(err, value) {
+        if (!err) {
+          this.service.getCharacteristic(Characteristic.ObstructionDetected).updateValue(value);
+        }
+      }.bind(this));
+      this.service.getCharacteristic(Characteristic.TargetDoorState).getValue(function(err, value) {
+        if (!err) {
+          this.service.getCharacteristic(Characteristic.TargetDoorState).updateValue(value);
+        }
+      }.bind(this));
+    }
+    // POLL handling ///////////////////////////////////////////////
+    // SmokeSensor
+    ////////////////////////////////////////////////////////////////
     else if (this.config.accessory == 'PLC_SmokeSensor') {
       // get the current target system state and update the value.
       this.service.getCharacteristic(Characteristic.SmokeDetected).getValue(function(err, value) {
@@ -1436,7 +1592,7 @@ GenericPLCAccessory.prototype = {
           this.service.getCharacteristic(Characteristic.StatusLowBattery).updateValue(value);
         }
       }.bind(this));
-    }    
+    }
   },
 
   getServices: function() {
@@ -1793,8 +1949,6 @@ GenericPLCAccessory.prototype = {
     }
   },
 
-
-
   //////////////////////////////////////////////////////////////////////////////
   // INT
   //////////////////////////////////////////////////////////////////////////////
@@ -1936,7 +2090,7 @@ GenericPLCAccessory.prototype = {
     if (this.platform.S7ClientConnect()) {
         S7Client.ReadArea(S7Client.S7AreaDB, db, offset, 1, S7Client.S7WLDWord, function(err, res) {
           if(err) {
-            log.error(logprefix, "ReadArea failed #" + err.toString(16) + " - " + S7Client.ErrorText(err));            
+            log.error(logprefix, "ReadArea failed #" + err.toString(16) + " - " + S7Client.ErrorText(err));
             if(err & 0xFFFFF) {S7Client.Disconnect();}
             callback(new Error('PLC error'));
           }

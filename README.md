@@ -356,7 +356,7 @@ Lock mechanism (not yet clear how to use changes are welcome)
 	- `0`: unsecured
 	- `1`: secured
 
-### <a name='PLC_LockMechanismBool'></a>Boolean lock mechanism as ``
+### <a name='PLC_LockMechanismBool'></a>Boolean lock mechanism as `PLC_LockMechanismBool`
 Lock mechanism implemented as bool on the PLC. **NOTE: The convention `0`=`false`: closed/secured  `1`=`true`: open/unsecured**
 
 ![homebridge pic](doc/lockbool.png)
