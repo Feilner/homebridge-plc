@@ -61,10 +61,12 @@ Parameters:
 - `ip`: the IPv4 address of the PLC
 - `rack`: the rack number of the PLC typically 0
 - `slot`: the slot number of the PLC for S7 300/400 typically `2`, for 1200/1500 typically `1`
-- `enablePolling`: when set to `true` a background task is executed every second enable polling for the accessories
-- `enablePush`: when set to `true` a the configured `port` is opened to push updates of values form plc to the plugin
-- `enableControl`: when set to `true` a the configured `port` is opened to control accessories by http request
-- `port`: port for http requests default `8080`
+- `enablePolling`: **(optional)** when set to `true` a background task is executed every second enable polling for the accessories
+- `defaultPollInterval` **(optional)** default polling interval for all accessories in seconds. Default value is `10` seconds.
+- `distributePolling` **(optional)** when set to `true` the polling of the accessories does not start at the same time.
+- `enablePush`: **(optional)** when set to `true` a the configured `port` is opened to push updates of values form plc to the plugin
+- `enableControl`: **(optional)** when set to `true` a the configured `port` is opened to control accessories by http request
+- `port`: **(optional)** port for http requests default `8888`
 
 ## Accessories
 - In the platform, you can declare different types of accessories
@@ -79,7 +81,7 @@ normal light see also simple PLC example for [single bit](doc/ligtbulb_plc_examp
 - `manufacturer`: **(optional)** description
 - `db`: s7 data base number e.g. `4` for `DB4`
 - `enablePolling`: **(optional)** when set to `true` the current state will be polled. It is mandatory as well to enable polling mode on platform level.
-- `pollInterval` **(optional)** poll interval in seconds. Default value is `10` seconds.
+- `pollInterval` **(optional)** poll interval in seconds. Default value see platform definition.
 - `get_On`: **(push support)** offset and bit get the current status S7 type `Bool` e.g. `55.0` for `DB4DBX55.0`
 - Single Bit for on/off:
 	- `set_On`: **(control support)** offset and bit set to 1/0 when switching on/off S7 type `Bool` PLC e.g. `55.0` for `DB4DBX55.0` could be same as get_On
@@ -101,7 +103,7 @@ outlet possible to show also as ventilator or light
 - `manufacturer`: **(optional)** description
 - `db`: s7 data base number e.g. `4` for `DB4`
 - `enablePolling`: **(optional)** when set to `true` the current state will be polled. It is mandatory as well to enable polling mode on platform level.
-- `pollInterval` **(optional)** poll interval in seconds. Default value is `10` seconds.
+- `pollInterval` **(optional)** poll interval in seconds. Default value see platform definition.
 - `get_On`: **(push support)** offset and bit get the current status S7 type `Bool` e.g. `55.0` for `DB4DBX55.0`
 - Single Bit for on/off:
 	- `set_On`: offset and bit set to 1/0 when switching on/off S7 type `Bool` PLC e.g. `55.0` for `DB4DBX55.0` could be same as get_On
@@ -117,7 +119,7 @@ outlet possible to show also as ventilator or light
 - `manufacturer`: **(optional)** description
 - `db`: s7 data base number e.g. `4` for `DB4`
 - `enablePolling`: **(optional)** when set to `true` the current state will be polled. It is mandatory as well to enable polling mode on platform level.
-- `pollInterval` **(optional)** poll interval in seconds. Default value is `10` seconds.
+- `pollInterval` **(optional)** poll interval in seconds. Default value see platform definition.
 - `get_On`: **(push support)** offset and bit get the current status S7 type `Bool` e.g. `55.0` for `DB4DBX55.0`
 - Single Bit for on/off:
 	- `set_On`: offset and bit set to 1/0 when switching on/off S7 type `Bool` PLC e.g. `55.0` for `DB4DBX55.0` could be same as get_On
@@ -133,7 +135,7 @@ normal temperature sensor
 - `manufacturer`: **(optional)** description
 - `db`: s7 data base number e.g. `4` for `DB4`
 - `enablePolling`: **(optional)** when set to `true` the current state will be polled. It is mandatory as well to enable polling mode on platform level.
-- `pollInterval` **(optional)** poll interval in seconds. Default value is `10` seconds.
+- `pollInterval` **(optional)** poll interval in seconds. Default value see platform definition.
 - `get_CurrentTemperature`: **(push support)** offset to get current temperature S7 type `Real` e.g. `55` for `DB4DBD55`
 - temperature range **(optional)**
 	- `minValue` default value: -50
@@ -148,7 +150,7 @@ normal humidity sensor
 - `manufacturer`: **(optional)** description
 - `db`: s7 data base number e.g. `4` for `DB4`
 - `enablePolling`: **(optional)** when set to `true` the current state will be polled. It is mandatory as well to enable polling mode on platform level.
-- `pollInterval` **(optional)** poll interval in seconds. Default value is `10` seconds.
+- `pollInterval` **(optional)** poll interval in seconds. Default value see platform definition.
 - `get_CurrentRelativeHumidity`: **(push support)** offset to get current humidity S7 type `Real` e.g. `55` for `DB4DBD55`
 - humidity range **(optional)**
 	- `minValue` default value: 0
@@ -164,7 +166,7 @@ temperature sensor and temperature regulation
 - `manufacturer`: **(optional)** description
 - `db`: s7 data base number e.g. `4` for `DB4`
 - `enablePolling`: **(optional)** when set to `true` the current state will be polled. It is mandatory as well to enable polling mode on platform level.
-- `pollInterval` **(optional)** poll interval in seconds. Default value is `10` seconds.
+- `pollInterval` **(optional)** poll interval in seconds. Default value see platform definition.
 - `get_CurrentTemperature`: offset to get current humidity S7 type `Real` e.g. `55` for `DB4DBD55`
 - S7 type `Byte` e.g. `56` for `DB4DBB56`
 - `get_CurrentTemperature`: **(push support)** offset to get current temperature S7 type `Real` e.g. `0` for `DB4DBD0`
@@ -200,7 +202,7 @@ motor driven blinds, windows and doors. Supports also manual driven blinds, wind
 - `adaptivePollingInterval` **(optional)** poll interval in seconds during high frequency polling. Default value is `1` second.
 - `forceCurrentPosition` **(optional)** when set to `true` the position set by `set_TargetPosition` is directly used as current position. By this it seems in tha home app as the target position was directly reached. This is recommended when not using `adaptivePolling` or pushing the value from the plc.
 - `enablePolling`: **(optional)** when set to `true` the current state will be polled. It is mandatory as well to enable polling mode on platform level.
-- `pollInterval` **(optional)** poll interval in seconds. Default value is `10` seconds.
+- `pollInterval` **(optional)** poll interval in seconds. Default value see platform definition.
 - `get_CurrentPosition`: **(push support)** offset to get current position S7 type `Byte` e.g. `0` for `DB4DBB0`
 - if one of the **(optional)** target position settings need specified all are needed. If not specified it os not movable ans sticks to current position.
 	- `get_TargetPosition`: **(optional)** **(push support)** offset to get target position S7 type `Byte` e.g. `1` for `DB4DBB1` (can have same value as set_TargetPosition)
@@ -219,7 +221,7 @@ presence detection sensor
 - `manufacturer`: **(optional)** description
 - `db`: s7 data base number e.g. `4` for `DB4`
 - `enablePolling`: **(optional)** when set to `true` the current state will be polled. It is mandatory as well to enable polling mode on platform level.
-- `pollInterval` **(optional)** poll interval in seconds. Default value is `10` seconds.
+- `pollInterval` **(optional)** poll interval in seconds. Default value see platform definition.
 - `get_OccupancyDetected`: **(push support)** offset and bit get the current status S7 type `Bool` e.g. `55.0` for `DB4DBX55.0`
 	- `false`: no occupancy
 	- `true`: occupancy detected
@@ -232,7 +234,7 @@ movement detection sensor
 - `manufacturer`: **(optional)** description
 - `db`: s7 data base number e.g. `4` for `DB4`
 - `enablePolling`: **(optional)** when set to `true` the current state will be polled. It is mandatory as well to enable polling mode on platform level.
-- `pollInterval` **(optional)** poll interval in seconds. Default value is `10` seconds.
+- `pollInterval` **(optional)** poll interval in seconds. Default value see platform definition.
 - `get_MotionDetected`: **(push support)** offset and bit get the current status S7 type `Bool` e.g. `55.0` for `DB4DBX55.0`
 	- `false`: no motion
 	- `true`: motion detected
@@ -245,7 +247,7 @@ Generic contact sensor. The home app allows to display as window, door, blind/sh
 - `manufacturer`: **(optional)** description
 - `db`: s7 data base number e.g. `4` for `DB4`
 - `enablePolling`: **(optional)** when set to `true` the current state will be polled. It is mandatory as well to enable polling mode on platform level.
-- `pollInterval` **(optional)** poll interval in seconds. Default value is `10` seconds.
+- `pollInterval` **(optional)** poll interval in seconds. Default value see platform definition.
 - `get_ContactSensorState`: **(push support)** offset and bit get the current status S7 type `Bool` e.g. `55.0` for `DB4DBX55.0`
 	- `false`: closed
 	- `true`: open
@@ -258,7 +260,7 @@ watering for the garden
 - `manufacturer`: **(optional)** description
 - `db`: s7 data base number e.g. `4` for `DB4`
 - `enablePolling`: **(optional)** when set to `true` the current state will be polled. It is mandatory as well to enable polling mode on platform level.
-- `pollInterval` **(optional)** poll interval in seconds. Default value is `10` seconds.
+- `pollInterval` **(optional)** poll interval in seconds. Default value see platform definition.
 - `get_Active`: **(push support)** offset and bit get the current status S7 type `Bool` e.g. `55.0` for `DB4DBX55.0`
 - Single Bit for on/off:
 	- `set_Active`: **(control support)** offset and bit set to 1/0 when switching on/off S7 type `Bool` PLC e.g. `55.0` for `DB4DBX55.0` could be same as get_Active
@@ -274,7 +276,7 @@ valve configurable as generic valve, irrigation, shower head or water faucet
 - `manufacturer`: **(optional)** description
 - `db`: s7 data base number e.g. `4` for `DB4`
 - `enablePolling`: **(optional)** when set to `true` the current state will be polled. It is mandatory as well to enable polling mode on platform level.
-- `pollInterval` **(optional)** poll interval in seconds. Default value is `10` seconds.
+- `pollInterval` **(optional)** poll interval in seconds. Default value see platform definition.
 - `ValveType` configures the valve type that is returned
 	- `0`: generic valve
 	- `1`: irrigation
@@ -299,7 +301,7 @@ alarm system
 - `manufacturer`: **(optional)** description
 - `db`: s7 data base number e.g. `4` for `DB4`
 - `enablePolling`: **(optional)** when set to `true` the current state of the security system will be polled.
-- `pollInterval` **(optional)** poll interval in seconds. Default value is `10` seconds.
+- `pollInterval` **(optional)** poll interval in seconds. Default value see platform definition.
 - `get_SecuritySystemCurrentState`: **(push support)** offset to current security system state S7 type `Byte` e.g. `3` for `DB4DBB3`
 	- `0`: armed stay at home
 	- `1`: armed away from home
@@ -331,7 +333,7 @@ Trigger actions in home app only works with control center e.g. AppleTV or HomeP
 - `manufacturer`: **(optional)** description
 - `db`: s7 data base number e.g. `4` for `DB4`
 - `enablePolling`: **(optional)** when set to `true` the current state will be polled. It is mandatory as well to enable polling mode on platform level.
-- `pollInterval` **(optional)** poll interval in seconds. Default value is `10` seconds.
+- `pollInterval` **(optional)** poll interval in seconds. Default value see platform definition.
 - `isEvent` offset and bit that is polled by homebridge-plc. **PLC has to set to `true`.** When `true` the event is read from `get_ProgrammableSwitchEvent` and set to `false` by homebirdge-plc to confirm that the event is handled. S7 type `Bool` e.g. `55.1` for `DB4DBX55.1` (polling only, not used for push)
 - `get_ProgrammableSwitchEvent`: **(push support)** **(control support)** offset to read current event of the switch. This is reported towards home app S7 type `Byte` e.g. `3` for `DB4DBB3`
 	- `0`: single press
@@ -346,7 +348,7 @@ Lock mechanism (not yet clear how to use changes are welcome)
 - `manufacturer`: **(optional)** description
 - `db`: s7 data base number e.g. `4` for `DB4`
 - `enablePolling`: **(optional)** when set to `true` the current state will be polled. It is mandatory as well to enable polling mode on platform level.
-- `pollInterval` **(optional)** poll interval in seconds. Default value is `10` seconds.
+- `pollInterval` **(optional)** poll interval in seconds. Default value see platform definition.
 - `forceCurrentState`: **(optional)** when set to `true` the position set by `set_LockTargetState` is directly used as current state. By this it seems in the home app as the target state was directly reached. This is recommended when not using `enablePolling` or pushing the value from the plc.
 	- `get_LockCurrentState`: **(push support)** offset to read current state current state S7 type `Byte` e.g. `3` for `DB4DBB3`
 		- `0`: unsecured
@@ -368,7 +370,7 @@ Lock mechanism implemented as bool on the PLC. **NOTE: The convention `0`=`false
 - `manufacturer`: **(optional)** description
 - `db`: s7 data base number e.g. `4` for `DB4`
 - `enablePolling`: **(optional)** when set to `true` the current state will be polled. t is mandatory as well to enable polling mode on platform level.
-- `pollInterval` **(optional)** poll interval in seconds. Default value is `10` seconds.
+- `pollInterval` **(optional)** poll interval in seconds. Default value see platform definition.
 - `forceCurrentState`: **(optional)** when set to `true` the position set by `set_LockTargetState` is directly used as current state. By this it seems in the home app as the target state was directly reached. This is recommended when not using `enablePolling` or pushing the value from the plc.
 - `get_LockCurrentState`: **(push support)** offset to read current state current state S7 type `Bool` .g. `3.1` for `DB4DBB3`
 	- `false`: secured
@@ -393,7 +395,7 @@ Garage door
 - `manufacturer`: **(optional)** description
 - `db`: s7 data base number e.g. `4` for `DB4`
 - `enablePolling`: **(optional)** when set to `true` the current state will be polled. It is mandatory as well to enable polling mode on platform level.
-- `pollInterval` **(optional)** poll interval in seconds. Default value is `10` seconds.
+- `pollInterval` **(optional)** poll interval in seconds. Default value see platform definition.
 - `forceCurrentState`: **(optional)** when set to `true` the position set by `set_TargetDoorState` is directly used as current state. By this it seems in the home app as the target state was directly reached. This is recommended when not using `enablePolling` or pushing the value from the plc.
 - `get_ObstructionDetected` **(optional)** **(push support)** offset and bit to obfuscation detection true means that the door was blocked S7 type `Bool` e.g. `55.1` for `DB4DBX55.1`
 - `get_CurrentDoorState`: **(push support)** offset to read current state current state S7 type `Byte` e.g. `3` for `DB4DBB3`
@@ -416,7 +418,7 @@ Fire alarm
 - `manufacturer`: **(optional)** description
 - `db`: s7 data base number e.g. `4` for `DB4`
 - `enablePolling`: **(optional)** when set to `true` the current state will be polled. It is mandatory as well to enable polling mode on platform level.
-- `pollInterval`: **(optional)** poll interval in seconds. Default value is `10` seconds.
+- `pollInterval`: **(optional)** poll interval in seconds. Default value see platform definition.
 - `get_SmokeDetected`: **(push support)** offset and bit to smoke detection. S7 type `Bool` e.g. `55.1` for `DB4DBX55.1`
 	- `false`: ok
 	- `true`: smoke detected
@@ -451,6 +453,11 @@ Note: The example is just an example it contains also some optional settings. Fo
 				"rack": 0,
 				"slot": 2,
 				"enablePolling": true,
+				"defaultPollInterval": 15,
+				"distributePolling": true,
+				"enablePush": true,
+				"enableControl": true,
+				"port": 8888,
 				"accessories": [
 					{
 						"accessory": "PLC_LightBulb",
