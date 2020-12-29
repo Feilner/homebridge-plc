@@ -44,7 +44,7 @@ PLC_Platform.prototype = {
       });
       callback(this.s7PlatformAccessories);
 
-      if (this.config.enablePolling) {        
+      if (this.config.enablePolling) {
         log("Enable polling...");
         setInterval(function(param) {this.pollLoop( this.s7PlatformAccessories);}.bind(this),1000);
       }
@@ -198,7 +198,7 @@ function GenericPLCAccessory(platform, config, accessoryNumber) {
 
   if ('enablePolling' in platform.config && platform.config.enablePolling && config.enablePolling) {
       this.pollActive = true;
-      this.pollInterval =  config.pollInterval || platform.config.defaultPollInterval;      
+      this.pollInterval =  config.pollInterval || platform.config.defaultPollInterval;
       if (platform.config.distributePolling) {
         this.pollCounter = (accessoryNumber % this.pollInterval) + 1;
       }
