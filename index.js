@@ -45,8 +45,8 @@ PLC_Platform.prototype = {
       callback(this.s7PlatformAccessories);
 
       if (this.config.enablePolling) {        
-        setInterval(function(param) {this.pollLoop( this.s7PlatformAccessories);}.bind(this),1000);
         log("Enable polling...");
+        setInterval(function(param) {this.pollLoop( this.s7PlatformAccessories);}.bind(this),1000);
       }
 
       if (this.config.enablePush || this.config.enableControl) {
