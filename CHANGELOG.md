@@ -6,7 +6,8 @@
 - control support for `PLC_Thermostat`
 
 ### Fixed
-- control handling for `PLC_Windows`, `PLC_WindowCovering` and `PLC_Door` 
+- control handling for `PLC_Windows`, `PLC_WindowCovering` and `PLC_Door`
+- control handling for `PLC_Faucet` and `PLC_Valve`
 
 ### Changed
 - reordered code to have same order for init, poll, and control part
@@ -16,7 +17,7 @@
 
 ### Added
 - add `PLC_SmokeSensor`
-  
+
 ## [1.0.19] - 2020-11-19
 
 ### Added
@@ -32,7 +33,7 @@
 ### Changed
 - added option `forceDoorState` for `PLC_GarageDoorOpener`
 - Home app seems does not to use the lock for `PLC_GarageDoorOpener`. Remove `get_LockCurrentState`, `get_LockTargetState` and `set_LockTargetState`
-  
+
 ## [1.0.17] - 2020-11-14
 
 ### Changed
@@ -40,7 +41,7 @@
 
 ### Fixed
 - Fixed `PLC_LightBulb` brightness to be `Byte` value as documented. In fact is was a `Real` please change in PLC if you already use it.
-  
+
 ## [1.0.16] - 2020-11-09
 
 ### Changed

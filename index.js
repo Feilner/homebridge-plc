@@ -45,10 +45,18 @@ PLC_Platform.prototype = {
       if (this.config.enablePush || this.config.enableControl) {
         this.port = this.config.port || 8080;
         this.api.on('didFinishLaunching', () => {
-            this.log('Enable push server...');
+            if (this.config.enablePush && this.config.enableControl) {
+              this.log('Enable push and control server...');
+            }
+            else if (this.config.enablePush) {
+              this.log('Enable push server...');
+            }
+            else {
+              this.log('Enable control server...');
+            }
             this.listener = require('http').createServer((req, res) => this.httpListener(req, res));
             this.listener.listen(this.port);
-            this.log('listening on port ' + this.port);
+            this.log('Listening on port ' + this.port);
         });
       }
       log("Init done!")
@@ -1265,7 +1273,7 @@ GenericPLCAccessory.prototype = {
     // Faucet
     ////////////////////////////////////////////////////////////////
     else if (this.config.accessory == 'PLC_Faucet'){
-      if (this.config.get_Active == offset)
+      if (this.config.set_Active == offset)
       {
         this.log.debug( "[" + this.name + "] Control Active:" + value);
         this.service.getCharacteristic(Characteristic.Active).setValue(value);
@@ -1276,7 +1284,7 @@ GenericPLCAccessory.prototype = {
     // Valve
     ////////////////////////////////////////////////////////////////
     else if (this.config.accessory == 'PLC_Valve'){
-      if (this.config.get_Active == offset)
+      if (this.config.set_Active == offset)
       {
         this.log.debug( "[" + this.name + "] Control Active:" + value);
         this.service.getCharacteristic(Characteristic.Active).setValue(value);
@@ -1300,7 +1308,7 @@ GenericPLCAccessory.prototype = {
         rv = true;
       }
     }
-   // CONTROL handling ////////////////////////////////////////////
+    // CONTROL handling ////////////////////////////////////////////
     // StatelessProgrammableSwitch, Doorbell
     ////////////////////////////////////////////////////////////////
     else if (this.config.accessory == 'PLC_StatelessProgrammableSwitch' || this.config.accessory == 'PLC_Doorbell'){
@@ -1315,7 +1323,7 @@ GenericPLCAccessory.prototype = {
     // LockMechanism, LockMechanismBool
     ////////////////////////////////////////////////////////////////
     else if (this.config.accessory == 'PLC_LockMechanism' || this.config.accessory == 'PLC_LockMechanismBool'){
-      if (this.config.set_LockTargetState == offset)
+      if (this.config.set_LockTargetState == offset || this.config.set_Secured == offset)
       {
         this.log.debug( "[" + this.name + "] Control LockTargetState:" + String(value) + "->" + String(this.modFunctionSet(parseInt(value))));
         this.service.getCharacteristic(Characteristic.LockTargetState).setValue(this.modFunctionSet(parseInt(value)));
@@ -1332,12 +1340,7 @@ GenericPLCAccessory.prototype = {
         this.service.getCharacteristic(Characteristic.TargetDoorState).setValue(value);
         rv = true;
       }
-      if (this.config.set_LockTargetState == offset)
-      {
-        this.log.debug( "[" + this.name + "] Control LockTargetState:" + value);
-        this.service.getCharacteristic(Characteristic.LockTargetState).setValue(value);
-        rv = true;
-      }
+
     // CONTROL handling ////////////////////////////////////////////
     // SmokeSensor
     ////////////////////////////////////////////////////////////////
