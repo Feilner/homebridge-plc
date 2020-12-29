@@ -1,5 +1,19 @@
 # Changelog
 
+## [1.0.21] - 2020-12-29
+
+### Added
+- control support for `PLC_Thermostat`
+
+### Fixed
+- control handling for `PLC_Windows`, `PLC_WindowCovering` and `PLC_Door` 
+- control handling for `PLC_Faucet` and `PLC_Valve`
+
+### Changed
+- reordered code to have same order for init, poll, and control part
+- add section comments to the code
+- add recommendations from validator
+
 ## [1.0.20] - 2020-12-23
 
 ### Added
@@ -9,6 +23,7 @@
 
 ### Added
 - new accessory `PLC_Doorbell`
+
 ### Fixed
 - `PLC_Thermostat` name of parameter corrected to `get_CurrentHeatingCoolingState` previous incorrect name `get_CurrentHeaterCoolerState` *check your config*
 - `PLC_Thermostat` did not poll CurrentHeatingCoolingState when polling was enabled
