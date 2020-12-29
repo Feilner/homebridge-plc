@@ -405,7 +405,7 @@ Garage door
 - `get_TargetDoorState`: **(push support)** offset to read target state current state S7 type `Byte` e.g. `3` for `DB4DBB3`
 	- `0`: open
 	- `1`: closed
-- `set_TargetDoorState`: offset to write target state current state S7 type `Byte` e.g. `3` for `DB4DBB3`
+- `set_TargetDoorState`: **(control support)** offset to write target state current state S7 type `Byte` e.g. `3` for `DB4DBB3`
 	- `0`: open
 	- `1`: closed
 
@@ -591,6 +591,26 @@ Note: The example is just an example it contains also some optional settings. Fo
 						"get_ContactSensorState": 25.2
 					},
 					{
+						"accessory": "PLC_Faucet",
+						"name": "Faucet",
+						"enablePolling": true,
+						"db": 12,
+						"get_Active": 28.0,
+						"set_Active": 28.0
+					},
+					{
+						"accessory": "PLC_Valve",
+						"name": "Valve",
+						"db": 12,
+						"enablePolling": true,
+						"ValveType": 2,
+						"get_Active": 28.1,
+						"set_Active": 28.1,
+						"get_SetDuration": 30,
+						"set_SetDuration": 30,
+						"get_RemainingDuration": 34
+					},
+					{
 						"accessory": "PLC_SecuritySystem",
 						"name": "SecuritySystem",
 						"db": 12,
@@ -612,26 +632,6 @@ Note: The example is just an example it contains also some optional settings. Fo
 								1,
 								3
 						]
-					},
-					{
-						"accessory": "PLC_Faucet",
-						"name": "Faucet",
-						"enablePolling": true,
-						"db": 12,
-						"get_Active": 28.0,
-						"set_Active": 28.0
-					},
-					{
-						"accessory": "PLC_Valve",
-						"name": "Valve",
-						"db": 12,
-						"enablePolling": true,
-						"ValveType": 2,
-						"get_Active": 28.1,
-						"set_Active": 28.1,
-						"get_SetDuration": 30,
-						"set_SetDuration": 30,
-						"get_RemainingDuration": 34
 					},
 					{
 						"accessory": "PLC_StatelessProgrammableSwitch",
@@ -705,7 +705,8 @@ There are three possible ways to workaround this.
 ## <a name='poll'></a>Poll values form PLC by homebridge-PLC plugin
 To enable this you have to set `"enablePolling": true;` platform level and on each individual accessory with individual interval in seconds `"enablePolling": true, "pollInterval": 10,`
 
-Example to poll the contact sensor state every 10 seconds
+Example to poll the contact sensor state every 10 seconds:
+
 	{
 		"platforms": [
 				{
@@ -790,7 +791,12 @@ To enable this you have to set `"enableControl": true,` platform level and optio
 **NOTE: It is currently not possible to query the current state**
 
 The interface that the PLC operates consists only of the keyword 'control', the database number 'db', the address within the db 'offset' and the value 'value'.
-The value is assigned to the matching ('db' and 'offset') set_* accessory configurations. For accessories with separate on/off configurations e.g. PLC_LightBulb set_On/set_Off the set_On has to be uses. All information is transmitted within the URL and in decimal. Parameters that supports push are marked with [control] in the description.
+The value is assigned to the matching ('db' and 'offset') set_* accessory configurations.
+
+For accessories with separate on/off configurations e.g. `PLC_LightBulb` `set_On`/`set_Off` the `set_On` or `PLC_LockMechanismBool` `set_Secured`/`set_Unsecured` the `set_Secured` has to be used. With `1` for on and `0` for off.
+
+All information is transmitted within the URL and in decimal.
+Parameters that supports push are marked with **(control support)** in the description.
 
 The Request has to be done as HTTP `PUT` or `GET` operation. There will be no logging when doing a `PUT` operation while there will be detailed output when during a `GET` operation. This in especially intended for testing with the browser as the browser performs a `GET` operation per default.
 
