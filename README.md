@@ -785,7 +785,7 @@ Example for byte values when trigger from browser
 
 # <a name='control'></a>Control of PLC accessories
 
-It´s also possible to control PLC accessories via HTTP `PUT` or `GET` operation. This might be useful for integration into other automation systems.
+ItÂ´s also possible to control PLC accessories via HTTP `PUT` or `GET` operation. This might be useful for integration into other automation systems.
 To enable this you have to set `"enableControl": true,` platform level and optional the `port`.
 
 **NOTE: It is currently not possible to query the current state**
