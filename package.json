@@ -1,37 +1,37 @@
 {
-  "name": "homebridge-plc",
-  "version": "1.0.21",
-  "description": "Homebridge plugin for Siemens Step7 and compatible PLCs. (https://github.com/homebridge)",
-  "license": "MIT",
-  "keywords": [
-    "homebridge-plugin",
-    "homebridge",
-    "S7",
-    "PLC",
-    "SIEMENS",
-    "snap7",
-    "YASKAWA",
-    "SLIO"
-  ],
-  "author": "Feilner",
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/Feilner/homebridge-plc.git"
-  },
-  "bugs": {
-    "url": "https://github.com/Feilner/homebridge-plc/issues"
-  },
-  "engines": {
-    "node": ">=4.3.2",
-    "homebridge": ">=1.1.6"
-  },
-  "preferGlobal": true,
-  "dependencies": {
-    "node-snap7": ">=1.0.4"
-  },
-  "homepage": "https://github.com/Feilner/homebridge-plc#readme",
-  "main": "index.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  }
+	"name": "homebridge-plc",
+	"version": "1.0.21",
+	"description": "Homebridge plugin for Siemens Step7 and compatible PLCs. (https://github.com/homebridge)",
+	"license": "MIT",
+	"keywords": [
+		"homebridge-plugin",
+		"homebridge",
+		"S7",
+		"PLC",
+		"SIEMENS",
+		"snap7",
+		"YASKAWA",
+		"SLIO"
+	],
+	"author": "Feilner",
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/Feilner/homebridge-plc.git"
+	},
+	"bugs": {
+		"url": "https://github.com/Feilner/homebridge-plc/issues"
+	},
+	"engines": {
+		"node": ">=4.3.2",
+		"homebridge": ">=1.1.6"
+	},
+	"preferGlobal": true,
+	"dependencies": {
+		"node-snap7": ">=1.0.4"
+	},
+	"homepage": "https://github.com/Feilner/homebridge-plc#readme",
+	"main": "index.js",
+	"scripts": {
+		"test": "echo \"Error: no test specified\" && exit 1"
+	}
 }
