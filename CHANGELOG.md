@@ -1,12 +1,21 @@
 # Changelog
 
+## [1.0.22] - 2021-01-01
+
+### Changed
+- changed **default value** for parameter `port` from `8080` to `8888`. This was done to avoid conflicts with Homebridge UI which has 8080 as default port. The port is used when using `enablePush` or `enableControl` is set. **(check your config)**
+
+### Added
+- add option `defaultPollInterval` on platform level
+- add option `distributePolling` on platform level
+
 ## [1.0.21] - 2020-12-29
 
 ### Added
 - control support for `PLC_Thermostat`
 
 ### Fixed
-- control handling for `PLC_Windows`, `PLC_WindowCovering` and `PLC_Door` 
+- control handling for `PLC_Windows`, `PLC_WindowCovering` and `PLC_Door`
 - control handling for `PLC_Faucet` and `PLC_Valve`
 
 ### Changed
@@ -18,7 +27,7 @@
 
 ### Added
 - add `PLC_SmokeSensor`
-  
+
 ## [1.0.19] - 2020-11-19
 
 ### Added
@@ -34,7 +43,7 @@
 ### Changed
 - added option `forceDoorState` for `PLC_GarageDoorOpener`
 - Home app seems does not to use the lock for `PLC_GarageDoorOpener`. Remove `get_LockCurrentState`, `get_LockTargetState` and `set_LockTargetState`
-  
+
 ## [1.0.17] - 2020-11-14
 
 ### Changed
@@ -42,7 +51,7 @@
 
 ### Fixed
 - Fixed `PLC_LightBulb` brightness to be `Byte` value as documented. In fact is was a `Real` please change in PLC if you already use it.
-  
+
 ## [1.0.16] - 2020-11-09
 
 ### Changed

@@ -1,5 +1,5 @@
 /*
- * (c) 2020 Feilner
+ * (c) 2020-2021 Feilner
  */
 
 var PlatformAccessory, Service, Characteristic, UUIDGen;
@@ -27,12 +27,19 @@ function PLC_Platform(log, config, api) {
 PLC_Platform.prototype = {
   accessories: function(callback) {
       var log = this.log;
+
+      if ( typeof(this.config.defaultPollInterval) === 'undefined' || this.config.defaultPollInterval === null || this.config.defaultPollInterval < 1) {
+        this.config.defaultPollInterval = 10;
+      }
+
       log("Add PLC accessories...");
       //create accessory for each configuration
       this.config.accessories.forEach((config, index) => {
-          log("[" + String(index+1) + "/" + this.config.accessories.length + "] " + config.name + " (" +  config.accessory + ")" );
+          var accessoryNumber = index +1;
+          var numberOfAccessories = this.config.accessories.length;
+          log("[" + String(accessoryNumber) + "/" + String(numberOfAccessories) + "] " + config.name + " (" +  config.accessory + ")" );
           //call accessory construction
-          var accessory = new GenericPLCAccessory(this, config);
+          var accessory = new GenericPLCAccessory(this, config, accessoryNumber);
           this.s7PlatformAccessories.push(accessory);
       });
       callback(this.s7PlatformAccessories);
@@ -43,7 +50,7 @@ PLC_Platform.prototype = {
       }
 
       if (this.config.enablePush || this.config.enableControl) {
-        this.port = this.config.port || 8080;
+        this.port = this.config.port || 8888;
         this.api.on('didFinishLaunching', () => {
             if (this.config.enablePush && this.config.enableControl) {
               this.log('Enable push and control server...');
@@ -180,7 +187,7 @@ PLC_Platform.prototype = {
 };
 
 
-function GenericPLCAccessory(platform, config) {
+function GenericPLCAccessory(platform, config, accessoryNumber) {
   this.platform = platform;
   this.log = platform.log;
   this.name = config.name;
@@ -191,9 +198,15 @@ function GenericPLCAccessory(platform, config) {
 
   if ('enablePolling' in platform.config && platform.config.enablePolling && config.enablePolling) {
       this.pollActive = true;
-      this.pollInterval =  config.pollInterval || 10;
-      this.pollCounter = this.pollInterval;
-      this.log.debug("Polling enabled interval " + this.pollInterval + "s");
+      this.pollInterval =  config.pollInterval || platform.config.defaultPollInterval;
+      if (platform.config.distributePolling) {
+        this.pollCounter = (accessoryNumber % this.pollInterval) + 1;
+      }
+      else
+      {
+        this.pollCounter = this.pollInterval;
+      }
+      this.log.debug("Polling enabled interval " + this.pollInterval + "s. First polling is done in " + this.pollCounter + "s");
   }
 
   // INIT handling ///////////////////////////////////////////////
@@ -919,7 +932,6 @@ function GenericPLCAccessory(platform, config) {
   .setCharacteristic(Characteristic.FirmwareRevision, '0.0.1');
 
   //this.log.debug("Done " + this.service.displayName + " (" + this.service.subtype + ") " + this.service.UUID);
-
 }
 
 GenericPLCAccessory.prototype = {
