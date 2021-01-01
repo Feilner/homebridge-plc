@@ -63,7 +63,7 @@ Parameters:
 - `slot`: the slot number of the PLC for S7 300/400 typically `2`, for 1200/1500 typically `1`
 - `enablePolling`: **(optional)** when set to `true` a background task is executed every second enable polling for the accessories
 - `defaultPollInterval` **(optional)** default polling interval for all accessories in seconds. Default value is `10` seconds.
-- `distributePolling` **(optional)** when set to `true` the polling of the accessories does not start at the same time.
+- `distributePolling` **(optional)** when set to `true` the polling of the accessories does not start at the same time. In order to distribute the PLC load for the queries.
 - `enablePush`: **(optional)** when set to `true` a the configured `port` is opened to push updates of values form plc to the plugin
 - `enableControl`: **(optional)** when set to `true` a the configured `port` is opened to control accessories by http request
 - `port`: **(optional)** port for http requests default `8888`
@@ -106,9 +106,9 @@ outlet possible to show also as ventilator or light
 - `pollInterval` **(optional)** poll interval in seconds. Default value see platform definition.
 - `get_On`: **(push support)** offset and bit get the current status S7 type `Bool` e.g. `55.0` for `DB4DBX55.0`
 - Single Bit for on/off:
-	- `set_On`: offset and bit set to 1/0 when switching on/off S7 type `Bool` PLC e.g. `55.0` for `DB4DBX55.0` could be same as get_On
+	- `set_On`: **(control support)** offset and bit set to 1/0 when switching on/off S7 type `Bool` PLC e.g. `55.0` for `DB4DBX55.0` could be same as get_On
 - Separate Bits for on/off:
-	- `set_On`: offset and bit set to 1 when switching on S7 type `Bool` **PLC has to set to 0** e.g. `55.1` for `DB4DBX55.1`
+	- `set_On`: **(control support)** offset and bit set to 1 when switching on S7 type `Bool` **PLC has to set to 0** e.g. `55.1` for `DB4DBX55.1`
 	- `set_Off`: offset and bit set to 1 when switching off S7 type `Bool` **PLC has to set to 0** e.g. `55.2` for `DB4DBX55.2`
 
 ### <a name='PLC_Switch'></a>Switch as `PLC_Switch`
@@ -122,9 +122,9 @@ outlet possible to show also as ventilator or light
 - `pollInterval` **(optional)** poll interval in seconds. Default value see platform definition.
 - `get_On`: **(push support)** offset and bit get the current status S7 type `Bool` e.g. `55.0` for `DB4DBX55.0`
 - Single Bit for on/off:
-	- `set_On`: offset and bit set to 1/0 when switching on/off S7 type `Bool` PLC e.g. `55.0` for `DB4DBX55.0` could be same as get_On
+	- `set_On`: **(control support)** offset and bit set to 1/0 when switching on/off S7 type `Bool` PLC e.g. `55.0` for `DB4DBX55.0` could be same as get_On
 - Separate Bits for on/off:
-	- `set_On`: offset and bit set to 1 when switching on S7 type `Bool` **PLC has to set to 0** e.g. `55.1` for `DB4DBX55.1`
+	- `set_On`: **(control support)** offset and bit set to 1 when switching on S7 type `Bool` **PLC has to set to 0** e.g. `55.1` for `DB4DBX55.1`
 	- `set_Off`: offset and bit set to 1 when switching off S7 type `Bool` **PLC has to set to 0** e.g. `55.2` for `DB4DBX55.2`
 
 ### <a name='PLC_TemperatureSensor'></a>Temperature Sensor as `PLC_TemperatureSensor`
@@ -206,12 +206,12 @@ motor driven blinds, windows and doors. Supports also manual driven blinds, wind
 - `get_CurrentPosition`: **(push support)** offset to get current position S7 type `Byte` e.g. `0` for `DB4DBB0`
 - if one of the **(optional)** target position settings need specified all are needed. If not specified it os not movable ans sticks to current position.
 	- `get_TargetPosition`: **(optional)** **(push support)** offset to get target position S7 type `Byte` e.g. `1` for `DB4DBB1` (can have same value as set_TargetPosition)
-	- `set_TargetPosition`: **(optional)** offset to set current position S7 type `Byte` e.g. `2` for `DB4DBB2` (can have same value as get_TargetPosition)
+	- `set_TargetPosition`: **(optional)** **(control support)** offset to set current position S7 type `Byte` e.g. `2` for `DB4DBB2` (can have same value as get_TargetPosition)
 - `get_PositionState`: **(optional)** **(push support)** offset to current movement state if not defined fixed `2`is returned S7 type `Byte` e.g. `3` for `DB4DBB3`
 	- `0`: down
 	- `1`: up
 	- `2`: stop
-- `set_HoldPosition`: **(optional)**: offset and bit set to 1 to stop movement. (Seems not to be used) when not defined writes will be ignoredS7 type `Bool` **PLC has to set to 0** e.g. `55.1` for `DB4DBX55.1`
+- `set_HoldPosition`: **(optional)** **(control support)** offset and bit set to 1 to stop movement. (Seems not to be used) when not defined writes will be ignoredS7 type `Bool` **PLC has to set to 0** e.g. `55.1` for `DB4DBX55.1`
 
 ### <a name='PLC_OccupancySensor'></a>Occupancy Sensor as `PLC_OccupancySensor`
 presence detection sensor

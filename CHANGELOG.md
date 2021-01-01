@@ -1,6 +1,6 @@
 # Changelog
 
-## [1.0.22] - 2020-12-30
+## [1.0.22] - 2021-01-01
 
 ### Changed
 - changed `defaultPort` from `8080` to `8888` avoid conflicts with Homebridge UI which has 8080 as default port. The port is used when using `enablePush` or `enableControl` is set. **(check your config)**
