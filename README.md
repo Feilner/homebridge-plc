@@ -66,7 +66,7 @@ Parameters:
 - `distributePolling` **(optional)** when set to `true` the polling of the accessories does not start at the same time. In order to distribute the PLC load for the queries.
 - `enablePush`: **(optional)** when set to `true` a the configured `port` is opened to push updates of values form plc to the plugin
 - `enableControl`: **(optional)** when set to `true` a the configured `port` is opened to control accessories by http request
-- `port`: **(optional)** port for http requests default `8888`
+- `port`: **(optional)** port for http server to handle incoming http requests for push and control functionality. Default port is `8888`
 
 ## Accessories
 - In the platform, you can declare different types of accessories

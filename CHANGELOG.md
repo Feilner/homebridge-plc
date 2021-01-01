@@ -3,7 +3,7 @@
 ## [1.0.22] - 2021-01-01
 
 ### Changed
-- changed `defaultPort` from `8080` to `8888` avoid conflicts with Homebridge UI which has 8080 as default port. The port is used when using `enablePush` or `enableControl` is set. **(check your config)**
+- changed **default value** for parameter `port` from `8080` to `8888`. This was done to avoid conflicts with Homebridge UI which has 8080 as default port. The port is used when using `enablePush` or `enableControl` is set. **(check your config)**
 
 ### Added
 - add option `defaultPollInterval` on platform level
