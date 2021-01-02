@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.0.23] - 2021-01-02
+
+### Added
+- add option `invert` for `PLC_OccupancySensor`, `PLC_MotionSensor` and `PLC_ContactSensor`
+
+
 ## [1.0.22] - 2021-01-01
 
 ### Changed
