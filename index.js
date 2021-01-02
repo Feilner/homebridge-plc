@@ -522,11 +522,17 @@ function GenericPLCAccessory(platform, config, accessoryNumber) {
     this.service = new Service.OccupancySensor(this.name);
     this.accessory.addService(this.service);
 
+    this.modBitGet = this.plain
+    if ('invert' in config && config.invert) {
+        this.modBitGet = this.invert_bit;
+    }
+
     this.service.getCharacteristic(Characteristic.OccupancyDetected)
       .on('get', function(callback) {this.getBit(callback,
         config.db,
         Math.floor(config.get_OccupancyDetected), Math.floor((config.get_OccupancyDetected*10)%10),
-        "get OccupancyDetected"
+        "get OccupancyDetected",
+        this.modBitGet
       );}.bind(this));
   }
   // INIT handling ///////////////////////////////////////////////
@@ -536,11 +542,17 @@ function GenericPLCAccessory(platform, config, accessoryNumber) {
     this.service = new Service.MotionSensor(this.name);
     this.accessory.addService(this.service);
 
+    this.modBitGet = this.plain
+    if ('invert' in config && config.invert) {
+        this.modBitGet = this.invert_bit;
+    }
+
     this.service.getCharacteristic(Characteristic.MotionDetected)
       .on('get', function(callback) {this.getBit(callback,
         config.db,
         Math.floor(config.get_MotionDetected), Math.floor((config.get_MotionDetected*10)%10),
-        "get MotionDetected"
+        "get MotionDetected",
+        this.modBitGet
       );}.bind(this));
   }
   // INIT handling ///////////////////////////////////////////////
@@ -549,12 +561,18 @@ function GenericPLCAccessory(platform, config, accessoryNumber) {
   else if (config.accessory == 'PLC_ContactSensor'){
     this.service = new Service.ContactSensor(this.name);
     this.accessory.addService(this.service);
-
-    this.service.getCharacteristic(Characteristic.ContactSensorState)
+    
+    this.modBitGet = this.plain
+    if ('invert' in config && config.invert) {
+        this.modBitGet = this.invert_bit;
+    }
+    
+      this.service.getCharacteristic(Characteristic.ContactSensorState)
       .on('get', function(callback) {this.getBit(callback,
         config.db,
         Math.floor(config.get_ContactSensorState), Math.floor((config.get_ContactSensorState*10)%10),
-        "get get_ContactSensorState"
+        "get get_ContactSensorState",
+        this.modBitGet
       );}.bind(this));
   }
   // INIT handling ///////////////////////////////////////////////
@@ -1615,6 +1633,10 @@ GenericPLCAccessory.prototype = {
 
   invert_0_100: function(value) {
     return 100-value;
+  },
+
+  invert_bit: function(value) {
+    return 1 - value;
   },
 
   mapFunction: function(value, map) {

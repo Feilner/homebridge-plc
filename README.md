@@ -220,6 +220,7 @@ presence detection sensor
 - `name`: unique name of the accessory
 - `manufacturer`: **(optional)** description
 - `db`: s7 data base number e.g. `4` for `DB4`
+- `invert`: **(optional)** set to `true` inverts the bit to `false:presence` and `true:no-presence`.
 - `enablePolling`: **(optional)** when set to `true` the current state will be polled. It is mandatory as well to enable polling mode on platform level.
 - `pollInterval` **(optional)** poll interval in seconds. Default value see platform definition.
 - `get_OccupancyDetected`: **(push support)** offset and bit get the current status S7 type `Bool` e.g. `55.0` for `DB4DBX55.0`
@@ -233,6 +234,7 @@ movement detection sensor
 - `name`: unique name of the accessory
 - `manufacturer`: **(optional)** description
 - `db`: s7 data base number e.g. `4` for `DB4`
+- `invert`: **(optional)** set to `true` inverts the bit to `false:motion` and `true:no-motion`.
 - `enablePolling`: **(optional)** when set to `true` the current state will be polled. It is mandatory as well to enable polling mode on platform level.
 - `pollInterval` **(optional)** poll interval in seconds. Default value see platform definition.
 - `get_MotionDetected`: **(push support)** offset and bit get the current status S7 type `Bool` e.g. `55.0` for `DB4DBX55.0`
@@ -246,6 +248,7 @@ Generic contact sensor. The home app allows to display as window, door, blind/sh
 - `name`: unique name of the accessory
 - `manufacturer`: **(optional)** description
 - `db`: s7 data base number e.g. `4` for `DB4`
+- `invert`: **(optional)** set to `true` inverts the bit to `false:closed` and `true:open`.
 - `enablePolling`: **(optional)** when set to `true` the current state will be polled. It is mandatory as well to enable polling mode on platform level.
 - `pollInterval` **(optional)** poll interval in seconds. Default value see platform definition.
 - `get_ContactSensorState`: **(push support)** offset and bit get the current status S7 type `Bool` e.g. `55.0` for `DB4DBX55.0`
