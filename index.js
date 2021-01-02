@@ -522,9 +522,9 @@ function GenericPLCAccessory(platform, config, accessoryNumber) {
     this.service = new Service.OccupancySensor(this.name);
     this.accessory.addService(this.service);
 
-    this.modBitGet = this.plain
+    this.modFunctionGet = this.plain
     if ('invert' in config && config.invert) {
-        this.modBitGet = this.invert_bit;
+        this.modFunctionGet = this.invert_bit;
     }
 
     this.service.getCharacteristic(Characteristic.OccupancyDetected)
@@ -532,7 +532,7 @@ function GenericPLCAccessory(platform, config, accessoryNumber) {
         config.db,
         Math.floor(config.get_OccupancyDetected), Math.floor((config.get_OccupancyDetected*10)%10),
         "get OccupancyDetected",
-        this.modBitGet
+        this.modFunctionGet
       );}.bind(this));
   }
   // INIT handling ///////////////////////////////////////////////
@@ -542,9 +542,9 @@ function GenericPLCAccessory(platform, config, accessoryNumber) {
     this.service = new Service.MotionSensor(this.name);
     this.accessory.addService(this.service);
 
-    this.modBitGet = this.plain
+    this.modFunctionGet = this.plain;
     if ('invert' in config && config.invert) {
-        this.modBitGet = this.invert_bit;
+        this.modFunctionGet = this.invert_bit;
     }
 
     this.service.getCharacteristic(Characteristic.MotionDetected)
@@ -552,7 +552,7 @@ function GenericPLCAccessory(platform, config, accessoryNumber) {
         config.db,
         Math.floor(config.get_MotionDetected), Math.floor((config.get_MotionDetected*10)%10),
         "get MotionDetected",
-        this.modBitGet
+        this.modFunctionGet
       );}.bind(this));
   }
   // INIT handling ///////////////////////////////////////////////
@@ -562,9 +562,9 @@ function GenericPLCAccessory(platform, config, accessoryNumber) {
     this.service = new Service.ContactSensor(this.name);
     this.accessory.addService(this.service);
     
-    this.modBitGet = this.plain
+    this.modFunctionGet = this.plain;
     if ('invert' in config && config.invert) {
-        this.modBitGet = this.invert_bit;
+        this.modFunctionGet = this.invert_bit;
     }
     
       this.service.getCharacteristic(Characteristic.ContactSensorState)
@@ -572,7 +572,7 @@ function GenericPLCAccessory(platform, config, accessoryNumber) {
         config.db,
         Math.floor(config.get_ContactSensorState), Math.floor((config.get_ContactSensorState*10)%10),
         "get get_ContactSensorState",
-        this.modBitGet
+        this.modFunctionGet
       );}.bind(this));
   }
   // INIT handling ///////////////////////////////////////////////
@@ -1067,8 +1067,8 @@ GenericPLCAccessory.prototype = {
     else if (this.config.accessory == 'PLC_OccupancySensor'){
       if (this.config.get_OccupancyDetected == offset)
       {
-        this.log.debug( "[" + this.name + "] Push OccupancyDetected:" + value);
-        this.service.getCharacteristic(Characteristic.OccupancyDetected).updateValue(value);
+        this.log.debug( "[" + this.name + "] Push OccupancyDetected:" + String(this.modFunctionGet(parseInt(value))) + "<-" + String(value));
+        this.service.getCharacteristic(Characteristic.OccupancyDetected).updateValue(this.modFunctionGet(parseInt(value)));
         rv = true;
       }
     }
@@ -1078,8 +1078,8 @@ GenericPLCAccessory.prototype = {
     else if (this.config.accessory == 'PLC_MotionSensor'){
       if (this.config.get_MotionDetected == offset)
       {
-        this.log.debug( "[" + this.name + "] Push MotionDetected:" + value);
-        this.service.getCharacteristic(Characteristic.MotionDetected).updateValue(value);
+        this.log.debug( "[" + this.name + "] Push MotionDetected:" + String(this.modFunctionGet(parseInt(value))) + "<-" + String(value));
+        this.service.getCharacteristic(Characteristic.MotionDetected).updateValue(this.modFunctionGet(parseInt(value)));
         rv = true;
       }
     }
@@ -1089,8 +1089,8 @@ GenericPLCAccessory.prototype = {
     else if (this.config.accessory == 'PLC_ContactSensor'){
       if (this.config.get_ContactSensorState == offset)
       {
-        this.log.debug( "[" + this.name + "] Push ContactSensorState:" + value);
-        this.service.getCharacteristic(Characteristic.ContactSensorState).updateValue(value);
+        this.log.debug( "[" + this.name + "] Push ContactSensorState:" + String(this.modFunctionGet(parseInt(value))) + "<-" + String(value));
+        this.service.getCharacteristic(Characteristic.ContactSensorState).updateValue(this.modFunctionGet(parseInt(value)));
         rv = true;
       }
     }
@@ -1636,7 +1636,7 @@ GenericPLCAccessory.prototype = {
   },
 
   invert_bit: function(value) {
-    return 1 - value;
+    return (value ? 0 : 1);
   },
 
   mapFunction: function(value, map) {
