@@ -195,6 +195,8 @@ function GenericPLCAccessory(platform, config, accessoryNumber) {
   var uuid = UUIDGen.generate(config.name + config.accessory);
   this.config = config;
   this.accessory = new PlatformAccessory(this.name, uuid);
+  this.modFunctionGet = this.plain;
+  this.modFunctionSet = this.plain;
 
   if ('enablePolling' in platform.config && platform.config.enablePolling && config.enablePolling) {
       this.pollActive = true;
@@ -425,8 +427,6 @@ function GenericPLCAccessory(platform, config, accessoryNumber) {
         }
     }
 
-    this.modFunctionGet = this.plain;
-    this.modFunctionSet = this.plain;
     if ('invert' in config && config.invert) {
       this.modFunctionGet = this.invert_0_100;
       this.modFunctionSet = this.invert_0_100;
@@ -522,7 +522,6 @@ function GenericPLCAccessory(platform, config, accessoryNumber) {
     this.service = new Service.OccupancySensor(this.name);
     this.accessory.addService(this.service);
 
-    this.modFunctionGet = this.plain
     if ('invert' in config && config.invert) {
         this.modFunctionGet = this.invert_bit;
     }
@@ -542,7 +541,6 @@ function GenericPLCAccessory(platform, config, accessoryNumber) {
     this.service = new Service.MotionSensor(this.name);
     this.accessory.addService(this.service);
 
-    this.modFunctionGet = this.plain;
     if ('invert' in config && config.invert) {
         this.modFunctionGet = this.invert_bit;
     }
@@ -562,7 +560,6 @@ function GenericPLCAccessory(platform, config, accessoryNumber) {
     this.service = new Service.ContactSensor(this.name);
     this.accessory.addService(this.service);
     
-    this.modFunctionGet = this.plain;
     if ('invert' in config && config.invert) {
         this.modFunctionGet = this.invert_bit;
     }
@@ -707,9 +704,6 @@ function GenericPLCAccessory(platform, config, accessoryNumber) {
       }.bind(this));
      }.bind(this);
 
-    this.modFunctionGet = this.plain;
-    this.modFunctionSet = this.plain;
-
     if ('mapSet' in config && config.mapSet) {
       modFunctionSet = function(value){return this.mapFunction(value, config.mapSet);}.bind(this);
     }
@@ -780,9 +774,6 @@ function GenericPLCAccessory(platform, config, accessoryNumber) {
       informFunction = function(value){this.service.getCharacteristic(Characteristic.LockCurrentState).updateValue(value);}.bind(this);
     }
 
-    this.modFunctionGet = this.plain;
-    this.modFunctionSet = this.plain;
-
     this.service.getCharacteristic(Characteristic.LockCurrentState)
       .on('get', function(callback) {this.getByte(callback,
         config.db,
@@ -817,8 +808,11 @@ function GenericPLCAccessory(platform, config, accessoryNumber) {
       informFunction = function(value){this.service.getCharacteristic(Characteristic.LockCurrentState).updateValue(value);}.bind(this);
     }
 
-    this.modFunctionGet = function(value){return (value ? 0 : 1);}.bind(this);
-    this.modFunctionSet = function(value){return (value ? 0 : 1);}.bind(this);
+    // note the invert is inverted! To invert is normal behaviour.
+    if (!('invert' in config && config.invert)) {
+      this.modFunctionGet = invert_bit;
+      this.modFunctionSet = invert_bit;
+    }
 
     this.service.getCharacteristic(Characteristic.LockCurrentState)
       .on('get', function(callback) {this.getBit(callback,
@@ -1339,22 +1333,36 @@ GenericPLCAccessory.prototype = {
     else if (this.config.accessory == 'PLC_StatelessProgrammableSwitch' || this.config.accessory == 'PLC_Doorbell'){
       if (this.config.get_ProgrammableSwitchEvent == offset)
       {
+        // Note: In contrast to all others accessories the control does not set the value in the PLC instead it simulates a key event.
+        //       Therefore updateValue is
         this.log.debug( "[" + this.name + "] Control ProgrammableSwitchEvent:" + value);
         this.service.getCharacteristic(Characteristic.ProgrammableSwitchEvent).updateValue(value);
         rv = true;
       }
     }
     // CONTROL handling ////////////////////////////////////////////
-    // LockMechanism, LockMechanismBool
+    // LockMechanism
     ////////////////////////////////////////////////////////////////
-    else if (this.config.accessory == 'PLC_LockMechanism' || this.config.accessory == 'PLC_LockMechanismBool'){
+    else if (this.config.accessory == 'PLC_LockMechanism'){
       if (this.config.set_LockTargetState == offset || this.config.set_Secured == offset)
-      {
-        this.log.debug( "[" + this.name + "] Control LockTargetState:" + String(value) + "->" + String(this.modFunctionSet(parseInt(value))));
-        this.service.getCharacteristic(Characteristic.LockTargetState).setValue(this.modFunctionSet(parseInt(value)));
+      { 
+        this.log.debug( "[" + this.name + "] Control LockTargetState:" + value);
+        this.service.getCharacteristic(Characteristic.LockTargetState).setValue(value);
         rv = true;
       }
     }
+    // CONTROL handling ////////////////////////////////////////////
+    // LockMechanismBool
+    ////////////////////////////////////////////////////////////////
+    else if (this.config.accessory == 'PLC_LockMechanismBool'){
+      if (this.config.set_LockTargetState == offset || this.config.set_Secured == offset)
+      { 
+        var valuePLC = this.invert_bit(parseInt(value));
+        this.log.debug( "[" + this.name + "] Control LockTargetState:" + String(value) + "->" + String(valuePLC));
+        this.service.getCharacteristic(Characteristic.LockTargetState).setValue(valuePLC);
+        rv = true;
+      }
+    }    
     // CONTROL handling ////////////////////////////////////////////
     // GarageDoorOpener
     ////////////////////////////////////////////////////////////////

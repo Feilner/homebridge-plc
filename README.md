@@ -374,7 +374,8 @@ Lock mechanism implemented as bool on the PLC. **NOTE: The convention `0`=`false
 - `db`: s7 data base number e.g. `4` for `DB4`
 - `enablePolling`: **(optional)** when set to `true` the current state will be polled. t is mandatory as well to enable polling mode on platform level.
 - `pollInterval` **(optional)** poll interval in seconds. Default value see platform definition.
-- `forceCurrentState`: **(optional)** when set to `true` the position set by `set_LockTargetState` is directly used as current state. By this it seems in the home app as the target state was directly reached. This is recommended when not using `enablePolling` or pushing the value from the plc.
+- `forceCurrentState`: **(optional)** when set to `true` the state set by `set_LockTargetState` is directly used as current state. By this it seems in the home app as the target state was directly reached. This is recommended when not using `enablePolling` or pushing the value from the plc.
+- `invert`: **(optional)** when set to `true` all states are inverted (current and target state) `false`: **unsecured** and `true`: **secured**.
 - `get_LockCurrentState`: **(push support)** offset to read current state current state S7 type `Bool` .g. `3.1` for `DB4DBB3`
 	- `false`: secured
 	- `true`: unsecured
@@ -801,12 +802,13 @@ To enable this you have to set `"enableControl": true,` platform level and optio
 **NOTE: It is currently not possible to query the current state**
 
 The interface that the PLC operates consists only of the keyword 'control', the database number 'db', the address within the db 'offset' and the value 'value'.
-The value is assigned to the matching ('db' and 'offset') set_* accessory configurations.
+The value is assigned to the matching ('db' and 'offset') set_* accessory configurations. All configurations that are supported  are marked with **(control support)** in the description.
 
 For accessories with separate on/off configurations e.g. `PLC_LightBulb` `set_On`/`set_Off` the `set_On` or `PLC_LockMechanismBool` `set_Secured`/`set_Unsecured` the `set_Secured` has to be used. With `1` for on and `0` for off.
 
-All information is transmitted within the URL and in decimal.
-Parameters that supports push are marked with **(control support)** in the description.
+All information is transmitted within the URL and in decimal. 
+
+**NOTE: Options like `invert`, `mapGet` and `mapSet` are not affecting the control interface. In example for PLC_Window is the value `0`: **closed** and `100`: **open** regardless if `invert` is set or not.
 
 The Request has to be done as HTTP `PUT` or `GET` operation. There will be no logging when doing a `PUT` operation while there will be detailed output when during a `GET` operation. This in especially intended for testing with the browser as the browser performs a `GET` operation per default.
 
