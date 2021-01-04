@@ -187,7 +187,12 @@ temperature sensor and temperature regulation
 	- `2`: cool
 	- `3`: automatic
 - `set_TargetHeatingCoolingState` not yet supported writes are ignored
-
+- `get_StatusTampered`: **(optional)** **(push support)** offset and bit to tamper detection. (Home app shows this only within the options) S7 type `Bool` e.g. `55.2` for `DB4DBX55.2`
+	- `false`: ok
+	- `true`: tampered
+- `get_StatusLowBattery`: **(optional)** **(push support)** offset and bit to battery low detection. (Home app does not inform with push notification) S7 type `Bool` e.g. `55.3` for `DB4DBX55.3`
+	- `false`: ok
+	- `true`: battery low
 
 ### <a name='PLC_Window'></a>Shutters as `PLC_WindowCovering`, windows as `PLC_Window` and doors as `PLC_Door`
 motor driven blinds, windows and doors. Supports also manual driven blinds, windows and doors to show just the current position in percent. **Note:** If your sensor shows only open/close may also have a look at [`PLC_ContactSensor`](#PLC_ContactSensor).

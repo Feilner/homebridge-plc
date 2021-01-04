@@ -1,10 +1,10 @@
 # Changelog
-## [1.0.24] - 2021-01-02
+## [1.0.24] - 2021-01-04
 
 ### Added
 - add option `invert` for `PLC_LockMechanismBool`
 - add option `mapGet` and `mapSet` for `PLC_LockMechanism`
-
+- add option `get_StatusTampered` and `get_StatusLowBattery` for `PLC_Thermostat`
 
 ## [1.0.23] - 2021-01-02
 
