@@ -187,10 +187,10 @@ temperature sensor and temperature regulation
 	- `2`: cool
 	- `3`: automatic
 - `set_TargetHeatingCoolingState` not yet supported writes are ignored
-- `get_StatusTampered`: **(optional)** **(push support)** offset and bit to tamper detection. (Home app shows this only within the options) S7 type `Bool` e.g. `55.2` for `DB4DBX55.2`
+- `get_StatusTampered`: **(optional)** **(push support)** offset and bit to tamper detection. (Home app shows this only within the options) S7 type `Bool` e.g. `55.2` for `DB4DBX55.2` **Note:** Homebridge 1.2.5 generates a warning when using this.
 	- `false`: ok
 	- `true`: tampered
-- `get_StatusLowBattery`: **(optional)** **(push support)** offset and bit to battery low detection. (Home app does not inform with push notification) S7 type `Bool` e.g. `55.3` for `DB4DBX55.3`
+- `get_StatusLowBattery`: **(optional)** **(push support)** offset and bit to battery low detection. (Home app does not inform with push notification) S7 type `Bool` e.g. `55.3` for `DB4DBX55.3` **Note:** Homebridge 1.2.5 generates a warning when using this.
 	- `false`: ok
 	- `true`: battery low
 
