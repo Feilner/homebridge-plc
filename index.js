@@ -613,6 +613,24 @@ function GenericPLCAccessory(platform, config, accessoryNumber) {
         "get OccupancyDetected",
         this.modFunctionGet
       );}.bind(this));
+
+      if ('get_StatusTampered' in config) {
+        this.service.getCharacteristic(Characteristic.StatusTampered)
+        .on('get', function(callback) {this.getBit(callback,
+          config.db,
+          Math.floor(config.get_StatusTampered), Math.floor((config.get_StatusTampered*10)%10),
+          'get StatusTampered'
+        );}.bind(this));
+      }
+
+      if ('get_StatusLowBattery' in config) {
+        this.service.getCharacteristic(Characteristic.StatusLowBattery)
+        .on('get', function(callback) {this.getBit(callback,
+          config.db,
+          Math.floor(config.get_StatusLowBattery), Math.floor((config.get_StatusLowBattery*10)%10),
+          'get StatusLowBattery'
+        );}.bind(this));
+      }
   }
   // INIT handling ///////////////////////////////////////////////
   // MotionSensor
@@ -632,6 +650,24 @@ function GenericPLCAccessory(platform, config, accessoryNumber) {
         "get MotionDetected",
         this.modFunctionGet
       );}.bind(this));
+
+      if ('get_StatusTampered' in config) {
+        this.service.getCharacteristic(Characteristic.StatusTampered)
+        .on('get', function(callback) {this.getBit(callback,
+          config.db,
+          Math.floor(config.get_StatusTampered), Math.floor((config.get_StatusTampered*10)%10),
+          'get StatusTampered'
+        );}.bind(this));
+      }
+
+      if ('get_StatusLowBattery' in config) {
+        this.service.getCharacteristic(Characteristic.StatusLowBattery)
+        .on('get', function(callback) {this.getBit(callback,
+          config.db,
+          Math.floor(config.get_StatusLowBattery), Math.floor((config.get_StatusLowBattery*10)%10),
+          'get StatusLowBattery'
+        );}.bind(this));
+      }
   }
   // INIT handling ///////////////////////////////////////////////
   // ContactSensor
@@ -651,6 +687,24 @@ function GenericPLCAccessory(platform, config, accessoryNumber) {
         "get get_ContactSensorState",
         this.modFunctionGet
       );}.bind(this));
+
+      if ('get_StatusTampered' in config) {
+        this.service.getCharacteristic(Characteristic.StatusTampered)
+        .on('get', function(callback) {this.getBit(callback,
+          config.db,
+          Math.floor(config.get_StatusTampered), Math.floor((config.get_StatusTampered*10)%10),
+          'get StatusTampered'
+        );}.bind(this));
+      }
+
+      if ('get_StatusLowBattery' in config) {
+        this.service.getCharacteristic(Characteristic.StatusLowBattery)
+        .on('get', function(callback) {this.getBit(callback,
+          config.db,
+          Math.floor(config.get_StatusLowBattery), Math.floor((config.get_StatusLowBattery*10)%10),
+          'get StatusLowBattery'
+        );}.bind(this));
+      }
   }
   // INIT handling ///////////////////////////////////////////////
   // Faucet
@@ -1201,6 +1255,18 @@ GenericPLCAccessory.prototype = {
         this.service.getCharacteristic(Characteristic.OccupancyDetected).updateValue(this.modFunctionGet(parseInt(value)));
         rv = true;
       }
+      if (this.config.get_StatusTampered == offset)
+      {
+        this.log.debug( "[" + this.name + "] Push StatusTampered:" + value);
+        this.service.getCharacteristic(Characteristic.StatusTampered).updateValue(value);
+        rv = true;
+      }
+      if (this.config.get_StatusLowBattery == offset)
+      {
+        this.log.debug( "[" + this.name + "] Push StatusLowBattery:" + value);
+        this.service.getCharacteristic(Characteristic.StatusLowBattery).updateValue(value);
+        rv = true;
+      }
     }
     // PUSH handling ///////////////////////////////////////////////
     // MotionSensor
@@ -1212,6 +1278,18 @@ GenericPLCAccessory.prototype = {
         this.service.getCharacteristic(Characteristic.MotionDetected).updateValue(this.modFunctionGet(parseInt(value)));
         rv = true;
       }
+      if (this.config.get_StatusTampered == offset)
+      {
+        this.log.debug( "[" + this.name + "] Push StatusTampered:" + value);
+        this.service.getCharacteristic(Characteristic.StatusTampered).updateValue(value);
+        rv = true;
+      }
+      if (this.config.get_StatusLowBattery == offset)
+      {
+        this.log.debug( "[" + this.name + "] Push StatusLowBattery:" + value);
+        this.service.getCharacteristic(Characteristic.StatusLowBattery).updateValue(value);
+        rv = true;
+      }
     }
     // PUSH handling ///////////////////////////////////////////////
     // ContactSensor
@@ -1221,6 +1299,18 @@ GenericPLCAccessory.prototype = {
       {
         this.log.debug( "[" + this.name + "] Push ContactSensorState:" + String(this.modFunctionGet(parseInt(value))) + "<-" + String(value));
         this.service.getCharacteristic(Characteristic.ContactSensorState).updateValue(this.modFunctionGet(parseInt(value)));
+        rv = true;
+      }
+      if (this.config.get_StatusTampered == offset)
+      {
+        this.log.debug( "[" + this.name + "] Push StatusTampered:" + value);
+        this.service.getCharacteristic(Characteristic.StatusTampered).updateValue(value);
+        rv = true;
+      }
+      if (this.config.get_StatusLowBattery == offset)
+      {
+        this.log.debug( "[" + this.name + "] Push StatusLowBattery:" + value);
+        this.service.getCharacteristic(Characteristic.StatusLowBattery).updateValue(value);
         rv = true;
       }
     }
@@ -1662,6 +1752,16 @@ GenericPLCAccessory.prototype = {
           this.service.getCharacteristic(Characteristic.OccupancyDetected).updateValue(value);
         }
       }.bind(this));
+      this.service.getCharacteristic(Characteristic.StatusTampered).getValue(function(err, value) {
+        if (!err) {
+          this.service.getCharacteristic(Characteristic.StatusTampered).updateValue(value);
+        }
+      }.bind(this));
+      this.service.getCharacteristic(Characteristic.StatusLowBattery).getValue(function(err, value) {
+        if (!err) {
+          this.service.getCharacteristic(Characteristic.StatusLowBattery).updateValue(value);
+        }
+      }.bind(this));
     }
     // POLL handling ///////////////////////////////////////////////
     // MotionSensor
@@ -1673,6 +1773,16 @@ GenericPLCAccessory.prototype = {
           this.service.getCharacteristic(Characteristic.MotionDetected).updateValue(value);
         }
       }.bind(this));
+      this.service.getCharacteristic(Characteristic.StatusTampered).getValue(function(err, value) {
+        if (!err) {
+          this.service.getCharacteristic(Characteristic.StatusTampered).updateValue(value);
+        }
+      }.bind(this));
+      this.service.getCharacteristic(Characteristic.StatusLowBattery).getValue(function(err, value) {
+        if (!err) {
+          this.service.getCharacteristic(Characteristic.StatusLowBattery).updateValue(value);
+        }
+      }.bind(this));
     }
     // POLL handling ///////////////////////////////////////////////
     // ContactSensor
@@ -1682,6 +1792,16 @@ GenericPLCAccessory.prototype = {
       this.service.getCharacteristic(Characteristic.ContactSensorState).getValue(function(err, value) {
         if (!err) {
           this.service.getCharacteristic(Characteristic.ContactSensorState).updateValue(value);
+        }
+      }.bind(this));
+      this.service.getCharacteristic(Characteristic.StatusTampered).getValue(function(err, value) {
+        if (!err) {
+          this.service.getCharacteristic(Characteristic.StatusTampered).updateValue(value);
+        }
+      }.bind(this));
+      this.service.getCharacteristic(Characteristic.StatusLowBattery).getValue(function(err, value) {
+        if (!err) {
+          this.service.getCharacteristic(Characteristic.StatusLowBattery).updateValue(value);
         }
       }.bind(this));
     }
