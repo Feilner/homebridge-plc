@@ -1,5 +1,5 @@
 # Changelog
-## [1.0.24] - 2021-01-04
+## [1.0.24] - 2021-01-05
 
 ### Added
 - add option `invert` for `PLC_LockMechanismBool`
