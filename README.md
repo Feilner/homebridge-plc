@@ -258,7 +258,7 @@ presence detection sensor
 - `get_StatusLowBattery`: **(optional)** **(push support)** offset and bit to battery low detection. (Home app does not inform with push notification) S7 type `Bool` e.g. `55.3` for `DB4DBX55.3`
 	- `false`: ok
 	- `true`: battery low
-	- 
+
 ### <a name='PLC_MotionSensor'></a>Motion Sensor as `PLC_MotionSensor`
 movement detection sensor
 
@@ -278,7 +278,7 @@ movement detection sensor
 - `get_StatusLowBattery`: **(optional)** **(push support)** offset and bit to battery low detection. (Home app does not inform with push notification) S7 type `Bool` e.g. `55.3` for `DB4DBX55.3`
 	- `false`: ok
 	- `true`: battery low
-	- 
+
 ### <a name='PLC_ContactSensor'></a>Contact Sensor as `PLC_ContactSensor`
 Generic contact sensor. The home app allows to display as window, door, blind/shutter, garage door or contact sensor.
 
@@ -298,7 +298,7 @@ Generic contact sensor. The home app allows to display as window, door, blind/sh
 - `get_StatusLowBattery`: **(optional)** **(push support)** offset and bit to battery low detection. (Home app does not inform with push notification) S7 type `Bool` e.g. `55.3` for `DB4DBX55.3`
 	- `false`: ok
 	- `true`: battery low
-	- 
+
 ### <a name='PLC_Faucet'></a>Faucet as `PLC_Faucet`
 watering for the garden
 
