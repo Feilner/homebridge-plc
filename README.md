@@ -148,7 +148,7 @@ normal temperature sensor
 	- `false`: ok
 	- `true`: battery low
 
-### <a name='PLC_HumiditySensor'></a>Humidity Sensor as `PLC_HumiditySensor`:
+### <a name='PLC_HumiditySensor'></a>Humidity Sensor as `PLC_HumiditySensor`
 normal humidity sensor
 
 ![homebridge pic](doc/humidity.png)
@@ -165,7 +165,7 @@ normal humidity sensor
 - `get_StatusTampered`: **(optional)** **(push support)** offset and bit to tamper detection. (Home app shows this only within the options) S7 type `Bool` e.g. `55.2` for `DB4DBX55.2`
 	- `false`: ok
 	- `true`: tampered
-- `get_StatusLowBattery`: **(optional)** **(push support)** offset and bit to battery low detection. (Home app does not inform with push notification) S7 type `Bool` e.g. `55.3` for `DB4DBX55.3` 
+- `get_StatusLowBattery`: **(optional)** **(push support)** offset and bit to battery low detection. (Home app does not inform with push notification) S7 type `Bool` e.g. `55.3` for `DB4DBX55.3`
 	- `false`: ok
 	- `true`: battery low
 
@@ -183,7 +183,6 @@ temperature sensor and temperature regulation
 - `get_CurrentTemperature`: **(push support)** offset to get current temperature S7 type `Real` e.g. `0` for `DB4DBD0`
 - `get_TargetTemperature`: **(push support)** offset to get target temperature S7 type `Real` e.g. `4` for `DB4DBD4`
 - `set_TargetTemperature`: **(control support)** offset to set current temperature S7 type `Real` e.g. `4` for `DB4DBD4` (can have same value as get_TargetTemperature)
-
 - target temperature range definitions **(optional)**
 	- `minValue` default value: 15
 	- `maxValue` default value: 27
@@ -208,10 +207,10 @@ temperature sensor and temperature regulation
 	- `2`: cool
 	- `3`: automatic
 - `set_TargetHeatingCoolingState` not yet supported writes are ignored
-- `get_StatusTampered`: **(optional)** **(push support)** offset and bit to tamper detection. (Home app shows this only within the options) S7 type `Bool` e.g. `55.2` for `DB4DBX55.2` 
+- `get_StatusTampered`: **(optional)** **(push support)** offset and bit to tamper detection. (Home app shows this only within the options) S7 type `Bool` e.g. `55.2` for `DB4DBX55.2`
 	- `false`: ok
 	- `true`: tampered
-- `get_StatusLowBattery`: **(optional)** **(push support)** offset and bit to battery low detection. (Home app does not inform with push notification) S7 type `Bool` e.g. `55.3` for `DB4DBX55.3` 
+- `get_StatusLowBattery`: **(optional)** **(push support)** offset and bit to battery low detection. (Home app does not inform with push notification) S7 type `Bool` e.g. `55.3` for `DB4DBX55.3`
 	- `false`: ok
 	- `true`: battery low
 
@@ -280,7 +279,7 @@ movement detection sensor
 	- `true`: battery low
 
 ### <a name='PLC_ContactSensor'></a>Contact Sensor as `PLC_ContactSensor`
-Generic contact sensor. The home app allows to display as window, door, blind/shutter, garage door or contact sensor.
+generic contact sensor. The home app allows to display as window, door, blind/shutter, garage door or contact sensor.
 
 ![homebridge pic](doc/contactsensor.png) ![homebridge pic](doc/blind.png) ![homebridge pic](doc/window.png) ![homebridge pic](doc/door.png) ![homebridge pic](doc/garagedoor.png)
 - `name`: unique name of the accessory
@@ -388,7 +387,7 @@ Trigger actions in home app only works with control center e.g. AppleTV or HomeP
 	- `2`: long press
 
 ### <a name='PLC_LockMechanism'></a>Lock mechanism as `PLC_LockMechanism`
-Lock mechanism (not yet clear how to use changes are welcome)
+lock mechanism
 
 ![homebridge pic](doc/lock.png)
 - `name`: unique name of the accessory
@@ -410,7 +409,8 @@ Lock mechanism (not yet clear how to use changes are welcome)
 	- `1`: secured
 
 ### <a name='PLC_LockMechanismBool'></a>Boolean lock mechanism as `PLC_LockMechanismBool`
-Lock mechanism implemented as bool on the PLC. **NOTE: The convention `0`=`false`: closed/secured `1`=`true`: open/unsecured**
+lock mechanism implemented as bool on the PLC
+**NOTE: The convention `0`=`false`: closed/secured `1`=`true`: open/unsecured**
 
 ![homebridge pic](doc/lockbool.png)
 - `name`: unique name of the accessory
@@ -436,7 +436,7 @@ Lock mechanism implemented as bool on the PLC. **NOTE: The convention `0`=`false
 
 
 ### <a name='PLC_GarageDoorOpener'></a>Garage door as `PLC_GarageDoorOpener`
-Garage door
+garage door
 
 ![homebridge pic](doc/garagedoor.png)
 - `name`: unique name of the accessory
@@ -460,7 +460,7 @@ Garage door
 	- `1`: closed
 
 ### <a name='PLC_SmokeSensor'></a>Smoke Sensor as `PLC_SmokeSensor`
-Fire alarm
+fire alarm
 
 - `name`: unique name of the accessory
 - `manufacturer`: **(optional)** description
