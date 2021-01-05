@@ -298,6 +298,23 @@ function GenericPLCAccessory(platform, config, accessoryNumber) {
       maxValue: config.maxValue || 50,
       minStep: config.minStep || 0.5
     });
+    if ('get_StatusTampered' in config) {
+      this.service.getCharacteristic(Characteristic.StatusTampered)
+      .on('get', function(callback) {this.getBit(callback,
+        config.db,
+        Math.floor(config.get_StatusTampered), Math.floor((config.get_StatusTampered*10)%10),
+        'get StatusTampered'
+      );}.bind(this));
+    }
+
+    if ('get_StatusLowBattery' in config) {
+      this.service.getCharacteristic(Characteristic.StatusLowBattery)
+      .on('get', function(callback) {this.getBit(callback,
+        config.db,
+        Math.floor(config.get_StatusLowBattery), Math.floor((config.get_StatusLowBattery*10)%10),
+        'get StatusLowBattery'
+      );}.bind(this));
+    }
   }
 
   // INIT handling ///////////////////////////////////////////////
@@ -318,6 +335,23 @@ function GenericPLCAccessory(platform, config, accessoryNumber) {
       maxValue: config.maxValue || 100,
       minStep: config.minStep || 1
     });
+    if ('get_StatusTampered' in config) {
+      this.service.getCharacteristic(Characteristic.StatusTampered)
+      .on('get', function(callback) {this.getBit(callback,
+        config.db,
+        Math.floor(config.get_StatusTampered), Math.floor((config.get_StatusTampered*10)%10),
+        'get StatusTampered'
+      );}.bind(this));
+    }
+
+    if ('get_StatusLowBattery' in config) {
+      this.service.getCharacteristic(Characteristic.StatusLowBattery)
+      .on('get', function(callback) {this.getBit(callback,
+        config.db,
+        Math.floor(config.get_StatusLowBattery), Math.floor((config.get_StatusLowBattery*10)%10),
+        'get StatusLowBattery'
+      );}.bind(this));
+    }
   }
 
   // INIT handling ///////////////////////////////////////////////
@@ -387,6 +421,33 @@ function GenericPLCAccessory(platform, config, accessoryNumber) {
         maxValue: config.maxValue || 27,
         minStep: config.minStep || 0.5
     });
+
+    if ('get_CurrentRelativeHumidity' in config) {
+      this.service.getCharacteristic(Characteristic.CurrentRelativeHumidity)
+      .on('get', function(callback) {this.getReal(callback,
+        config.db,
+        config.get_CurrentRelativeHumidity,
+        'get CurrentRelativeHumidity'
+        );}.bind(this))
+    }
+    if ('get_TargetRelativeHumidity' in config) {
+      this.service.getCharacteristic(Characteristic.TargetRelativeHumidity)
+      .on('get', function(callback) {this.getReal(callback,
+        config.db,
+        config.get_TargetRelativeHumidity,
+        'get TargetRelativeHumidity'
+        );}.bind(this))
+      .on('set', function(value, callback) {this.setReal(value, callback,
+        config.db,
+        config.set_TargetRelativeHumidity,
+        'set TargetRelativeHumidity'
+        );}.bind(this))
+        .setProps({
+          minValue: config.minHumidityValue || 0,
+          maxValue: config.maxHumidityValue || 100,
+          minStep: config.minHumidityStep || 1
+      });
+    }
 
     if ('get_StatusTampered' in config) {
       this.service.getCharacteristic(Characteristic.StatusTampered)
@@ -578,11 +639,11 @@ function GenericPLCAccessory(platform, config, accessoryNumber) {
   else if (config.accessory == 'PLC_ContactSensor'){
     this.service = new Service.ContactSensor(this.name);
     this.accessory.addService(this.service);
-    
+
     if ('invert' in config && config.invert) {
         this.modFunctionGet = this.invert_bit;
     }
-    
+
       this.service.getCharacteristic(Characteristic.ContactSensorState)
       .on('get', function(callback) {this.getBit(callback,
         config.db,
@@ -1025,6 +1086,18 @@ GenericPLCAccessory.prototype = {
         this.service.getCharacteristic(Characteristic.CurrentTemperature).updateValue(value);
         rv = true;
       }
+      if (this.config.get_StatusTampered == offset)
+      {
+        this.log.debug( "[" + this.name + "] Push StatusTampered:" + value);
+        this.service.getCharacteristic(Characteristic.StatusTampered).updateValue(value);
+        rv = true;
+      }
+      if (this.config.get_StatusLowBattery == offset)
+      {
+        this.log.debug( "[" + this.name + "] Push StatusLowBattery:" + value);
+        this.service.getCharacteristic(Characteristic.StatusLowBattery).updateValue(value);
+        rv = true;
+      }
     }
     // PUSH handling ///////////////////////////////////////////////
     // HumiditySensor
@@ -1034,6 +1107,18 @@ GenericPLCAccessory.prototype = {
       {
         this.log.debug( "[" + this.name + "] Push CurrentRelativeHumidity:" + value);
         this.service.getCharacteristic(Characteristic.CurrentRelativeHumidity).updateValue(value);
+        rv = true;
+      }
+      if (this.config.get_StatusTampered == offset)
+      {
+        this.log.debug( "[" + this.name + "] Push StatusTampered:" + value);
+        this.service.getCharacteristic(Characteristic.StatusTampered).updateValue(value);
+        rv = true;
+      }
+      if (this.config.get_StatusLowBattery == offset)
+      {
+        this.log.debug( "[" + this.name + "] Push StatusLowBattery:" + value);
+        this.service.getCharacteristic(Characteristic.StatusLowBattery).updateValue(value);
         rv = true;
       }
     }
@@ -1049,8 +1134,20 @@ GenericPLCAccessory.prototype = {
       }
       if (this.config.get_TargetTemperature == offset)
       {
-        this.log.debug( "[" + this.name + "] Push TargetTemperature :" + value);
+        this.log.debug( "[" + this.name + "] Push TargetTemperature:" + value);
         this.service.getCharacteristic(Characteristic.TargetTemperature).updateValue(value);
+        rv = true;
+      }
+      if (this.config.get_CurrentRelativeHumidity == offset)
+      {
+        this.log.debug( "[" + this.name + "] Push CurrentRelativeHumidity:" + value);
+        this.service.getCharacteristic(Characteristic.CurrentRelativeHumidity).updateValue(value);
+        rv = true;
+      }
+      if (this.config.get_TargetRelativeHumidity == offset)
+      {
+        this.log.debug( "[" + this.name + "] Push TargetRelativeHumidity:" + value);
+        this.service.getCharacteristic(Characteristic.TargetRelativeHumidity).updateValue(value);
         rv = true;
       }
       if (this.config.get_StatusTampered == offset)
@@ -1064,7 +1161,7 @@ GenericPLCAccessory.prototype = {
         this.log.debug( "[" + this.name + "] Push StatusLowBattery:" + value);
         this.service.getCharacteristic(Characteristic.StatusLowBattery).updateValue(value);
         rv = true;
-      }      
+      }
     }
     // PUSH handling ///////////////////////////////////////////////
     // Window, WindowCovering and Door
@@ -1300,6 +1397,12 @@ GenericPLCAccessory.prototype = {
         this.service.getCharacteristic(Characteristic.TargetTemperature).setValue(value);
         rv = true;
       }
+      if (this.config.set_TargetRelativeHumidity == offset)
+      {
+        this.log.debug( "[" + this.name + "] Control TargetRelativeHumidity:" + value);
+        this.service.getCharacteristic(Characteristic.TargetRelativeHumidity).setValue(value);
+        rv = true;
+      }
     }
     // CONTROL handling ////////////////////////////////////////////
     // Window, WindowCovering and Door
@@ -1384,7 +1487,7 @@ GenericPLCAccessory.prototype = {
     ////////////////////////////////////////////////////////////////
     else if (this.config.accessory == 'PLC_LockMechanism'){
       if (this.config.set_LockTargetState == offset || this.config.set_Secured == offset)
-      { 
+      {
         this.log.debug( "[" + this.name + "] Control LockTargetState:" + value);
         this.service.getCharacteristic(Characteristic.LockTargetState).setValue(value);
         rv = true;
@@ -1395,13 +1498,13 @@ GenericPLCAccessory.prototype = {
     ////////////////////////////////////////////////////////////////
     else if (this.config.accessory == 'PLC_LockMechanismBool'){
       if (this.config.set_LockTargetState == offset || this.config.set_Secured == offset)
-      { 
+      {
         var valuePLC = this.invert_bit(parseInt(value));
         this.log.debug( "[" + this.name + "] Control LockTargetState:" + String(value) + "->" + String(valuePLC));
         this.service.getCharacteristic(Characteristic.LockTargetState).setValue(valuePLC);
         rv = true;
       }
-    }    
+    }
     // CONTROL handling ////////////////////////////////////////////
     // GarageDoorOpener
     ////////////////////////////////////////////////////////////////
@@ -1450,6 +1553,16 @@ GenericPLCAccessory.prototype = {
           this.service.getCharacteristic(Characteristic.CurrentTemperature).updateValue(value);
         }
       }.bind(this));
+      this.service.getCharacteristic(Characteristic.StatusTampered).getValue(function(err, value) {
+        if (!err) {
+          this.service.getCharacteristic(Characteristic.StatusTampered).updateValue(value);
+        }
+      }.bind(this));
+      this.service.getCharacteristic(Characteristic.StatusLowBattery).getValue(function(err, value) {
+        if (!err) {
+          this.service.getCharacteristic(Characteristic.StatusLowBattery).updateValue(value);
+        }
+      }.bind(this));
     }
     // POLL handling ///////////////////////////////////////////////
     // HumiditySensor
@@ -1459,6 +1572,16 @@ GenericPLCAccessory.prototype = {
       this.service.getCharacteristic(Characteristic.CurrentRelativeHumidity).getValue(function(err, value) {
         if (!err) {
           this.service.getCharacteristic(Characteristic.CurrentRelativeHumidity).updateValue(value);
+        }
+      }.bind(this));
+      this.service.getCharacteristic(Characteristic.StatusTampered).getValue(function(err, value) {
+        if (!err) {
+          this.service.getCharacteristic(Characteristic.StatusTampered).updateValue(value);
+        }
+      }.bind(this));
+      this.service.getCharacteristic(Characteristic.StatusLowBattery).getValue(function(err, value) {
+        if (!err) {
+          this.service.getCharacteristic(Characteristic.StatusLowBattery).updateValue(value);
         }
       }.bind(this));
     }
@@ -1475,6 +1598,16 @@ GenericPLCAccessory.prototype = {
       this.service.getCharacteristic(Characteristic.TargetTemperature).getValue(function(err, value) {
         if (!err) {
           this.service.getCharacteristic(Characteristic.TargetTemperature).updateValue(value);
+        }
+      }.bind(this));
+      this.service.getCharacteristic(Characteristic.CurrentRelativeHumidity).getValue(function(err, value) {
+        if (!err) {
+          this.service.getCharacteristic(Characteristic.CurrentRelativeHumidity).updateValue(value);
+        }
+      }.bind(this));
+      this.service.getCharacteristic(Characteristic.TargetRelativeHumidity).getValue(function(err, value) {
+        if (!err) {
+          this.service.getCharacteristic(Characteristic.TargetRelativeHumidity).updateValue(value);
         }
       }.bind(this));
       this.service.getCharacteristic(Characteristic.CurrentHeatingCoolingState).getValue(function(err, value) {

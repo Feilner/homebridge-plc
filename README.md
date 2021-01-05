@@ -141,6 +141,12 @@ normal temperature sensor
 	- `minValue` default value: -50
 	- `maxValue` default value: 50
 	- `minStep` default value: 0.5
+- `get_StatusTampered`: **(optional)** **(push support)** offset and bit to tamper detection. (Home app shows this only within the options) S7 type `Bool` e.g. `55.2` for `DB4DBX55.2` **Note:** Homebridge 1.2.5 generates a warning when using this.
+	- `false`: ok
+	- `true`: tampered
+- `get_StatusLowBattery`: **(optional)** **(push support)** offset and bit to battery low detection. (Home app does not inform with push notification) S7 type `Bool` e.g. `55.3` for `DB4DBX55.3` **Note:** Homebridge 1.2.5 generates a warning when using this.
+	- `false`: ok
+	- `true`: battery low
 
 ### <a name='PLC_HumiditySensor'></a>Humidity Sensor as `PLC_HumiditySensor`:
 normal humidity sensor
@@ -156,7 +162,12 @@ normal humidity sensor
 	- `minValue` default value: 0
 	- `maxValue` default value: 100
 	- `minStep` default value: 1
-
+- `get_StatusTampered`: **(optional)** **(push support)** offset and bit to tamper detection. (Home app shows this only within the options) S7 type `Bool` e.g. `55.2` for `DB4DBX55.2` **Note:** Homebridge 1.2.5 generates a warning when using this.
+	- `false`: ok
+	- `true`: tampered
+- `get_StatusLowBattery`: **(optional)** **(push support)** offset and bit to battery low detection. (Home app does not inform with push notification) S7 type `Bool` e.g. `55.3` for `DB4DBX55.3` **Note:** Homebridge 1.2.5 generates a warning when using this.
+	- `false`: ok
+	- `true`: battery low
 
 ### <a name='PLC_Thermostat'></a>Thermostat as `PLC_Thermostat`
 temperature sensor and temperature regulation
@@ -172,10 +183,20 @@ temperature sensor and temperature regulation
 - `get_CurrentTemperature`: **(push support)** offset to get current temperature S7 type `Real` e.g. `0` for `DB4DBD0`
 - `get_TargetTemperature`: **(push support)** offset to get target temperature S7 type `Real` e.g. `4` for `DB4DBD4`
 - `set_TargetTemperature`: **(control support)** offset to set current temperature S7 type `Real` e.g. `4` for `DB4DBD4` (can have same value as get_TargetTemperature)
+
 - target temperature range definitions **(optional)**
 	- `minValue` default value: 15
 	- `maxValue` default value: 27
-	- `minStep` default value: 1
+	- `minStep` default value: 0.5 **Note:** lower values seems not be supported by Homekit
+- Humidity measurement
+	- `get_CurrentRelativeHumidity`: **(optional)** **(push support)** offset to get current temperature S7 type `Real` e.g. `0` for `DB4DBD0`
+- Humidity control
+	- `get_TargetRelativeHumidity`: **(optional)** **(push support)** offset to get target temperature S7 type `Real` e.g. `4` for `DB4DBD4`
+	- `set_TargetRelativeHumidity`: **(optional)** **(control support)** offset to set current temperature S7 type `Real` e.g. `4` for `DB4DBD4` (can have same value as get_TargetTemperature)
+	- target relative humidity range definitions **(optional)**
+		- `minHumidityValue` default value: 0
+		- `maxHumidityValue` default value: 100
+		- `minHumidityStep` default value: 1
 - `get_CurrentHeatingCoolingState`: **(optional)** current heating/cooling state when not present fixed `1` is used S7 type `Byte` e.g. `8` for `DB4DBB58`
 	- `0`: inactive
 	- `1`: idle
@@ -811,7 +832,7 @@ The value is assigned to the matching ('db' and 'offset') set_* accessory config
 
 For accessories with separate on/off configurations e.g. `PLC_LightBulb` `set_On`/`set_Off` the `set_On` or `PLC_LockMechanismBool` `set_Secured`/`set_Unsecured` the `set_Secured` has to be used. With `1` for on and `0` for off.
 
-All information is transmitted within the URL and in decimal. 
+All information is transmitted within the URL and in decimal.
 
 **NOTE: Options like `invert`, `mapGet` and `mapSet` are not affecting the control interface. In example for PLC_Window is the value `0`: **closed** and `100`: **open** regardless if `invert` is set or not.
 
