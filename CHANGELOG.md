@@ -1,4 +1,16 @@
 # Changelog
+## [1.0.24] - 2021-01-05
+
+### Added
+- add option `invert` for `PLC_LockMechanismBool`
+- add option `mapGet` and `mapSet` for `PLC_LockMechanism`
+- add option `get_CurrentRelativeHumidity` , `set_TargetRelativeHumidity` and `get_TargetRelativeHumidity` for `PLC_Thermostat`
+- add option `get_StatusTampered` and `get_StatusLowBattery` for `PLC_Thermostat`
+- add option `get_StatusTampered` and `get_StatusLowBattery` for `PLC_TemperatureSensor`
+- add option `get_StatusTampered` and `get_StatusLowBattery` for `PLC_HumiditySensor`
+- add option `get_StatusTampered` and `get_StatusLowBattery` for `PLC_OccupancySensor`
+- add option `get_StatusTampered` and `get_StatusLowBattery` for `PLC_MotionSensor`
+- add option `get_StatusTampered` and `get_StatusLowBattery` for `PLC_ContactSensor`
 
 ## [1.0.23] - 2021-01-02
 

@@ -195,6 +195,8 @@ function GenericPLCAccessory(platform, config, accessoryNumber) {
   var uuid = UUIDGen.generate(config.name + config.accessory);
   this.config = config;
   this.accessory = new PlatformAccessory(this.name, uuid);
+  this.modFunctionGet = this.plain;
+  this.modFunctionSet = this.plain;
 
   if ('enablePolling' in platform.config && platform.config.enablePolling && config.enablePolling) {
       this.pollActive = true;
@@ -296,6 +298,23 @@ function GenericPLCAccessory(platform, config, accessoryNumber) {
       maxValue: config.maxValue || 50,
       minStep: config.minStep || 0.5
     });
+    if ('get_StatusTampered' in config) {
+      this.service.getCharacteristic(Characteristic.StatusTampered)
+      .on('get', function(callback) {this.getBit(callback,
+        config.db,
+        Math.floor(config.get_StatusTampered), Math.floor((config.get_StatusTampered*10)%10),
+        'get StatusTampered'
+      );}.bind(this));
+    }
+
+    if ('get_StatusLowBattery' in config) {
+      this.service.getCharacteristic(Characteristic.StatusLowBattery)
+      .on('get', function(callback) {this.getBit(callback,
+        config.db,
+        Math.floor(config.get_StatusLowBattery), Math.floor((config.get_StatusLowBattery*10)%10),
+        'get StatusLowBattery'
+      );}.bind(this));
+    }
   }
 
   // INIT handling ///////////////////////////////////////////////
@@ -316,6 +335,23 @@ function GenericPLCAccessory(platform, config, accessoryNumber) {
       maxValue: config.maxValue || 100,
       minStep: config.minStep || 1
     });
+    if ('get_StatusTampered' in config) {
+      this.service.getCharacteristic(Characteristic.StatusTampered)
+      .on('get', function(callback) {this.getBit(callback,
+        config.db,
+        Math.floor(config.get_StatusTampered), Math.floor((config.get_StatusTampered*10)%10),
+        'get StatusTampered'
+      );}.bind(this));
+    }
+
+    if ('get_StatusLowBattery' in config) {
+      this.service.getCharacteristic(Characteristic.StatusLowBattery)
+      .on('get', function(callback) {this.getBit(callback,
+        config.db,
+        Math.floor(config.get_StatusLowBattery), Math.floor((config.get_StatusLowBattery*10)%10),
+        'get StatusLowBattery'
+      );}.bind(this));
+    }
   }
 
   // INIT handling ///////////////////////////////////////////////
@@ -362,29 +398,75 @@ function GenericPLCAccessory(platform, config, accessoryNumber) {
       'set TemperatureDisplayUnits'
       );}.bind(this));
 
-      this.service.getCharacteristic(Characteristic.CurrentTemperature)
-      .on('get', function(callback) {this.getReal(callback,
-        config.db,
-        config.get_CurrentTemperature,
-        'get CurrentTemperature'
-        );}.bind(this));
+    this.service.getCharacteristic(Characteristic.CurrentTemperature)
+    .on('get', function(callback) {this.getReal(callback,
+      config.db,
+      config.get_CurrentTemperature,
+      'get CurrentTemperature'
+      );}.bind(this));
 
-      this.service.getCharacteristic(Characteristic.TargetTemperature)
+    this.service.getCharacteristic(Characteristic.TargetTemperature)
+    .on('get', function(callback) {this.getReal(callback,
+      config.db,
+      config.get_TargetTemperature,
+      'get TargetTemperature'
+      );}.bind(this))
+    .on('set', function(value, callback) {this.setReal(value, callback,
+      config.db,
+      config.set_TargetTemperature,
+      'set TargetTemperature'
+      );}.bind(this))
+      .setProps({
+        minValue: config.minValue || 15,
+        maxValue: config.maxValue || 27,
+        minStep: config.minStep || 0.5
+    });
+
+    if ('get_CurrentRelativeHumidity' in config) {
+      this.service.getCharacteristic(Characteristic.CurrentRelativeHumidity)
       .on('get', function(callback) {this.getReal(callback,
         config.db,
-        config.get_TargetTemperature,
-        'get TargetTemperature'
+        config.get_CurrentRelativeHumidity,
+        'get CurrentRelativeHumidity'
+        );}.bind(this))
+    }
+    if ('get_TargetRelativeHumidity' in config) {
+      this.service.getCharacteristic(Characteristic.TargetRelativeHumidity)
+      .on('get', function(callback) {this.getReal(callback,
+        config.db,
+        config.get_TargetRelativeHumidity,
+        'get TargetRelativeHumidity'
         );}.bind(this))
       .on('set', function(value, callback) {this.setReal(value, callback,
         config.db,
-        config.set_TargetTemperature,
-        'set TargetTemperature'
+        config.set_TargetRelativeHumidity,
+        'set TargetRelativeHumidity'
         );}.bind(this))
         .setProps({
-          minValue: config.minValue || 15,
-          maxValue: config.maxValue || 27,
-          minStep: config.minStep || 0.5
+          minValue: config.minHumidityValue || 0,
+          maxValue: config.maxHumidityValue || 100,
+          minStep: config.minHumidityStep || 1
       });
+    }
+
+    if ('get_StatusTampered' in config) {
+      this.service.getCharacteristic(Characteristic.StatusTampered)
+      .on('get', function(callback) {this.getBit(callback,
+        config.db,
+        Math.floor(config.get_StatusTampered), Math.floor((config.get_StatusTampered*10)%10),
+        'get StatusTampered'
+      );}.bind(this));
+    }
+
+    if ('get_StatusLowBattery' in config) {
+      this.service.getCharacteristic(Characteristic.StatusLowBattery)
+      .on('get', function(callback) {this.getBit(callback,
+        config.db,
+        Math.floor(config.get_StatusLowBattery), Math.floor((config.get_StatusLowBattery*10)%10),
+        'get StatusLowBattery'
+      );}.bind(this));
+    }
+
   }
 
   // INIT handling ///////////////////////////////////////////////
@@ -425,8 +507,6 @@ function GenericPLCAccessory(platform, config, accessoryNumber) {
         }
     }
 
-    this.modFunctionGet = this.plain;
-    this.modFunctionSet = this.plain;
     if ('invert' in config && config.invert) {
       this.modFunctionGet = this.invert_0_100;
       this.modFunctionSet = this.invert_0_100;
@@ -522,7 +602,6 @@ function GenericPLCAccessory(platform, config, accessoryNumber) {
     this.service = new Service.OccupancySensor(this.name);
     this.accessory.addService(this.service);
 
-    this.modFunctionGet = this.plain
     if ('invert' in config && config.invert) {
         this.modFunctionGet = this.invert_bit;
     }
@@ -534,6 +613,24 @@ function GenericPLCAccessory(platform, config, accessoryNumber) {
         "get OccupancyDetected",
         this.modFunctionGet
       );}.bind(this));
+
+      if ('get_StatusTampered' in config) {
+        this.service.getCharacteristic(Characteristic.StatusTampered)
+        .on('get', function(callback) {this.getBit(callback,
+          config.db,
+          Math.floor(config.get_StatusTampered), Math.floor((config.get_StatusTampered*10)%10),
+          'get StatusTampered'
+        );}.bind(this));
+      }
+
+      if ('get_StatusLowBattery' in config) {
+        this.service.getCharacteristic(Characteristic.StatusLowBattery)
+        .on('get', function(callback) {this.getBit(callback,
+          config.db,
+          Math.floor(config.get_StatusLowBattery), Math.floor((config.get_StatusLowBattery*10)%10),
+          'get StatusLowBattery'
+        );}.bind(this));
+      }
   }
   // INIT handling ///////////////////////////////////////////////
   // MotionSensor
@@ -542,7 +639,6 @@ function GenericPLCAccessory(platform, config, accessoryNumber) {
     this.service = new Service.MotionSensor(this.name);
     this.accessory.addService(this.service);
 
-    this.modFunctionGet = this.plain;
     if ('invert' in config && config.invert) {
         this.modFunctionGet = this.invert_bit;
     }
@@ -554,6 +650,24 @@ function GenericPLCAccessory(platform, config, accessoryNumber) {
         "get MotionDetected",
         this.modFunctionGet
       );}.bind(this));
+
+      if ('get_StatusTampered' in config) {
+        this.service.getCharacteristic(Characteristic.StatusTampered)
+        .on('get', function(callback) {this.getBit(callback,
+          config.db,
+          Math.floor(config.get_StatusTampered), Math.floor((config.get_StatusTampered*10)%10),
+          'get StatusTampered'
+        );}.bind(this));
+      }
+
+      if ('get_StatusLowBattery' in config) {
+        this.service.getCharacteristic(Characteristic.StatusLowBattery)
+        .on('get', function(callback) {this.getBit(callback,
+          config.db,
+          Math.floor(config.get_StatusLowBattery), Math.floor((config.get_StatusLowBattery*10)%10),
+          'get StatusLowBattery'
+        );}.bind(this));
+      }
   }
   // INIT handling ///////////////////////////////////////////////
   // ContactSensor
@@ -561,12 +675,11 @@ function GenericPLCAccessory(platform, config, accessoryNumber) {
   else if (config.accessory == 'PLC_ContactSensor'){
     this.service = new Service.ContactSensor(this.name);
     this.accessory.addService(this.service);
-    
-    this.modFunctionGet = this.plain;
+
     if ('invert' in config && config.invert) {
         this.modFunctionGet = this.invert_bit;
     }
-    
+
       this.service.getCharacteristic(Characteristic.ContactSensorState)
       .on('get', function(callback) {this.getBit(callback,
         config.db,
@@ -574,6 +687,24 @@ function GenericPLCAccessory(platform, config, accessoryNumber) {
         "get get_ContactSensorState",
         this.modFunctionGet
       );}.bind(this));
+
+      if ('get_StatusTampered' in config) {
+        this.service.getCharacteristic(Characteristic.StatusTampered)
+        .on('get', function(callback) {this.getBit(callback,
+          config.db,
+          Math.floor(config.get_StatusTampered), Math.floor((config.get_StatusTampered*10)%10),
+          'get StatusTampered'
+        );}.bind(this));
+      }
+
+      if ('get_StatusLowBattery' in config) {
+        this.service.getCharacteristic(Characteristic.StatusLowBattery)
+        .on('get', function(callback) {this.getBit(callback,
+          config.db,
+          Math.floor(config.get_StatusLowBattery), Math.floor((config.get_StatusLowBattery*10)%10),
+          'get StatusLowBattery'
+        );}.bind(this));
+      }
   }
   // INIT handling ///////////////////////////////////////////////
   // Faucet
@@ -707,15 +838,12 @@ function GenericPLCAccessory(platform, config, accessoryNumber) {
       }.bind(this));
      }.bind(this);
 
-    this.modFunctionGet = this.plain;
-    this.modFunctionSet = this.plain;
-
     if ('mapSet' in config && config.mapSet) {
-      modFunctionSet = function(value){return this.mapFunction(value, config.mapSet);}.bind(this);
+      this.modFunctionSet = function(value){return this.mapFunction(value, config.mapSet);}.bind(this);
     }
 
     if ('mapGet' in config && config.mapGet) {
-      modFunctionGet = function(value){return this.mapFunction(value, config.mapGet);}.bind(this);
+      this.modFunctionGet = function(value){return this.mapFunction(value, config.mapGet);}.bind(this);
     }
 
     this.service.getCharacteristic(Characteristic.SecuritySystemCurrentState)
@@ -723,7 +851,7 @@ function GenericPLCAccessory(platform, config, accessoryNumber) {
         config.db,
         config.get_SecuritySystemCurrentState,
         "get SecuritySystemCurrentState",
-        modFunctionGet
+        this.modFunctionGet
       );}.bind(this));
 
       this.service.getCharacteristic(Characteristic.SecuritySystemTargetState)
@@ -731,14 +859,14 @@ function GenericPLCAccessory(platform, config, accessoryNumber) {
         config.db,
         config.get_SecuritySystemTargetState,
         "get SecuritySystemTargetState",
-        modFunctionGet
+        this.modFunctionGet
       );}.bind(this))
       .on('set', function(value, callback) {this.setByte(value, callback,
         config.db,
         config.set_SecuritySystemTargetState,
         "set SecuritySystemTargetState",
         informFunction,
-        modFunctionSet
+        this.modFunctionSet
       );}.bind(this));
   }
   // INIT handling ///////////////////////////////////////////////
@@ -780,8 +908,13 @@ function GenericPLCAccessory(platform, config, accessoryNumber) {
       informFunction = function(value){this.service.getCharacteristic(Characteristic.LockCurrentState).updateValue(value);}.bind(this);
     }
 
-    this.modFunctionGet = this.plain;
-    this.modFunctionSet = this.plain;
+    if ('mapSet' in config && config.mapSet) {
+      this.modFunctionSet = function(value){return this.mapFunction(value, config.mapSet);}.bind(this);
+    }
+
+    if ('mapGet' in config && config.mapGet) {
+      this.modFunctionGet = function(value){return this.mapFunction(value, config.mapGet);}.bind(this);
+    }
 
     this.service.getCharacteristic(Characteristic.LockCurrentState)
       .on('get', function(callback) {this.getByte(callback,
@@ -817,8 +950,11 @@ function GenericPLCAccessory(platform, config, accessoryNumber) {
       informFunction = function(value){this.service.getCharacteristic(Characteristic.LockCurrentState).updateValue(value);}.bind(this);
     }
 
-    this.modFunctionGet = function(value){return (value ? 0 : 1);}.bind(this);
-    this.modFunctionSet = function(value){return (value ? 0 : 1);}.bind(this);
+    // note the invert is inverted! To invert is normal behaviour.
+    if (!('invert' in config && config.invert)) {
+      this.modFunctionGet = this.invert_bit;
+      this.modFunctionSet = this.invert_bit;
+    }
 
     this.service.getCharacteristic(Characteristic.LockCurrentState)
       .on('get', function(callback) {this.getBit(callback,
@@ -1004,6 +1140,18 @@ GenericPLCAccessory.prototype = {
         this.service.getCharacteristic(Characteristic.CurrentTemperature).updateValue(value);
         rv = true;
       }
+      if (this.config.get_StatusTampered == offset)
+      {
+        this.log.debug( "[" + this.name + "] Push StatusTampered:" + value);
+        this.service.getCharacteristic(Characteristic.StatusTampered).updateValue(value);
+        rv = true;
+      }
+      if (this.config.get_StatusLowBattery == offset)
+      {
+        this.log.debug( "[" + this.name + "] Push StatusLowBattery:" + value);
+        this.service.getCharacteristic(Characteristic.StatusLowBattery).updateValue(value);
+        rv = true;
+      }
     }
     // PUSH handling ///////////////////////////////////////////////
     // HumiditySensor
@@ -1013,6 +1161,18 @@ GenericPLCAccessory.prototype = {
       {
         this.log.debug( "[" + this.name + "] Push CurrentRelativeHumidity:" + value);
         this.service.getCharacteristic(Characteristic.CurrentRelativeHumidity).updateValue(value);
+        rv = true;
+      }
+      if (this.config.get_StatusTampered == offset)
+      {
+        this.log.debug( "[" + this.name + "] Push StatusTampered:" + value);
+        this.service.getCharacteristic(Characteristic.StatusTampered).updateValue(value);
+        rv = true;
+      }
+      if (this.config.get_StatusLowBattery == offset)
+      {
+        this.log.debug( "[" + this.name + "] Push StatusLowBattery:" + value);
+        this.service.getCharacteristic(Characteristic.StatusLowBattery).updateValue(value);
         rv = true;
       }
     }
@@ -1028,8 +1188,32 @@ GenericPLCAccessory.prototype = {
       }
       if (this.config.get_TargetTemperature == offset)
       {
-        this.log.debug( "[" + this.name + "] Push TargetTemperature :" + value);
+        this.log.debug( "[" + this.name + "] Push TargetTemperature:" + value);
         this.service.getCharacteristic(Characteristic.TargetTemperature).updateValue(value);
+        rv = true;
+      }
+      if (this.config.get_CurrentRelativeHumidity == offset)
+      {
+        this.log.debug( "[" + this.name + "] Push CurrentRelativeHumidity:" + value);
+        this.service.getCharacteristic(Characteristic.CurrentRelativeHumidity).updateValue(value);
+        rv = true;
+      }
+      if (this.config.get_TargetRelativeHumidity == offset)
+      {
+        this.log.debug( "[" + this.name + "] Push TargetRelativeHumidity:" + value);
+        this.service.getCharacteristic(Characteristic.TargetRelativeHumidity).updateValue(value);
+        rv = true;
+      }
+      if (this.config.get_StatusTampered == offset)
+      {
+        this.log.debug( "[" + this.name + "] Push StatusTampered:" + value);
+        this.service.getCharacteristic(Characteristic.StatusTampered).updateValue(value);
+        rv = true;
+      }
+      if (this.config.get_StatusLowBattery == offset)
+      {
+        this.log.debug( "[" + this.name + "] Push StatusLowBattery:" + value);
+        this.service.getCharacteristic(Characteristic.StatusLowBattery).updateValue(value);
         rv = true;
       }
     }
@@ -1071,6 +1255,18 @@ GenericPLCAccessory.prototype = {
         this.service.getCharacteristic(Characteristic.OccupancyDetected).updateValue(this.modFunctionGet(parseInt(value)));
         rv = true;
       }
+      if (this.config.get_StatusTampered == offset)
+      {
+        this.log.debug( "[" + this.name + "] Push StatusTampered:" + value);
+        this.service.getCharacteristic(Characteristic.StatusTampered).updateValue(value);
+        rv = true;
+      }
+      if (this.config.get_StatusLowBattery == offset)
+      {
+        this.log.debug( "[" + this.name + "] Push StatusLowBattery:" + value);
+        this.service.getCharacteristic(Characteristic.StatusLowBattery).updateValue(value);
+        rv = true;
+      }
     }
     // PUSH handling ///////////////////////////////////////////////
     // MotionSensor
@@ -1082,6 +1278,18 @@ GenericPLCAccessory.prototype = {
         this.service.getCharacteristic(Characteristic.MotionDetected).updateValue(this.modFunctionGet(parseInt(value)));
         rv = true;
       }
+      if (this.config.get_StatusTampered == offset)
+      {
+        this.log.debug( "[" + this.name + "] Push StatusTampered:" + value);
+        this.service.getCharacteristic(Characteristic.StatusTampered).updateValue(value);
+        rv = true;
+      }
+      if (this.config.get_StatusLowBattery == offset)
+      {
+        this.log.debug( "[" + this.name + "] Push StatusLowBattery:" + value);
+        this.service.getCharacteristic(Characteristic.StatusLowBattery).updateValue(value);
+        rv = true;
+      }
     }
     // PUSH handling ///////////////////////////////////////////////
     // ContactSensor
@@ -1091,6 +1299,18 @@ GenericPLCAccessory.prototype = {
       {
         this.log.debug( "[" + this.name + "] Push ContactSensorState:" + String(this.modFunctionGet(parseInt(value))) + "<-" + String(value));
         this.service.getCharacteristic(Characteristic.ContactSensorState).updateValue(this.modFunctionGet(parseInt(value)));
+        rv = true;
+      }
+      if (this.config.get_StatusTampered == offset)
+      {
+        this.log.debug( "[" + this.name + "] Push StatusTampered:" + value);
+        this.service.getCharacteristic(Characteristic.StatusTampered).updateValue(value);
+        rv = true;
+      }
+      if (this.config.get_StatusLowBattery == offset)
+      {
+        this.log.debug( "[" + this.name + "] Push StatusLowBattery:" + value);
+        this.service.getCharacteristic(Characteristic.StatusLowBattery).updateValue(value);
         rv = true;
       }
     }
@@ -1208,7 +1428,7 @@ GenericPLCAccessory.prototype = {
       }
       if (this.config.get_StatusTampered == offset)
       {
-        this.log.debug( "[" + this.name + "] Push SmokeDetected:" + value);
+        this.log.debug( "[" + this.name + "] Push StatusTampered:" + value);
         this.service.getCharacteristic(Characteristic.StatusTampered).updateValue(value);
         rv = true;
       }
@@ -1265,6 +1485,12 @@ GenericPLCAccessory.prototype = {
       {
         this.log.debug( "[" + this.name + "] Control TargetTemperature:" + value);
         this.service.getCharacteristic(Characteristic.TargetTemperature).setValue(value);
+        rv = true;
+      }
+      if (this.config.set_TargetRelativeHumidity == offset)
+      {
+        this.log.debug( "[" + this.name + "] Control TargetRelativeHumidity:" + value);
+        this.service.getCharacteristic(Characteristic.TargetRelativeHumidity).setValue(value);
         rv = true;
       }
     }
@@ -1339,19 +1565,33 @@ GenericPLCAccessory.prototype = {
     else if (this.config.accessory == 'PLC_StatelessProgrammableSwitch' || this.config.accessory == 'PLC_Doorbell'){
       if (this.config.get_ProgrammableSwitchEvent == offset)
       {
+        // Note: In contrast to all others accessories the control does not set the value in the PLC instead it simulates a key event.
+        //       Therefore updateValue is
         this.log.debug( "[" + this.name + "] Control ProgrammableSwitchEvent:" + value);
         this.service.getCharacteristic(Characteristic.ProgrammableSwitchEvent).updateValue(value);
         rv = true;
       }
     }
     // CONTROL handling ////////////////////////////////////////////
-    // LockMechanism, LockMechanismBool
+    // LockMechanism
     ////////////////////////////////////////////////////////////////
-    else if (this.config.accessory == 'PLC_LockMechanism' || this.config.accessory == 'PLC_LockMechanismBool'){
+    else if (this.config.accessory == 'PLC_LockMechanism'){
       if (this.config.set_LockTargetState == offset || this.config.set_Secured == offset)
       {
-        this.log.debug( "[" + this.name + "] Control LockTargetState:" + String(value) + "->" + String(this.modFunctionSet(parseInt(value))));
-        this.service.getCharacteristic(Characteristic.LockTargetState).setValue(this.modFunctionSet(parseInt(value)));
+        this.log.debug( "[" + this.name + "] Control LockTargetState:" + value);
+        this.service.getCharacteristic(Characteristic.LockTargetState).setValue(value);
+        rv = true;
+      }
+    }
+    // CONTROL handling ////////////////////////////////////////////
+    // LockMechanismBool
+    ////////////////////////////////////////////////////////////////
+    else if (this.config.accessory == 'PLC_LockMechanismBool'){
+      if (this.config.set_LockTargetState == offset || this.config.set_Secured == offset)
+      {
+        var valuePLC = this.invert_bit(parseInt(value));
+        this.log.debug( "[" + this.name + "] Control LockTargetState:" + String(value) + "->" + String(valuePLC));
+        this.service.getCharacteristic(Characteristic.LockTargetState).setValue(valuePLC);
         rv = true;
       }
     }
@@ -1403,6 +1643,16 @@ GenericPLCAccessory.prototype = {
           this.service.getCharacteristic(Characteristic.CurrentTemperature).updateValue(value);
         }
       }.bind(this));
+      this.service.getCharacteristic(Characteristic.StatusTampered).getValue(function(err, value) {
+        if (!err) {
+          this.service.getCharacteristic(Characteristic.StatusTampered).updateValue(value);
+        }
+      }.bind(this));
+      this.service.getCharacteristic(Characteristic.StatusLowBattery).getValue(function(err, value) {
+        if (!err) {
+          this.service.getCharacteristic(Characteristic.StatusLowBattery).updateValue(value);
+        }
+      }.bind(this));
     }
     // POLL handling ///////////////////////////////////////////////
     // HumiditySensor
@@ -1412,6 +1662,16 @@ GenericPLCAccessory.prototype = {
       this.service.getCharacteristic(Characteristic.CurrentRelativeHumidity).getValue(function(err, value) {
         if (!err) {
           this.service.getCharacteristic(Characteristic.CurrentRelativeHumidity).updateValue(value);
+        }
+      }.bind(this));
+      this.service.getCharacteristic(Characteristic.StatusTampered).getValue(function(err, value) {
+        if (!err) {
+          this.service.getCharacteristic(Characteristic.StatusTampered).updateValue(value);
+        }
+      }.bind(this));
+      this.service.getCharacteristic(Characteristic.StatusLowBattery).getValue(function(err, value) {
+        if (!err) {
+          this.service.getCharacteristic(Characteristic.StatusLowBattery).updateValue(value);
         }
       }.bind(this));
     }
@@ -1430,6 +1690,16 @@ GenericPLCAccessory.prototype = {
           this.service.getCharacteristic(Characteristic.TargetTemperature).updateValue(value);
         }
       }.bind(this));
+      this.service.getCharacteristic(Characteristic.CurrentRelativeHumidity).getValue(function(err, value) {
+        if (!err) {
+          this.service.getCharacteristic(Characteristic.CurrentRelativeHumidity).updateValue(value);
+        }
+      }.bind(this));
+      this.service.getCharacteristic(Characteristic.TargetRelativeHumidity).getValue(function(err, value) {
+        if (!err) {
+          this.service.getCharacteristic(Characteristic.TargetRelativeHumidity).updateValue(value);
+        }
+      }.bind(this));
       this.service.getCharacteristic(Characteristic.CurrentHeatingCoolingState).getValue(function(err, value) {
         if (!err) {
           this.service.getCharacteristic(Characteristic.CurrentHeatingCoolingState).updateValue(value);
@@ -1438,6 +1708,16 @@ GenericPLCAccessory.prototype = {
       this.service.getCharacteristic(Characteristic.TargetHeatingCoolingState).getValue(function(err, value) {
         if (!err) {
           this.service.getCharacteristic(Characteristic.TargetHeatingCoolingState).updateValue(value);
+        }
+      }.bind(this));
+      this.service.getCharacteristic(Characteristic.StatusTampered).getValue(function(err, value) {
+        if (!err) {
+          this.service.getCharacteristic(Characteristic.StatusTampered).updateValue(value);
+        }
+      }.bind(this));
+      this.service.getCharacteristic(Characteristic.StatusLowBattery).getValue(function(err, value) {
+        if (!err) {
+          this.service.getCharacteristic(Characteristic.StatusLowBattery).updateValue(value);
         }
       }.bind(this));
     }
@@ -1472,6 +1752,16 @@ GenericPLCAccessory.prototype = {
           this.service.getCharacteristic(Characteristic.OccupancyDetected).updateValue(value);
         }
       }.bind(this));
+      this.service.getCharacteristic(Characteristic.StatusTampered).getValue(function(err, value) {
+        if (!err) {
+          this.service.getCharacteristic(Characteristic.StatusTampered).updateValue(value);
+        }
+      }.bind(this));
+      this.service.getCharacteristic(Characteristic.StatusLowBattery).getValue(function(err, value) {
+        if (!err) {
+          this.service.getCharacteristic(Characteristic.StatusLowBattery).updateValue(value);
+        }
+      }.bind(this));
     }
     // POLL handling ///////////////////////////////////////////////
     // MotionSensor
@@ -1483,6 +1773,16 @@ GenericPLCAccessory.prototype = {
           this.service.getCharacteristic(Characteristic.MotionDetected).updateValue(value);
         }
       }.bind(this));
+      this.service.getCharacteristic(Characteristic.StatusTampered).getValue(function(err, value) {
+        if (!err) {
+          this.service.getCharacteristic(Characteristic.StatusTampered).updateValue(value);
+        }
+      }.bind(this));
+      this.service.getCharacteristic(Characteristic.StatusLowBattery).getValue(function(err, value) {
+        if (!err) {
+          this.service.getCharacteristic(Characteristic.StatusLowBattery).updateValue(value);
+        }
+      }.bind(this));
     }
     // POLL handling ///////////////////////////////////////////////
     // ContactSensor
@@ -1492,6 +1792,16 @@ GenericPLCAccessory.prototype = {
       this.service.getCharacteristic(Characteristic.ContactSensorState).getValue(function(err, value) {
         if (!err) {
           this.service.getCharacteristic(Characteristic.ContactSensorState).updateValue(value);
+        }
+      }.bind(this));
+      this.service.getCharacteristic(Characteristic.StatusTampered).getValue(function(err, value) {
+        if (!err) {
+          this.service.getCharacteristic(Characteristic.StatusTampered).updateValue(value);
+        }
+      }.bind(this));
+      this.service.getCharacteristic(Characteristic.StatusLowBattery).getValue(function(err, value) {
+        if (!err) {
+          this.service.getCharacteristic(Characteristic.StatusLowBattery).updateValue(value);
         }
       }.bind(this));
     }

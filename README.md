@@ -141,8 +141,14 @@ normal temperature sensor
 	- `minValue` default value: -50
 	- `maxValue` default value: 50
 	- `minStep` default value: 0.5
+- `get_StatusTampered`: **(optional)** **(push support)** offset and bit to tamper detection. (Home app shows this only within the options) S7 type `Bool` e.g. `55.2` for `DB4DBX55.2` **Note:** Homebridge 1.2.5 generates a warning when using this.
+	- `false`: ok
+	- `true`: tampered
+- `get_StatusLowBattery`: **(optional)** **(push support)** offset and bit to battery low detection. (Home app does not inform with push notification) S7 type `Bool` e.g. `55.3` for `DB4DBX55.3` **Note:** Homebridge 1.2.5 generates a warning when using this.
+	- `false`: ok
+	- `true`: battery low
 
-### <a name='PLC_HumiditySensor'></a>Humidity Sensor as `PLC_HumiditySensor`:
+### <a name='PLC_HumiditySensor'></a>Humidity Sensor as `PLC_HumiditySensor`
 normal humidity sensor
 
 ![homebridge pic](doc/humidity.png)
@@ -156,7 +162,12 @@ normal humidity sensor
 	- `minValue` default value: 0
 	- `maxValue` default value: 100
 	- `minStep` default value: 1
-
+- `get_StatusTampered`: **(optional)** **(push support)** offset and bit to tamper detection. (Home app shows this only within the options) S7 type `Bool` e.g. `55.2` for `DB4DBX55.2`
+	- `false`: ok
+	- `true`: tampered
+- `get_StatusLowBattery`: **(optional)** **(push support)** offset and bit to battery low detection. (Home app does not inform with push notification) S7 type `Bool` e.g. `55.3` for `DB4DBX55.3`
+	- `false`: ok
+	- `true`: battery low
 
 ### <a name='PLC_Thermostat'></a>Thermostat as `PLC_Thermostat`
 temperature sensor and temperature regulation
@@ -175,7 +186,16 @@ temperature sensor and temperature regulation
 - target temperature range definitions **(optional)**
 	- `minValue` default value: 15
 	- `maxValue` default value: 27
-	- `minStep` default value: 1
+	- `minStep` default value: 0.5 **Note:** lower values seems not be supported by Homekit
+- Humidity measurement
+	- `get_CurrentRelativeHumidity`: **(optional)** **(push support)** offset to get current temperature S7 type `Real` e.g. `0` for `DB4DBD0`
+- Humidity control
+	- `get_TargetRelativeHumidity`: **(optional)** **(push support)** offset to get target temperature S7 type `Real` e.g. `4` for `DB4DBD4`
+	- `set_TargetRelativeHumidity`: **(optional)** **(control support)** offset to set current temperature S7 type `Real` e.g. `4` for `DB4DBD4` (can have same value as get_TargetTemperature)
+	- target relative humidity range definitions **(optional)**
+		- `minHumidityValue` default value: 0
+		- `maxHumidityValue` default value: 100
+		- `minHumidityStep` default value: 1
 - `get_CurrentHeatingCoolingState`: **(optional)** current heating/cooling state when not present fixed `1` is used S7 type `Byte` e.g. `8` for `DB4DBB58`
 	- `0`: inactive
 	- `1`: idle
@@ -187,7 +207,12 @@ temperature sensor and temperature regulation
 	- `2`: cool
 	- `3`: automatic
 - `set_TargetHeatingCoolingState` not yet supported writes are ignored
-
+- `get_StatusTampered`: **(optional)** **(push support)** offset and bit to tamper detection. (Home app shows this only within the options) S7 type `Bool` e.g. `55.2` for `DB4DBX55.2`
+	- `false`: ok
+	- `true`: tampered
+- `get_StatusLowBattery`: **(optional)** **(push support)** offset and bit to battery low detection. (Home app does not inform with push notification) S7 type `Bool` e.g. `55.3` for `DB4DBX55.3`
+	- `false`: ok
+	- `true`: battery low
 
 ### <a name='PLC_Window'></a>Shutters as `PLC_WindowCovering`, windows as `PLC_Window` and doors as `PLC_Door`
 motor driven blinds, windows and doors. Supports also manual driven blinds, windows and doors to show just the current position in percent. **Note:** If your sensor shows only open/close may also have a look at [`PLC_ContactSensor`](#PLC_ContactSensor).
@@ -226,6 +251,12 @@ presence detection sensor
 - `get_OccupancyDetected`: **(push support)** offset and bit get the current status S7 type `Bool` e.g. `55.0` for `DB4DBX55.0`
 	- `false`: no occupancy
 	- `true`: occupancy detected
+- `get_StatusTampered`: **(optional)** **(push support)** offset and bit to tamper detection. (Home app shows this only within the options) S7 type `Bool` e.g. `55.2` for `DB4DBX55.2`
+	- `false`: ok
+	- `true`: tampered
+- `get_StatusLowBattery`: **(optional)** **(push support)** offset and bit to battery low detection. (Home app does not inform with push notification) S7 type `Bool` e.g. `55.3` for `DB4DBX55.3`
+	- `false`: ok
+	- `true`: battery low
 
 ### <a name='PLC_MotionSensor'></a>Motion Sensor as `PLC_MotionSensor`
 movement detection sensor
@@ -240,9 +271,15 @@ movement detection sensor
 - `get_MotionDetected`: **(push support)** offset and bit get the current status S7 type `Bool` e.g. `55.0` for `DB4DBX55.0`
 	- `false`: no motion
 	- `true`: motion detected
+- `get_StatusTampered`: **(optional)** **(push support)** offset and bit to tamper detection. (Home app shows this only within the options) S7 type `Bool` e.g. `55.2` for `DB4DBX55.2`
+	- `false`: ok
+	- `true`: tampered
+- `get_StatusLowBattery`: **(optional)** **(push support)** offset and bit to battery low detection. (Home app does not inform with push notification) S7 type `Bool` e.g. `55.3` for `DB4DBX55.3`
+	- `false`: ok
+	- `true`: battery low
 
 ### <a name='PLC_ContactSensor'></a>Contact Sensor as `PLC_ContactSensor`
-Generic contact sensor. The home app allows to display as window, door, blind/shutter, garage door or contact sensor.
+generic contact sensor. The home app allows to display as window, door, blind/shutter, garage door or contact sensor.
 
 ![homebridge pic](doc/contactsensor.png) ![homebridge pic](doc/blind.png) ![homebridge pic](doc/window.png) ![homebridge pic](doc/door.png) ![homebridge pic](doc/garagedoor.png)
 - `name`: unique name of the accessory
@@ -254,6 +291,12 @@ Generic contact sensor. The home app allows to display as window, door, blind/sh
 - `get_ContactSensorState`: **(push support)** offset and bit get the current status S7 type `Bool` e.g. `55.0` for `DB4DBX55.0`
 	- `false`: closed
 	- `true`: open
+- `get_StatusTampered`: **(optional)** **(push support)** offset and bit to tamper detection. (Home app shows this only within the options) S7 type `Bool` e.g. `55.2` for `DB4DBX55.2`
+	- `false`: ok
+	- `true`: tampered
+- `get_StatusLowBattery`: **(optional)** **(push support)** offset and bit to battery low detection. (Home app does not inform with push notification) S7 type `Bool` e.g. `55.3` for `DB4DBX55.3`
+	- `false`: ok
+	- `true`: battery low
 
 ### <a name='PLC_Faucet'></a>Faucet as `PLC_Faucet`
 watering for the garden
@@ -344,7 +387,7 @@ Trigger actions in home app only works with control center e.g. AppleTV or HomeP
 	- `2`: long press
 
 ### <a name='PLC_LockMechanism'></a>Lock mechanism as `PLC_LockMechanism`
-Lock mechanism (not yet clear how to use changes are welcome)
+lock mechanism
 
 ![homebridge pic](doc/lock.png)
 - `name`: unique name of the accessory
@@ -366,7 +409,8 @@ Lock mechanism (not yet clear how to use changes are welcome)
 	- `1`: secured
 
 ### <a name='PLC_LockMechanismBool'></a>Boolean lock mechanism as `PLC_LockMechanismBool`
-Lock mechanism implemented as bool on the PLC. **NOTE: The convention `0`=`false`: closed/secured `1`=`true`: open/unsecured**
+lock mechanism implemented as bool on the PLC
+**NOTE: The convention `0`=`false`: closed/secured `1`=`true`: open/unsecured**
 
 ![homebridge pic](doc/lockbool.png)
 - `name`: unique name of the accessory
@@ -374,7 +418,8 @@ Lock mechanism implemented as bool on the PLC. **NOTE: The convention `0`=`false
 - `db`: s7 data base number e.g. `4` for `DB4`
 - `enablePolling`: **(optional)** when set to `true` the current state will be polled. t is mandatory as well to enable polling mode on platform level.
 - `pollInterval` **(optional)** poll interval in seconds. Default value see platform definition.
-- `forceCurrentState`: **(optional)** when set to `true` the position set by `set_LockTargetState` is directly used as current state. By this it seems in the home app as the target state was directly reached. This is recommended when not using `enablePolling` or pushing the value from the plc.
+- `forceCurrentState`: **(optional)** when set to `true` the state set by `set_LockTargetState` is directly used as current state. By this it seems in the home app as the target state was directly reached. This is recommended when not using `enablePolling` or pushing the value from the plc.
+- `invert`: **(optional)** when set to `true` all states are inverted (current and target state) `false`: **unsecured** and `true`: **secured**.
 - `get_LockCurrentState`: **(push support)** offset to read current state current state S7 type `Bool` .g. `3.1` for `DB4DBB3`
 	- `false`: secured
 	- `true`: unsecured
@@ -391,7 +436,7 @@ Lock mechanism implemented as bool on the PLC. **NOTE: The convention `0`=`false
 
 
 ### <a name='PLC_GarageDoorOpener'></a>Garage door as `PLC_GarageDoorOpener`
-Garage door
+garage door
 
 ![homebridge pic](doc/garagedoor.png)
 - `name`: unique name of the accessory
@@ -415,7 +460,7 @@ Garage door
 	- `1`: closed
 
 ### <a name='PLC_SmokeSensor'></a>Smoke Sensor as `PLC_SmokeSensor`
-Fire alarm
+fire alarm
 
 - `name`: unique name of the accessory
 - `manufacturer`: **(optional)** description
@@ -801,12 +846,13 @@ To enable this you have to set `"enableControl": true,` platform level and optio
 **NOTE: It is currently not possible to query the current state**
 
 The interface that the PLC operates consists only of the keyword 'control', the database number 'db', the address within the db 'offset' and the value 'value'.
-The value is assigned to the matching ('db' and 'offset') set_* accessory configurations.
+The value is assigned to the matching ('db' and 'offset') set_* accessory configurations. All configurations that are supported  are marked with **(control support)** in the description.
 
 For accessories with separate on/off configurations e.g. `PLC_LightBulb` `set_On`/`set_Off` the `set_On` or `PLC_LockMechanismBool` `set_Secured`/`set_Unsecured` the `set_Secured` has to be used. With `1` for on and `0` for off.
 
 All information is transmitted within the URL and in decimal.
-Parameters that supports push are marked with **(control support)** in the description.
+
+**NOTE: Options like `invert`, `mapGet` and `mapSet` are not affecting the control interface. In example for PLC_Window is the value `0`: **closed** and `100`: **open** regardless if `invert` is set or not.
 
 The Request has to be done as HTTP `PUT` or `GET` operation. There will be no logging when doing a `PUT` operation while there will be detailed output when during a `GET` operation. This in especially intended for testing with the browser as the browser performs a `GET` operation per default.
 
