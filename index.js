@@ -361,6 +361,29 @@ function GenericPLCAccessory(platform, config, accessoryNumber) {
     this.service = new Service.Thermostat(this.name);
     this.accessory.addService(this.service);
 
+    informFunction = function(notUsed){
+      // update target state and current state value.
+      this.service.getCharacteristic(Characteristic.TargetHeatingCoolingState).getValue(function(err, value) {
+        if (!err) {
+          this.service.getCharacteristic(Characteristic.TargetHeatingCoolingState).updateValue(value);
+        }
+      }.bind(this));
+
+      this.service.getCharacteristic(Characteristic.CurrentHeatingCoolingState).getValue(function(err, value) {
+        if (!err) {
+          this.service.getCharacteristic(Characteristic.CurrentHeatingCoolingState).updateValue(value);
+        }
+      }.bind(this));
+     }.bind(this);
+
+    if ('mapSetTarget' in config && config.mapSet) {
+      this.modFunctionSet = function(value){return this.mapFunction(value, config.mapSetTarget);}.bind(this);
+    }
+
+    if ('mapGetTarget' in config && config.mapGet) {
+      this.modFunctionGet = function(value){return this.mapFunction(value, config.mapGetTarget);}.bind(this);
+    }
+
     if ('get_CurrentHeatingCoolingState' in config) {
       this.service.getCharacteristic(Characteristic.CurrentHeatingCoolingState)
       .on('get', function(callback) {this.getByte(callback,
@@ -378,16 +401,34 @@ function GenericPLCAccessory(platform, config, accessoryNumber) {
         );}.bind(this));
     }
 
-    this.service.getCharacteristic(Characteristic.TargetHeatingCoolingState)
-    .on('get', function(callback) {this.getDummy(callback,
-      3, // currently return fixed value off=0, heat=1, cool=2, automatic=3
-      'get TargetHeatingCoolingState'
-      );}.bind(this))
-    .on('set', function(value, callback) {this.setDummy(value, callback,
-      'set TargetHeatingCoolingState',
-      // stick to fixed value
-      function(value){ this.service.getCharacteristic(Characteristic.TargetHeatingCoolingState).updateValue(3); }.bind(this)
-      );}.bind(this));
+    if ('get_TargetHeatingCoolingState' in config) {
+      this.service.getCharacteristic(Characteristic.TargetHeatingCoolingState)
+      .on('get', function(callback) {this.getByte(callback,
+        config.db,
+        config.get_TargetHeatingCoolingState,
+        'get TargetHeatingCoolingState',
+        this.modFunctionGet
+        );}.bind(this))
+      .on('set', function(value, callback) {this.setByte(value, callback,
+        config.db,
+        config.set_TargetHeatingCoolingState,
+        'set TargetHeatingCoolingState',
+        informFunction,
+        this.modFunctionSet
+        );}.bind(this));
+    }
+    else {
+      this.service.getCharacteristic(Characteristic.TargetHeatingCoolingState)
+      .on('get', function(callback) {this.getDummy(callback,
+        3, // currently return fixed value off=0, heat=1, cool=2, automatic=3
+        'get TargetHeatingCoolingState'
+        );}.bind(this))
+      .on('set', function(value, callback) {this.setDummy(value, callback,
+        'set TargetHeatingCoolingState',
+        // ignore set and return current fixed values
+        informFunction
+        );}.bind(this));
+    }
 
     this.service.getCharacteristic(Characteristic.TemperatureDisplayUnits)
     .on('get', function(callback) {this.getDummy(callback,
@@ -1204,6 +1245,18 @@ GenericPLCAccessory.prototype = {
         this.service.getCharacteristic(Characteristic.TargetRelativeHumidity).updateValue(value);
         rv = true;
       }
+      if (this.config.get_CurrentHeatingCoolingState == offset)
+      {
+        this.log.debug( "[" + this.name + "] Push CurrentHeatingCoolingState:" + value);
+        this.service.getCharacteristic(Characteristic.CurrentHeatingCoolingState).updateValue(value);
+        rv = true;
+      }
+      if (this.config.get_TargetHeatingCoolingState == offset)
+      {
+        this.log.debug( "[" + this.name + "] Push TargetHeatingCoolingState:" + value);
+        this.service.getCharacteristic(Characteristic.TargetHeatingCoolingState).updateValue(value);
+        rv = true;
+      }
       if (this.config.get_StatusTampered == offset)
       {
         this.log.debug( "[" + this.name + "] Push StatusTampered:" + value);
@@ -1491,6 +1544,12 @@ GenericPLCAccessory.prototype = {
       {
         this.log.debug( "[" + this.name + "] Control TargetRelativeHumidity:" + value);
         this.service.getCharacteristic(Characteristic.TargetRelativeHumidity).setValue(value);
+        rv = true;
+      }
+      if (this.config.set_TargetHeatingCoolingState == offset)
+      {
+        this.log.debug( "[" + this.name + "] Control TargetHeatingCoolingState:" + value);
+        this.service.getCharacteristic(Characteristic.TargetHeatingCoolingState).setValue(value);
         rv = true;
       }
     }
