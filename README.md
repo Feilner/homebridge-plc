@@ -141,10 +141,10 @@ normal temperature sensor
 	- `minValue` default value: -50
 	- `maxValue` default value: 50
 	- `minStep` default value: 0.5
-- `get_StatusTampered`: **(optional)** **(push support)** offset and bit to tamper detection. (Home app shows this only within the options) S7 type `Bool` e.g. `55.2` for `DB4DBX55.2` **Note:** Homebridge 1.2.5 generates a warning when using this.
+- `get_StatusTampered`: **(optional)** **(push support)** offset and bit to tamper detection. (Home app shows this only within the options) S7 type `Bool` e.g. `55.2` for `DB4DBX55.2`
 	- `false`: ok
 	- `true`: tampered
-- `get_StatusLowBattery`: **(optional)** **(push support)** offset and bit to battery low detection. (Home app does not inform with push notification) S7 type `Bool` e.g. `55.3` for `DB4DBX55.3` **Note:** Homebridge 1.2.5 generates a warning when using this.
+- `get_StatusLowBattery`: **(optional)** **(push support)** offset and bit to battery low detection. (Home app does not inform with push notification) S7 type `Bool` e.g. `55.3` for `DB4DBX55.3`
 	- `false`: ok
 	- `true`: battery low
 
@@ -196,17 +196,22 @@ temperature sensor and temperature regulation
 		- `minHumidityValue` default value: 0
 		- `maxHumidityValue` default value: 100
 		- `minHumidityStep` default value: 1
-- `get_CurrentHeatingCoolingState`: **(optional)** current heating/cooling state when not present fixed `1` is used S7 type `Byte` e.g. `8` for `DB4DBB58`
-	- `0`: inactive
-	- `1`: idle
-	- `2`: heating
-	- `3`: cooling
-- `get_TargetHeatingCoolingState` not yet supported returns fixed `3`
+- `get_CurrentHeatingCoolingState`: **(optional)** **(push support)** offset to get current heating/cooling state S7 type `Byte` e.g. `8` for `DB4DBB8`. When not defined fixed `1`: heating is used.
+	- `0`: inactive (shown as green in home app)
+	- `1`: heating (shown as orange in home app)
+	- `2`: cooling (shown as blue in home app)
+- `get_TargetHeatingCoolingState` **(optional)** **(push support)** offset to get target heating/cooling state. S7 type `Byte` e.g. `9` for `DB4DBB9`. When not defined fixed `3`: automatic is used. 
 	- `0`: off
 	- `1`: heat
 	- `2`: cool
 	- `3`: automatic
-- `set_TargetHeatingCoolingState` not yet supported writes are ignored
+- `set_TargetHeatingCoolingState`  **(optional)** **(control support)** offset to set target heating/cooling state. Can be identical with `get_TargetHeatingCoolingState`. Has to be defined when `get_TargetHeatingCoolingState` is defined. When not defined writes changes are ignored. S7 type `Byte` e.g. `9` for `DB4DBB9`.
+	- `0`: off
+	- `1`: heat
+	- `2`: cool
+	- `3`: automatic
+- `mapGetTarget`: **(optional)** define mapping array for get target heating cooling state. The PLC value is used as index into the table. e.g. `[0, 3]` which maps the PLC value `0->0 1->3` when the PLC supports only two states with `0:off` and and `1:automatic`.
+- `mapSetTarget`: **(optional)** define mapping array for set target heating cooling state. The home app value is used as index into the table. e.g. `[0, 1, 0, 3]` which maps the PLC value `0->0 1->1 2->0, 3->3` when the PLC supports only two states with `0:off` and `1:heat` and `3:automatic`. The state cool is mapped to off.
 - `get_StatusTampered`: **(optional)** **(push support)** offset and bit to tamper detection. (Home app shows this only within the options) S7 type `Bool` e.g. `55.2` for `DB4DBX55.2`
 	- `false`: ok
 	- `true`: tampered
@@ -581,6 +586,12 @@ Note: The example is just an example it contains also some optional settings. Fo
 						"get_TargetTemperature": 16,
 						"set_TargetTemperature": 16,
 						"get_CurrentHeatingCoolingState": 20
+						"mapSetTarget": [
+								0,
+								1,
+								0,
+								3
+						],
 					},
 					{
 						"accessory": "PLC_WindowCovering",

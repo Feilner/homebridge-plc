@@ -1,4 +1,16 @@
 # Changelog
+
+
+## [1.0.25] 2021-01.19
+
+### Added
+- `PLC_Thermostat`: add push support for `get_CurrentHeatingCoolingState`
+- `PLC_Thermostat`: add support for `get_TargetHeatingCoolingState` and `set_TargetHeatingCoolingState` including `mapGetTarget` and `mapSetTarget`
+
+### Fixed
+- `PLC_Thermostat` fixed documentation of `get_CurrentHeatingCoolingState`
+- `PLC_Thermostat` remove warning when using `get_StatusTampered` or `get_StatusLowBattery` see https://github.com/homebridge/homebridge/issues/2768
+
 ## [1.0.24] - 2021-01-05
 
 ### Added
