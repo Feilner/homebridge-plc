@@ -141,10 +141,10 @@ normal temperature sensor
 	- `minValue` default value: -50
 	- `maxValue` default value: 50
 	- `minStep` default value: 0.5
-- `get_StatusTampered`: **(optional)** **(push support)** offset and bit to tamper detection. (Home app shows this only within the options) S7 type `Bool` e.g. `55.2` for `DB4DBX55.2` **Note:** Homebridge 1.2.5 generates a warning when using this.
+- `get_StatusTampered`: **(optional)** **(push support)** offset and bit to tamper detection. (Home app shows this only within the options) S7 type `Bool` e.g. `55.2` for `DB4DBX55.2`
 	- `false`: ok
 	- `true`: tampered
-- `get_StatusLowBattery`: **(optional)** **(push support)** offset and bit to battery low detection. (Home app does not inform with push notification) S7 type `Bool` e.g. `55.3` for `DB4DBX55.3` **Note:** Homebridge 1.2.5 generates a warning when using this.
+- `get_StatusLowBattery`: **(optional)** **(push support)** offset and bit to battery low detection. (Home app does not inform with push notification) S7 type `Bool` e.g. `55.3` for `DB4DBX55.3`
 	- `false`: ok
 	- `true`: battery low
 

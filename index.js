@@ -491,6 +491,8 @@ function GenericPLCAccessory(platform, config, accessoryNumber) {
     }
 
     if ('get_StatusTampered' in config) {
+      //Silence warning that the characteristic is not supported.
+      this.service.addCharacteristic(Characteristic.StatusTampered);
       this.service.getCharacteristic(Characteristic.StatusTampered)
       .on('get', function(callback) {this.getBit(callback,
         config.db,
@@ -500,6 +502,8 @@ function GenericPLCAccessory(platform, config, accessoryNumber) {
     }
 
     if ('get_StatusLowBattery' in config) {
+      //Silence warning that the characteristic is not supported.
+      this.service.addCharacteristic(Characteristic.StatusLowBattery);
       this.service.getCharacteristic(Characteristic.StatusLowBattery)
       .on('get', function(callback) {this.getBit(callback,
         config.db,
