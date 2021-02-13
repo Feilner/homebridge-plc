@@ -295,9 +295,10 @@ function GenericPLCAccessory(platform, config, accessoryNumber) {
       );}.bind(this))
     .setProps({
       minValue: config.minValue || -50,
-      maxValue: config.maxValue || 50,
+      maxValue: config.maxValue || 110,
       minStep: config.minStep || 0.5
     });
+
     if ('get_StatusTampered' in config) {
       this.service.getCharacteristic(Characteristic.StatusTampered)
       .on('get', function(callback) {this.getBit(callback,
@@ -491,8 +492,7 @@ function GenericPLCAccessory(platform, config, accessoryNumber) {
     }
 
     if ('get_StatusTampered' in config) {
-      //Silence warning that the characteristic is not supported.
-      this.service.addCharacteristic(Characteristic.StatusTampered);
+      //This will generate a warning but will work anyway.
       this.service.getCharacteristic(Characteristic.StatusTampered)
       .on('get', function(callback) {this.getBit(callback,
         config.db,
@@ -502,8 +502,7 @@ function GenericPLCAccessory(platform, config, accessoryNumber) {
     }
 
     if ('get_StatusLowBattery' in config) {
-      //Silence warning that the characteristic is not supported.
-      this.service.addCharacteristic(Characteristic.StatusLowBattery);
+      //This will generate a warning but will work anyway.
       this.service.getCharacteristic(Characteristic.StatusLowBattery)
       .on('get', function(callback) {this.getBit(callback,
         config.db,

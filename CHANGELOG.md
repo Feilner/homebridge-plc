@@ -1,5 +1,10 @@
 # Changelog
 
+## [1.0.26] 2021-02-14
+
+### Changed
+- `PLC_TemperatureSensor`: default maxValue increased from 50 to 110
+- `PLC_Thermostat` remove warning when using `get_StatusTampered` or `get_StatusLowBattery` was no success remove useless code.
 
 ## [1.0.25] 2021-01.19
 
