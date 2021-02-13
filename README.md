@@ -139,8 +139,8 @@ normal temperature sensor
 - `get_CurrentTemperature`: **(push support)** offset to get current temperature S7 type `Real` e.g. `55` for `DB4DBD55`
 - temperature range **(optional)**
 	- `minValue` default value: -50
-	- `maxValue` default value: 50
-	- `minStep` default value: 0.5
+	- `maxValue` default value: 110
+	- `minStep` default value: 0.1
 - `get_StatusTampered`: **(optional)** **(push support)** offset and bit to tamper detection. (Home app shows this only within the options) S7 type `Bool` e.g. `55.2` for `DB4DBX55.2`
 	- `false`: ok
 	- `true`: tampered
