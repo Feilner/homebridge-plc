@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.0.27] 2021-02-22
+
+### Added
+- add`PLC_HumidifierDehumidifier`
+- `PLC_Thermostat`: add option `mapGetCurrent`
+
 ## [1.0.26] 2021-02-14
 
 ### Changed

@@ -385,12 +385,18 @@ function GenericPLCAccessory(platform, config, accessoryNumber) {
       this.modFunctionGet = function(value){return this.mapFunction(value, config.mapGetTarget);}.bind(this);
     }
 
+    this.modFunctionGetCurrent = this.plain;
+    if ('mapGetCurrent' in config && config.mapGet) {
+      this.modFunctionGetCurrent = function(value){return this.mapFunction(value, config.mapGetCurrent);}.bind(this);
+    }
+
     if ('get_CurrentHeatingCoolingState' in config) {
       this.service.getCharacteristic(Characteristic.CurrentHeatingCoolingState)
       .on('get', function(callback) {this.getByte(callback,
         config.db,
         config.get_CurrentHeatingCoolingState,
-        'get CurrentHeatingCoolingState'
+        'get CurrentHeatingCoolingState',
+        this.modFunctionGetCurrent
         );}.bind(this));
     }
     else
@@ -512,7 +518,206 @@ function GenericPLCAccessory(platform, config, accessoryNumber) {
     }
 
   }
+  // INIT handling ///////////////////////////////////////////////
+  // Humidifier Dehumidifier
+  ////////////////////////////////////////////////////////////////
+  else if (config.accessory == 'PLC_HumidifierDehumidifier'){
+    this.service = new Service.HumidifierDehumidifier(this.name);
+    this.accessory.addService(this.service);
 
+    informFunction = function(notUsed){
+      // update target state and current state value.
+      this.service.getCharacteristic(Characteristic.TargetHumidifierDehumidifierState).getValue(function(err, value) {
+        if (!err) {
+          this.service.getCharacteristic(Characteristic.TargetHumidifierDehumidifierState).updateValue(value);
+        }
+      }.bind(this));
+
+      this.service.getCharacteristic(Characteristic.CurrentHumidifierDehumidifierState).getValue(function(err, value) {
+        if (!err) {
+          this.service.getCharacteristic(Characteristic.CurrentHumidifierDehumidifierState).updateValue(value);
+        }
+      }.bind(this));
+     }.bind(this);
+
+    if ('mapSetTarget' in config && config.mapSet) {
+      this.modFunctionSet = function(value){return this.mapFunction(value, config.mapSetTarget);}.bind(this);
+    }
+
+    if ('mapGetTarget' in config && config.mapGet) {
+      this.modFunctionGet = function(value){return this.mapFunction(value, config.mapGetTarget);}.bind(this);
+    }
+
+    this.modFunctionGetCurrent = this.plain;
+    if ('mapGetCurrent' in config && config.mapGet) {
+      this.modFunctionGetCurrent = function(value){return this.mapFunction(value, config.mapGetCurrent);}.bind(this);
+    }
+
+    if ('get_CurrentHumidifierDehumidifierState' in config) {
+      this.service.getCharacteristic(Characteristic.CurrentHumidifierDehumidifierState)
+      .on('get', function(callback) {this.getByte(callback,
+        config.db,
+        config.get_CurrentHumidifierDehumidifierState,
+        'get CurrentHumidifierDehumidifierState',
+        this.modFunctionGetCurrent
+        );}.bind(this));
+    }
+    else
+    {
+      this.service.getCharacteristic(Characteristic.CurrentHumidifierDehumidifierState)
+      .on('get', function(callback) {this.getDummy(callback,
+        1, // currently return fixed value inactive=0, idle=1, humidifying=2, dehumidifying=3
+        'get CurrentHumidifierDehumidifierState'
+        );}.bind(this));
+    }
+
+    if ('get_TargetHumidifierDehumidifierState' in config) {
+      this.service.getCharacteristic(Characteristic.TargetHumidifierDehumidifierState)
+      .on('get', function(callback) {this.getByte(callback,
+        config.db,
+        config.get_TargetHumidifierDehumidifierState,
+        'get TargetHumidifierDehumidifierState',
+        this.modFunctionGet
+        );}.bind(this))
+      .on('set', function(value, callback) {this.setByte(value, callback,
+        config.db,
+        config.set_TargetHumidifierDehumidifierState,
+        'set TargetHumidifierDehumidifierState',
+        informFunction,
+        this.modFunctionSet
+        );}.bind(this));
+    }
+    else {
+      this.service.getCharacteristic(Characteristic.TargetHumidifierDehumidifierState)
+      .on('get', function(callback) {this.getDummy(callback,
+        config.fix_TargetHumidifierDehumidifierState || 0, // currently return fixed value auto=0, humidifier=1, dehumidifier=2
+        'get TargetHeatingCoolingState'
+        );}.bind(this))
+      .on('set', function(value, callback) {this.setDummy(value, callback,
+        'set TargetHeatingCoolingState',
+        // ignore set and return current fixed values
+        informFunction
+        );}.bind(this));
+    }
+
+    this.service.getCharacteristic(Characteristic.CurrentRelativeHumidity)
+    .on('get', function(callback) {this.getReal(callback,
+      config.db,
+      config.get_CurrentRelativeHumidity,
+      'get CurrentRelativeHumidity'
+      );}.bind(this));
+
+    if ('get_RelativeHumidityDehumidifierThreshold' in config) {
+      this.service.getCharacteristic(Characteristic.RelativeHumidityDehumidifierThreshold)
+      .on('get', function(callback) {this.getReal(callback,
+        config.db,
+        config.get_RelativeHumidityDehumidifierThreshold,
+        'get RelativeHumidityDehumidifierThreshold'
+        );}.bind(this))
+      .on('set', function(value, callback) {this.setReal(value, callback,
+        config.db,
+        config.set_RelativeHumidityDehumidifierThreshold,
+        'set RelativeHumidityDehumidifierThreshold'
+        );}.bind(this));
+    }
+
+    if ('get_RelativeHumidityHumidifierThreshold' in config) {
+      this.service.getCharacteristic(Characteristic.RelativeHumidityHumidifierThreshold)
+      .on('get', function(callback) {this.getReal(callback,
+        config.db,
+        config.get_RelativeHumidityHumidifierThreshold,
+        'get RelativeHumidityHumidifierThreshold'
+        );}.bind(this))
+      .on('set', function(value, callback) {this.setReal(value, callback,
+        config.db,
+        config.set_RelativeHumidityHumidifierThreshold,
+        'set RelativeHumidityHumidifierThreshold'
+        );}.bind(this));
+    }
+
+    if ('get_RotationSpeed' in config) {
+      this.service.getCharacteristic(Characteristic.RotationSpeed)
+      .on('get', function(callback) {this.getReal(callback,
+        config.db,
+        config.get_RotationSpeed,
+        'get RotationSpeed'
+        );}.bind(this))
+      .on('set', function(value, callback) {this.setReal(value, callback,
+        config.db,
+        config.set_RotationSpeed,
+        'set RotationSpeed'
+        );}.bind(this));
+    }
+    if ('get_Active' in config) {
+      this.service.getCharacteristic(Characteristic.Active)
+        .on('get', function(callback) {this.getBit(callback,
+          config.db,
+          Math.floor(config.get_Active), Math.floor((config.get_Active*10)%10),
+          'get Active'
+        );}.bind(this))
+        .on('set', function(powerOn, callback) { this.setBit(powerOn, callback,
+          config.db,
+          Math.floor(config.set_Active), Math.floor((config.set_Active*10)%10),
+          'set Active',
+          function(value){this.service.getCharacteristic(Characteristic.Active).updateValue(value);}.bind(this)
+        );}.bind(this));
+      }
+      else {
+      this.service.getCharacteristic(Characteristic.Active)
+        .on('get', function(callback) {this.getDummy(callback,
+          1,
+          'get Active'
+        );}.bind(this))
+        .on('set', function(value, callback) { this.setDummy(value, callback,
+          'set Active',
+          function(value){this.service.getCharacteristic(Characteristic.Active).updateValue(value);}.bind(this)
+        );}.bind(this));
+      }
+
+    if ('get_SwingMode' in config) {
+      this.service.getCharacteristic(Characteristic.SwingMode)
+      .on('get', function(callback) {this.getByte(callback,
+        config.db,
+        config.get_SwingMode,
+        'get SwingMode'
+        );}.bind(this))
+      .on('set', function(value, callback) {this.setByte(value, callback,
+        config.db,
+        config.set_SwingMode,
+        'set SwingMode'
+        );}.bind(this));
+    }
+
+    if ('get_WaterLevel' in config) {
+      this.service.getCharacteristic(Characteristic.WaterLevel)
+      .on('get', function(callback) {this.getReal(callback,
+        config.db,
+        config.get_WaterLevel,
+        'get WaterLevel'
+        );}.bind(this));
+    }
+
+    if ('get_StatusTampered' in config) {
+      //This will generate a warning but will work anyway.
+      this.service.getCharacteristic(Characteristic.StatusTampered)
+      .on('get', function(callback) {this.getBit(callback,
+        config.db,
+        Math.floor(config.get_StatusTampered), Math.floor((config.get_StatusTampered*10)%10),
+        'get StatusTampered'
+      );}.bind(this));
+    }
+
+    if ('get_StatusLowBattery' in config) {
+      //This will generate a warning but will work anyway.
+      this.service.getCharacteristic(Characteristic.StatusLowBattery)
+      .on('get', function(callback) {this.getBit(callback,
+        config.db,
+        Math.floor(config.get_StatusLowBattery), Math.floor((config.get_StatusLowBattery*10)%10),
+        'get StatusLowBattery'
+      );}.bind(this));
+    }
+
+  }
   // INIT handling ///////////////////////////////////////////////
   // Window, WindowCovering and Door
   ////////////////////////////////////////////////////////////////
@@ -1274,6 +1479,77 @@ GenericPLCAccessory.prototype = {
       }
     }
     // PUSH handling ///////////////////////////////////////////////
+    // Humidifier Dehumidifier
+    ////////////////////////////////////////////////////////////////
+    else if (this.config.accessory == 'PLC_HumidifierDehumidifier'){
+      if (this.config.get_Active == offset)
+      {
+        this.log.debug( "[" + this.name + "] Push Active :" + value);
+        this.service.getCharacteristic(Characteristic.Active).updateValue(value);
+        rv = true;
+      }
+      if (this.config.get_CurrentHumidifierDehumidifierState == offset)
+      {
+        this.log.debug( "[" + this.name + "] Push CurrentHumidifierDehumidifierState:" + value);
+        this.service.getCharacteristic(Characteristic.CurrentHumidifierDehumidifierState).updateValue(value);
+        rv = true;
+      }
+      if (this.config.get_TargetHumidifierDehumidifierState == offset)
+      {
+        this.log.debug( "[" + this.name + "] Push TargetHumidifierDehumidifierState:" + value);
+        this.service.getCharacteristic(Characteristic.TargetHumidifierDehumidifierState).updateValue(value);
+        rv = true;
+      }
+      if (this.config.get_CurrentRelativeHumidity == offset)
+      {
+        this.log.debug( "[" + this.name + "] Push CurrentRelativeHumidity:" + value);
+        this.service.getCharacteristic(Characteristic.CurrentRelativeHumidity).updateValue(value);
+        rv = true;
+      }
+      if (this.config.get_RelativeHumidityDehumidifierThreshold == offset)
+      {
+        this.log.debug( "[" + this.name + "] Push RelativeHumidityDehumidifierThreshold:" + value);
+        this.service.getCharacteristic(Characteristic.RelativeHumidityDehumidifierThreshold).updateValue(value);
+        rv = true;
+      }
+      if (this.config.get_RelativeHumidityHumidifierThreshold == offset)
+      {
+        this.log.debug( "[" + this.name + "] Push RelativeHumidityHumidifierThreshold:" + value);
+        this.service.getCharacteristic(Characteristic.RelativeHumidityHumidifierThreshold).updateValue(value);
+        rv = true;
+      }
+      if (this.config.get_RotationSpeed == offset)
+      {
+        this.log.debug( "[" + this.name + "] Push RotationSpeed:" + value);
+        this.service.getCharacteristic(Characteristic.RotationSpeed).updateValue(value);
+        rv = true;
+      }
+      if (this.config.get_SwingMode == offset)
+      {
+        this.log.debug( "[" + this.name + "] Push SwingMode:" + value);
+        this.service.getCharacteristic(Characteristic.SwingMode).updateValue(value);
+        rv = true;
+      }
+      if (this.config.get_WaterLevel == offset)
+      {
+        this.log.debug( "[" + this.name + "] Push WaterLevel:" + value);
+        this.service.getCharacteristic(Characteristic.WaterLevel).updateValue(value);
+        rv = true;
+      }
+      if (this.config.get_StatusTampered == offset)
+      {
+        this.log.debug( "[" + this.name + "] Push StatusTampered:" + value);
+        this.service.getCharacteristic(Characteristic.StatusTampered).updateValue(value);
+        rv = true;
+      }
+      if (this.config.get_StatusLowBattery == offset)
+      {
+        this.log.debug( "[" + this.name + "] Push StatusLowBattery:" + value);
+        this.service.getCharacteristic(Characteristic.StatusLowBattery).updateValue(value);
+        rv = true;
+      }
+    }
+    // PUSH handling ///////////////////////////////////////////////
     // Window, WindowCovering and Door
     ////////////////////////////////////////////////////////////////
     else if (this.config.accessory == 'PLC_Window' || this.config.accessory == 'PLC_WindowCovering' || this.config.accessory == 'PLC_Door'){
@@ -1557,6 +1833,41 @@ GenericPLCAccessory.prototype = {
       }
     }
     // CONTROL handling ////////////////////////////////////////////
+    // Humidifier Dehumidifier
+    ////////////////////////////////////////////////////////////////
+    else if (this.config.accessory == 'PLC_HumidifierDehumidifier'){
+      if (this.config.set_TargetHumidifierDehumidifierState == offset)
+      {
+        this.log.debug( "[" + this.name + "] Control TargetHumidifierDehumidifierState:" + value);
+        this.service.getCharacteristic(Characteristic.TargetHumidifierDehumidifierState).setValue(value);
+        rv = true;
+      }
+      if (this.config.set_RelativeHumidityDehumidifierThreshold == offset)
+      {
+        this.log.debug( "[" + this.name + "] Control RelativeHumidityDehumidifierThreshold:" + value);
+        this.service.getCharacteristic(Characteristic.RelativeHumidityDehumidifierThreshold).setValue(value);
+        rv = true;
+      }
+      if (this.config.set_RelativeHumidityHumidifierThreshold == offset)
+      {
+        this.log.debug( "[" + this.name + "] Control RelativeHumidityHumidifierThreshold:" + value);
+        this.service.getCharacteristic(Characteristic.RelativeHumidityHumidifierThreshold).setValue(value);
+        rv = true;
+      }
+      if (this.config.set_RotationSpeed == offset)
+      {
+        this.log.debug( "[" + this.name + "] Control RotationSpeed:" + value);
+        this.service.getCharacteristic(Characteristic.RotationSpeed).setValue(value);
+        rv = true;
+      }
+      if (this.config.set_SwingMode == offset)
+      {
+        this.log.debug( "[" + this.name + "] Control SwingMode:" + value);
+        this.service.getCharacteristic(Characteristic.SwingMode).setValue(value);
+        rv = true;
+      }
+    }
+    // CONTROL handling ////////////////////////////////////////////
     // Window, WindowCovering and Door
     ////////////////////////////////////////////////////////////////
     else if (this.config.accessory == 'PLC_Window' || this.config.accessory == 'PLC_WindowCovering' || this.config.accessory == 'PLC_Door'){
@@ -1770,6 +2081,62 @@ GenericPLCAccessory.prototype = {
       this.service.getCharacteristic(Characteristic.TargetHeatingCoolingState).getValue(function(err, value) {
         if (!err) {
           this.service.getCharacteristic(Characteristic.TargetHeatingCoolingState).updateValue(value);
+        }
+      }.bind(this));
+      this.service.getCharacteristic(Characteristic.StatusTampered).getValue(function(err, value) {
+        if (!err) {
+          this.service.getCharacteristic(Characteristic.StatusTampered).updateValue(value);
+        }
+      }.bind(this));
+      this.service.getCharacteristic(Characteristic.StatusLowBattery).getValue(function(err, value) {
+        if (!err) {
+          this.service.getCharacteristic(Characteristic.StatusLowBattery).updateValue(value);
+        }
+      }.bind(this));
+    }
+    // POLL handling ///////////////////////////////////////////////
+    // Humidifier Dehumidifier
+    ////////////////////////////////////////////////////////////////
+    else if (this.config.accessory == 'PLC_HumidifierDehumidifier') {
+      // get the current target system state and update the value.
+      this.service.getCharacteristic(Characteristic.get_Active).getValue(function(err, value) {
+        if (!err) {
+          this.service.getCharacteristic(Characteristic.get_Active).updateValue(value);
+        }
+      }.bind(this));
+      this.service.getCharacteristic(Characteristic.CurrentHumidifierDehumidifierState).getValue(function(err, value) {
+        if (!err) {
+          this.service.getCharacteristic(Characteristic.CurrentHumidifierDehumidifierState).updateValue(value);
+        }
+      }.bind(this));
+      this.service.getCharacteristic(Characteristic.TargetHumidifierDehumidifierState).getValue(function(err, value) {
+        if (!err) {
+          this.service.getCharacteristic(Characteristic.TargetHumidifierDehumidifierState).updateValue(value);
+        }
+      }.bind(this));
+      this.service.getCharacteristic(Characteristic.CurrentRelativeHumidity).getValue(function(err, value) {
+        if (!err) {
+          this.service.getCharacteristic(Characteristic.CurrentRelativeHumidity).updateValue(value);
+        }
+      }.bind(this));
+      this.service.getCharacteristic(Characteristic.RelativeHumidityDehumidifierThreshold).getValue(function(err, value) {
+        if (!err) {
+          this.service.getCharacteristic(Characteristic.RelativeHumidityDehumidifierThreshold).updateValue(value);
+        }
+      }.bind(this));
+      this.service.getCharacteristic(Characteristic.RelativeHumidityHumidifierThreshold).getValue(function(err, value) {
+        if (!err) {
+          this.service.getCharacteristic(Characteristic.RelativeHumidityHumidifierThreshold).updateValue(value);
+        }
+      }.bind(this));
+      this.service.getCharacteristic(Characteristic.RotationSpeed).getValue(function(err, value) {
+        if (!err) {
+          this.service.getCharacteristic(Characteristic.RotationSpeed).updateValue(value);
+        }
+      }.bind(this));
+      this.service.getCharacteristic(Characteristic.SwingMode).getValue(function(err, value) {
+        if (!err) {
+          this.service.getCharacteristic(Characteristic.SwingMode).updateValue(value);
         }
       }.bind(this));
       this.service.getCharacteristic(Characteristic.StatusTampered).getValue(function(err, value) {
