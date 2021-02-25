@@ -23,6 +23,7 @@ SIEMENS S7 PLC plugin for [Homebridge](https://homebridge.io)
 	* [Temperature Sensor as `PLC_TemperatureSensor`](#PLC_TemperatureSensor)
 	* [Humidity Sensor as `PLC_HumiditySensor`](#PLC_HumiditySensor)
 	* [Thermostat as `PLC_Thermostat`](#PLC_Thermostat)
+    * [Humidifier/Dehumidifier as `PLC_HumidifierDehumidifier`](#PLC_HumidifierDehumidifier)
 	* [Shutter as `PLC_WindowCovering`](#PLC_Window)
 	* [Window as `PLC_Window`](#PLC_Window)
 	* [Door as `PLC_Door`](#PLC_Window)
@@ -81,7 +82,7 @@ normal light see also simple PLC example for [single bit](doc/ligtbulb_plc_examp
 - `manufacturer`: **(optional)** description
 - `db`: s7 data base number e.g. `4` for `DB4`
 - `enablePolling`: **(optional)** when set to `true` the current state will be polled. It is mandatory as well to enable polling mode on platform level.
-- `pollInterval` **(optional)** poll interval in seconds. Default value see platform definition.
+- `pollInterval`: **(optional)** poll interval in seconds. Default value see platform definition.
 - `get_On`: **(push support)** offset and bit get the current status S7 type `Bool` e.g. `55.0` for `DB4DBX55.0`
 - Single Bit for on/off:
 	- `set_On`: **(control support)** offset and bit set to 1/0 when switching on/off S7 type `Bool` PLC e.g. `55.0` for `DB4DBX55.0` could be same as get_On
@@ -103,7 +104,7 @@ outlet possible to show also as ventilator or light
 - `manufacturer`: **(optional)** description
 - `db`: s7 data base number e.g. `4` for `DB4`
 - `enablePolling`: **(optional)** when set to `true` the current state will be polled. It is mandatory as well to enable polling mode on platform level.
-- `pollInterval` **(optional)** poll interval in seconds. Default value see platform definition.
+- `pollInterval`: **(optional)** poll interval in seconds. Default value see platform definition.
 - `get_On`: **(push support)** offset and bit get the current status S7 type `Bool` e.g. `55.0` for `DB4DBX55.0`
 - Single Bit for on/off:
 	- `set_On`: **(control support)** offset and bit set to 1/0 when switching on/off S7 type `Bool` PLC e.g. `55.0` for `DB4DBX55.0` could be same as get_On
@@ -119,7 +120,7 @@ outlet possible to show also as ventilator or light
 - `manufacturer`: **(optional)** description
 - `db`: s7 data base number e.g. `4` for `DB4`
 - `enablePolling`: **(optional)** when set to `true` the current state will be polled. It is mandatory as well to enable polling mode on platform level.
-- `pollInterval` **(optional)** poll interval in seconds. Default value see platform definition.
+- `pollInterval`: **(optional)** poll interval in seconds. Default value see platform definition.
 - `get_On`: **(push support)** offset and bit get the current status S7 type `Bool` e.g. `55.0` for `DB4DBX55.0`
 - Single Bit for on/off:
 	- `set_On`: **(control support)** offset and bit set to 1/0 when switching on/off S7 type `Bool` PLC e.g. `55.0` for `DB4DBX55.0` could be same as get_On
@@ -135,12 +136,12 @@ normal temperature sensor
 - `manufacturer`: **(optional)** description
 - `db`: s7 data base number e.g. `4` for `DB4`
 - `enablePolling`: **(optional)** when set to `true` the current state will be polled. It is mandatory as well to enable polling mode on platform level.
-- `pollInterval` **(optional)** poll interval in seconds. Default value see platform definition.
+- `pollInterval`: **(optional)** poll interval in seconds. Default value see platform definition.
 - `get_CurrentTemperature`: **(push support)** offset to get current temperature S7 type `Real` e.g. `55` for `DB4DBD55`
 - temperature range **(optional)**
 	- `minValue` default value: -50
 	- `maxValue` default value: 110
-	- `minStep` default value: 0.1
+	- `minStep` default value: 0.5
 - `get_StatusTampered`: **(optional)** **(push support)** offset and bit to tamper detection. (Home app shows this only within the options) S7 type `Bool` e.g. `55.2` for `DB4DBX55.2`
 	- `false`: ok
 	- `true`: tampered
@@ -156,7 +157,7 @@ normal humidity sensor
 - `manufacturer`: **(optional)** description
 - `db`: s7 data base number e.g. `4` for `DB4`
 - `enablePolling`: **(optional)** when set to `true` the current state will be polled. It is mandatory as well to enable polling mode on platform level.
-- `pollInterval` **(optional)** poll interval in seconds. Default value see platform definition.
+- `pollInterval`: **(optional)** poll interval in seconds. Default value see platform definition.
 - `get_CurrentRelativeHumidity`: **(push support)** offset to get current humidity S7 type `Real` e.g. `55` for `DB4DBD55`
 - humidity range **(optional)**
 	- `minValue` default value: 0
@@ -170,16 +171,15 @@ normal humidity sensor
 	- `true`: battery low
 
 ### <a name='PLC_Thermostat'></a>Thermostat as `PLC_Thermostat`
-temperature sensor and temperature regulation
+temperature / humidity sensor with temperature / humidity regulation
 
 ![homebridge pic](doc/thermostat.png)
 - `name`: unique name of the accessory
 - `manufacturer`: **(optional)** description
 - `db`: s7 data base number e.g. `4` for `DB4`
 - `enablePolling`: **(optional)** when set to `true` the current state will be polled. It is mandatory as well to enable polling mode on platform level.
-- `pollInterval` **(optional)** poll interval in seconds. Default value see platform definition.
-- `get_CurrentTemperature`: offset to get current humidity S7 type `Real` e.g. `55` for `DB4DBD55`
-- S7 type `Byte` e.g. `56` for `DB4DBB56`
+- `pollInterval`: **(optional)** poll interval in seconds. Default value see platform definition.
+- `get_CurrentTemperature`: offset to get current humidity S7 type `Real` e.g. `55` for `DB4DBD55` S7 type `Byte` e.g. `56` for `DB4DBB56`
 - `get_CurrentTemperature`: **(push support)** offset to get current temperature S7 type `Real` e.g. `0` for `DB4DBD0`
 - `get_TargetTemperature`: **(push support)** offset to get target temperature S7 type `Real` e.g. `4` for `DB4DBD4`
 - `set_TargetTemperature`: **(control support)** offset to set current temperature S7 type `Real` e.g. `4` for `DB4DBD4` (can have same value as get_TargetTemperature)
@@ -200,7 +200,7 @@ temperature sensor and temperature regulation
 	- `0`: inactive (shown as green in home app)
 	- `1`: heating (shown as orange in home app)
 	- `2`: cooling (shown as blue in home app)
-- `get_TargetHeatingCoolingState` **(optional)** **(push support)** offset to get target heating/cooling state. S7 type `Byte` e.g. `9` for `DB4DBB9`. When not defined fixed `3`: automatic is used. 
+- `get_TargetHeatingCoolingState` **(optional)** **(push support)** offset to get target heating/cooling state. S7 type `Byte` e.g. `9` for `DB4DBB9`. When not defined fixed `3`: automatic is used.
 	- `0`: off
 	- `1`: heat
 	- `2`: cool
@@ -210,8 +210,58 @@ temperature sensor and temperature regulation
 	- `1`: heat
 	- `2`: cool
 	- `3`: automatic
-- `mapGetTarget`: **(optional)** define mapping array for get target heating cooling state. The PLC value is used as index into the table. e.g. `[0, 3]` which maps the PLC value `0->0 1->3` when the PLC supports only two states with `0:off` and and `1:automatic`.
-- `mapSetTarget`: **(optional)** define mapping array for set target heating cooling state. The home app value is used as index into the table. e.g. `[0, 1, 0, 3]` which maps the PLC value `0->0 1->1 2->0, 3->3` when the PLC supports only two states with `0:off` and `1:heat` and `3:automatic`. The state cool is mapped to off.
+- `mapGetTarget`: **(optional)** define mapping array for `get_TargetHeatingCoolingState`. The PLC value is used as index into the table. e.g. `[0, 3]` which maps the PLC value `0->0 1->3` when the PLC supports only two states with `0:off` and `1:automatic`.
+- `mapSetTarget`: **(optional)** define mapping array for `set_TargetHeatingCoolingState`. The home app value is used as index into the table. e.g. `[0, 1, 0, 3]` which maps the PLC value `0->0 1->1 2->0, 3->3` when the PLC supports only two states with `0:off` and `1:heat` and `3:automatic`. The state cool is mapped to off.
+- `mapGetCurrent`: **(optional)** define mapping array for `get_CurrentHeatingCoolingState`. The PLC value is used as index into the table. e.g. `[0, 2]` which maps the PLC value `0->0 1->2` when the PLC supports only two states with `0:inactive` and `1:cooling`.
+- `get_StatusTampered`: **(optional)** **(push support)** offset and bit to tamper detection. (Home app shows this only within the options) S7 type `Bool` e.g. `55.2` for `DB4DBX55.2`
+	- `false`: ok
+	- `true`: tampered
+- `get_StatusLowBattery`: **(optional)** **(push support)** offset and bit to battery low detection. (Home app does not inform with push notification) S7 type `Bool` e.g. `55.3` for `DB4DBX55.3`
+	- `false`: ok
+	- `true`: battery low
+
+### <a name='PLC_Thermostat'></a>Thermostat as `PLC_HumidifierDehumidifier`
+Humidifier and/or Dehumidifier
+
+![homebridge pic](doc/thermostat.png)
+- `name`: unique name of the accessory
+- `manufacturer`: **(optional)** description
+- `db`: s7 data base number e.g. `4` for `DB4`
+- `enablePolling`: **(optional)** when set to `true` the current state will be polled. It is mandatory as well to enable polling mode on platform level.
+- `pollInterval`: **(optional)** poll interval in seconds. Default value see platform definition.
+- `get_CurrentRelativeHumidity`: **(push support)** offset to get current humidity S7 type `Real` e.g. `55` for `DB4DBD55`
+- `get_Active`: **(optional)** **(push support)** offset and bit get the current status S7 type `Bool` e.g. `55.0` for `DB4DBX55.0`
+- current state
+  - `get_CurrentHumidifierDehumidifierState`: **(optional)** **(push support)** offset to get current state. Default value `1:idle`. S7 type `Byte` e.g. `55` for `DB4DBD55`
+  	- `0`: inactive
+  	- `1`: idle
+  	- `2`: humidifying
+  	- `3`: dehumidifying
+  - `mapGetCurrent`: **(optional)** define mapping array for `get_CurrentHumidifierDehumidifierState`. The PLC value is used as index into the table. e.g. `[1, 3]` which maps the PLC value `0->1 1->3` when the PLC supports only two states with `0:idle` and `1:dehumidifying`.
+- Target state 
+  - `default_TargetHumidifierDehumidifierState`: **(optional)** defines alternative value thats returned then `get_TargetHumidifierDehumidifierState` is not defined. Default value `0:auto`
+  	- `0`: auto (humidifier or dehumidifier)
+  	- `1`: humidifier
+  	- `2`: dehumidifier
+  - `get_TargetHumidifierDehumidifierState`: **(optional)** **(push support)** offset to get current target state S7 type `Byte` e.g. `55` for `DB4DBD55`
+  	- `0`: auto (humidifier or dehumidifier)
+  	- `1`: humidifier
+  	- `2`: dehumidifier
+  - `set_TargetHumidifierDehumidifierState`: **(optional)** **(control support)**offset to set current target state. Needs to be defined when `get_TargetHumidifierDehumidifierState` is set  S7 type `Byte` e.g. `55` for `DB4DBD55`
+  	- `0`: auto (humidifier or dehumidifier)
+  	- `1`: humidifier
+  	- `2`: dehumidifier
+  - `mapGetTarget`: **(optional)** define mapping array for `get_TargetHumidifierDehumidifierState`. The PLC value is used as index into the table. e.g. `[0]` which maps the PLC value `0->2 1->3` when the PLC supports only one states with `0:dehumidifier.
+  - `mapSetTarget`: **(optional)** define mapping array for `set_TargetHumidifierDehumidifierState`. The home app value is used as index into the table. e.g. `[2, 2, 2
+- Rotation Speed
+  - `get_RotationSpeed`: **(optional)** **(push support)** offset to get rotation speed state S7 type `Real` e.g. `8` for `DB4DBB8`.
+  - `set_RotationSpeed` **(optional)** **(push support)** offset to get set speed state. S7 type `Real` e.g. `9` for `DB4DBB9`.
+- Swing Mode
+  - `get_SwingMode`: **(optional)** **(push support)** offset to get rotation speed state S7 type `Bool` e.g. `8` for `DB4DBB8`.
+  - `set_SwingMode` **(optional)** **(push support)** offset to get set speed state. S7 type `Bool` e.g. `9` for `DB4DBB9`.
+- Water Level
+  - `get_WaterLevel`: **(optional)** **(push support)** offset to get rotation speed state S7 type `Real` e.g. `8` for `DB4DBB8`.
+  - `set_WaterLevel` **(optional)** **(push support)** offset to get set speed state. S7 type `Real` e.g. `9` for `DB4DBB9`.
 - `get_StatusTampered`: **(optional)** **(push support)** offset and bit to tamper detection. (Home app shows this only within the options) S7 type `Bool` e.g. `55.2` for `DB4DBX55.2`
 	- `false`: ok
 	- `true`: tampered
@@ -232,7 +282,7 @@ motor driven blinds, windows and doors. Supports also manual driven blinds, wind
 - `adaptivePollingInterval` **(optional)** poll interval in seconds during high frequency polling. Default value is `1` second.
 - `forceCurrentPosition` **(optional)** when set to `true` the position set by `set_TargetPosition` is directly used as current position. By this it seems in tha home app as the target position was directly reached. This is recommended when not using `adaptivePolling` or pushing the value from the plc.
 - `enablePolling`: **(optional)** when set to `true` the current state will be polled. It is mandatory as well to enable polling mode on platform level.
-- `pollInterval` **(optional)** poll interval in seconds. Default value see platform definition.
+- `pollInterval`: **(optional)** poll interval in seconds. Default value see platform definition.
 - `get_CurrentPosition`: **(push support)** offset to get current position S7 type `Byte` e.g. `0` for `DB4DBB0`
 - if one of the **(optional)** target position settings need specified all are needed. If not specified it os not movable ans sticks to current position.
 	- `get_TargetPosition`: **(optional)** **(push support)** offset to get target position S7 type `Byte` e.g. `1` for `DB4DBB1` (can have same value as set_TargetPosition)
@@ -252,7 +302,7 @@ presence detection sensor
 - `db`: s7 data base number e.g. `4` for `DB4`
 - `invert`: **(optional)** set to `true` inverts the bit to `false:presence` and `true:no-presence`.
 - `enablePolling`: **(optional)** when set to `true` the current state will be polled. It is mandatory as well to enable polling mode on platform level.
-- `pollInterval` **(optional)** poll interval in seconds. Default value see platform definition.
+- `pollInterval`: **(optional)** poll interval in seconds. Default value see platform definition.
 - `get_OccupancyDetected`: **(push support)** offset and bit get the current status S7 type `Bool` e.g. `55.0` for `DB4DBX55.0`
 	- `false`: no occupancy
 	- `true`: occupancy detected
@@ -272,7 +322,7 @@ movement detection sensor
 - `db`: s7 data base number e.g. `4` for `DB4`
 - `invert`: **(optional)** set to `true` inverts the bit to `false:motion` and `true:no-motion`.
 - `enablePolling`: **(optional)** when set to `true` the current state will be polled. It is mandatory as well to enable polling mode on platform level.
-- `pollInterval` **(optional)** poll interval in seconds. Default value see platform definition.
+- `pollInterval`: **(optional)** poll interval in seconds. Default value see platform definition.
 - `get_MotionDetected`: **(push support)** offset and bit get the current status S7 type `Bool` e.g. `55.0` for `DB4DBX55.0`
 	- `false`: no motion
 	- `true`: motion detected
@@ -292,7 +342,7 @@ generic contact sensor. The home app allows to display as window, door, blind/sh
 - `db`: s7 data base number e.g. `4` for `DB4`
 - `invert`: **(optional)** set to `true` inverts the bit to `false:closed` and `true:open`.
 - `enablePolling`: **(optional)** when set to `true` the current state will be polled. It is mandatory as well to enable polling mode on platform level.
-- `pollInterval` **(optional)** poll interval in seconds. Default value see platform definition.
+- `pollInterval`: **(optional)** poll interval in seconds. Default value see platform definition.
 - `get_ContactSensorState`: **(push support)** offset and bit get the current status S7 type `Bool` e.g. `55.0` for `DB4DBX55.0`
 	- `false`: closed
 	- `true`: open
@@ -311,7 +361,7 @@ watering for the garden
 - `manufacturer`: **(optional)** description
 - `db`: s7 data base number e.g. `4` for `DB4`
 - `enablePolling`: **(optional)** when set to `true` the current state will be polled. It is mandatory as well to enable polling mode on platform level.
-- `pollInterval` **(optional)** poll interval in seconds. Default value see platform definition.
+- `pollInterval`: **(optional)** poll interval in seconds. Default value see platform definition.
 - `get_Active`: **(push support)** offset and bit get the current status S7 type `Bool` e.g. `55.0` for `DB4DBX55.0`
 - Single Bit for on/off:
 	- `set_Active`: **(control support)** offset and bit set to 1/0 when switching on/off S7 type `Bool` PLC e.g. `55.0` for `DB4DBX55.0` could be same as get_Active
@@ -327,7 +377,7 @@ valve configurable as generic valve, irrigation, shower head or water faucet
 - `manufacturer`: **(optional)** description
 - `db`: s7 data base number e.g. `4` for `DB4`
 - `enablePolling`: **(optional)** when set to `true` the current state will be polled. It is mandatory as well to enable polling mode on platform level.
-- `pollInterval` **(optional)** poll interval in seconds. Default value see platform definition.
+- `pollInterval`: **(optional)** poll interval in seconds. Default value see platform definition.
 - `ValveType` configures the valve type that is returned
 	- `0`: generic valve
 	- `1`: irrigation
@@ -352,7 +402,7 @@ alarm system
 - `manufacturer`: **(optional)** description
 - `db`: s7 data base number e.g. `4` for `DB4`
 - `enablePolling`: **(optional)** when set to `true` the current state of the security system will be polled.
-- `pollInterval` **(optional)** poll interval in seconds. Default value see platform definition.
+- `pollInterval`: **(optional)** poll interval in seconds. Default value see platform definition.
 - `get_SecuritySystemCurrentState`: **(push support)** offset to current security system state S7 type `Byte` e.g. `3` for `DB4DBB3`
 	- `0`: armed stay at home
 	- `1`: armed away from home
@@ -384,7 +434,7 @@ Trigger actions in home app only works with control center e.g. AppleTV or HomeP
 - `manufacturer`: **(optional)** description
 - `db`: s7 data base number e.g. `4` for `DB4`
 - `enablePolling`: **(optional)** when set to `true` the current state will be polled. It is mandatory as well to enable polling mode on platform level.
-- `pollInterval` **(optional)** poll interval in seconds. Default value see platform definition.
+- `pollInterval`: **(optional)** poll interval in seconds. Default value see platform definition.
 - `isEvent` offset and bit that is polled by homebridge-plc. **PLC has to set to `true`.** When `true` the event is read from `get_ProgrammableSwitchEvent` and set to `false` by homebirdge-plc to confirm that the event is handled. S7 type `Bool` e.g. `55.1` for `DB4DBX55.1` (polling only, not used for push)
 - `get_ProgrammableSwitchEvent`: **(push support)** **(control support)** offset to read current event of the switch. This is reported towards home app S7 type `Byte` e.g. `3` for `DB4DBB3`
 	- `0`: single press
@@ -399,7 +449,7 @@ lock mechanism
 - `manufacturer`: **(optional)** description
 - `db`: s7 data base number e.g. `4` for `DB4`
 - `enablePolling`: **(optional)** when set to `true` the current state will be polled. It is mandatory as well to enable polling mode on platform level.
-- `pollInterval` **(optional)** poll interval in seconds. Default value see platform definition.
+- `pollInterval`: **(optional)** poll interval in seconds. Default value see platform definition.
 - `forceCurrentState`: **(optional)** when set to `true` the position set by `set_LockTargetState` is directly used as current state. By this it seems in the home app as the target state was directly reached. This is recommended when not using `enablePolling` or pushing the value from the plc.
 	- `get_LockCurrentState`: **(push support)** offset to read current state current state S7 type `Byte` e.g. `3` for `DB4DBB3`
 		- `0`: unsecured
@@ -422,7 +472,7 @@ lock mechanism implemented as bool on the PLC
 - `manufacturer`: **(optional)** description
 - `db`: s7 data base number e.g. `4` for `DB4`
 - `enablePolling`: **(optional)** when set to `true` the current state will be polled. t is mandatory as well to enable polling mode on platform level.
-- `pollInterval` **(optional)** poll interval in seconds. Default value see platform definition.
+- `pollInterval`: **(optional)** poll interval in seconds. Default value see platform definition.
 - `forceCurrentState`: **(optional)** when set to `true` the state set by `set_LockTargetState` is directly used as current state. By this it seems in the home app as the target state was directly reached. This is recommended when not using `enablePolling` or pushing the value from the plc.
 - `invert`: **(optional)** when set to `true` all states are inverted (current and target state) `false`: **unsecured** and `true`: **secured**.
 - `get_LockCurrentState`: **(push support)** offset to read current state current state S7 type `Bool` .g. `3.1` for `DB4DBB3`
@@ -448,7 +498,7 @@ garage door
 - `manufacturer`: **(optional)** description
 - `db`: s7 data base number e.g. `4` for `DB4`
 - `enablePolling`: **(optional)** when set to `true` the current state will be polled. It is mandatory as well to enable polling mode on platform level.
-- `pollInterval` **(optional)** poll interval in seconds. Default value see platform definition.
+- `pollInterval`: **(optional)** poll interval in seconds. Default value see platform definition.
 - `forceCurrentState`: **(optional)** when set to `true` the position set by `set_TargetDoorState` is directly used as current state. By this it seems in the home app as the target state was directly reached. This is recommended when not using `enablePolling` or pushing the value from the plc.
 - `get_ObstructionDetected` **(optional)** **(push support)** offset and bit to obfuscation detection true means that the door was blocked S7 type `Bool` e.g. `55.1` for `DB4DBX55.1`
 - `get_CurrentDoorState`: **(push support)** offset to read current state current state S7 type `Byte` e.g. `3` for `DB4DBB3`
