@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.0.28] 2021-02-26
+
+### Changed
+- update doku
+
+### Fixed
+- polling for`PLC_HumidifierDehumidifier`
+
 ## [1.0.27] 2021-02-22
 
 ### Added

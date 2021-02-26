@@ -179,40 +179,41 @@ temperature / humidity sensor with temperature / humidity regulation
 - `db`: s7 data base number e.g. `4` for `DB4`
 - `enablePolling`: **(optional)** when set to `true` the current state will be polled. It is mandatory as well to enable polling mode on platform level.
 - `pollInterval`: **(optional)** poll interval in seconds. Default value see platform definition.
-- `get_CurrentTemperature`: offset to get current humidity S7 type `Real` e.g. `55` for `DB4DBD55` S7 type `Byte` e.g. `56` for `DB4DBB56`
 - `get_CurrentTemperature`: **(push support)** offset to get current temperature S7 type `Real` e.g. `0` for `DB4DBD0`
-- `get_TargetTemperature`: **(push support)** offset to get target temperature S7 type `Real` e.g. `4` for `DB4DBD4`
-- `set_TargetTemperature`: **(control support)** offset to set current temperature S7 type `Real` e.g. `4` for `DB4DBD4` (can have same value as get_TargetTemperature)
-- target temperature range definitions **(optional)**
-	- `minValue` default value: 15
-	- `maxValue` default value: 27
-	- `minStep` default value: 0.5 **Note:** lower values seems not be supported by Homekit
-- Humidity measurement
-	- `get_CurrentRelativeHumidity`: **(optional)** **(push support)** offset to get current temperature S7 type `Real` e.g. `0` for `DB4DBD0`
-- Humidity control
+- Target Temperature
+  - `get_TargetTemperature`: **(push support)** offset to get target temperature S7 type `Real` e.g. `4` for `DB4DBD4`
+  - `set_TargetTemperature`: **(control support)** offset to set current temperature S7 type `Real` e.g. `4` for `DB4DBD4` (can have same value as get_TargetTemperature)
+  - target temperature range definitions **(optional)**
+  	- `minValue` default value: 15
+  	- `maxValue` default value: 27
+  	- `minStep` default value: 0.5 **Note:** lower values seems not be supported by Homekit
+- `get_CurrentRelativeHumidity`: **(optional)** **(push support)** offset to get current humidity S7 type `Real` e.g. `0` for `DB4DBD0`
+- Target Humidity
 	- `get_TargetRelativeHumidity`: **(optional)** **(push support)** offset to get target temperature S7 type `Real` e.g. `4` for `DB4DBD4`
 	- `set_TargetRelativeHumidity`: **(optional)** **(control support)** offset to set current temperature S7 type `Real` e.g. `4` for `DB4DBD4` (can have same value as get_TargetTemperature)
 	- target relative humidity range definitions **(optional)**
 		- `minHumidityValue` default value: 0
 		- `maxHumidityValue` default value: 100
 		- `minHumidityStep` default value: 1
-- `get_CurrentHeatingCoolingState`: **(optional)** **(push support)** offset to get current heating/cooling state S7 type `Byte` e.g. `8` for `DB4DBB8`. When not defined fixed `1`: heating is used.
-	- `0`: inactive (shown as green in home app)
-	- `1`: heating (shown as orange in home app)
-	- `2`: cooling (shown as blue in home app)
-- `get_TargetHeatingCoolingState` **(optional)** **(push support)** offset to get target heating/cooling state. S7 type `Byte` e.g. `9` for `DB4DBB9`. When not defined fixed `3`: automatic is used.
-	- `0`: off
-	- `1`: heat
-	- `2`: cool
-	- `3`: automatic
-- `set_TargetHeatingCoolingState`  **(optional)** **(control support)** offset to set target heating/cooling state. Can be identical with `get_TargetHeatingCoolingState`. Has to be defined when `get_TargetHeatingCoolingState` is defined. When not defined writes changes are ignored. S7 type `Byte` e.g. `9` for `DB4DBB9`.
-	- `0`: off
-	- `1`: heat
-	- `2`: cool
-	- `3`: automatic
-- `mapGetTarget`: **(optional)** define mapping array for `get_TargetHeatingCoolingState`. The PLC value is used as index into the table. e.g. `[0, 3]` which maps the PLC value `0->0 1->3` when the PLC supports only two states with `0:off` and `1:automatic`.
-- `mapSetTarget`: **(optional)** define mapping array for `set_TargetHeatingCoolingState`. The home app value is used as index into the table. e.g. `[0, 1, 0, 3]` which maps the PLC value `0->0 1->1 2->0, 3->3` when the PLC supports only two states with `0:off` and `1:heat` and `3:automatic`. The state cool is mapped to off.
-- `mapGetCurrent`: **(optional)** define mapping array for `get_CurrentHeatingCoolingState`. The PLC value is used as index into the table. e.g. `[0, 2]` which maps the PLC value `0->0 1->2` when the PLC supports only two states with `0:inactive` and `1:cooling`.
+- Heating Cooling State
+  - `get_CurrentHeatingCoolingState`: **(optional)** **(push support)** offset to get current heating/cooling state S7 type `Byte` e.g. `8` for `DB4DBB8`. When not defined fixed `1`: heating is used.
+  	- `0`: inactive (shown as green in home app)
+  	- `1`: heating (shown as orange in home app)
+  	- `2`: cooling (shown as blue in home app)
+  - `mapGetCurrent`: **(optional)** define mapping array for `get_CurrentHeatingCoolingState`. The PLC value is used as index into the table. e.g. `[0, 2]` which maps the PLC value `0->0 1->2` when the PLC supports only two states with `0:inactive` and `1:cooling`.
+  
+  - `get_TargetHeatingCoolingState` **(optional)** **(push support)** offset to get target heating/cooling state. S7 type `Byte` e.g. `9` for `DB4DBB9`. When not defined fixed `3`: automatic is used.
+  	- `0`: off
+  	- `1`: heat
+  	- `2`: cool
+  	- `3`: automatic
+  - `mapGetTarget`: **(optional)** define mapping array for `get_TargetHeatingCoolingState`. The PLC value is used as index into the table. e.g. `[0, 3]` which maps the PLC value `0->0 1->3` when the PLC supports only two states with `0:off` and `1:automatic`.
+  - `set_TargetHeatingCoolingState`  **(optional)** **(control support)** offset to set target heating/cooling state. Can be identical with `get_TargetHeatingCoolingState`. Has to be defined when `get_TargetHeatingCoolingState` is defined. When not defined writes changes are ignored. S7 type `Byte` e.g. `9` for `DB4DBB9`.
+  	- `0`: off
+  	- `1`: heat
+  	- `2`: cool
+  	- `3`: automatic
+  - `mapSetTarget`: **(optional)** define mapping array for `set_TargetHeatingCoolingState`. The home app value is used as index into the table. e.g. `[0, 1, 0, 3]` which maps the PLC value `0->0 1->1 2->0, 3->3` when the PLC supports only two states with `0:off` and `1:heat` and `3:automatic`. The state cool is mapped to off.
 - `get_StatusTampered`: **(optional)** **(push support)** offset and bit to tamper detection. (Home app shows this only within the options) S7 type `Bool` e.g. `55.2` for `DB4DBX55.2`
 	- `false`: ok
 	- `true`: tampered
@@ -220,7 +221,7 @@ temperature / humidity sensor with temperature / humidity regulation
 	- `false`: ok
 	- `true`: battery low
 
-### <a name='PLC_Thermostat'></a>Thermostat as `PLC_HumidifierDehumidifier`
+### <a name='PLC_HumidifierDehumidifier'></a>Thermostat as `PLC_HumidifierDehumidifier`
 Humidifier and/or Dehumidifier
 
 ![homebridge pic](doc/thermostat.png)
@@ -230,15 +231,17 @@ Humidifier and/or Dehumidifier
 - `enablePolling`: **(optional)** when set to `true` the current state will be polled. It is mandatory as well to enable polling mode on platform level.
 - `pollInterval`: **(optional)** poll interval in seconds. Default value see platform definition.
 - `get_CurrentRelativeHumidity`: **(push support)** offset to get current humidity S7 type `Real` e.g. `55` for `DB4DBD55`
-- `get_Active`: **(optional)** **(push support)** offset and bit get the current status S7 type `Bool` e.g. `55.0` for `DB4DBX55.0`
-- current state
+- Active
+  - `get_Active`: **(optional)** **(push support)** offset and bit get active state S7 type `Bool` e.g. `55.0` for `DB4DBX55.0`
+  - `set_Active`: **(optional)** **(push support)** offset and bit set active state S7 type `Bool` e.g. `55.0` for `DB4DBX55.0`
+- Current State
   - `get_CurrentHumidifierDehumidifierState`: **(optional)** **(push support)** offset to get current state. Default value `1:idle`. S7 type `Byte` e.g. `55` for `DB4DBD55`
   	- `0`: inactive
   	- `1`: idle
   	- `2`: humidifying
   	- `3`: dehumidifying
   - `mapGetCurrent`: **(optional)** define mapping array for `get_CurrentHumidifierDehumidifierState`. The PLC value is used as index into the table. e.g. `[1, 3]` which maps the PLC value `0->1 1->3` when the PLC supports only two states with `0:idle` and `1:dehumidifying`.
-- Target state 
+- Target State 
   - `default_TargetHumidifierDehumidifierState`: **(optional)** defines alternative value thats returned then `get_TargetHumidifierDehumidifierState` is not defined. Default value `0:auto`
   	- `0`: auto (humidifier or dehumidifier)
   	- `1`: humidifier
