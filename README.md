@@ -224,7 +224,7 @@ temperature / humidity sensor with temperature / humidity regulation
 ### <a name='PLC_HumidifierDehumidifier'></a>Thermostat as `PLC_HumidifierDehumidifier`
 Humidifier and/or Dehumidifier
 
-![homebridge pic](doc/thermostat.png)
+![homebridge pic](doc/humidifierdehumidifier.png)
 - `name`: unique name of the accessory
 - `manufacturer`: **(optional)** description
 - `db`: s7 data base number e.g. `4` for `DB4`
