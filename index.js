@@ -2099,9 +2099,9 @@ GenericPLCAccessory.prototype = {
     ////////////////////////////////////////////////////////////////
     else if (this.config.accessory == 'PLC_HumidifierDehumidifier') {
       // get the current target system state and update the value.
-      this.service.getCharacteristic(Characteristic.get_Active).getValue(function(err, value) {
+      this.service.getCharacteristic(Characteristic.Active).getValue(function(err, value) {
         if (!err) {
-          this.service.getCharacteristic(Characteristic.get_Active).updateValue(value);
+          this.service.getCharacteristic(Characteristic.Active).updateValue(value);
         }
       }.bind(this));
       this.service.getCharacteristic(Characteristic.CurrentHumidifierDehumidifierState).getValue(function(err, value) {
