@@ -1,4 +1,12 @@
 # Changelog
+## [1.0.29] 2021-04-21
+
+### Fixed
+- `PLC_HumidifierDehumidifier` correct option `mapSetTarget`, `mapGetTarget`  and `mapGetCurrent`
+- `PLC_Thermostat` correct option `mapSetTarget`, `mapGetTarget`  and `mapGetCurrent`
+
+### Changed
+- `PLC_SecuritySystem` introduce `mapSetTarget`, `mapGetTarget`  and `mapGetCurrent` this replaces `mapSet` and `mapGet`. (For backwards compatibility old options are still supported)
 
 ## [1.0.28] 2021-02-26
 

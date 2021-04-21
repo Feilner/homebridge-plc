@@ -377,16 +377,16 @@ function GenericPLCAccessory(platform, config, accessoryNumber) {
       }.bind(this));
      }.bind(this);
 
-    if ('mapSetTarget' in config && config.mapSet) {
+    if ('mapSetTarget' in config && config.mapSetTarget) {
       this.modFunctionSet = function(value){return this.mapFunction(value, config.mapSetTarget);}.bind(this);
     }
 
-    if ('mapGetTarget' in config && config.mapGet) {
+    if ('mapGetTarget' in config && config.mapGetTarget) {
       this.modFunctionGet = function(value){return this.mapFunction(value, config.mapGetTarget);}.bind(this);
     }
 
     this.modFunctionGetCurrent = this.plain;
-    if ('mapGetCurrent' in config && config.mapGet) {
+    if ('mapGetCurrent' in config && config.mapGetCurrent) {
       this.modFunctionGetCurrent = function(value){return this.mapFunction(value, config.mapGetCurrent);}.bind(this);
     }
 
@@ -540,16 +540,16 @@ function GenericPLCAccessory(platform, config, accessoryNumber) {
       }.bind(this));
      }.bind(this);
 
-    if ('mapSetTarget' in config && config.mapSet) {
+    if ('mapSetTarget' in config && config.mapSetTarget) {
       this.modFunctionSet = function(value){return this.mapFunction(value, config.mapSetTarget);}.bind(this);
     }
 
-    if ('mapGetTarget' in config && config.mapGet) {
+    if ('mapGetTarget' in config && config.mapGetTarget) {
       this.modFunctionGet = function(value){return this.mapFunction(value, config.mapGetTarget);}.bind(this);
     }
 
     this.modFunctionGetCurrent = this.plain;
-    if ('mapGetCurrent' in config && config.mapGet) {
+    if ('mapGetCurrent' in config && config.mapGetCurrent) {
       this.modFunctionGetCurrent = function(value){return this.mapFunction(value, config.mapGetCurrent);}.bind(this);
     }
 
@@ -1071,6 +1071,7 @@ function GenericPLCAccessory(platform, config, accessoryNumber) {
   else if (config.accessory == 'PLC_SecuritySystem'){
     this.service = new Service.SecuritySystem(this.name);
     this.accessory.addService(this.service);
+    this.modFunctionGetCurrent = this.plain;
 
     informFunction = function(notUsed){
       // get the current target system state and update the value.
@@ -1090,9 +1091,22 @@ function GenericPLCAccessory(platform, config, accessoryNumber) {
     if ('mapSet' in config && config.mapSet) {
       this.modFunctionSet = function(value){return this.mapFunction(value, config.mapSet);}.bind(this);
     }
+    else if ('mapSetTarget' in config && config.mapSetTarget) {
+      this.modFunctionSet = function(value){return this.mapFunction(value, config.mapSetTarget);}.bind(this);
+    }
 
     if ('mapGet' in config && config.mapGet) {
       this.modFunctionGet = function(value){return this.mapFunction(value, config.mapGet);}.bind(this);
+      this.modFunctionGetCurrent = function(value){return this.mapFunction(value, config.mapGet);}.bind(this);
+    }
+    else {
+      if ('mapGetTarget' in config && config.mapGetTarget) {
+        this.modFunctionGet = function(value){return this.mapFunction(value, config.mapGetTarget);}.bind(this);
+      }
+
+      if ('mapGetCurrent' in config && config.mapGetCurrent) {
+        this.modFunctionGetCurrent = function(value){return this.mapFunction(value, config.mapGetCurrent);}.bind(this);
+      }
     }
 
     this.service.getCharacteristic(Characteristic.SecuritySystemCurrentState)
@@ -1100,7 +1114,7 @@ function GenericPLCAccessory(platform, config, accessoryNumber) {
         config.db,
         config.get_SecuritySystemCurrentState,
         "get SecuritySystemCurrentState",
-        this.modFunctionGet
+        this.modFunctionGetCurrent
       );}.bind(this));
 
       this.service.getCharacteristic(Characteristic.SecuritySystemTargetState)
@@ -1455,14 +1469,14 @@ GenericPLCAccessory.prototype = {
       }
       if (this.config.get_CurrentHeatingCoolingState == offset)
       {
-        this.log.debug( "[" + this.name + "] Push CurrentHeatingCoolingState:" + value);
-        this.service.getCharacteristic(Characteristic.CurrentHeatingCoolingState).updateValue(value);
+        this.log.debug( "[" + this.name + "] Push CurrentHeatingCoolingState:" + String(this.modFunctionGetCurrent(parseInt(value))) + "<-" + String(value));
+        this.service.getCharacteristic(Characteristic.CurrentHeatingCoolingState).updateValue(this.modFunctionGetCurrent(parseInt(value)));
         rv = true;
       }
       if (this.config.get_TargetHeatingCoolingState == offset)
       {
-        this.log.debug( "[" + this.name + "] Push TargetHeatingCoolingState:" + value);
-        this.service.getCharacteristic(Characteristic.TargetHeatingCoolingState).updateValue(value);
+        this.log.debug( "[" + this.name + "] Push TargetHeatingCoolingState:" + String(this.modFunctionGet(parseInt(value))) + "<-" + String(value));
+        this.service.getCharacteristic(Characteristic.TargetHeatingCoolingState).updateValue(this.modFunctionGet(parseInt(value)));
         rv = true;
       }
       if (this.config.get_StatusTampered == offset)
@@ -1490,14 +1504,14 @@ GenericPLCAccessory.prototype = {
       }
       if (this.config.get_CurrentHumidifierDehumidifierState == offset)
       {
-        this.log.debug( "[" + this.name + "] Push CurrentHumidifierDehumidifierState:" + value);
-        this.service.getCharacteristic(Characteristic.CurrentHumidifierDehumidifierState).updateValue(value);
+        this.log.debug( "[" + this.name + "] Push CurrentHumidifierDehumidifierState:" + String(this.modFunctionGetCurrent(parseInt(value))) + "<-" + String(value));
+        this.service.getCharacteristic(Characteristic.CurrentHumidifierDehumidifierState).updateValue(this.modFunctionGetCurrent(parseInt(value)));
         rv = true;
       }
       if (this.config.get_TargetHumidifierDehumidifierState == offset)
       {
-        this.log.debug( "[" + this.name + "] Push TargetHumidifierDehumidifierState:" + value);
-        this.service.getCharacteristic(Characteristic.TargetHumidifierDehumidifierState).updateValue(value);
+        this.log.debug( "[" + this.name + "] Push TargetHumidifierDehumidifierState:" + String(this.modFunctionGet(parseInt(value))) + "<-" + String(value));
+        this.service.getCharacteristic(Characteristic.TargetHumidifierDehumidifierState).updateValue(this.modFunctionGet(parseInt(value)));
         rv = true;
       }
       if (this.config.get_CurrentRelativeHumidity == offset)
@@ -1686,8 +1700,8 @@ GenericPLCAccessory.prototype = {
     else if (this.config.accessory == 'PLC_SecuritySystem'){
       if (this.config.get_SecuritySystemCurrentState == offset)
       {
-        this.log.debug( "[" + this.name + "] Push SecuritySystemCurrentState:" + String(this.modFunctionGet(parseInt(value))) + "<-" + String(value));
-        this.service.getCharacteristic(Characteristic.SecuritySystemCurrentState).updateValue(this.modFunctionGet(parseInt(value)));
+        this.log.debug( "[" + this.name + "] Push SecuritySystemCurrentState:" + String(this.modFunctionGetCurrent(parseInt(value))) + "<-" + String(value));
+        this.service.getCharacteristic(Characteristic.SecuritySystemCurrentState).updateValue(this.modFunctionGetCurrent(parseInt(value)));
         rv = true;
       }
       if (this.config.get_SecuritySystemTargetState == offset)
