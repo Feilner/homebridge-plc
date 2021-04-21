@@ -3,6 +3,7 @@ Homebridge plugin for Siemens Step7 and compatible PLCs
 
 [![NPM Version](https://img.shields.io/npm/v/homebridge-plc.svg)](https://www.npmjs.com/package/homebridge-plc)
 [![npm](https://img.shields.io/npm/l/homebridge-plc.svg)](https://www.npmjs.com/package/homebridge-plc) [![npm](https://img.shields.io/npm/dt/homebridge-plc.svg)](https://www.npmjs.com/package/homebridge-plc)
+[![donate](https://img.shields.io/badge/donate-PayPal-blue.svg)](https://www.paypal.me/OFeilner)
 
 SIEMENS S7 PLC plugin for [Homebridge](https://homebridge.io)
 - Uses snap7 for communication therefore compatible with:
@@ -11,7 +12,11 @@ SIEMENS S7 PLC plugin for [Homebridge](https://homebridge.io)
 	- S7 1200 see [Snap7 notes](http://snap7.sourceforge.net/snap7_client.html#1200_1500)
 	- S7 1500 see [Snap7 notes](http://snap7.sourceforge.net/snap7_client.html#1200_1500)
 	- and compatible PLCs e.g. Yaskawa or VIPA
-- Tested with S7-300 compatible PLC and S7-1200
+	- uses PG-Communication (programming device communication) to connect the PLC
+	- optional also OP-Communication (HMI or panel communication) can be used for to connect the PLC
+
+	  	**NOTE:** You may need to increase the connection resources for PG-Communication or OP-Communication within Siemens Simatic Manager or Siemens TIA Portal. The default value is 1 and thus lead to connection problems using programming tool or panel and this plugin at the same time.
+- Tested with S7-300, S7-1200 and S7-300 compatible PLCs from Yaskawa
 - Implementation is based on documentation of the [Homebridge API](https://developers.homebridge.io)
 - Supports [**polling**](#poll) of PLC from homebridge-plc plugin by per accessory defined interval
 - Supports [**push**](#push) from PLC to homebridge-plc plugin by http PUT/GET
@@ -62,6 +67,7 @@ Parameters:
 - `ip`: the IPv4 address of the PLC
 - `rack`: the rack number of the PLC typically 0
 - `slot`: the slot number of the PLC for S7 300/400 typically `2`, for 1200/1500 typically `1`
+- `communicationOP`: **(optional)** when set to `true` OP-Communication is used instead of PG-Communication
 - `enablePolling`: **(optional)** when set to `true` a background task is executed every second enable polling for the accessories
 - `defaultPollInterval` **(optional)** default polling interval for all accessories in seconds. Default value is `10` seconds.
 - `distributePolling` **(optional)** when set to `true` the polling of the accessories does not start at the same time. In order to distribute the PLC load for the queries.
@@ -575,6 +581,7 @@ Note: The example is just an example it contains also some optional settings. Fo
 				"ip": "10.10.10.32",
 				"rack": 0,
 				"slot": 2,
+				"communicationOP": false,
 				"enablePolling": true,
 				"defaultPollInterval": 15,
 				"distributePolling": true,

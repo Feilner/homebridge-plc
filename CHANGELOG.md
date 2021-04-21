@@ -1,4 +1,9 @@
 # Changelog
+## [1.0.30] 2021-04-21
+
+### Added
+- option `communicationOP` to use OP-Communication instead of PG-Communication for communication with the PLC
+
 ## [1.0.29] 2021-04-21
 
 ### Fixed

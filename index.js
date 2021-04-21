@@ -156,30 +156,44 @@ PLC_Platform.prototype = {
 
     //PLC connection check function
   S7ClientConnect: function() {
+      let typeName = ["invalid", "PG-Communication", "OP-Communication"]
       var log = this.log;
       var S7Client = this.S7Client;
       var ip = this.config.ip;
       var rack = this.config.rack;
       var slot = this.config.slot;
+      var type = S7Client.CONNTYPE_PG;
       var rv = false;
+
+      if ( 'communicationOP' in this.config && this.config.communicationOP) {
+        type = S7Client.CONNTYPE_OP;
+      }
 
       if (S7Client.Connected()) {
         rv = true;
       }
       else {
-          log("Connecting to %s (%s:%s)", ip, rack, slot);
+          log("Connecting to %s (%s:%s) %s", ip, rack, slot, typeName[type]);
 
           if (!this.isConnectOngoing) {
             this.isConnectOngoing = true;
-              var ok = S7Client.ConnectTo(ip, rack, slot);
+            var ok = S7Client.SetConnectionType(type);
+            if(ok) {
+
+              ok = S7Client.ConnectTo(ip, rack, slot);
               this.isConnectOngoing = false;
               if(ok) {
-                log("Connected to %s (%s:%s)", ip, rack, slot);
+                log("Connected to %s (%s:%s) %s", ip, rack, slot, typeName[type]);
                 rv = true;
               }
               else {
                 log.error("Connection to %s (%s:%s) failed", ip, rack, slot);
               }
+            }
+            else {
+              this.isConnectOngoing = false;
+              log.error("Set connection type to %s (%s:%s) %s failed", ip, rack, slot, typeName[type]);
+            }
           }
       }
     return rv;
