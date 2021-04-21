@@ -1,4 +1,8 @@
 # Changelog
+## [1.0.29] 2021-04-21
+
+### Fixed
+- Correct option `mapSetTarget`, `mapGetTarget`  and `mapGetCurrent` function for `PLC_Thermostat` and `PLC_HumidifierDehumidifier`
 
 ## [1.0.28] 2021-02-26
 
