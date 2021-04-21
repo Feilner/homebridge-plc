@@ -7,15 +7,14 @@ Homebridge plugin for Siemens Step7 and compatible PLCs
 
 SIEMENS S7 PLC plugin for [Homebridge](https://homebridge.io)
 - Uses snap7 for communication therefore compatible with:
-	- S7 300
-	- S7 400
-	- S7 1200 see [Snap7 notes](http://snap7.sourceforge.net/snap7_client.html#1200_1500)
-	- S7 1500 see [Snap7 notes](http://snap7.sourceforge.net/snap7_client.html#1200_1500)
-	- and compatible PLCs e.g. Yaskawa or VIPA
-	- uses PG-Communication (programming device communication) to connect the PLC
-	- optional also OP-Communication (HMI or panel communication) can be used for to connect the PLC
-
-	  	**NOTE:** You may need to increase the connection resources for PG-Communication or OP-Communication within Siemens Simatic Manager or Siemens TIA Portal. The default value is 1 and thus lead to connection problems using programming tool or panel and this plugin at the same time.
+	* S7 300
+	* S7 400
+	* S7 1200 see [Snap7 notes](http://snap7.sourceforge.net/snap7_client.html#1200_1500)
+	* S7 1500 see [Snap7 notes](http://snap7.sourceforge.net/snap7_client.html#1200_1500)
+	* and compatible PLCs e.g. Yaskawa or VIPA
+	* uses PG-Communication (programming device communication) to connect the PLC
+	* optional also OP-Communication (HMI or panel communication) can be used for to connect the PLC
+	* **NOTE:** You may need to increase the connection resources for PG-Communication or OP-Communication within Siemens Simatic Manager or Siemens TIA Portal. The default value is 1 and thus lead to connection problems using programming tool or panel and this plugin at the same time.	 
 - Tested with S7-300, S7-1200 and S7-300 compatible PLCs from Yaskawa
 - Implementation is based on documentation of the [Homebridge API](https://developers.homebridge.io)
 - Supports [**polling**](#poll) of PLC from homebridge-plc plugin by per accessory defined interval
@@ -447,12 +446,9 @@ alarm system
 ### <a name='PLC_StatelessProgrammableSwitch'></a>Button as `PLC_StatelessProgrammableSwitch`, Doorbell as `PLC_Doorbell`
 stateless switch from PLC to home app.
 
-Trigger actions in home app only works with control center e.g. AppleTV or HomePod. [**Polling**](#poll) or [**push**](#push) from PLC required!
-
-[**Polling mode**](#poll) homebridge-plc polls `isEvent`. The PLC sets the bit to `true`. hombebridge-plc reads `get_ProgrammableSwitchEvent` and set the `isEvent` bit to `false`.
-
-[**Push mode**](#push) PLC informs homebridge-plc by http request with the value for `get_ProgrammableSwitchEvent`.
-
+Trigger actions in home app only works with control center e.g. AppleTV or HomePod. [**Polling**](#poll) or [**push**](#push) from PLC required!\
+[**Polling mode**](#poll) homebridge-plc polls `isEvent`. The PLC sets the bit to `true`. hombebridge-plc reads `get_ProgrammableSwitchEvent` and set the `isEvent` bit to `false`.\
+[**Push mode**](#push) PLC informs homebridge-plc by http request with the value for `get_ProgrammableSwitchEvent`.\
 [**Control**](#control) External simulates event by http request with the value for `get_ProgrammableSwitchEvent`.
 
 ![homebridge pic](doc/statelessswitch.png)
