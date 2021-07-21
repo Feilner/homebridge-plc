@@ -286,8 +286,8 @@ function GenericPLCAccessory(platform, config, accessoryNumber) {
           'set Brightness'
           );}.bind(this))
           .setProps({
-            minValue: config.minValue || 20,
-            maxValue: config.maxValue || 100,
+            minValue: ('minValue' in config) ? config.minValue : 20,
+            maxValue: ('maxValue' in config) ? config.maxValue : 100,
             minStep: config.minStep || 1
         });
       }
@@ -308,8 +308,8 @@ function GenericPLCAccessory(platform, config, accessoryNumber) {
       'get CurrentTemperature'
       );}.bind(this))
     .setProps({
-      minValue: config.minValue || -50,
-      maxValue: config.maxValue || 110,
+      minValue: ('minValue' in config) ? config.minValue : -50,
+      maxValue: ('maxValue' in config) ? config.maxValue : 110,
       minStep: config.minStep || 0.5
     });
 
@@ -346,8 +346,8 @@ function GenericPLCAccessory(platform, config, accessoryNumber) {
       'get CurrentRelativeHumidity'
       );}.bind(this))
     .setProps({
-      minValue: config.minValue || 0,
-      maxValue: config.maxValue || 100,
+      minValue: ('minValue' in config) ? config.minValue : 0,
+      maxValue: ('maxValue' in config) ? config.maxValue : 100,
       minStep: config.minStep || 1
     });
     if ('get_StatusTampered' in config) {
@@ -479,8 +479,8 @@ function GenericPLCAccessory(platform, config, accessoryNumber) {
       'set TargetTemperature'
       );}.bind(this))
       .setProps({
-        minValue: config.minValue || 15,
-        maxValue: config.maxValue || 27,
+        minValue: ('minValue' in config) ? config.minValue : 15,
+        maxValue: ('maxValue' in config) ? config.maxValue : 27,
         minStep: config.minStep || 0.5
     });
 
@@ -505,8 +505,8 @@ function GenericPLCAccessory(platform, config, accessoryNumber) {
         'set TargetRelativeHumidity'
         );}.bind(this))
         .setProps({
-          minValue: config.minHumidityValue || 0,
-          maxValue: config.maxHumidityValue || 100,
+          minValue: ('minHumidityValue' in config) ? config.minValue : 0,
+          maxValue: ('maxHumidityValue' in config) ? config.maxValue : 100,
           minStep: config.minHumidityStep || 1
       });
     }
