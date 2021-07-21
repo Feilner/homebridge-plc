@@ -1,4 +1,9 @@
 # Changelog
+## [1.0.31] 2021-07-21
+
+### Fixed
+- option `minValue` and `maxValue` to also work with value 0
+
 ## [1.0.30] 2021-04-21
 
 ### Added
