@@ -1,4 +1,16 @@
 # Changelog
+## [1.0.32] 2021-11-11
+
+With the latest update of the Homebridge UI docker container the the plugin does not start!
+
+Error: The module ... node_snap7.node was compile against a different Node.js version ... Please try re-compiling or re-installing ...
+
+During installation of this module snap7 is downloaded and compiled against the installed version of Node.js
+Therefore the issue is fixed for shure by deinstalling and installing the homebridge_plc plugin.
+
+### Changed
+- Updated dependant version of node-snap7 in hope that triggers an reinstall of node-snap7.
+
 ## [1.0.31] 2021-07-21
 
 ### Fixed
