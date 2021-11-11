@@ -1,6 +1,6 @@
 {
   "name": "homebridge-plc",
-  "version": "1.0.31",
+  "version": "1.0.32",
   "description": "Homebridge plugin for Siemens Step7 and compatible PLCs. (https://github.com/homebridge)",
   "license": "MIT",
   "keywords": [
@@ -27,7 +27,7 @@
   },
   "preferGlobal": true,
   "dependencies": {
-    "node-snap7": ">=1.0.4"
+    "node-snap7": ">=1.0.5"
   },
   "homepage": "https://github.com/Feilner/homebridge-plc#readme",
   "main": "index.js",
