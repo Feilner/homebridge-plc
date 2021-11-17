@@ -34,6 +34,7 @@ SIEMENS S7 PLC plugin for [Homebridge](https://homebridge.io)
 	* [Occupancy Sensor as `PLC_OccupancySensor`](#PLC_OccupancySensor)
 	* [Motion Sensor as `PLC_MotionSensor`](#PLC_MotionSensor)
 	* [Contact Sensor as `PLC_ContactSensor`](#PLC_ContactSensor)
+	* [Contact Sensor as `PLC_LeakSensor`](#PLC_LeakSensor)
 	* [Faucet as `PLC_Faucet`](#PLC_Faucet)
 	* [Valve as `PLC_Valve`](#PLC_Valve)
 	* [Security System as `PLC_SecuritySystem`](#PLC_SecuritySystem)
@@ -366,6 +367,25 @@ generic contact sensor. The home app allows to display as window, door, blind/sh
 - `get_ContactSensorState`: **(push support)** offset and bit get the current status S7 type `Bool` e.g. `55.0` for `DB4DBX55.0`
 	- `false`: closed
 	- `true`: open
+- `get_StatusTampered`: **(optional)** **(push support)** offset and bit to tamper detection. (Home app shows this only within the options) S7 type `Bool` e.g. `55.2` for `DB4DBX55.2`
+	- `false`: ok
+	- `true`: tampered
+- `get_StatusLowBattery`: **(optional)** **(push support)** offset and bit to battery low detection. (Home app does not inform with push notification) S7 type `Bool` e.g. `55.3` for `DB4DBX55.3`
+	- `false`: ok
+	- `true`: battery low
+
+### <a name='PLC_LeakSensor'></a>Contact Sensor as `PLC_LeakSensor`
+leak sensor
+
+- `name`: unique name of the accessory
+- `manufacturer`: **(optional)** description
+- `db`: s7 data base number e.g. `4` for `DB4`
+- `invert`: **(optional)** set to `true` inverts the bit to `false:closed` and `true:open`.
+- `enablePolling`: **(optional)** when set to `true` the current state will be polled. It is mandatory as well to enable polling mode on platform level.
+- `pollInterval`: **(optional)** poll interval in seconds. Default value see platform definition.
+- `get_LeakDetected`: **(push support)** offset and bit get the current status S7 type `Bool` e.g. `55.0` for `DB4DBX55.0`
+	- `false`: leak not detected
+	- `true`: leak detected
 - `get_StatusTampered`: **(optional)** **(push support)** offset and bit to tamper detection. (Home app shows this only within the options) S7 type `Bool` e.g. `55.2` for `DB4DBX55.2`
 	- `false`: ok
 	- `true`: tampered

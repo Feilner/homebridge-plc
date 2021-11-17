@@ -970,6 +970,43 @@ function GenericPLCAccessory(platform, config, accessoryNumber) {
       }
   }
   // INIT handling ///////////////////////////////////////////////
+  // LeakSensor
+  ////////////////////////////////////////////////////////////////
+  else if (config.accessory == 'PLC_LeakSensor'){
+    this.service = new Service.LeakSensor(this.name);
+    this.accessory.addService(this.service);
+
+    if ('invert' in config && config.invert) {
+        this.modFunctionGet = this.invert_bit;
+    }
+
+      this.service.getCharacteristic(Characteristic.LeakDetected)
+      .on('get', function(callback) {this.getBit(callback,
+        config.db,
+        Math.floor(config.get_LeakDetected), Math.floor((config.get_LeakDetected*10)%10),
+        "get get_LeakDetected",
+        this.modFunctionGet
+      );}.bind(this));
+
+      if ('get_StatusTampered' in config) {
+        this.service.getCharacteristic(Characteristic.StatusTampered)
+        .on('get', function(callback) {this.getBit(callback,
+          config.db,
+          Math.floor(config.get_StatusTampered), Math.floor((config.get_StatusTampered*10)%10),
+          'get StatusTampered'
+        );}.bind(this));
+      }
+
+      if ('get_StatusLowBattery' in config) {
+        this.service.getCharacteristic(Characteristic.StatusLowBattery)
+        .on('get', function(callback) {this.getBit(callback,
+          config.db,
+          Math.floor(config.get_StatusLowBattery), Math.floor((config.get_StatusLowBattery*10)%10),
+          'get StatusLowBattery'
+        );}.bind(this));
+      }
+  }
+  // INIT handling ///////////////////////////////////////////////
   // Faucet
   ////////////////////////////////////////////////////////////////
   else if (config.accessory == 'PLC_Faucet'){
@@ -1675,6 +1712,29 @@ GenericPLCAccessory.prototype = {
       }
     }
     // PUSH handling ///////////////////////////////////////////////
+    // LeakSensor
+    ////////////////////////////////////////////////////////////////
+    else if (this.config.accessory == 'PLC_LeakSensor'){
+      if (this.config.get_LeakDetected == offset)
+      {
+        this.log.debug( "[" + this.name + "] Push LeakDetected:" + String(this.modFunctionGet(parseInt(value))) + "<-" + String(value));
+        this.service.getCharacteristic(Characteristic.LeakDetected).updateValue(this.modFunctionGet(parseInt(value)));
+        rv = true;
+      }
+      if (this.config.get_StatusTampered == offset)
+      {
+        this.log.debug( "[" + this.name + "] Push StatusTampered:" + value);
+        this.service.getCharacteristic(Characteristic.StatusTampered).updateValue(value);
+        rv = true;
+      }
+      if (this.config.get_StatusLowBattery == offset)
+      {
+        this.log.debug( "[" + this.name + "] Push StatusLowBattery:" + value);
+        this.service.getCharacteristic(Characteristic.StatusLowBattery).updateValue(value);
+        rv = true;
+      }
+    }
+    // PUSH handling ///////////////////////////////////////////////
     // Faucet
     ////////////////////////////////////////////////////////////////
     else if (this.config.accessory == 'PLC_Faucet'){
@@ -1920,7 +1980,9 @@ GenericPLCAccessory.prototype = {
     // CONTROL handling ////////////////////////////////////////////
     // ContactSensor
     ////////////////////////////////////////////////////////////////
-
+    // CONTROL handling ////////////////////////////////////////////
+    // LeakDetected
+    ////////////////////////////////////////////////////////////////
     // CONTROL handling ////////////////////////////////////////////
     // Faucet
     ////////////////////////////////////////////////////////////////
@@ -2249,6 +2311,27 @@ GenericPLCAccessory.prototype = {
       this.service.getCharacteristic(Characteristic.ContactSensorState).getValue(function(err, value) {
         if (!err) {
           this.service.getCharacteristic(Characteristic.ContactSensorState).updateValue(value);
+        }
+      }.bind(this));
+      this.service.getCharacteristic(Characteristic.StatusTampered).getValue(function(err, value) {
+        if (!err) {
+          this.service.getCharacteristic(Characteristic.StatusTampered).updateValue(value);
+        }
+      }.bind(this));
+      this.service.getCharacteristic(Characteristic.StatusLowBattery).getValue(function(err, value) {
+        if (!err) {
+          this.service.getCharacteristic(Characteristic.StatusLowBattery).updateValue(value);
+        }
+      }.bind(this));
+    }
+    // POLL handling ///////////////////////////////////////////////
+    // LeakSensor
+    ////////////////////////////////////////////////////////////////
+    else if (this.config.accessory == 'PLC_LeakSensor') {
+      // get the current target system state and update the value.
+      this.service.getCharacteristic(Characteristic.LeakDetected).getValue(function(err, value) {
+        if (!err) {
+          this.service.getCharacteristic(Characteristic.LeakDetected).updateValue(value);
         }
       }.bind(this));
       this.service.getCharacteristic(Characteristic.StatusTampered).getValue(function(err, value) {

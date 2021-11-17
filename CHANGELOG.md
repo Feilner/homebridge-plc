@@ -1,4 +1,10 @@
 # Changelog
+
+## [1.0.33] 2021-11-xx
+
+### Added
+- add `PLC_LeakSensor`
+
 ## [1.0.32] 2021-11-11
 
 With the latest update of the Homebridge UI docker container the the plugin does not start!
