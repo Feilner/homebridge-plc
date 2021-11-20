@@ -14,7 +14,7 @@ SIEMENS S7 PLC plugin for [Homebridge](https://homebridge.io)
 	* and compatible PLCs e.g. Yaskawa or VIPA
 	* uses PG-Communication (programming device communication) to connect the PLC
 	* optional also OP-Communication (HMI or panel communication) can be used for to connect the PLC
-	* **NOTE:** You may need to increase the connection resources for PG-Communication or OP-Communication within Siemens Simatic Manager or Siemens TIA Portal. The default value is 1 and thus lead to connection problems using programming tool or panel and this plugin at the same time.	 
+	* **NOTE:** You may need to increase the connection resources for PG-Communication or OP-Communication within Siemens Simatic Manager or Siemens TIA Portal. The default value is 1 and thus lead to connection problems using programming tool or panel and this plugin at the same time.
 - Tested with S7-300, S7-1200 and S7-300 compatible PLCs from Yaskawa
 - Implementation is based on documentation of the [Homebridge API](https://developers.homebridge.io)
 - Supports [**polling**](#poll) of PLC from homebridge-plc plugin by per accessory defined interval
@@ -27,7 +27,7 @@ SIEMENS S7 PLC plugin for [Homebridge](https://homebridge.io)
 	* [Temperature Sensor as `PLC_TemperatureSensor`](#PLC_TemperatureSensor)
 	* [Humidity Sensor as `PLC_HumiditySensor`](#PLC_HumiditySensor)
 	* [Thermostat as `PLC_Thermostat`](#PLC_Thermostat)
-    * [Humidifier/Dehumidifier as `PLC_HumidifierDehumidifier`](#PLC_HumidifierDehumidifier)
+		* [Humidifier/Dehumidifier as `PLC_HumidifierDehumidifier`](#PLC_HumidifierDehumidifier)
 	* [Shutter as `PLC_WindowCovering`](#PLC_Window)
 	* [Window as `PLC_Window`](#PLC_Window)
 	* [Door as `PLC_Door`](#PLC_Window)
@@ -44,6 +44,7 @@ SIEMENS S7 PLC plugin for [Homebridge](https://homebridge.io)
 	* [Boolean lock mechanism as `PLC_LockMechanismBool`](#PLC_LockMechanismBool)
 	* [Garage door as `PLC_GarageDoorOpener`](#PLC_GarageDoorOpener)
 	* [Smoke Sensor as `PLC_SmokeSensor`](#PLC_SmokeSensor)
+	* [Smoke Sensor as `PLC_Fan`](#PLC_Fan)
 
 # Installation
 
@@ -187,12 +188,12 @@ temperature / humidity sensor with temperature / humidity regulation
 - `pollInterval`: **(optional)** poll interval in seconds. Default value see platform definition.
 - `get_CurrentTemperature`: **(push support)** offset to get current temperature S7 type `Real` e.g. `0` for `DB4DBD0`
 - Target Temperature
-  - `get_TargetTemperature`: **(push support)** offset to get target temperature S7 type `Real` e.g. `4` for `DB4DBD4`
-  - `set_TargetTemperature`: **(control support)** offset to set current temperature S7 type `Real` e.g. `4` for `DB4DBD4` (can have same value as get_TargetTemperature)
-  - target temperature range definitions **(optional)**
-  	- `minValue` default value: 15
-  	- `maxValue` default value: 27
-  	- `minStep` default value: 0.5 **Note:** lower values seems not be supported by Homekit
+	- `get_TargetTemperature`: **(push support)** offset to get target temperature S7 type `Real` e.g. `4` for `DB4DBD4`
+	- `set_TargetTemperature`: **(control support)** offset to set current temperature S7 type `Real` e.g. `4` for `DB4DBD4` (can have same value as get_TargetTemperature)
+	- target temperature range definitions **(optional)**
+		- `minValue` default value: 15
+		- `maxValue` default value: 27
+		- `minStep` default value: 0.5 **Note:** lower values seems not be supported by Homekit
 - `get_CurrentRelativeHumidity`: **(optional)** **(push support)** offset to get current humidity S7 type `Real` e.g. `0` for `DB4DBD0`
 - Target Humidity
 	- `get_TargetRelativeHumidity`: **(optional)** **(push support)** offset to get target temperature S7 type `Real` e.g. `4` for `DB4DBD4`
@@ -202,24 +203,24 @@ temperature / humidity sensor with temperature / humidity regulation
 		- `maxHumidityValue` default value: 100
 		- `minHumidityStep` default value: 1
 - Current State:
-  - `get_CurrentHeatingCoolingState`: **(optional)** **(push support)** offset to get current heating/cooling state S7 type `Byte` e.g. `8` for `DB4DBB8`. When not defined fixed `1`: heating is used.
-  	- `0`: inactive (shown as green in home app)
-  	- `1`: heating (shown as orange in home app)
-  	- `2`: cooling (shown as blue in home app)
-  - `mapGetCurrent`: **(optional)** define mapping array for `get_CurrentHeatingCoolingState`. The PLC value is used as index into the table. e.g. `[0, 2]` which maps the PLC value `0->0 1->2` when the PLC supports only two states with `0:inactive` and `1:cooling`.
+	- `get_CurrentHeatingCoolingState`: **(optional)** **(push support)** offset to get current heating/cooling state S7 type `Byte` e.g. `8` for `DB4DBB8`. When not defined fixed `1`: heating is used.
+		- `0`: inactive (shown as green in home app)
+		- `1`: heating (shown as orange in home app)
+		- `2`: cooling (shown as blue in home app)
+	- `mapGetCurrent`: **(optional)** define mapping array for `get_CurrentHeatingCoolingState`. The PLC value is used as index into the table. e.g. `[0, 2]` which maps the PLC value `0->0 1->2` when the PLC supports only two states with `0:inactive` and `1:cooling`.
 - Target State:
-  - `get_TargetHeatingCoolingState` **(optional)** **(push support)** offset to get target heating/cooling state. S7 type `Byte` e.g. `9` for `DB4DBB9`. When not defined fixed `3`: automatic is used.
-  	- `0`: off
-  	- `1`: heat
-  	- `2`: cool
-  	- `3`: automatic
-  - `mapGetTarget`: **(optional)** define mapping array for `get_TargetHeatingCoolingState`. The PLC value is used as index into the table. e.g. `[0, 3]` which maps the PLC value `0->0 1->3` when the PLC supports only two states with `0:off` and `1:automatic`.
-  - `set_TargetHeatingCoolingState`  **(optional)** **(control support)** offset to set target heating/cooling state. Can be identical with `get_TargetHeatingCoolingState`. Has to be defined when `get_TargetHeatingCoolingState` is defined. When not defined writes changes are ignored. S7 type `Byte` e.g. `9` for `DB4DBB9`.
-  	- `0`: off
-  	- `1`: heat
-  	- `2`: cool
-  	- `3`: automatic
-  - `mapSetTarget`: **(optional)** define mapping array for `set_TargetHeatingCoolingState`. The home app value is used as index into the table. e.g. `[0, 1, 0, 3]` which maps the PLC value `0->0 1->1 2->0, 3->3` when the PLC supports only two states with `0:off` and `1:heat` and `3:automatic`. The state cool is mapped to off.
+	- `get_TargetHeatingCoolingState` **(optional)** **(push support)** offset to get target heating/cooling state. S7 type `Byte` e.g. `9` for `DB4DBB9`. When not defined fixed `3`: automatic is used.
+		- `0`: off
+		- `1`: heat
+		- `2`: cool
+		- `3`: automatic
+	- `mapGetTarget`: **(optional)** define mapping array for `get_TargetHeatingCoolingState`. The PLC value is used as index into the table. e.g. `[0, 3]` which maps the PLC value `0->0 1->3` when the PLC supports only two states with `0:off` and `1:automatic`.
+	- `set_TargetHeatingCoolingState`	**(optional)** **(control support)** offset to set target heating/cooling state. Can be identical with `get_TargetHeatingCoolingState`. Has to be defined when `get_TargetHeatingCoolingState` is defined. When not defined writes changes are ignored. S7 type `Byte` e.g. `9` for `DB4DBB9`.
+		- `0`: off
+		- `1`: heat
+		- `2`: cool
+		- `3`: automatic
+	- `mapSetTarget`: **(optional)** define mapping array for `set_TargetHeatingCoolingState`. The home app value is used as index into the table. e.g. `[0, 1, 0, 3]` which maps the PLC value `0->0 1->1 2->0, 3->3` when the PLC supports only two states with `0:off` and `1:heat` and `3:automatic`. The state cool is mapped to off.
 - `get_StatusTampered`: **(optional)** **(push support)** offset and bit to tamper detection. (Home app shows this only within the options) S7 type `Bool` e.g. `55.2` for `DB4DBX55.2`
 	- `false`: ok
 	- `true`: tampered
@@ -238,39 +239,39 @@ Humidifier and/or Dehumidifier
 - `pollInterval`: **(optional)** poll interval in seconds. Default value see platform definition.
 - `get_CurrentRelativeHumidity`: **(push support)** offset to get current humidity S7 type `Real` e.g. `55` for `DB4DBD55`
 - Active
-  - `get_Active`: **(optional)** **(push support)** offset and bit get active state S7 type `Bool` e.g. `55.0` for `DB4DBX55.0`
-  - `set_Active`: **(optional)** **(push support)** offset and bit set active state S7 type `Bool` e.g. `55.0` for `DB4DBX55.0`
+	- `get_Active`: **(optional)** **(push support)** offset and bit get active state S7 type `Bool` e.g. `55.0` for `DB4DBX55.0`
+	- `set_Active`: **(optional)** **(push support)** offset and bit set active state S7 type `Bool` e.g. `55.0` for `DB4DBX55.0`
 - Current State
-  - `get_CurrentHumidifierDehumidifierState`: **(optional)** **(push support)** offset to get current state. Default value `1:idle`. S7 type `Byte` e.g. `55` for `DB4DBD55`
-  	- `0`: inactive
-  	- `1`: idle
-  	- `2`: humidifying
-  	- `3`: dehumidifying
-  - `mapGetCurrent`: **(optional)** define mapping array for `get_CurrentHumidifierDehumidifierState`. The PLC value is used as index into the table. e.g. `[1, 3]` which maps the PLC value `0->1 1->3` when the PLC supports only two states with `0:idle` and `1:dehumidifying`.
+	- `get_CurrentHumidifierDehumidifierState`: **(optional)** **(push support)** offset to get current state. Default value `1:idle`. S7 type `Byte` e.g. `55` for `DB4DBD55`
+		- `0`: inactive
+		- `1`: idle
+		- `2`: humidifying
+		- `3`: dehumidifying
+	- `mapGetCurrent`: **(optional)** define mapping array for `get_CurrentHumidifierDehumidifierState`. The PLC value is used as index into the table. e.g. `[1, 3]` which maps the PLC value `0->1 1->3` when the PLC supports only two states with `0:idle` and `1:dehumidifying`.
 - Target State
-  - `default_TargetHumidifierDehumidifierState`: **(optional)** defines alternative value thats returned then `get_TargetHumidifierDehumidifierState` is not defined. Default value `0:auto`
-  	- `0`: auto (humidifier or dehumidifier)
-  	- `1`: humidifier
-  	- `2`: dehumidifier
-  - `get_TargetHumidifierDehumidifierState`: **(optional)** **(push support)** offset to get current target state S7 type `Byte` e.g. `55` for `DB4DBD55`
-  	- `0`: auto (humidifier or dehumidifier)
-  	- `1`: humidifier
-  	- `2`: dehumidifier
-  - `set_TargetHumidifierDehumidifierState`: **(optional)** **(control support)**offset to set current target state. Needs to be defined when `get_TargetHumidifierDehumidifierState` is set  S7 type `Byte` e.g. `55` for `DB4DBD55`
-  	- `0`: auto (humidifier or dehumidifier)
-  	- `1`: humidifier
-  	- `2`: dehumidifier
-  - `mapGetTarget`: **(optional)** define mapping array for `get_TargetHumidifierDehumidifierState`. The PLC value is used as index into the table. e.g. `[0]` which maps the PLC value `0->2 1->3` when the PLC supports only one states with `0:dehumidifier.
-  - `mapSetTarget`: **(optional)** define mapping array for `set_TargetHumidifierDehumidifierState`. The home app value is used as index into the table. e.g. `[2, 2, 2
+	- `default_TargetHumidifierDehumidifierState`: **(optional)** defines alternative value thats returned then `get_TargetHumidifierDehumidifierState` is not defined. Default value `0:auto`
+		- `0`: auto (humidifier or dehumidifier)
+		- `1`: humidifier
+		- `2`: dehumidifier
+	- `get_TargetHumidifierDehumidifierState`: **(optional)** **(push support)** offset to get current target state S7 type `Byte` e.g. `55` for `DB4DBD55`
+		- `0`: auto (humidifier or dehumidifier)
+		- `1`: humidifier
+		- `2`: dehumidifier
+	- `set_TargetHumidifierDehumidifierState`: **(optional)** **(control support)**offset to set current target state. Needs to be defined when `get_TargetHumidifierDehumidifierState` is set	S7 type `Byte` e.g. `55` for `DB4DBD55`
+		- `0`: auto (humidifier or dehumidifier)
+		- `1`: humidifier
+		- `2`: dehumidifier
+	- `mapGetTarget`: **(optional)** define mapping array for `get_TargetHumidifierDehumidifierState`. The PLC value is used as index into the table. e.g. `[0]` which maps the PLC value `0->2 1->3` when the PLC supports only one states with `0:dehumidifier.
+	- `mapSetTarget`: **(optional)** define mapping array for `set_TargetHumidifierDehumidifierState`. The home app value is used as index into the table. e.g. `[2, 2, 2
 - Rotation Speed
-  - `get_RotationSpeed`: **(optional)** **(push support)** offset to get rotation speed state S7 type `Real` e.g. `8` for `DB4DBB8`.
-  - `set_RotationSpeed` **(optional)** **(push support)** offset to get set speed state. S7 type `Real` e.g. `9` for `DB4DBB9`.
+	- `get_RotationSpeed`: **(optional)** **(push support)** offset to get rotation speed state S7 type `Real` e.g. `8` for `DB4DBB8`.
+	- `set_RotationSpeed` **(optional)** **(push support)** offset to get set speed state. S7 type `Real` e.g. `9` for `DB4DBB9`.
 - Swing Mode
-  - `get_SwingMode`: **(optional)** **(push support)** offset to get rotation speed state S7 type `Bool` e.g. `8` for `DB4DBB8`.
-  - `set_SwingMode` **(optional)** **(push support)** offset to get set speed state. S7 type `Bool` e.g. `9` for `DB4DBB9`.
+	- `get_SwingMode`: **(optional)** **(push support)** offset to get rotation speed state S7 type `Bool` e.g. `8` for `DB4DBB8`.
+	- `set_SwingMode` **(optional)** **(push support)** offset to get set speed state. S7 type `Bool` e.g. `9` for `DB4DBB9`.
 - Water Level
-  - `get_WaterLevel`: **(optional)** **(push support)** offset to get rotation speed state S7 type `Real` e.g. `8` for `DB4DBB8`.
-  - `set_WaterLevel` **(optional)** **(push support)** offset to get set speed state. S7 type `Real` e.g. `9` for `DB4DBB9`.
+	- `get_WaterLevel`: **(optional)** **(push support)** offset to get rotation speed state S7 type `Real` e.g. `8` for `DB4DBB8`.
+	- `set_WaterLevel` **(optional)** **(push support)** offset to get set speed state. S7 type `Real` e.g. `9` for `DB4DBB9`.
 - `get_StatusTampered`: **(optional)** **(push support)** offset and bit to tamper detection. (Home app shows this only within the options) S7 type `Bool` e.g. `55.2` for `DB4DBX55.2`
 	- `false`: ok
 	- `true`: tampered
@@ -291,23 +292,23 @@ motor driven blinds, windows and doors. Supports also manual driven blinds, wind
 - `enablePolling`: **(optional)** when set to `true` the current state will be polled. It is mandatory as well to enable polling mode on platform level.
 - `pollInterval`: **(optional)** poll interval in seconds. Default value see platform definition.
 - Current position:
-  - `get_CurrentPosition`: **(push support)** offset to get current position `0:closed 100:open` S7 type `Byte` e.g. `0` for `DB4DBB0`
-    - `0`: closed
-    - `in between`: partly open
-    - `100`: open
-  - `invert`: **(optional)** set to `true` to inverts the values of current and target position from `0:closed 100:open` to `100:closed 0:open`
-  - `mapGet`: **(optional)** define mapping array for get position. The PLC value is used as index into the table. e.g. `[0, 25, 100]` which maps the PLC value `0->0 1->25 2->100` this this is useful e.g. for window open state.
+	- `get_CurrentPosition`: **(push support)** offset to get current position `0:closed 100:open` S7 type `Byte` e.g. `0` for `DB4DBB0`
+		- `0`: closed
+		- `in between`: partly open
+		- `100`: open
+	- `invert`: **(optional)** set to `true` to inverts the values of current and target position from `0:closed 100:open` to `100:closed 0:open`
+	- `mapGet`: **(optional)** define mapping array for get position. The PLC value is used as index into the table. e.g. `[0, 25, 100]` which maps the PLC value `0->0 1->25 2->100` this this is useful e.g. for window open state.
 - Target position:
-  -  if one of the **(optional)** target position settings need specified all are needed. If not specified it os not movable ans sticks to current position.
-  - `get_TargetPosition`: **(optional)** **(push support)** offset to get target position S7 type `Byte` e.g. `1` for `DB4DBB1` (can have same value as set_TargetPosition)
-    	- `0`: closed
-    	- `in between`: partly open
-    	- `100`: open
-  - `set_TargetPosition`: **(optional)** **(control support)** offset to set current position `0:closed 100:open` S7 type `Byte` e.g. `2` for `DB4DBB2` (can have same value as get_TargetPosition)
-    - `0`: closed
-    - `in between`: partly open
-    - `100`: open
-  - `invert`: **(optional)** set to `true` to inverts the values of current and target position from `0:closed 100:open` to `100:closed 0:open`
+	-	if one of the **(optional)** target position settings need specified all are needed. If not specified it os not movable ans sticks to current position.
+	- `get_TargetPosition`: **(optional)** **(push support)** offset to get target position S7 type `Byte` e.g. `1` for `DB4DBB1` (can have same value as set_TargetPosition)
+			- `0`: closed
+			- `in between`: partly open
+			- `100`: open
+	- `set_TargetPosition`: **(optional)** **(control support)** offset to set current position `0:closed 100:open` S7 type `Byte` e.g. `2` for `DB4DBB2` (can have same value as get_TargetPosition)
+		- `0`: closed
+		- `in between`: partly open
+		- `100`: open
+	- `invert`: **(optional)** set to `true` to inverts the values of current and target position from `0:closed 100:open` to `100:closed 0:open`
 - `get_PositionState`: **(optional)** **(push support)** offset to current movement state if not defined fixed `2`is returned S7 type `Byte` e.g. `3` for `DB4DBB3`
 	- `0`: down
 	- `1`: up
@@ -377,6 +378,7 @@ generic contact sensor. The home app allows to display as window, door, blind/sh
 ### <a name='PLC_LeakSensor'></a>Contact Sensor as `PLC_LeakSensor`
 leak sensor
 
+![homebridge pic](doc/leaksensor.png)
 - `name`: unique name of the accessory
 - `manufacturer`: **(optional)** description
 - `db`: s7 data base number e.g. `4` for `DB4`
@@ -444,22 +446,22 @@ alarm system
 - `enablePolling`: **(optional)** when set to `true` the current state of the security system will be polled.
 - `pollInterval`: **(optional)** poll interval in seconds. Default value see platform definition.
 - Current State:
-  - `get_SecuritySystemCurrentState`: **(push support)** offset to current security system state S7 type `Byte` e.g. `3` for `DB4DBB3`
-  	- `0`: armed stay at home
-  	- `1`: armed away from home
-  	- `2`: armed night
-  	- `3`: disarmed
-  	- `4`: alarm triggered
-  - `mapGetCurrent`: **(optional)** define mapping array for get security system state. The PLC value is used as index into the table. e.g. `[3, 1]` which maps the PLC value `0->3 1->2` when the PLC supports only two states with `0:disarmed` and `1:armed` and `2:alarm`.
+	- `get_SecuritySystemCurrentState`: **(push support)** offset to current security system state S7 type `Byte` e.g. `3` for `DB4DBB3`
+		- `0`: armed stay at home
+		- `1`: armed away from home
+		- `2`: armed night
+		- `3`: disarmed
+		- `4`: alarm triggered
+	- `mapGetCurrent`: **(optional)** define mapping array for get security system state. The PLC value is used as index into the table. e.g. `[3, 1]` which maps the PLC value `0->3 1->2` when the PLC supports only two states with `0:disarmed` and `1:armed` and `2:alarm`.
 - Target State:
-  - `set_SecuritySystemTargetState`: **(control support)** offset to set target security system state S7 type `Byte` e.g. `5` for `DB4DBB4`
-  - `get_SecuritySystemTargetState`: **(push support)** offset to set target security system state S7 type `Byte` e.g. `6` for `DB4DBB6`
-  	- `0`: armed stay at home
-  	- `1`: armed away from home
-  	- `2`: armed night
-  	- `3`: disarmed
-  - `mapSetTarget`: **(optional)** define mapping array for set security system state. The home app value is used as index into the table. e.g. `[1, 1, 1, 0, 2]` which maps the PLC value `0->1 1->1 2->1, 3->0, 4->2` when the PLC supports only two states with `0:disarmed` and `1:armed` and `2:alarm`.
-  - `mapGetTarget`: **(optional)** define mapping array for get security system state. The PLC value is used as index into the table. e.g. `[3, 1]` which maps the PLC value `0->3 1->2` when the PLC supports only two states with `0:disarmed` and `1:armed` and `2:alarm`.
+	- `set_SecuritySystemTargetState`: **(control support)** offset to set target security system state S7 type `Byte` e.g. `5` for `DB4DBB4`
+	- `get_SecuritySystemTargetState`: **(push support)** offset to set target security system state S7 type `Byte` e.g. `6` for `DB4DBB6`
+		- `0`: armed stay at home
+		- `1`: armed away from home
+		- `2`: armed night
+		- `3`: disarmed
+	- `mapSetTarget`: **(optional)** define mapping array for set security system state. The home app value is used as index into the table. e.g. `[1, 1, 1, 0, 2]` which maps the PLC value `0->1 1->1 2->1, 3->0, 4->2` when the PLC supports only two states with `0:disarmed` and `1:armed` and `2:alarm`.
+	- `mapGetTarget`: **(optional)** define mapping array for get security system state. The PLC value is used as index into the table. e.g. `[3, 1]` which maps the PLC value `0->3 1->2` when the PLC supports only two states with `0:disarmed` and `1:armed` and `2:alarm`.
 - `mapGet` **(obsolete)** **(optional)** overwrites `mapGetCurrent`and `mapGetTarget`
 - `mapSet` **(obsolete)** **(optional)** overwrites `mapSetTarget`
 
@@ -559,6 +561,7 @@ garage door
 ### <a name='PLC_SmokeSensor'></a>Smoke Sensor as `PLC_SmokeSensor`
 fire alarm
 
+![homebridge pic](doc/fan.png)
 - `name`: unique name of the accessory
 - `manufacturer`: **(optional)** description
 - `db`: s7 data base number e.g. `4` for `DB4`
@@ -573,6 +576,53 @@ fire alarm
 - `get_StatusLowBattery`: **(optional)** **(push support)** offset and bit to battery low detection. (Home app does not inform with push notification) S7 type `Bool` e.g. `55.3` for `DB4DBX55.3`
 	- `false`: ok
 	- `true`: battery low
+
+### <a name='PLC_Fan'></a>Fan as `PLC_Fan`
+fan
+
+![homebridge pic](doc/fan.png)
+- `name`: unique name of the accessory
+- `manufacturer`: **(optional)** description
+- `db`: s7 data base number e.g. `4` for `DB4`
+- `enablePolling`: **(optional)** when set to `true` the current state will be polled. It is mandatory as well to enable polling mode on platform level.
+- `pollInterval`: **(optional)** poll interval in seconds. Default value see platform definition.
+- Current State:
+	- `default_CurrentFanState`: **(optional)** defines alternative value thats returned then `get_CurrentFanState` is not defined. Default value `0:inactive
+	- `get_CurrentFanState`: **(optional)** **(push support)** offset to get current heating/cooling state S7 type `Byte` e.g. `8` for `DB4DBB8`.
+		- `0`: inactive
+		- `1`: idle
+		- `2`: blowing
+	- `mapCurrentGet`: **(optional)** define mapping array for `get_CurrentFanState`. The PLC value is used as index into the table. e.g. `[0, 2]` which maps the PLC value `0->1 1->2` when the PLC supports only two states with `0:idle` and `1:blowing`.
+- Target State:
+	- `default_TargetFanState`: **(optional)** defines alternative value thats returned then `get_TargetFanState` is not defined. Default value `0:manual`
+		- `0`: manual
+		- `1`: automatic
+	- `get_TargetFanState` **(optional)** **(push support)** offset to get target heating/cooling state. S7 type `Byte` e.g. `9` for `DB4DBB9`. When not defined fixed `1`: automatic is used.
+		- `0`: manual
+		- `1`: automatic
+	- `set_TargetFanState` **(optional but required when `get_TargetFanState` is defined)** **(control support)** offset to get target heating/cooling state. S7 type `Byte` e.g. `9` for `DB4DBB9`. When not defined fixed `1`: automatic is used.
+		- `0`: manual
+		- `1`: automatic
+	- `mapTargetGet`: **(optional)** define mapping array for `get_TargetFanState`. The PLC value is used as index into the table. e.g. `[1, 0]` which maps the PLC value `0->1 1->0` when the PLC supports only two states with `0:automatic` and `1:manual`.
+	- `mapTargetSet`: **(optional)** define mapping array for `set_TargetFanState`. The home app value is used as index into the table. e.g. `[1, 0]` which maps the PLC value `0->1 1->0` when the PLC supports only two states with `0:automatic` and `1:manual`.
+- Rotation Direction
+	- get_RotationDirection **(optional)** **(push support)** offset to get rotation direction state. S7 type `Byte` e.g. `9` for `DB4DBB9`. When not defined fixed `0`: clockwise is used.
+		- `0`: clockwise
+		- `1`: counter clockwise
+	- set_RotationDirection **(optional)** **(control support)** offset to set rotation directionstate. S7 type `Byte` e.g. `9` for `DB4DBB9`.
+		- `0`: clockwise
+		- `1`: counter clockwise
+	- `mapDirectionGet`: **(optional)** define mapping array for `get_RotationDirection`. The PLC value is used as index into the table. e.g. `[1, 0]` inverts the direction.
+	- `mapDirectionSet`: **(optional)** define mapping array for `set_RotationDirection`. The home app value is used as index into the table. e.g. `[1, 0]` inverts the direction.
+- Rotation Speed
+	- `get_RotationSpeed`: **(optional)** **(push support)** offset to get rotation speed state S7 type `Byte` e.g. `8` for `DB4DBB8`.
+	- `set_RotationSpeed`: **(optional)** **(push support)** offset to get set speed state. S7 type `Byte` e.g. `9` for `DB4DBB9`.
+- `get_Active`: **(push support)** offset and bit get the current status S7 type `Bool` e.g. `55.0` for `DB4DBX55.0`
+- Single Bit for on/off:
+	- `set_Active`: **(control support)** offset and bit set to 1/0 when switching on/off S7 type `Bool` PLC e.g. `55.0` for `DB4DBX55.0` could be same as get_Active
+- Separate Bits for on/off:
+	- `set_Active`: **(control support)** offset and bit set to 1 when switching on S7 type `Bool` **PLC has to set to 0** e.g. `55.1` for `DB4DBX55.1`
+	- `set_Deactivate`: offset and bit set to 1 when switching off S7 type `Bool` **PLC has to set to 0** e.g. `55.2` for `DB4DBX55.2`
 
 
 ## config.json Example
@@ -953,7 +1003,7 @@ To enable this you have to set `"enableControl": true,` platform level and optio
 **NOTE: It is currently not possible to query the current state**
 
 The interface that the PLC operates consists only of the keyword 'control', the database number 'db', the address within the db 'offset' and the value 'value'.
-The value is assigned to the matching ('db' and 'offset') set_* accessory configurations. All configurations that are supported  are marked with **(control support)** in the description.
+The value is assigned to the matching ('db' and 'offset') set_* accessory configurations. All configurations that are supported	are marked with **(control support)** in the description.
 
 For accessories with separate on/off configurations e.g. `PLC_LightBulb` `set_On`/`set_Off` the `set_On` or `PLC_LockMechanismBool` `set_Secured`/`set_Unsecured` the `set_Secured` has to be used. With `1` for on and `0` for off.
 

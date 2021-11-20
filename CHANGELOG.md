@@ -4,6 +4,8 @@
 
 ### Added
 - add `PLC_LeakSensor`
+- add `PLC_Fan`
+
 
 ## [1.0.32] 2021-11-11
 
