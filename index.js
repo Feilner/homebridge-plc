@@ -663,7 +663,21 @@ function GenericPLCAccessory(platform, config, accessoryNumber) {
         'set RotationSpeed'
         );}.bind(this));
     }
-    if ('get_Active' in config) {
+
+    if ('set_Deactivate' in config) {
+      this.service.getCharacteristic(Characteristic.Active)
+        .on('get', function(callback) {this.getBit(callback,
+          config.db,
+          Math.floor(config.get_Active), Math.floor((config.get_Active*10)%10),
+          'get Active'
+        );}.bind(this))
+        .on('set', function(powerOn, callback) { this.setOnOffBit(powerOn, callback,
+          config.db,
+          Math.floor(config.set_Active), Math.floor((config.set_Active*10)%10),
+          Math.floor(config.set_Deactivate), Math.floor((config.set_Deactivate*10)%10),
+          'set Active'
+        );}.bind(this));
+    } else if ('get_Active' in config) {
       this.service.getCharacteristic(Characteristic.Active)
         .on('get', function(callback) {this.getBit(callback,
           config.db,
@@ -673,11 +687,9 @@ function GenericPLCAccessory(platform, config, accessoryNumber) {
         .on('set', function(powerOn, callback) { this.setBit(powerOn, callback,
           config.db,
           Math.floor(config.set_Active), Math.floor((config.set_Active*10)%10),
-          'set Active',
-          function(value){this.service.getCharacteristic(Characteristic.Active).updateValue(value);}.bind(this)
+          'set Active'
         );}.bind(this));
-      }
-      else {
+    } else {
       this.service.getCharacteristic(Characteristic.Active)
         .on('get', function(callback) {this.getDummy(callback,
           1,
@@ -1506,6 +1518,7 @@ function GenericPLCAccessory(platform, config, accessoryNumber) {
           'set Active'
         );}.bind(this));
     }
+
     if ('get_RotationSpeed' in config) {
       this.service.getCharacteristic(Characteristic.RotationSpeed)
         .on('get', function(callback) {this.getByte(callback,

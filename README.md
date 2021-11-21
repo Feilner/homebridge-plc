@@ -238,9 +238,12 @@ Humidifier and/or Dehumidifier
 - `enablePolling`: **(optional)** when set to `true` the current state will be polled. It is mandatory as well to enable polling mode on platform level.
 - `pollInterval`: **(optional)** poll interval in seconds. Default value see platform definition.
 - `get_CurrentRelativeHumidity`: **(push support)** offset to get current humidity S7 type `Real` e.g. `55` for `DB4DBD55`
-- Active
-	- `get_Active`: **(optional)** **(push support)** offset and bit get active state S7 type `Bool` e.g. `55.0` for `DB4DBX55.0`
-	- `set_Active`: **(optional)** **(push support)** offset and bit set active state S7 type `Bool` e.g. `55.0` for `DB4DBX55.0`
+- `get_Active`: **(push support)** offset and bit get the current status S7 type `Bool` e.g. `55.0` for `DB4DBX55.0`
+- Single Bit for on/off:
+	- `set_Active`: **(control support)** offset and bit set to 1/0 when switching on/off S7 type `Bool` PLC e.g. `55.0` for `DB4DBX55.0` could be same as get_Active
+- Separate Bits for on/off:
+	- `set_Active`: **(control support)** offset and bit set to 1 when switching on S7 type `Bool` **PLC has to set to 0** e.g. `55.1` for `DB4DBX55.1`
+	- `set_Deactivate`: offset and bit set to 1 when switching off S7 type `Bool` **PLC has to set to 0** e.g. `55.2` for `DB4DBX55.2`
 - Current State
 	- `get_CurrentHumidifierDehumidifierState`: **(optional)** **(push support)** offset to get current state. Default value `1:idle`. S7 type `Byte` e.g. `55` for `DB4DBD55`
 		- `0`: inactive
@@ -800,6 +803,14 @@ Note: The example is just an example it contains also some optional settings. Fo
 						"get_ContactSensorState": 25.2
 					},
 					{
+						"accessory": "PLC_LeakSensor",
+						"name": "LeakSensor",
+						"enablePolling": true
+						"pollInterval": 5,
+						"db": 12,
+						"get_LeakDetected": 25.3,
+					},
+					{
 						"accessory": "PLC_Faucet",
 						"name": "Faucet",
 						"enablePolling": true,
@@ -905,14 +916,15 @@ Note: The example is just an example it contains also some optional settings. Fo
 						"name": "Fan",
 						"manufacturer": "Test",
 						"db": 12,
-						"set_Active": 0.0,
-						"get_RotationDirection": 1,
-						"set_RotationDirection": 1,
-						"get_RotationSpeed": 2,
-						"set_RotationSpeed": 2,
-						"get_CurrentFanState": 3,
-						"get_TargetFanState": 4,
-						"set_TargetFanState": 4,
+						"set_Active": 44.3,
+						"get_Active": 44.3,
+						"get_RotationDirection": 45,
+						"set_RotationDirection": 45,
+						"get_RotationSpeed": 46,
+						"set_RotationSpeed": 46,
+						"get_CurrentFanState": 47,
+						"get_TargetFanState": 48,
+						"set_TargetFanState": 48,
 						"enablePolling": true
 					},
 				]
