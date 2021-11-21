@@ -267,14 +267,17 @@ Humidifier and/or Dehumidifier
 	- `mapGetTarget`: **(optional)** define mapping array for `get_TargetHumidifierDehumidifierState`. The PLC value is used as index into the table. e.g. `[0]` which maps the PLC value `0->2 1->3` when the PLC supports only one states with `0:dehumidifier.
 	- `mapSetTarget`: **(optional)** define mapping array for `set_TargetHumidifierDehumidifierState`. The home app value is used as index into the table. e.g. `[2, 2, 2
 - Rotation Speed
-	- `get_RotationSpeed`: **(optional)** **(push support)** offset to get rotation speed state S7 type `Real` e.g. `8` for `DB4DBB8`.
-	- `set_RotationSpeed` **(optional)** **(push support)** offset to get set speed state. S7 type `Real` e.g. `9` for `DB4DBB9`.
+    - Byte
+    	- `get_RotationSpeedByte`: **(optional)** **(push support)** offset to get rotation speed state S7 type `Byte` e.g. `8` for `DB4DBB8`.
+    	- `set_RotationSpeedByte` **(optional but required when `set_RotationSpeedByte` is defined)** **(push support)** offset to get set speed state. S7 type `Byte` e.g. `9` for `DB4DBB9`.
+	- Real
+    	- `get_RotationSpeed`: **(optional)** **(push support)** offset to get rotation speed state S7 type `Real` e.g. `8` for `DB4DBB8`.
+    	- `set_RotationSpeed` **(optional but required when `get_RotationSpeed` is defined)** **(push support)** offset to get set speed state. S7 type `Real` e.g. `9` for `DB4DBB9`.
 - Swing Mode
 	- `get_SwingMode`: **(optional)** **(push support)** offset to get rotation speed state S7 type `Bool` e.g. `8` for `DB4DBB8`.
 	- `set_SwingMode` **(optional)** **(push support)** offset to get set speed state. S7 type `Bool` e.g. `9` for `DB4DBB9`.
 - Water Level
 	- `get_WaterLevel`: **(optional)** **(push support)** offset to get rotation speed state S7 type `Real` e.g. `8` for `DB4DBB8`.
-	- `set_WaterLevel` **(optional)** **(push support)** offset to get set speed state. S7 type `Real` e.g. `9` for `DB4DBB9`.
 - `get_StatusTampered`: **(optional)** **(push support)** offset and bit to tamper detection. (Home app shows this only within the options) S7 type `Bool` e.g. `55.2` for `DB4DBX55.2`
 	- `false`: ok
 	- `true`: tampered
@@ -591,7 +594,7 @@ ventilator
 - `pollInterval`: **(optional)** poll interval in seconds. Default value see platform definition.
 - Current State:
 	- `default_CurrentFanState`: **(optional)** defines alternative value thats returned then `get_CurrentFanState` is not defined. Default value `0:inactive
-	- `get_CurrentFanState`: **(optional)** **(push support)** offset to get current heating/cooling state S7 type `Byte` e.g. `8` for `DB4DBB8`.
+	- ``: **(optional)** **(push support)** offset to get current heating/cooling state S7 type `Byte` e.g. `8` for `DB4DBB8`.
 		- `0`: inactive
 		- `1`: idle
 		- `2`: blowing
@@ -618,8 +621,12 @@ ventilator
 	- `mapDirectionGet`: **(optional)** define mapping array for `get_RotationDirection`. The PLC value is used as index into the table. e.g. `[1, 0]` inverts the direction.
 	- `mapDirectionSet`: **(optional)** define mapping array for `set_RotationDirection`. The home app value is used as index into the table. e.g. `[1, 0]` inverts the direction.
 - Rotation Speed
-	- `get_RotationSpeed`: **(optional)** **(push support)** offset to get rotation speed state S7 type `Byte` e.g. `8` for `DB4DBB8`.
-	- `set_RotationSpeed`: **(optional)** **(push support)** offset to get set speed state. S7 type `Byte` e.g. `9` for `DB4DBB9`.
+    - Byte
+    	- `get_RotationSpeedByte`: **(optional)** **(push support)** offset to get rotation speed state S7 type `Byte` e.g. `8` for `DB4DBB8`.
+    	- `set_RotationSpeedByte` **(optional but required when `set_RotationSpeedByte` is defined)** **(push support)** offset to get set speed state. S7 type `Byte` e.g. `9` for `DB4DBB9`.
+	- Real
+    	- `get_RotationSpeed`: **(optional)** **(push support)** offset to get rotation speed state S7 type `Real` e.g. `8` for `DB4DBB8`.
+    	- `set_RotationSpeed` **(optional but required when `get_RotationSpeed` is defined)** **(push support)** offset to get set speed state. S7 type `Real` e.g. `9` for `DB4DBB9`.
 - `get_Active`: **(push support)** offset and bit get the current status S7 type `Bool` e.g. `55.0` for `DB4DBX55.0`
 - Single Bit for on/off:
 	- `set_Active`: **(control support)** offset and bit set to 1/0 when switching on/off S7 type `Bool` PLC e.g. `55.0` for `DB4DBX55.0` could be same as get_Active

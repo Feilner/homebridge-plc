@@ -662,6 +662,18 @@ function GenericPLCAccessory(platform, config, accessoryNumber) {
         config.set_RotationSpeed,
         'set RotationSpeed'
         );}.bind(this));
+    }else if ('get_RotationSpeedByte' in config) {
+      this.service.getCharacteristic(Characteristic.RotationSpeed)
+      .on('get', function(callback) {this.getByte(callback,
+        config.db,
+        config.get_RotationSpeedByte,
+        'get RotationSpeed'
+        );}.bind(this))
+      .on('set', function(value, callback) {this.setByte(value, callback,
+        config.db,
+        config.set_RotationSpeedByte,
+        'set RotationSpeed'
+        );}.bind(this));
     }
 
     if ('set_Deactivate' in config) {
@@ -1462,10 +1474,10 @@ function GenericPLCAccessory(platform, config, accessoryNumber) {
         this.mapTargetSet
         );}.bind(this));
     }
-    else {
+    else if ('default_TargetFanState' in config) {
       this.service.getCharacteristic(Characteristic.TargetFanState)
       .on('get', function(callback) {this.getDummy(callback,
-        config.default_CurrentFanState || 0, // currently return fixed value inactive=0, idle=1, blowing=2
+        config.default_TargetFanState || 0, // currently return fixed value inactive=0, idle=1, blowing=2
         'get TargetFanState'
         );}.bind(this))
       .on('set', function(value, callback) {this.setDummy(value, callback,
@@ -1521,19 +1533,28 @@ function GenericPLCAccessory(platform, config, accessoryNumber) {
 
     if ('get_RotationSpeed' in config) {
       this.service.getCharacteristic(Characteristic.RotationSpeed)
-        .on('get', function(callback) {this.getByte(callback,
-          config.db,
-          config.get_RotationSpeed,
-          'get RotationSpeed'
-          );}.bind(this));
-    }
-    if ('set_RotationSpeed' in config) {
+      .on('get', function(callback) {this.getReal(callback,
+        config.db,
+        config.get_RotationSpeed,
+        'get RotationSpeed'
+        );}.bind(this))
+      .on('set', function(value, callback) {this.setReal(value, callback,
+        config.db,
+        config.set_RotationSpeed,
+        'set RotationSpeed'
+        );}.bind(this));
+    } else if ('get_RotationSpeedByte' in config) {
       this.service.getCharacteristic(Characteristic.RotationSpeed)
-        .on('set', function(value, callback) {this.setByte(value, callback,
-          config.db,
-          config.set_RotationSpeed,
-          'set RotationSpeed'
-          );}.bind(this));
+      .on('get', function(callback) {this.getByte(callback,
+        config.db,
+        config.get_RotationSpeedByte,
+        'get RotationSpeed'
+        );}.bind(this))
+      .on('set', function(value, callback) {this.setByte(value, callback,
+        config.db,
+        config.set_RotationSpeedByte,
+        'set RotationSpeed'
+        );}.bind(this));
     }
 
     if ('get_RotationDirection' in config) {
@@ -1752,7 +1773,7 @@ GenericPLCAccessory.prototype = {
         this.service.getCharacteristic(Characteristic.RelativeHumidityHumidifierThreshold).updateValue(value);
         rv = true;
       }
-      if (this.config.get_RotationSpeed == offset)
+      if (this.config.get_RotationSpeed == offset || this.config.get_RotationSpeedByte)
       {
         this.log.debug( "[" + this.name + "] Push RotationSpeed:" + value);
         this.service.getCharacteristic(Characteristic.RotationSpeed).updateValue(value);
@@ -2050,7 +2071,7 @@ GenericPLCAccessory.prototype = {
         this.service.getCharacteristic(Characteristic.CurrentFanState).updateValue(this.modCurrentGet(parseInt(value)));
         rv = true;
       }
-      if (this.config.get_RotationSpeed == offset)
+      if (this.config.get_RotationSpeed == offset || this.config.get_RotationSpeedByte)
       {
         this.log.debug( "[" + this.name + "] Push RotationSpeed:" + value);
         this.service.getCharacteristic(Characteristic.Active).RotationSpeed(value);
@@ -2147,7 +2168,7 @@ GenericPLCAccessory.prototype = {
         this.service.getCharacteristic(Characteristic.RelativeHumidityHumidifierThreshold).setValue(value);
         rv = true;
       }
-      if (this.config.set_RotationSpeed == offset)
+      if (this.config.set_RotationSpeed == offset || this.config.set_RotationSpeedByte == offset)
       {
         this.log.debug( "[" + this.name + "] Control RotationSpeed:" + value);
         this.service.getCharacteristic(Characteristic.RotationSpeed).setValue(value);
@@ -2294,7 +2315,7 @@ GenericPLCAccessory.prototype = {
         this.service.getCharacteristic(Characteristic.TargetFanState).setValue(value);
         rv = true;
       }
-      if (this.config.set_RotationSpeed == offset)
+      if (this.config.set_RotationSpeed == offset || this.config.set_RotationSpeedByte == offset)
       {
         this.log.debug( "[" + this.name + "] Control RotationSpeed:" + value);
         this.service.getCharacteristic(Characteristic.RotationSpeed).setValue(value);
