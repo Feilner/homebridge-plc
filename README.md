@@ -44,7 +44,7 @@ SIEMENS S7 PLC plugin for [Homebridge](https://homebridge.io)
 	* [Boolean lock mechanism as `PLC_LockMechanismBool`](#PLC_LockMechanismBool)
 	* [Garage door as `PLC_GarageDoorOpener`](#PLC_GarageDoorOpener)
 	* [Smoke Sensor as `PLC_SmokeSensor`](#PLC_SmokeSensor)
-	* [Smoke Sensor as `PLC_Fan`](#PLC_Fan)
+	* [Fan as `PLC_Fan`](#PLC_Fan)
 
 # Installation
 
@@ -561,7 +561,7 @@ garage door
 ### <a name='PLC_SmokeSensor'></a>Smoke Sensor as `PLC_SmokeSensor`
 fire alarm
 
-![homebridge pic](doc/fan.png)
+![homebridge pic](doc/smokesensor.png)
 - `name`: unique name of the accessory
 - `manufacturer`: **(optional)** description
 - `db`: s7 data base number e.g. `4` for `DB4`
@@ -578,7 +578,7 @@ fire alarm
 	- `true`: battery low
 
 ### <a name='PLC_Fan'></a>Fan as `PLC_Fan`
-fan
+ventilator
 
 ![homebridge pic](doc/fan.png)
 - `name`: unique name of the accessory
@@ -899,7 +899,22 @@ Note: The example is just an example it contains also some optional settings. Fo
 						"get_SmokeDetected": 44.0,
 						"get_StatusTampered": 44.1,
 						"get_StatusLowBattery": 44.2
-					}
+					},
+					{
+						"accessory": "PLC_Fan",
+						"name": "Fan",
+						"manufacturer": "Test",
+						"db": 12,
+						"set_Active": 0.0,
+						"get_RotationDirection": 1,
+						"set_RotationDirection": 1,
+						"get_RotationSpeed": 2,
+						"set_RotationSpeed": 2,
+						"get_CurrentFanState": 3,
+						"get_TargetFanState": 4,
+						"set_TargetFanState": 4,
+						"enablePolling": true
+					},
 				]
 			}
 		]
