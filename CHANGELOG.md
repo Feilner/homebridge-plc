@@ -1,6 +1,6 @@
 # Changelog
 
-## [1.0.33] 2021-11-xx
+## [1.0.33] 2021-11-23
 
 ### Added
 - add `PLC_LeakSensor`
