@@ -4,7 +4,7 @@
 
 ### Added
 - add `PLC_LeakSensor`
-- add `PLC_Fan`
+- add `PLC_Fan` (beta)
 ### Changed
 - `PLC_HumidifierDehumidifier` add separated bit on/off support by adding  `set_Deactivate`
 - `PLC_HumidifierDehumidifier` add byte support for rotation speed by adding `set_RotationSpeedByte` and  `get_RotationSpeedByte`
