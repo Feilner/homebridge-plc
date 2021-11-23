@@ -953,27 +953,27 @@ To enable this you have to set `"enablePolling": true;` platform level and on ea
 
 Example to poll the contact sensor state every 10 seconds:
 
-  {
-    "platforms": [
-        {
-        "platform": "PLC",
-        "ip": "10.10.10.32",
-        "rack": 0,
-        "slot": 2,
-        "enablePolling": true,
-        "accessories": [
+    {
+      "platforms": [
           {
-            "accessory": "PLC_ContactSensor",
-            "name": "ContactSensor",
-            "enablePolling": true,
-            "pollInterval": 10,
-            "db": 12,
-            "get_ContactSensorState": 25.2
-          }
-        ]
-      }
-    ]
-  }
+          "platform": "PLC",
+          "ip": "10.10.10.32",
+          "rack": 0,
+          "slot": 2,
+          "enablePolling": true,
+          "accessories": [
+            {
+              "accessory": "PLC_ContactSensor",
+              "name": "ContactSensor",
+              "enablePolling": true,
+              "pollInterval": 10,
+              "db": 12,
+              "get_ContactSensorState": 25.2
+            }
+          ]
+        }
+      ]
+    }
 
 ## <a name='push'></a>Push values from PLC to homebridge-plc plugin
 
@@ -988,27 +988,27 @@ The value is assigned to all matching ('db' and 'offset') get_* accessory config
 For example the push from the PLC is done as 'http://homebridgeIp:8080/?push&db=1014&offset=1&value=3'
 With the following configuration:
 
-  {
-    "platforms": [
-        {
-        "platform": "PLC",
-        "ip": "10.10.10.32",
-        "rack": 0,
-        "slot": 2,
-        "enablePush": true,
-        "accessories": [
+    {
+      "platforms": [
           {
-              "accessory": "PLC_SecuritySystem",
-              "name": "AlarmSystem",
-              "db": 1014,
-              "get_SecuritySystemCurrentState": 1,
-              "set_SecuritySystemTargetState": 1,
-              "get_SecuritySystemTargetState": 1
-          }
-        ]
-      }
-    ]
-  }
+          "platform": "PLC",
+          "ip": "10.10.10.32",
+          "rack": 0,
+          "slot": 2,
+          "enablePush": true,
+          "accessories": [
+            {
+                "accessory": "PLC_SecuritySystem",
+                "name": "AlarmSystem",
+                "db": 1014,
+                "get_SecuritySystemCurrentState": 1,
+                "set_SecuritySystemTargetState": 1,
+                "get_SecuritySystemTargetState": 1
+            }
+          ]
+        }
+      ]
+    }
 
 The value '3' disarmed will be used for both for 'get_SecuritySystemCurrentState' as well as 'get_SecuritySystemTargetState'.
 
