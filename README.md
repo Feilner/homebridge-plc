@@ -638,306 +638,306 @@ ventilator
 ## config.json Example
 Note: The example is just an example it contains also some optional settings. For testing purposes all accessories are set to one DB.
 
-  {
-    "bridge": {
-      "name": "Homebridge DEMO",
-      "username": "0E:54:47:36:82:26",
-      "port": 52609,
-      "pin": "031-55-155"
-    },
-    "accessories": [],
-    "platforms": [
-      {
-        "name": "Config",
-        "port": 8080,
-        "platform": "config"
+    {
+      "bridge": {
+        "name": "Homebridge DEMO",
+        "username": "0E:54:47:36:82:26",
+        "port": 52609,
+        "pin": "031-55-155"
       },
-      {
-        "platform": "PLC",
-        "ip": "10.10.10.32",
-        "rack": 0,
-        "slot": 2,
-        "communicationOP": false,
-        "enablePolling": true,
-        "defaultPollInterval": 15,
-        "distributePolling": true,
-        "enablePush": true,
-        "enableControl": true,
-        "port": 8888,
-        "accessories": [
-          {
-            "accessory": "PLC_LightBulb",
-            "name": "LightBulb0",
-            "manufacturer": "normal light bulb",
-            "enablePolling": true,
-            "db": 12,
-            "get_On": 0.0,
-            "set_On": 0.1,
-            "set_Off": 0.2
-          },
-          {
-            "accessory": "PLC_LightBulb",
-            "name": "LightBulb1",
-            "manufacturer": "with dim function",
-            "enablePolling": true,
-            "db": 12,
-            "get_On": 2.0,
-            "set_On": 2.1,
-            "set_Off": 2.2,
-            "get_Brightness": 1,
-            "set_Brightness": 1
-          },
-          {
-            "accessory": "PLC_LightBulb",
-            "name": "LightBulb2",
-            "manufacturer": "single bit for on/off",
-            "enablePolling": true,
-            "db": 12,
-            "get_On": 2.3,
-            "set_On": 2.3
-          },
-          {
-            "accessory": "PLC_Outlet",
-            "name": "Outlet",
-            "enablePolling": true,
-            "db": 12,
-            "get_On": 2.4,
-            "set_On": 2.5
-          },
-          {
-            "accessory": "PLC_Switch",
-            "name": "Switch",
-            "enablePolling": true,
-            "db": 12,
-            "get_On": 2.6,
-            "set_On": 2.7,
-            "set_Off": 3.0
-          },
-          {
-            "accessory": "PLC_TemperatureSensor",
-            "name": "Temperature",
-            "db": 12,
-            "get_CurrentTemperature": 4,
-            "enablePolling": true,
-            "pollInterval": 60
-          },
-          {
-            "accessory": "PLC_HumiditySensor",
-            "name": "Humidity",
-            "db": 12,
-            "get_CurrentRelativeHumidity": 8,
-            "enablePolling": true,
-            "pollInterval": 120
-          },
-          {
-            "accessory": "PLC_Thermostat",
-            "name": "Thermostat",
-            "manufacturer": "ground floor",
-            "db": 12,
-            "enablePolling": true,
-            "get_CurrentTemperature": 12,
-            "get_TargetTemperature": 16,
-            "set_TargetTemperature": 16,
-            "get_CurrentHeatingCoolingState": 20
-            "mapSetTarget": [
-                0,
-                1,
-                0,
-                3
-            ],
-          },
-          {
-            "accessory": "PLC_WindowCovering",
-            "name": "Blind",
-            "manufacturer": "ground floor",
-            "db": 12,
-            "invert": false,
-            "adaptivePolling": true,
-            "adaptivePollingInterval": 1,
-            "enablePolling": true,
-            "pollInterval": 180,
-            "get_CurrentPosition": 21,
-            "get_TargetPosition": 22,
-            "set_TargetPosition": 1
-          },
-          {
-            "accessory": "PLC_Window",
-            "name": "Window",
-            "manufacturer": "ground floor",
-            "enablePolling": true,
-            "pollInterval": 60,
-            "db": 12,
-            "get_CurrentPosition": 23,
-            "mapGet": [
-                0,
-                25,
-                100
-            ]
-          },
-          {
-            "accessory": "PLC_Door",
-            "name": "Door",
-            "manufacturer": "ground floor",
-            "enablePolling": true,
-            "pollInterval": 10,
-            "db": 12,
-            "get_CurrentPosition": 24,
-            "mapGet": [
-                0,
-                100
-            ]
-          },
-          {
-            "accessory": "PLC_OccupancySensor",
-            "name": "Presence",
-            "enablePolling": true,
-            "db": 12,
-            "get_OccupancyDetected": 25.0
-          },
-          {
-            "accessory": "PLC_MotionSensor",
-            "name": "Motion",
-            "enablePolling": true,
-            "db": 12,
-            "get_MotionDetected": 25.1
-          },
-          {
-            "accessory": "PLC_ContactSensor",
-            "name": "ContactSensor",
-            "enablePolling": true,
-            "pollInterval": 5,
-            "db": 12,
-            "get_ContactSensorState": 25.2
-          },
-          {
-            "accessory": "PLC_LeakSensor",
-            "name": "LeakSensor",
-            "enablePolling": true
-            "pollInterval": 5,
-            "db": 12,
-            "get_LeakDetected": 25.3,
-          },
-          {
-            "accessory": "PLC_Faucet",
-            "name": "Faucet",
-            "enablePolling": true,
-            "db": 12,
-            "get_Active": 28.0,
-            "set_Active": 28.0
-          },
-          {
-            "accessory": "PLC_Valve",
-            "name": "Valve",
-            "db": 12,
-            "enablePolling": true,
-            "ValveType": 2,
-            "get_Active": 28.1,
-            "set_Active": 28.1,
-            "get_SetDuration": 30,
-            "set_SetDuration": 30,
-            "get_RemainingDuration": 34
-          },
-          {
-            "accessory": "PLC_SecuritySystem",
-            "name": "SecuritySystem",
-            "db": 12,
-            "enablePolling": true,
-            "pollInterval": 60,
-            "get_SecuritySystemCurrentState": 26,
-            "set_SecuritySystemTargetState": 27,
-            "get_SecuritySystemTargetState": 27,
-            "mapGetCurrent": [
-                3,
-                1,
-                4
-            ],
-            "mapGetTarget": [
-                3,
-                1
-            ]
-            "mapSetTarget": [
-                1,
-                1,
-                1,
-                0
-            ]
+      "accessories": [],
+      "platforms": [
+        {
+          "name": "Config",
+          "port": 8080,
+          "platform": "config"
+        },
+        {
+          "platform": "PLC",
+          "ip": "10.10.10.32",
+          "rack": 0,
+          "slot": 2,
+          "communicationOP": false,
+          "enablePolling": true,
+          "defaultPollInterval": 15,
+          "distributePolling": true,
+          "enablePush": true,
+          "enableControl": true,
+          "port": 8888,
+          "accessories": [
+            {
+              "accessory": "PLC_LightBulb",
+              "name": "LightBulb0",
+              "manufacturer": "normal light bulb",
+              "enablePolling": true,
+              "db": 12,
+              "get_On": 0.0,
+              "set_On": 0.1,
+              "set_Off": 0.2
+            },
+            {
+              "accessory": "PLC_LightBulb",
+              "name": "LightBulb1",
+              "manufacturer": "with dim function",
+              "enablePolling": true,
+              "db": 12,
+              "get_On": 2.0,
+              "set_On": 2.1,
+              "set_Off": 2.2,
+              "get_Brightness": 1,
+              "set_Brightness": 1
+            },
+            {
+              "accessory": "PLC_LightBulb",
+              "name": "LightBulb2",
+              "manufacturer": "single bit for on/off",
+              "enablePolling": true,
+              "db": 12,
+              "get_On": 2.3,
+              "set_On": 2.3
+            },
+            {
+              "accessory": "PLC_Outlet",
+              "name": "Outlet",
+              "enablePolling": true,
+              "db": 12,
+              "get_On": 2.4,
+              "set_On": 2.5
+            },
+            {
+              "accessory": "PLC_Switch",
+              "name": "Switch",
+              "enablePolling": true,
+              "db": 12,
+              "get_On": 2.6,
+              "set_On": 2.7,
+              "set_Off": 3.0
+            },
+            {
+              "accessory": "PLC_TemperatureSensor",
+              "name": "Temperature",
+              "db": 12,
+              "get_CurrentTemperature": 4,
+              "enablePolling": true,
+              "pollInterval": 60
+            },
+            {
+              "accessory": "PLC_HumiditySensor",
+              "name": "Humidity",
+              "db": 12,
+              "get_CurrentRelativeHumidity": 8,
+              "enablePolling": true,
+              "pollInterval": 120
+            },
+            {
+              "accessory": "PLC_Thermostat",
+              "name": "Thermostat",
+              "manufacturer": "ground floor",
+              "db": 12,
+              "enablePolling": true,
+              "get_CurrentTemperature": 12,
+              "get_TargetTemperature": 16,
+              "set_TargetTemperature": 16,
+              "get_CurrentHeatingCoolingState": 20
+              "mapSetTarget": [
+                  0,
+                  1,
+                  0,
+                  3
+              ],
+            },
+            {
+              "accessory": "PLC_WindowCovering",
+              "name": "Blind",
+              "manufacturer": "ground floor",
+              "db": 12,
+              "invert": false,
+              "adaptivePolling": true,
+              "adaptivePollingInterval": 1,
+              "enablePolling": true,
+              "pollInterval": 180,
+              "get_CurrentPosition": 21,
+              "get_TargetPosition": 22,
+              "set_TargetPosition": 1
+            },
+            {
+              "accessory": "PLC_Window",
+              "name": "Window",
+              "manufacturer": "ground floor",
+              "enablePolling": true,
+              "pollInterval": 60,
+              "db": 12,
+              "get_CurrentPosition": 23,
+              "mapGet": [
+                  0,
+                  25,
+                  100
+              ]
+            },
+            {
+              "accessory": "PLC_Door",
+              "name": "Door",
+              "manufacturer": "ground floor",
+              "enablePolling": true,
+              "pollInterval": 10,
+              "db": 12,
+              "get_CurrentPosition": 24,
+              "mapGet": [
+                  0,
+                  100
+              ]
+            },
+            {
+              "accessory": "PLC_OccupancySensor",
+              "name": "Presence",
+              "enablePolling": true,
+              "db": 12,
+              "get_OccupancyDetected": 25.0
+            },
+            {
+              "accessory": "PLC_MotionSensor",
+              "name": "Motion",
+              "enablePolling": true,
+              "db": 12,
+              "get_MotionDetected": 25.1
+            },
+            {
+              "accessory": "PLC_ContactSensor",
+              "name": "ContactSensor",
+              "enablePolling": true,
+              "pollInterval": 5,
+              "db": 12,
+              "get_ContactSensorState": 25.2
+            },
+            {
+              "accessory": "PLC_LeakSensor",
+              "name": "LeakSensor",
+              "enablePolling": true
+              "pollInterval": 5,
+              "db": 12,
+              "get_LeakDetected": 25.3,
+            },
+            {
+              "accessory": "PLC_Faucet",
+              "name": "Faucet",
+              "enablePolling": true,
+              "db": 12,
+              "get_Active": 28.0,
+              "set_Active": 28.0
+            },
+            {
+              "accessory": "PLC_Valve",
+              "name": "Valve",
+              "db": 12,
+              "enablePolling": true,
+              "ValveType": 2,
+              "get_Active": 28.1,
+              "set_Active": 28.1,
+              "get_SetDuration": 30,
+              "set_SetDuration": 30,
+              "get_RemainingDuration": 34
+            },
+            {
+              "accessory": "PLC_SecuritySystem",
+              "name": "SecuritySystem",
+              "db": 12,
+              "enablePolling": true,
+              "pollInterval": 60,
+              "get_SecuritySystemCurrentState": 26,
+              "set_SecuritySystemTargetState": 27,
+              "get_SecuritySystemTargetState": 27,
+              "mapGetCurrent": [
+                  3,
+                  1,
+                  4
+              ],
+              "mapGetTarget": [
+                  3,
+                  1
+              ]
+              "mapSetTarget": [
+                  1,
+                  1,
+                  1,
+                  0
+              ]
 
-          },
-          {
-            "accessory": "PLC_StatelessProgrammableSwitch",
-            "name": "Stateless Switch",
-            "enablePolling": true,
-            "pollInterval": 10,
-            "db": 12,
-            "isEvent": 29.2,
-            "get_ProgrammableSwitchEvent": 38
-          },
-          {
-            "accessory": "PLC_Doorbell",
-            "name": "Doorbell",
-            "enablePolling": true,
-            "pollInterval": 10,
-            "db": 12,
-            "isEvent": 29.2,
-            "get_ProgrammableSwitchEvent": 38
-          },
-          {
-            "accessory": "PLC_LockMechanism",
-            "name": "Lock",
-            "db": 12,
-            "enablePolling": true,
-            "get_LockCurrentState": 39,
-            "get_LockTargetState": 40,
-            "set_LockTargetState": 40
-          },
-          {
-            "accessory": "PLC_LockMechanismBool",
-            "name": "LockBool",
-            "db": 12,
-            "enablePolling": true,
-            "get_LockCurrentState": 41.0,
-            "get_LockTargetState": 41.1,
-            "set_LockTargetState": 41.1
-          },
-          {
-            "accessory": "PLC_GarageDoorOpener",
-            "name": "GarageDoor",
-            "db": 12,
-            "enablePolling": true,
-            "get_ObstructionDetected": 41.2,
-            "get_CurrentDoorState": 42,
-            "get_TargetDoorState": 43,
-            "set_TargetDoorState": 43,
-          },
-          {
-            "accessory": "PLC_SmokeSensor",
-            "name": "SmokeSensor",
-            "db": 12,
-            "enablePolling": true,
-            "get_SmokeDetected": 44.0,
-            "get_StatusTampered": 44.1,
-            "get_StatusLowBattery": 44.2
-          },
-          {
-            "accessory": "PLC_Fan",
-            "name": "Fan",
-            "manufacturer": "Test",
-            "db": 12,
-            "set_Active": 44.3,
-            "get_Active": 44.3,
-            "get_RotationDirection": 45,
-            "set_RotationDirection": 45,
-            "get_RotationSpeed": 46,
-            "set_RotationSpeed": 46,
-            "get_CurrentFanState": 47,
-            "get_TargetFanState": 48,
-            "set_TargetFanState": 48,
-            "enablePolling": true
-          },
-        ]
-      }
-    ]
-  }
+            },
+            {
+              "accessory": "PLC_StatelessProgrammableSwitch",
+              "name": "Stateless Switch",
+              "enablePolling": true,
+              "pollInterval": 10,
+              "db": 12,
+              "isEvent": 29.2,
+              "get_ProgrammableSwitchEvent": 38
+            },
+            {
+              "accessory": "PLC_Doorbell",
+              "name": "Doorbell",
+              "enablePolling": true,
+              "pollInterval": 10,
+              "db": 12,
+              "isEvent": 29.2,
+              "get_ProgrammableSwitchEvent": 38
+            },
+            {
+              "accessory": "PLC_LockMechanism",
+              "name": "Lock",
+              "db": 12,
+              "enablePolling": true,
+              "get_LockCurrentState": 39,
+              "get_LockTargetState": 40,
+              "set_LockTargetState": 40
+            },
+            {
+              "accessory": "PLC_LockMechanismBool",
+              "name": "LockBool",
+              "db": 12,
+              "enablePolling": true,
+              "get_LockCurrentState": 41.0,
+              "get_LockTargetState": 41.1,
+              "set_LockTargetState": 41.1
+            },
+            {
+              "accessory": "PLC_GarageDoorOpener",
+              "name": "GarageDoor",
+              "db": 12,
+              "enablePolling": true,
+              "get_ObstructionDetected": 41.2,
+              "get_CurrentDoorState": 42,
+              "get_TargetDoorState": 43,
+              "set_TargetDoorState": 43,
+            },
+            {
+              "accessory": "PLC_SmokeSensor",
+              "name": "SmokeSensor",
+              "db": 12,
+              "enablePolling": true,
+              "get_SmokeDetected": 44.0,
+              "get_StatusTampered": 44.1,
+              "get_StatusLowBattery": 44.2
+            },
+            {
+              "accessory": "PLC_Fan",
+              "name": "Fan",
+              "manufacturer": "Test",
+              "db": 12,
+              "set_Active": 44.3,
+              "get_Active": 44.3,
+              "get_RotationDirection": 45,
+              "set_RotationDirection": 45,
+              "get_RotationSpeed": 46,
+              "set_RotationSpeed": 46,
+              "get_CurrentFanState": 47,
+              "get_TargetFanState": 48,
+              "set_TargetFanState": 48,
+              "enablePolling": true
+            },
+          ]
+        }
+      ]
+    }
 
 # Update of values
 The home app does not regularly poll for updates of values. Only when switching rooms or close/open the app the actual values are requested.
