@@ -1584,6 +1584,15 @@ function GenericPLCAccessory(platform, config, accessoryNumber) {
     this.service = new Service.LightSensor(this.name);
     this.accessory.addService(this.service);
 
+    if ('get_CurrentAmbientLightLevelDInt' in config) {
+      this.service.getCharacteristic(Characteristic.CurrentAmbientLightLevel)
+      .on('get', function(callback) {this.getDInt(callback,
+        config.db,
+        config.get_CurrentAmbientLightLevelDInt,
+        "get CurrentAmbientLightLevel",
+        this.modFunctionGet
+      );}.bind(this));
+    }else{
       this.service.getCharacteristic(Characteristic.CurrentAmbientLightLevel)
       .on('get', function(callback) {this.getReal(callback,
         config.db,
@@ -1591,24 +1600,25 @@ function GenericPLCAccessory(platform, config, accessoryNumber) {
         "get CurrentAmbientLightLevel",
         this.modFunctionGet
       );}.bind(this));
+    }
 
-      if ('get_StatusTampered' in config) {
-        this.service.getCharacteristic(Characteristic.StatusTampered)
-        .on('get', function(callback) {this.getBit(callback,
-          config.db,
-          Math.floor(config.get_StatusTampered), Math.floor((config.get_StatusTampered*10)%10),
-          'get StatusTampered'
-        );}.bind(this));
-      }
+    if ('get_StatusTampered' in config) {
+      this.service.getCharacteristic(Characteristic.StatusTampered)
+      .on('get', function(callback) {this.getBit(callback,
+        config.db,
+        Math.floor(config.get_StatusTampered), Math.floor((config.get_StatusTampered*10)%10),
+        'get StatusTampered'
+      );}.bind(this));
+    }
 
-      if ('get_StatusLowBattery' in config) {
-        this.service.getCharacteristic(Characteristic.StatusLowBattery)
-        .on('get', function(callback) {this.getBit(callback,
-          config.db,
-          Math.floor(config.get_StatusLowBattery), Math.floor((config.get_StatusLowBattery*10)%10),
-          'get StatusLowBattery'
-        );}.bind(this));
-      }
+    if ('get_StatusLowBattery' in config) {
+      this.service.getCharacteristic(Characteristic.StatusLowBattery)
+      .on('get', function(callback) {this.getBit(callback,
+        config.db,
+        Math.floor(config.get_StatusLowBattery), Math.floor((config.get_StatusLowBattery*10)%10),
+        'get StatusLowBattery'
+      );}.bind(this));
+    }
   }
 
 
@@ -1617,7 +1627,7 @@ function GenericPLCAccessory(platform, config, accessoryNumber) {
   }
 
   this.accessory.getService(Service.AccessoryInformation)
-  .setCharacteristic(Characteristic.Manufacturer, ('manufacturer' in config) ? config.manufacturer : 'homebridge-plc')
+  .setCharacteristic(Characteristic.Manufacturer, ('manufacturer' in config) ? config.manufacturer : ('db' in config) ? 'homebridge-plc (DB' + String(config.db)+ ')' : 'homebridge-plc')
   .setCharacteristic(Characteristic.Model, config.accessory)
   .setCharacteristic(Characteristic.SerialNumber, uuid)
   .setCharacteristic(Characteristic.FirmwareRevision, '0.0.1');
@@ -2121,7 +2131,8 @@ GenericPLCAccessory.prototype = {
     // LightSensor
     ////////////////////////////////////////////////////////////////
     else if (this.config.accessory == 'PLC_LightSensor'){
-      if (this.config.get_CurrentAmbientLightLevel == offset)
+
+      if (this.config.get_CurrentAmbientLightLevel == offset || this.config.get_CurrentAmbientLightLevelDInt == offset )
       {
         this.log.debug( "[" + this.name + "] Push CurrentAmbientLightLevel:" + value);
         this.service.getCharacteristic(Characteristic.CurrentAmbientLightLevel).updateValue(value);
