@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.0.34] 2022-01-04
+
+### Added
+- add `PLC_LightSensor`
+### Changed
+- add DB number to manufacture field when other value is given
+- updated documentation
+
 ## [1.0.33] 2021-11-23
 
 ### Added
