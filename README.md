@@ -27,7 +27,7 @@ SIEMENS S7 PLC plugin for [Homebridge](https://homebridge.io)
   * [Temperature Sensor as `PLC_TemperatureSensor`](#PLC_TemperatureSensor)
   * [Humidity Sensor as `PLC_HumiditySensor`](#PLC_HumiditySensor)
   * [Thermostat as `PLC_Thermostat`](#PLC_Thermostat)
-    * [Humidifier/Dehumidifier as `PLC_HumidifierDehumidifier`](#PLC_HumidifierDehumidifier)
+  * [Humidifier/Dehumidifier as `PLC_HumidifierDehumidifier`](#PLC_HumidifierDehumidifier)
   * [Shutter as `PLC_WindowCovering`](#PLC_Window)
   * [Window as `PLC_Window`](#PLC_Window)
   * [Door as `PLC_Door`](#PLC_Window)
@@ -644,7 +644,11 @@ Illuminance sensor
 - `db`: s7 data base number e.g. `4` for `DB4`
 - `enablePolling`: **(optional)** when set to `true` the current state will be polled. It is mandatory as well to enable polling mode on platform level.
 - `pollInterval`: **(optional)** poll interval in seconds. Default value see platform definition.
-- `get_CurrentAmbientLightLevel`: **(push support)** offset to get current illumination in LUX S7 type `Real` or `DInt` in case of `PLC_LightSensor_DInt` e.g. `55` for `DB4DBD55`
+- AmbientLightLevel
+  - DInt
+    - `get_CurrentAmbientLightLevelDInt`: **(push support)** offset to get current illumination in LUX S7 type `DInt` in case of `PLC_LightSensor_DInt` e.g. `55` for `DB4DBD55`
+  - Real
+    - `get_CurrentAmbientLightLevel`: **(push support)** offset to get current illumination in LUX S7 type `Real` in case of `PLC_LightSensor_DInt` e.g. `55` for `DB4DBD55`
 - `get_StatusTampered`: **(optional)** **(push support)** offset and bit to tamper detection. (Home app shows this only within the options) S7 type `Bool` e.g. `55.2` for `DB4DBX55.2`
   - `false`: ok
   - `true`: tampered
