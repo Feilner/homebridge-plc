@@ -45,6 +45,7 @@ SIEMENS S7 PLC plugin for [Homebridge](https://homebridge.io)
   * [Garage door as `PLC_GarageDoorOpener`](#PLC_GarageDoorOpener)
   * [Smoke Sensor as `PLC_SmokeSensor`](#PLC_SmokeSensor)
   * [Fan as `PLC_Fan`](#PLC_Fan)
+  * [Light Sensor as `PLC_LightSensor`](#PLC_LightSensor)
 
 # Installation
 
@@ -634,6 +635,22 @@ ventilator
   - `set_Active`: **(control support)** offset and bit set to 1 when switching on S7 type `Bool` **PLC has to set to 0** e.g. `55.1` for `DB4DBX55.1`
   - `set_Deactivate`: offset and bit set to 1 when switching off S7 type `Bool` **PLC has to set to 0** e.g. `55.2` for `DB4DBX55.2`
 
+### <a name='PLC_LightSensor'></a>Light Sensor as `PLC_LightSensor`
+Illuminance sensor
+
+![homebridge pic](doc/lightsensor.png)
+- `name`: unique name of the accessory
+- `manufacturer`: **(optional)** description
+- `db`: s7 data base number e.g. `4` for `DB4`
+- `enablePolling`: **(optional)** when set to `true` the current state will be polled. It is mandatory as well to enable polling mode on platform level.
+- `pollInterval`: **(optional)** poll interval in seconds. Default value see platform definition.
+- `get_CurrentAmbientLightLevel`: **(push support)** offset to get current illumination in LUX S7 type `Real` e.g. `55` for `DB4DBD55`
+- `get_StatusTampered`: **(optional)** **(push support)** offset and bit to tamper detection. (Home app shows this only within the options) S7 type `Bool` e.g. `55.2` for `DB4DBX55.2`
+  - `false`: ok
+  - `true`: tampered
+- `get_StatusLowBattery`: **(optional)** **(push support)** offset and bit to battery low detection. (Home app does not inform with push notification) S7 type `Bool` e.g. `55.3` for `DB4DBX55.3`
+  - `false`: ok
+  - `true`: battery low
 
 ## config.json Example
 Note: The example is just an example it contains also some optional settings. For testing purposes all accessories are set to one DB.
@@ -933,6 +950,14 @@ Note: The example is just an example it contains also some optional settings. Fo
               "get_TargetFanState": 48,
               "set_TargetFanState": 48,
               "enablePolling": true
+            },
+            {
+                "accessory": "PLC_LightSensor",
+                "name": "LightSensor",
+                "db": 12,
+                "enablePolling": true,
+                "get_CurrentAmbientLightLevel": 50,
+                "pollInterval": 180
             },
           ]
         }

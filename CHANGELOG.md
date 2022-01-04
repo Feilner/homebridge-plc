@@ -1,5 +1,10 @@
 # Changelog
 
+## [1.0.34] 2022-01-04
+
+### Added
+- add `PLC_LightSensor`
+
 ## [1.0.33] 2021-11-23
 
 ### Added

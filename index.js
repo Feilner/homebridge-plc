@@ -1577,6 +1577,39 @@ function GenericPLCAccessory(platform, config, accessoryNumber) {
         );}.bind(this));
     }
   }
+  // INIT handling ///////////////////////////////////////////////
+  // LightSensor
+  ////////////////////////////////////////////////////////////////
+  else if (config.accessory == 'PLC_LightSensor'){
+    this.service = new Service.LightSensor(this.name);
+    this.accessory.addService(this.service);
+
+      this.service.getCharacteristic(Characteristic.CurrentAmbientLightLevel)
+      .on('get', function(callback) {this.getReal(callback,
+        config.db,
+        config.get_CurrentAmbientLightLevel,
+        "get CurrentAmbientLightLevel",
+        this.modFunctionGet
+      );}.bind(this));
+
+      if ('get_StatusTampered' in config) {
+        this.service.getCharacteristic(Characteristic.StatusTampered)
+        .on('get', function(callback) {this.getBit(callback,
+          config.db,
+          Math.floor(config.get_StatusTampered), Math.floor((config.get_StatusTampered*10)%10),
+          'get StatusTampered'
+        );}.bind(this));
+      }
+
+      if ('get_StatusLowBattery' in config) {
+        this.service.getCharacteristic(Characteristic.StatusLowBattery)
+        .on('get', function(callback) {this.getBit(callback,
+          config.db,
+          Math.floor(config.get_StatusLowBattery), Math.floor((config.get_StatusLowBattery*10)%10),
+          'get StatusLowBattery'
+        );}.bind(this));
+      }
+  }
 
 
   else {
@@ -2084,7 +2117,29 @@ GenericPLCAccessory.prototype = {
         rv = true;
       }
     }
-
+    // PUSH handling ///////////////////////////////////////////////
+    // LightSensor
+    ////////////////////////////////////////////////////////////////
+    else if (this.config.accessory == 'PLC_LightSensor'){
+      if (this.config.get_CurrentAmbientLightLevel == offset)
+      {
+        this.log.debug( "[" + this.name + "] Push CurrentAmbientLightLevel:" + value);
+        this.service.getCharacteristic(Characteristic.CurrentAmbientLightLevel).updateValue(value);
+        rv = true;
+      }
+      if (this.config.get_StatusTampered == offset)
+      {
+        this.log.debug( "[" + this.name + "] Push StatusTampered:" + value);
+        this.service.getCharacteristic(Characteristic.StatusTampered).updateValue(value);
+        rv = true;
+      }
+      if (this.config.get_StatusLowBattery == offset)
+      {
+        this.log.debug( "[" + this.name + "] Push StatusLowBattery:" + value);
+        this.service.getCharacteristic(Characteristic.StatusLowBattery).updateValue(value);
+        rv = true;
+      }
+    }
 
     return rv;
   },
@@ -2757,7 +2812,27 @@ GenericPLCAccessory.prototype = {
         }
       }.bind(this));
     }
-
+    // POLL handling ///////////////////////////////////////////////
+    // LightSensor
+    ////////////////////////////////////////////////////////////////
+    else if (this.config.accessory == 'PLC_LightSensor') {
+      // get the current target system state and update the value.
+      this.service.getCharacteristic(Characteristic.CurrentAmbientLightLevel).getValue(function(err, value) {
+        if (!err) {
+          this.service.getCharacteristic(Characteristic.CurrentAmbientLightLevel).updateValue(value);
+        }
+      }.bind(this));
+      this.service.getCharacteristic(Characteristic.StatusTampered).getValue(function(err, value) {
+        if (!err) {
+          this.service.getCharacteristic(Characteristic.StatusTampered).updateValue(value);
+        }
+      }.bind(this));
+      this.service.getCharacteristic(Characteristic.StatusLowBattery).getValue(function(err, value) {
+        if (!err) {
+          this.service.getCharacteristic(Characteristic.StatusLowBattery).updateValue(value);
+        }
+      }.bind(this));
+    }
   },
 
   getServices: function() {
