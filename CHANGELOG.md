@@ -1,5 +1,9 @@
 # Changelog
 
+## [1.0.35] 2022-01-25
+### Changed
+- add range limit 0.0001~100000 for `PLC_LightSensor` to avoid warning when value 0 is used.
+
 ## [1.0.34] 2022-01-04
 
 ### Added

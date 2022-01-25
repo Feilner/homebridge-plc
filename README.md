@@ -50,7 +50,7 @@ SIEMENS S7 PLC plugin for [Homebridge](https://homebridge.io)
 # Installation
 
 - Basic Installation
-  - Install this plugin using: `npm install -g homebridge-plc`
+  - Install this plugin using: `sudo npm install -g homebridge-plc`
   - Edit `config.json` to add the plc platform and its accessories.
   - Run Homebridge
 
@@ -635,7 +635,7 @@ ventilator
   - `set_Active`: **(control support)** offset and bit set to 1 when switching on S7 type `Bool` **PLC has to set to 0** e.g. `55.1` for `DB4DBX55.1`
   - `set_Deactivate`: offset and bit set to 1 when switching off S7 type `Bool` **PLC has to set to 0** e.g. `55.2` for `DB4DBX55.2`
 
-### <a name='PLC_LightSensor'></a>Light Sensor as `PLC_LightSensor`
+### <a name='PLC_LightSensor'></a>Light Sensor as `PLC_LightSensor` or `PLC_LightSensor_DInt`
 Illuminance sensor
 
 ![homebridge pic](doc/lightsensor.png)
@@ -646,9 +646,9 @@ Illuminance sensor
 - `pollInterval`: **(optional)** poll interval in seconds. Default value see platform definition.
 - AmbientLightLevel
   - DInt
-    - `get_CurrentAmbientLightLevelDInt`: **(push support)** offset to get current illumination in LUX S7 type `DInt` e.g. `55` for `DB4DBD55`
+    - `get_CurrentAmbientLightLevelDInt`: **(push support)** offset to get current illumination in LUX S7 type `DInt` value limited to 0.0001 ~ 100,000   e.g. `55` for `DB4DBD55`
   - Real
-    - `get_CurrentAmbientLightLevel`: **(push support)** offset to get current illumination in LUX S7 type `Real` e.g. `55` for `DB4DBD55`
+    - `get_CurrentAmbientLightLevel`: **(push support)** offset to get current illumination in LUX S7 type `Real` value limited to 0.0001 ~ 100,000   e.g. `55` for `DB4DBD55`
 - `get_StatusTampered`: **(optional)** **(push support)** offset and bit to tamper detection. (Home app shows this only within the options) S7 type `Bool` e.g. `55.2` for `DB4DBX55.2`
   - `false`: ok
   - `true`: tampered

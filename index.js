@@ -1584,6 +1584,8 @@ function GenericPLCAccessory(platform, config, accessoryNumber) {
     this.service = new Service.LightSensor(this.name);
     this.accessory.addService(this.service);
 
+    this.modFunctionGet = function(value){return this.limitFunction(value, 0.0001 ,100000);}.bind(this);
+
     if ('get_CurrentAmbientLightLevelDInt' in config) {
       this.service.getCharacteristic(Characteristic.CurrentAmbientLightLevel)
       .on('get', function(callback) {this.getDInt(callback,
@@ -2132,10 +2134,16 @@ GenericPLCAccessory.prototype = {
     ////////////////////////////////////////////////////////////////
     else if (this.config.accessory == 'PLC_LightSensor'){
 
-      if (this.config.get_CurrentAmbientLightLevel == offset || this.config.get_CurrentAmbientLightLevelDInt == offset )
+      if ( this.config.get_CurrentAmbientLightLevelDInt == offset )
       {
-        this.log.debug( "[" + this.name + "] Push CurrentAmbientLightLevel:" + value);
-        this.service.getCharacteristic(Characteristic.CurrentAmbientLightLevel).updateValue(value);
+        this.log.debug( "[" + this.name + "] Push CurrentAmbientLightLevel:" + String(this.modFunctionGet(parseInt(value))) + "<-" + String(value));
+        this.service.getCharacteristic(Characteristic.CurrentAmbientLightLevel).updateValue(this.modFunctionGet(parseInt(value)));
+        rv = true;
+      }
+      if (this.config.get_CurrentAmbientLightLevel == offset )
+      {
+        this.log.debug( "[" + this.name + "] Push CurrentAmbientLightLevel:" + String(this.modFunctionGet(parseFloat(value))) + "<-" + String(value));
+        this.service.getCharacteristic(Characteristic.CurrentAmbientLightLevel).updateValue(this.modFunctionGet(parseFloat(value)));
         rv = true;
       }
       if (this.config.get_StatusTampered == offset)
@@ -2869,13 +2877,22 @@ GenericPLCAccessory.prototype = {
     if (value >= 0 && value < map.length) {
       rv = map[value];
     }
-    else
-    {
+    else {
       this.log.error("[mapFunction] value:" + value + " is out ouf range of mapping array with "+ map.length + " elements");
     }
     return rv;
   },
 
+  limitFunction: function(value, min, max){
+    rv = value;
+    if( rv < min) {
+      rv = min;
+    }
+    else if(rv >max) {
+      rv = max;
+    }
+    return rv;
+  },
 
 
   s7time2int: function(value){
