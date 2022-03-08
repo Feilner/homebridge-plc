@@ -73,8 +73,14 @@ Parameters:
 - `enablePolling`: **(optional)** when set to `true` a background task is executed every second enable polling for the accessories
 - `defaultPollInterval` **(optional)** default polling interval for all accessories in seconds. Default value is `10` seconds.
 - `distributePolling` **(optional)** when set to `true` the polling of the accessories does not start at the same time. In order to distribute the PLC load for the queries.
-- `enablePush`: **(optional)** when set to `true` a the configured `port` is opened to push updates of values form plc to the plugin
-- `enableControl`: **(optional)** when set to `true` a the configured `port` is opened to control accessories by http request
+- [**push**](#push) support
+  - `enablePush`: **(optional)** when set to `true` a the configured `port` is opened to push updates of values form plc to the plugin
+  - `forwardPush`: **(optional)** forwards the not handled push requests to another instance of plc-homebridge e.g. `http:\\127.0.0.1:8889` 
+  - `forwardPushAll`: **(optional)** forwards the all push requests to another instance of plc-homebridge e.g. `http:\\127.0.0.1:8889` 
+- [**control**](#control) support
+  - `enableControl`: **(optional)** when set to `true` a the configured `port` is opened to control accessories by http request
+  - `forwardControl`: **(optional)** forwards the not handled control requests to another instance of plc-homebridge e.g. `http:\\127.0.0.1:8889` 
+  - `forwardControlAll`: **(optional)** forwards the all control requests to another instance of plc-homebridge e.g. `http:\\127.0.0.1:8889` 
 - `port`: **(optional)** port for http server to handle incoming http requests for push and control functionality. Default port is `8888`
 
 ## Accessories
@@ -1014,6 +1020,8 @@ The interface that the PLC has to use consists only of the keyword 'push', the d
 
 The value is assigned to all matching ('db' and 'offset') get_* accessory configurations. All information is transmitted within the URL and in decimal. Parameters that supports push are marked with [push] in the description.
 
+It's also possible to forward all push requests or just the one where no match with 'db' and 'offset' the push request could be optional forwarded to another instance of homebridge-plc see parameter `forwardPush` and `forwardPushAll`
+
 For example the push from the PLC is done as 'http://homebridgeIp:8080/?push&db=1014&offset=1&value=3'
 With the following configuration:
 
@@ -1046,15 +1054,15 @@ The Request has to be done as HTTP `PUT` or `GET` operation. There will be no lo
 ### Format
 Example for float values when trigger from browser:
 
-  http://homebridgeIp:8080/?push&db=3&offset=22&value=12.5
+  http://homebridgeIp:8888/?push&db=3&offset=22&value=12.5
 
 Example for bool values when trigger from browser
 
-  http://homebridgeIp:8080/?push&db=5&offset=5.1&value=1
+  http://homebridgeIp:8888/?push&db=5&offset=5.1&value=1
 
 Example for byte values when trigger from browser
 
-  http://homebridgeIp:8080/?push&db=2&offset=3&value=255
+  http://homebridgeIp:8888/?push&db=2&offset=3&value=255
 
 **NOTE:** Chrome/Edge does at minimum two requests with different parameters resulting in some error messages. I recommend `Talend API Tester - Free Edition`
 
@@ -1071,6 +1079,8 @@ The value is assigned to the matching ('db' and 'offset') set_* accessory config
 For accessories with separate on/off configurations e.g. `PLC_LightBulb` `set_On`/`set_Off` the `set_On` or `PLC_LockMechanismBool` `set_Secured`/`set_Unsecured` the `set_Secured` has to be used. With `1` for on and `0` for off.
 
 All information is transmitted within the URL and in decimal.
+
+It's also possible to forward all control requests or just the one where no match with 'db' and 'offset' the push request could be optional forwarded to another instance of homebridge-plc see parameter `forwardControl` and `forwardControlAll`
 
 **NOTE: Options like `invert`, `mapGet` and `mapSet` are not affecting the control interface. In example for PLC_Window is the value `0`: **closed** and `100`: **open** regardless if `invert` is set or not.
 

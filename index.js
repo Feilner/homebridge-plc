@@ -75,6 +75,17 @@ PLC_Platform.prototype = {
     });
   },
 
+  forwardHTTP: function(logprefix, url) {
+    require('http').get(url, (resp) => {
+      if (resp.statusCode !== 200) {
+        this.log.error(logprefix + " Forward failed with HTTP status: " + resp.statusCode);
+        return;
+      }
+    }).on('error', function(e) {
+      this.log.error(logprefix + " Forward failed: " + e.message);
+    }.bind(this));
+  },
+
   httpListener: function(req, res) {
     var data = '';
     var url = '';
@@ -105,6 +116,12 @@ PLC_Platform.prototype = {
                   handled = accessory.updatePush(offset, value) || handled;
                 }
               });
+              if (typeof(this.config.forwardPushAll) != 'undefined' && this.config.forwardPushAll) {
+                this.forwardHTTP("[HTTP ForwardPushAll]", this.config.forwardPushAll + req.url);
+              }
+              else if(!handled && (typeof(this.config.forwardPush) != 'undefined' && this.config.forwardPush) ) {
+                  this.forwardHTTP("[HTTP ForwardPush]", this.config.forwardPush + req.url);
+              }
               if(!handled && doLog) {
                 this.log.error("[HTTP Push] No matching accessory found for db:" + url.query.db + " offset:" + url.query.offset +" value:" + url.query.value);
               }
@@ -122,6 +139,12 @@ PLC_Platform.prototype = {
                   handled = accessory.updateControl(offset, value) || handled;
                 }
               });
+              if (typeof(this.config.forwardControlAll) != 'undefined' && this.config.forwardControlAll) {
+                this.forwardHTTP("[HTTP ForwardControlAll]", this.config.forwardControlAll + req.url);
+              }
+              else if(!handled && (typeof(this.config.forwardControl) != 'undefined' && this.config.forwardControl) ) {
+                  this.forwardHTTP("[HTTP ForwardControl]", this.config.forwardControl + req.url);
+              }
               if(!handled && doLog) {
                 this.log.error("[HTTP Control] No matching accessory found for db:" + url.query.db + " offset:" + url.query.offset +" value:" + url.query.value);
               }
@@ -135,16 +158,16 @@ PLC_Platform.prototype = {
                 this.log.error("[HTTP Control] enableControl is not set in platform config!");
               }
               else if (!('push' in url.query) && !('control' in url.query) ) {
-                this.log.error("[HTTP Push/Control] neither push or control!");
+                this.log.error("[HTTP Push/Control] operation push or control in url" + req.url);
               }
               else if (!('db' in url.query)) {
-                this.log.error("[HTTP Push/Control] parameter db is missing!");
+                this.log.error("[HTTP Push/Control] parameter db is missing in url" + req.url);
               }
               else if (!('offset' in url.query)) {
-                this.log.error("[HTTP Push/Control] parameter offset is missing!");
+                this.log.error("[HTTP Push/Control] parameter offset is missing in url" + req.url);
               }
               else if (!('value' in url.query)) {
-                this.log.error("[HTTP Push/Control] parameter value is missing!");
+                this.log.error("[HTTP Push/Control] parameter value is missing in url" + req.url);
               }
             }
         });
