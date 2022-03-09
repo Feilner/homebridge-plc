@@ -116,14 +116,13 @@ PLC_Platform.prototype = {
                   handled = accessory.updatePush(offset, value) || handled;
                 }
               });
-              if (typeof(this.config.forwardPushAll) != 'undefined' && this.config.forwardPushAll) {
-                this.forwardHTTP("[HTTP ForwardPushAll]", this.config.forwardPushAll + req.url);
-              }
-              else if(!handled && (typeof(this.config.forwardPush) != 'undefined' && this.config.forwardPush) ) {
-                  this.forwardHTTP("[HTTP ForwardPush]", this.config.forwardPush + req.url);
-              }
-              if(!handled && doLog) {
-                this.log.error("[HTTP Push] No matching accessory found for db:" + url.query.db + " offset:" + url.query.offset +" value:" + url.query.value);
+              if(!handled) {
+                if  (typeof(this.config.forward) != 'undefined' && this.config.forward) {
+                  this.forwardHTTP("[HTTP forward]", this.config.forward + req.url);
+                }
+                else if(doLog) {
+                  this.log.error("[HTTP Push] No matching accessory found for db:" + url.query.db + " offset:" + url.query.offset +" value:" + url.query.value);
+                }
               }
             }
             else if (this.config.enableControl && 'control' in url.query && 'db' in url.query && 'offset' in url.query && 'value' in url.query) {
@@ -139,14 +138,13 @@ PLC_Platform.prototype = {
                   handled = accessory.updateControl(offset, value) || handled;
                 }
               });
-              if (typeof(this.config.forwardControlAll) != 'undefined' && this.config.forwardControlAll) {
-                this.forwardHTTP("[HTTP ForwardControlAll]", this.config.forwardControlAll + req.url);
-              }
-              else if(!handled && (typeof(this.config.forwardControl) != 'undefined' && this.config.forwardControl) ) {
-                  this.forwardHTTP("[HTTP ForwardControl]", this.config.forwardControl + req.url);
-              }
-              if(!handled && doLog) {
-                this.log.error("[HTTP Control] No matching accessory found for db:" + url.query.db + " offset:" + url.query.offset +" value:" + url.query.value);
+              if(!handled) {
+                if (typeof(this.config.forward) != 'undefined' && this.config.forward) {
+                  this.forwardHTTP("[HTTP forward]", this.config.forward + req.url);
+                }
+                else if(!handled && doLog) {
+                  this.log.error("[HTTP Control] No matching accessory found for db:" + url.query.db + " offset:" + url.query.offset +" value:" + url.query.value);
+                }
               }
             }
             else if(doLog)
@@ -176,6 +174,20 @@ PLC_Platform.prototype = {
     res.end();
 },
 
+  informInstance: function(logprefix, url) {
+
+    if ( 'informInstance' in this.config && this.config.informInstance) {
+      require('http').get(this.config.informInstance + url, (resp) => {
+        if (resp.statusCode !== 201) {
+          this.log.error(logprefix, "Forward failed with HTTP status: " + resp.statusCode);
+          return;
+        }
+      }).on('error', function(e) {
+        this.log.error(logprefix, "Forward failed: " + e.message);
+      }.bind(this));
+    }
+    return;
+  },
 
     //PLC connection check function
   S7ClientConnect: function() {
@@ -2969,6 +2981,7 @@ GenericPLCAccessory.prototype = {
     var logprefix = "[" + this.name + "] " + characteristic + ": %s (setOnOffBit DB" + db + "DBX"+ offset + "." + bit + ")";
     var S7Client = this.platform.S7Client;
     var log = this.log;
+    var informInstance = function(value) { this.platform.informInstance(logprefix, "/?push&db="+db+"&offset="+ on_offset + "." + on_bit + "&value="+ value);}.bind(this);
 
     //ensure PLC connection
     if (this.platform.S7ClientConnect()) {
@@ -2987,6 +3000,7 @@ GenericPLCAccessory.prototype = {
           {
             inform(value);
           }
+          informInstance(value? 1 : 0);
         }
       });
     }
@@ -3001,6 +3015,7 @@ GenericPLCAccessory.prototype = {
     var S7Client = this.platform.S7Client;
     var log = this.log;
     var valuePLC = value;
+    var informInstance = function(value) { this.platform.informInstance(logprefix, "/?push&db="+db+"&offset="+ offset + "." + bit + "&value="+ value);}.bind(this);
 
     if (typeof(valueMod) != 'undefined' && valueMod)
     {
@@ -3030,6 +3045,7 @@ GenericPLCAccessory.prototype = {
           {
             inform(value);
           }
+          informInstance(value);
         }
       });
     }
@@ -3045,8 +3061,7 @@ GenericPLCAccessory.prototype = {
     var S7Client = this.platform.S7Client;
     var log = this.log;
     //check PLC connection
-    this.platform.S7ClientConnect();
-
+    var informInstance = function(value) { this.platform.informInstance(logprefix, "/?push&db="+db+"&offset="+ offset + "." + bit + "&value="+ value);}.bind(this);
     if (this.platform.S7ClientConnect()) {
       S7Client.ReadArea(S7Client.S7AreaDB, db, ((offset*8) + bit), 1, S7Client.S7WLBit, function(err, res) {
         if(err) {
@@ -3067,6 +3082,7 @@ GenericPLCAccessory.prototype = {
             log.debug(logprefix , String(value));
           }
           callback(null, value);
+          informInstance(value);
         }
       });
     }
@@ -3118,6 +3134,7 @@ GenericPLCAccessory.prototype = {
     else {
         callback(new Error('PLC not connected'));
     }
+    this.platform.informInstance(logprefix, "/?push&db="+db+"&offset="+ offset + "&value="+ value);
   },
 
   getReal: function(callback, db, offset, characteristic, valueMod) {
@@ -3198,6 +3215,7 @@ GenericPLCAccessory.prototype = {
     else {
         callback(new Error('PLC not connected'));
     }
+    this.platform.informInstance(logprefix, "/?push&db="+db+"&offset="+ offset + "&value="+ value);
   },
 
   getByte: function(callback, db, offset, characteristic, valueMod) {
@@ -3277,6 +3295,7 @@ GenericPLCAccessory.prototype = {
     else {
         callback(new Error('PLC not connected'));
     }
+    this.platform.informInstance(logprefix, "/?push&db="+db+"&offset="+ offset + "&value="+ value);
   },
 
   getInt: function(callback, db, offset, characteristic, valueMod) {
@@ -3312,6 +3331,7 @@ GenericPLCAccessory.prototype = {
     else {
         callback(new Error('PLC not connected'));
     }
+    this.platform.informInstance(logprefix, "/?push&db="+db+"&offset="+ offset + "&value="+ value);
   },
 
 
@@ -3359,6 +3379,7 @@ GenericPLCAccessory.prototype = {
     else {
         callback(new Error('PLC not connected'));
     }
+    this.platform.informInstance(logprefix, "/?push&db="+db+"&offset="+ offset + "&value="+ value);
   },
 
   getDInt: function(callback, db, offset, characteristic, valueMod) {
