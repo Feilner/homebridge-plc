@@ -105,7 +105,7 @@ PLC_Platform.prototype = {
             url = require('url').parse(req.url, true); // will parse parameters into query string
             if (this.config.enablePush && 'push' in url.query && 'db' in url.query && 'offset' in url.query && 'value' in url.query) {
               if(doLog) {
-                this.log.debug("[HTTP Push] Received update for accessory:" + url.query.db + " offset:" + url.query.offset +" value:" + url.query.value);
+                this.log.debug("[HTTP Push] (" + req.socket.remoteAddress + ") Received update for accessory:" + url.query.db + " offset:" + url.query.offset +" value:" + url.query.value);
               }
               var db = parseInt(url.query.db);
               var offset = parseFloat(url.query.offset);
@@ -118,16 +118,16 @@ PLC_Platform.prototype = {
               });
               if(!handled) {
                 if  (typeof(this.config.forward) != 'undefined' && this.config.forward) {
-                  this.forwardHTTP("[HTTP forward]", this.config.forward + req.url);
+                  this.forwardHTTP("[HTTP Push]", this.config.forward + req.url);
                 }
                 else if(doLog) {
-                  this.log.error("[HTTP Push] No matching accessory found for db:" + url.query.db + " offset:" + url.query.offset +" value:" + url.query.value);
+                  this.log.error("[HTTP Push] (" + req.socket.remoteAddress + ") " + doLog + req.method + "No matching accessory found for db:" + url.query.db + " offset:" + url.query.offset +" value:" + url.query.value);
                 }
               }
             }
             else if (this.config.enableControl && 'control' in url.query && 'db' in url.query && 'offset' in url.query && 'value' in url.query) {
               if(doLog) {
-                this.log.debug("[HTTP Control] Received control request for accessory:" + url.query.db + " offset:" + url.query.offset +" value:" + url.query.value);
+                this.log.debug("[HTTP Control] (" + req.socket.remoteAddress + ") Received control request for accessory:" + url.query.db + " offset:" + url.query.offset +" value:" + url.query.value);
               }
               var db = parseInt(url.query.db);
               var offset = parseFloat(url.query.offset);
@@ -140,32 +140,32 @@ PLC_Platform.prototype = {
               });
               if(!handled) {
                 if (typeof(this.config.forward) != 'undefined' && this.config.forward) {
-                  this.forwardHTTP("[HTTP forward]", this.config.forward + req.url);
+                  this.forwardHTTP("[HTTP Control]", this.config.forward + req.url);
                 }
-                else if(!handled && doLog) {
-                  this.log.error("[HTTP Control] No matching accessory found for db:" + url.query.db + " offset:" + url.query.offset +" value:" + url.query.value);
+                else if(doLog) {
+                  this.log.error("[HTTP Control] (" + req.socket.remoteAddress + ")  No matching accessory found for db:" + url.query.db + " offset:" + url.query.offset +" value:" + url.query.value);
                 }
               }
             }
             else if(doLog)
             {
               if (!this.config.enablePush && 'push' in url.query) {
-                this.log.error("[HTTP Push] enablePush is not set in platform config!");
+                this.log.error("[HTTP Push]  (" + req.socket.remoteAddress + ") enablePush is not set in platform config!");
               }
               else if (!this.config.enableControl && 'control' in url.query) {
-                this.log.error("[HTTP Control] enableControl is not set in platform config!");
+                this.log.error("[HTTP Control]  (" + req.socket.remoteAddress + ") enableControl is not set in platform config!");
               }
               else if (!('push' in url.query) && !('control' in url.query) ) {
-                this.log.error("[HTTP Push/Control] operation push or control in url" + req.url);
+                this.log.error("[HTTP Push/Control]  (" + req.socket.remoteAddress + ") operation push or control in url" + req.url);
               }
               else if (!('db' in url.query)) {
-                this.log.error("[HTTP Push/Control] parameter db is missing in url" + req.url);
+                this.log.error("[HTTP Push/Control]  (" + req.socket.remoteAddress + ") parameter db is missing in url" + req.url);
               }
               else if (!('offset' in url.query)) {
-                this.log.error("[HTTP Push/Control] parameter offset is missing in url" + req.url);
+                this.log.error("[HTTP Push/Control]  (" + req.socket.remoteAddress + ") parameter offset is missing in url" + req.url);
               }
               else if (!('value' in url.query)) {
-                this.log.error("[HTTP Push/Control] parameter value is missing in url" + req.url);
+                this.log.error("[HTTP Push/Control]  (" + req.socket.remoteAddress + ") parameter value is missing in url" + req.url);
               }
             }
         });
