@@ -75,7 +75,7 @@ Parameters:
 - `distributePolling` **(optional)** when set to `true` the polling of the accessories does not start at the same time. In order to distribute the PLC load for the queries
 - `enablePush`: **(optional)** when set to `true` a the configured `port` is opened to push updates of values form plc to the plugin
 - `enableControl`: **(optional)** when set to `true` a the configured `port` is opened to control accessories by http request
-- `forward`: **(optional)** forwards the not handled push or control requests a cascaded instance of homebridge-plc to overcome the 150 devices limit of homebridge e.g. `http:\\127.0.0.1:8889` requires that `enablePush` or `enableControl` are enabled on both instances
+- `forward`: **(optional)** forwards the not handled (`db` is not matching) push or control requests to a cascaded instance of homebridge-plc to overcome the 150 devices limit of homebridge e.g. `http:\\127.0.0.1:8889` requires that `enablePush` or `enableControl` are enabled on both instances
 - `mirror` **(optional)** There are environments where it makes sense to have ha second instance of homebridge that is paired e.g with another Apple Home App or Home Assistant. This option mirrors all operations between the two instances. It has to be set on both. `enablePolling` should only be set on one instance. 
 - `port`: **(optional)** port for http server to handle incoming http requests for push and control functionality. Default port is `8888`
 
@@ -1016,7 +1016,7 @@ The interface that the PLC has to use consists only of the keyword 'push', the d
 
 The value is assigned to all matching ('db' and 'offset') get_* accessory configurations. All information is transmitted within the URL and in decimal. Parameters that supports push are marked with [push] in the description.
 
-It's also possible to forward all push requests or just the one where no match with 'db' and 'offset' the push request could be optional forwarded to another instance of homebridge-plc see parameter `forward`.
+It's also possible to forward all push where no matching accessory no matches the `db` configuration to another instance of homebridge-plc see parameter `forward`.
 
 For example the push from the PLC is done as 'http://homebridgeIp:8080/?push&db=1014&offset=1&value=3'
 With the following configuration:
@@ -1076,7 +1076,7 @@ For accessories with separate on/off configurations e.g. `PLC_LightBulb` `set_On
 
 All information is transmitted within the URL and in decimal.
 
-It's also possible to forward all control requests or just the one where no match with 'db' and 'offset' the push request could be optional forwarded to another instance of homebridge-plc see parameter `forward`.
+It's also possible to forward all control requests where no matching accessory no matches the `db` configuration to another instance of homebridge-plc see parameter `forward`.
 
 **NOTE: Options like `invert`, `mapGet` and `mapSet` are not affecting the control interface. In example for PLC_Window is the value `0`: **closed** and `100`: **open** regardless if `invert` is set or not.
 

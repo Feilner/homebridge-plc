@@ -32,12 +32,12 @@ PLC_Platform.prototype = {
         this.config.defaultPollInterval = 10;
       }
 
-      log("Add PLC accessories...");
+      log.info("Add PLC accessories...");
       //create accessory for each configuration
       this.config.accessories.forEach((config, index) => {
           var accessoryNumber = index +1;
           var numberOfAccessories = this.config.accessories.length;
-          log("[" + String(accessoryNumber) + "/" + String(numberOfAccessories) + "] " + config.name + " (" +  config.accessory + ")" );
+          log.info("[" + String(accessoryNumber) + "/" + String(numberOfAccessories) + "] " + config.name + " (" +  config.accessory + ")" );
           //call accessory construction
           var accessory = new GenericPLCAccessory(this, config, accessoryNumber);
           this.s7PlatformAccessories.push(accessory);
@@ -45,7 +45,7 @@ PLC_Platform.prototype = {
       callback(this.s7PlatformAccessories);
 
       if (this.config.enablePolling) {
-        log("Enable polling...");
+        log.info("Enable polling...");
         setInterval(function(param) {this.pollLoop( this.s7PlatformAccessories);}.bind(this),1000);
       }
 
@@ -53,20 +53,20 @@ PLC_Platform.prototype = {
         this.port = this.config.port || 8888;
         this.api.on('didFinishLaunching', () => {
             if (this.config.enablePush && this.config.enableControl) {
-              this.log('Enable push and control server...');
+              this.log.info('Enable push and control server...');
             }
             else if (this.config.enablePush) {
-              this.log('Enable push server...');
+              this.log.info('Enable push server...');
             }
             else {
-              this.log('Enable control server...');
+              this.log.info('Enable control server...');
             }
             this.listener = require('http').createServer((req, res) => this.httpListener(req, res));
             this.listener.listen(this.port);
-            this.log('Listening on port ' + this.port);
+            this.log.info('Listening on port ' + this.port);
         });
       }
-      log("Init done!");
+      log.info("Init done!");
   },
 
   pollLoop: function(s7PlatformAccessories)  {
@@ -95,8 +95,8 @@ PLC_Platform.prototype = {
             data += chunk;
         });
         req.on('end', () => {
-            this.log('Received POST and body data:');
-            this.log(data.toString());
+            this.log.info('Received POST and body data:');
+            this.log.info(data.toString());
         });
     }
     else if (req.method == 'PUT' || req.method == 'GET') {
@@ -110,19 +110,24 @@ PLC_Platform.prototype = {
               var db = parseInt(url.query.db);
               var offset = parseFloat(url.query.offset);
               var value = url.query.value;
-              var handled = false;
+              var offsetHandled = false;
+              var dbHandled = false;
               this.s7PlatformAccessories.forEach((accessory) => {
                 if (accessory.config.db == db) {
-                  handled = accessory.updatePush(offset, value) || handled;
+                  dbHandled = true;
+                  offsetHandled = accessory.updatePush(offset, value) || offsetHandled;
                 }
               });
-              if(!handled) {
+              if(!dbHandled) {
                 if  (typeof(this.config.forward) != 'undefined' && this.config.forward) {
                   this.forwardHTTP("[HTTP Push]", this.config.forward + req.url);
                 }
-                else if(doLog) {
-                  this.log.error("[HTTP Push] (" + req.socket.remoteAddress + ") " + doLog + req.method + "No matching accessory found for db:" + url.query.db + " offset:" + url.query.offset +" value:" + url.query.value);
+                else{
+                  this.log.warn("[HTTP Push] (" + req.socket.remoteAddress + ") " + "No accessory configured for db:" + url.query.db + " offset:" + url.query.offset +" value:" + url.query.value);
                 }
+              }
+              else if (!offsetHandled) {
+                this.log.warn("[HTTP Push] (" + req.socket.remoteAddress + ") " + "Offset not configured for accessory db:" + url.query.db + " offset:" + url.query.offset +" value:" + url.query.value);
               }
             }
             else if (this.config.enableControl && 'control' in url.query && 'db' in url.query && 'offset' in url.query && 'value' in url.query) {
@@ -132,40 +137,45 @@ PLC_Platform.prototype = {
               var db = parseInt(url.query.db);
               var offset = parseFloat(url.query.offset);
               var value = url.query.value;
-              var handled = false;
+              var offsetHandled = false;
+              var dbHandled = false;
               this.s7PlatformAccessories.forEach((accessory) => {
                 if (accessory.config.db == db) {
-                  handled = accessory.updateControl(offset, value) || handled;
+                  dbHandled = true;
+                  offsetHandled = accessory.updateControl(offset, value) || offsetHandled;
                 }
               });
-              if(!handled) {
+              if(!dbHandled) {
                 if (typeof(this.config.forward) != 'undefined' && this.config.forward) {
                   this.forwardHTTP("[HTTP Control]", this.config.forward + req.url);
                 }
                 else if(doLog) {
-                  this.log.error("[HTTP Control] (" + req.socket.remoteAddress + ")  No matching accessory found for db:" + url.query.db + " offset:" + url.query.offset +" value:" + url.query.value);
+                  this.log.warn("[HTTP Control] (" + req.socket.remoteAddress + ") " + "No accessory configured for db:" + url.query.db + " offset:" + url.query.offset +" value:" + url.query.value);
                 }
+              }
+              else if (!offsetHandled) {
+                this.log.warn("[HTTP Control] (" + req.socket.remoteAddress + ") " + "Offset not configured for accessory db:" + url.query.db + " offset:" + url.query.offset +" value:" + url.query.value);
               }
             }
             else if(doLog)
             {
               if (!this.config.enablePush && 'push' in url.query) {
-                this.log.error("[HTTP Push]  (" + req.socket.remoteAddress + ") enablePush is not set in platform config!");
+                this.log.warn("[HTTP Push]  (" + req.socket.remoteAddress + ") enablePush is not set in platform config!");
               }
               else if (!this.config.enableControl && 'control' in url.query) {
-                this.log.error("[HTTP Control]  (" + req.socket.remoteAddress + ") enableControl is not set in platform config!");
+                this.log.warn("[HTTP Control]  (" + req.socket.remoteAddress + ") enableControl is not set in platform config!");
               }
               else if (!('push' in url.query) && !('control' in url.query) ) {
-                this.log.error("[HTTP Push/Control]  (" + req.socket.remoteAddress + ") operation push or control in url" + req.url);
+                this.log.warn("[HTTP Push/Control]  (" + req.socket.remoteAddress + ") operation push or control in url" + req.url);
               }
               else if (!('db' in url.query)) {
-                this.log.error("[HTTP Push/Control]  (" + req.socket.remoteAddress + ") parameter db is missing in url" + req.url);
+                this.log.warn("[HTTP Push/Control]  (" + req.socket.remoteAddress + ") parameter db is missing in url" + req.url);
               }
               else if (!('offset' in url.query)) {
-                this.log.error("[HTTP Push/Control]  (" + req.socket.remoteAddress + ") parameter offset is missing in url" + req.url);
+                this.log.warn("[HTTP Push/Control]  (" + req.socket.remoteAddress + ") parameter offset is missing in url" + req.url);
               }
               else if (!('value' in url.query)) {
-                this.log.error("[HTTP Push/Control]  (" + req.socket.remoteAddress + ") parameter value is missing in url" + req.url);
+                this.log.warn("[HTTP Push/Control]  (" + req.socket.remoteAddress + ") parameter value is missing in url" + req.url);
               }
             }
         });
@@ -208,7 +218,7 @@ PLC_Platform.prototype = {
         rv = true;
       }
       else {
-          log("Connecting to %s (%s:%s) %s", ip, rack, slot, typeName[type]);
+          log.info("Connecting to %s (%s:%s) %s", ip, rack, slot, typeName[type]);
 
           if (!this.isConnectOngoing) {
             this.isConnectOngoing = true;
@@ -218,7 +228,7 @@ PLC_Platform.prototype = {
               ok = S7Client.ConnectTo(ip, rack, slot);
               this.isConnectOngoing = false;
               if(ok) {
-                log("Connected to %s (%s:%s) %s", ip, rack, slot, typeName[type]);
+                log.info("Connected to %s (%s:%s) %s", ip, rack, slot, typeName[type]);
                 rv = true;
               }
               else {
@@ -1657,10 +1667,11 @@ function GenericPLCAccessory(platform, config, accessoryNumber) {
       );}.bind(this));
     }
   }
-
-
+  // INIT handling ///////////////////////////////////////////////
+  // Undefined
+  ////////////////////////////////////////////////////////////////
   else {
-    this.log("Accessory "+ config.accessory + " is not defined.");
+    this.log.info("Accessory "+ config.accessory + " is not defined.");
   }
 
   this.accessory.getService(Service.AccessoryInformation)
@@ -2758,7 +2769,7 @@ GenericPLCAccessory.prototype = {
             this.getByte(function(err, event) {
               if (!err) {
                 this.service.getCharacteristic(Characteristic.ProgrammableSwitchEvent).updateValue(event);
-                this.log( "[" + this.name + "] Stateless switch event :" + event);
+                this.log.info( "[" + this.name + "] Stateless switch event :" + event);
                 this.setBit(0,function(err){},
                   this.config.db,
                   Math.floor(this.config.isEvent), Math.floor((this.config.isEvent*10)%10),
