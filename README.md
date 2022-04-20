@@ -76,9 +76,8 @@ Parameters:
 - `enablePush`: **(optional)** when set to `true` a the configured `port` is opened to push updates of values form plc to the plugin
 - `enableControl`: **(optional)** when set to `true` a the configured `port` is opened to control accessories by http request
 - `forward`: **(optional)** forwards the not handled (`db` is not matching) push or control requests to a cascaded instance of homebridge-plc to overcome the 150 devices limit of homebridge e.g. `http:\\127.0.0.1:8889` requires that `enablePush` or `enableControl` are enabled on both instances
-- `mirror` **(optional)** There are environments where it makes sense to have ha second instance of homebridge that is paired e.g with another Apple Home App or Home Assistant. This option mirrors all operations between the two instances. It has to be set on both. `enablePolling` should only be set on one instance. 
+- `mirror` **(optional)** There are environments where it makes sense to have ha second instance of homebridge that is paired e.g with another Apple Home App or Home Assistant. e.g. `http:\\192.168.1.101:8888` This option mirrors all operations between the two instances. The option `mirror` and `enablePush` has to be set on  both instances. The parameter `enablePolling` should only be set on one instance. 
 - `port`: **(optional)** port for http server to handle incoming http requests for push and control functionality. Default port is `8888`
-
 ## Accessories
 - In the platform, you can declare different types of accessories
 - The notation **(push support)** identifies that parameter supports direct updates from the PLC

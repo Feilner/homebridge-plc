@@ -184,16 +184,16 @@ PLC_Platform.prototype = {
     res.end();
 },
 
-  informInstance: function(logprefix, url) {
+  mirror: function(logprefix, url) {
 
-    if ( 'informInstance' in this.config && this.config.informInstance) {
-      require('http').get(this.config.informInstance + url, (resp) => {
+    if ( 'mirror' in this.config && this.config.mirror) {
+      require('http').get(this.config.mirror + url, (resp) => {
         if (resp.statusCode !== 201) {
-          this.log.error(logprefix, "Forward failed with HTTP status: " + resp.statusCode);
+          this.log.error(logprefix, "Mirror failed with HTTP status: " + resp.statusCode);
           return;
         }
       }).on('error', function(e) {
-        this.log.error(logprefix, "Forward failed: " + e.message);
+        this.log.error(logprefix, "Mirror failed: " + e.message);
       }.bind(this));
     }
     return;
@@ -2992,7 +2992,6 @@ GenericPLCAccessory.prototype = {
     var logprefix = "[" + this.name + "] " + characteristic + ": %s (setOnOffBit DB" + db + "DBX"+ offset + "." + bit + ")";
     var S7Client = this.platform.S7Client;
     var log = this.log;
-    var informInstance = function(value) { this.platform.informInstance(logprefix, "/?push&db="+db+"&offset="+ on_offset + "." + on_bit + "&value="+ value);}.bind(this);
 
     //ensure PLC connection
     if (this.platform.S7ClientConnect()) {
@@ -3011,13 +3010,13 @@ GenericPLCAccessory.prototype = {
           {
             inform(value);
           }
-          informInstance(value? 1 : 0);
         }
       });
     }
     else {
       callback(new Error('PLC not connected'), false);
     }
+    this.platform.mirror(logprefix, "/?push&db="+db+"&offset="+ on_offset + "." + on_bit + "&value="+ value);
   },
 
   setBit: function(value, callback, db, offset, bit, characteristic, inform, valueMod) {
@@ -3026,8 +3025,6 @@ GenericPLCAccessory.prototype = {
     var S7Client = this.platform.S7Client;
     var log = this.log;
     var valuePLC = value;
-    var informInstance = function(value) { this.platform.informInstance(logprefix, "/?push&db="+db+"&offset="+ offset + "." + bit + "&value="+ value);}.bind(this);
-
     if (typeof(valueMod) != 'undefined' && valueMod)
     {
       valuePLC = valueMod(value);
@@ -3056,13 +3053,13 @@ GenericPLCAccessory.prototype = {
           {
             inform(value);
           }
-          informInstance(value);
         }
       });
     }
     else {
       callback(new Error('PLC not connected'), false);
     }
+    this.platform.mirror(logprefix, "/?push&db="+db+"&offset="+ offset + "." + bit + "&value="+ valuePLC);
   },
 
 
@@ -3071,8 +3068,9 @@ GenericPLCAccessory.prototype = {
     var logprefix = "[" + this.name + "] " + characteristic + ": %s (getBit DB" + db + "DBX"+ offset + "." + bit + ")";
     var S7Client = this.platform.S7Client;
     var log = this.log;
+    var pushMirror = function(value) { this.platform.mirror(logprefix, "/?push&db="+db+"&offset="+ offset + "." + bit + "&value="+ value);}.bind(this);
+
     //check PLC connection
-    var informInstance = function(value) { this.platform.informInstance(logprefix, "/?push&db="+db+"&offset="+ offset + "." + bit + "&value="+ value);}.bind(this);
     if (this.platform.S7ClientConnect()) {
       S7Client.ReadArea(S7Client.S7AreaDB, db, ((offset*8) + bit), 1, S7Client.S7WLBit, function(err, res) {
         if(err) {
@@ -3093,7 +3091,7 @@ GenericPLCAccessory.prototype = {
             log.debug(logprefix , String(value));
           }
           callback(null, value);
-          informInstance(value);
+          pushMirror(valuePLC);
         }
       });
     }
@@ -3111,11 +3109,11 @@ GenericPLCAccessory.prototype = {
     var log = this.log;
     var buf = this.buf;
     var valuePLC = value;
-
     if (typeof(valueMod) != 'undefined' && valueMod)
     {
       valuePLC = valueMod(value);
     }
+
     //ensure PLC connection
     if (this.platform.S7ClientConnect()) {
         buf.writeFloatBE(valuePLC, 0);
@@ -3145,7 +3143,7 @@ GenericPLCAccessory.prototype = {
     else {
         callback(new Error('PLC not connected'));
     }
-    this.platform.informInstance(logprefix, "/?push&db="+db+"&offset="+ offset + "&value="+ value);
+    this.platform.mirror(logprefix, "/?push&db="+db+"&offset="+ offset + "&value="+ valuePLC);
   },
 
   getReal: function(callback, db, offset, characteristic, valueMod) {
@@ -3153,6 +3151,8 @@ GenericPLCAccessory.prototype = {
     var S7Client = this.platform.S7Client;
     var log = this.log;
     var value = 0;
+    var pushMirror = function(value) { this.platform.mirror(logprefix, "/?push&db="+db+"&offset="+ offset + "&value="+ value);}.bind(this);
+
     //ensure PLC connection
     if (this.platform.S7ClientConnect()) {
         S7Client.ReadArea(S7Client.S7AreaDB, db, offset, 1, S7Client.S7WLReal, function(err, res) {
@@ -3174,6 +3174,7 @@ GenericPLCAccessory.prototype = {
               log.debug(logprefix , String(value));
             }
             callback(null, value);
+            pushMirror(valuePLC);
           }
         });
     }
@@ -3192,11 +3193,11 @@ GenericPLCAccessory.prototype = {
     var log = this.log;
     var buf = this.buf;
     var valuePLC = value;
-
     if (typeof(valueMod) != 'undefined' && valueMod)
     {
       valuePLC = valueMod(value);
     }
+
     //ensure PLC connection
     if (this.platform.S7ClientConnect()) {
         buf[0] = valuePLC;
@@ -3226,7 +3227,7 @@ GenericPLCAccessory.prototype = {
     else {
         callback(new Error('PLC not connected'));
     }
-    this.platform.informInstance(logprefix, "/?push&db="+db+"&offset="+ offset + "&value="+ value);
+    this.platform.mirror(logprefix, "/?push&db="+db+"&offset="+ offset + "&value="+ valuePLC);
   },
 
   getByte: function(callback, db, offset, characteristic, valueMod) {
@@ -3234,6 +3235,8 @@ GenericPLCAccessory.prototype = {
     var S7Client = this.platform.S7Client;
     var log = this.log;
     var value = 0;
+    var pushMirror = function(value) { this.platform.mirror(logprefix, "/?push&db="+db+"&offset="+ offset + "&value="+ value);}.bind(this);
+
     //ensure PLC connection
     if (this.platform.S7ClientConnect()) {
         S7Client.ReadArea(S7Client.S7AreaDB, db, offset, 1, S7Client.S7WLByte, function(err, res) {
@@ -3255,6 +3258,7 @@ GenericPLCAccessory.prototype = {
               log.debug(logprefix , String(value));
             }
             callback(null, value);
+            pushMirror(valuePLC);
           }
         });
     }
@@ -3272,11 +3276,11 @@ GenericPLCAccessory.prototype = {
     var log = this.log;
     var buf = this.buf;
     var valuePLC = value;
-
     if (typeof(valueMod) != 'undefined' && valueMod)
     {
       valuePLC = valueMod(value);
     }
+
     //ensure PLC connection
     if (this.platform.S7ClientConnect()) {
         buf.writeInt16BE(valuePLC, 0);
@@ -3306,7 +3310,7 @@ GenericPLCAccessory.prototype = {
     else {
         callback(new Error('PLC not connected'));
     }
-    this.platform.informInstance(logprefix, "/?push&db="+db+"&offset="+ offset + "&value="+ value);
+    this.platform.mirror(logprefix, "/?push&db="+db+"&offset="+ offset + "&value="+ valuePLC);
   },
 
   getInt: function(callback, db, offset, characteristic, valueMod) {
@@ -3315,6 +3319,8 @@ GenericPLCAccessory.prototype = {
     var log = this.log;
     var value = 0;
     var valuePLC = 0;
+    var pushMirror = function(value) { this.platform.mirror(logprefix, "/?push&db="+db+"&offset="+ offset + "&value="+ value);}.bind(this);
+
     //ensure PLC connection
     if (this.platform.S7ClientConnect()) {
         S7Client.ReadArea(S7Client.S7AreaDB, db, offset, 1, S7Client.S7WLWord, function(err, res) {
@@ -3336,13 +3342,13 @@ GenericPLCAccessory.prototype = {
               log.debug(logprefix , String(value));
             }
             callback(null, value);
+            pushMirror(valuePLC);
           }
         });
     }
     else {
         callback(new Error('PLC not connected'));
     }
-    this.platform.informInstance(logprefix, "/?push&db="+db+"&offset="+ offset + "&value="+ value);
   },
 
 
@@ -3356,11 +3362,11 @@ GenericPLCAccessory.prototype = {
     var log = this.log;
     var buf = this.buf;
     var valuePLC = value;
-
     if (typeof(valueMod) != 'undefined' && valueMod)
     {
       valuePLC = valueMod(value);
     }
+
     //ensure PLC connection
     if (this.platform.S7ClientConnect()) {
         buf.writeInt32BE(valuePLC, 0);
@@ -3390,7 +3396,7 @@ GenericPLCAccessory.prototype = {
     else {
         callback(new Error('PLC not connected'));
     }
-    this.platform.informInstance(logprefix, "/?push&db="+db+"&offset="+ offset + "&value="+ value);
+    this.platform.mirror(logprefix, "/?push&db="+db+"&offset="+ offset + "&value="+ valuePLC);
   },
 
   getDInt: function(callback, db, offset, characteristic, valueMod) {
@@ -3399,6 +3405,8 @@ GenericPLCAccessory.prototype = {
     var log = this.log;
     var value = 0;
     var valuePLC = 0;
+    var pushMirror = function(value) { this.platform.mirror(logprefix, "/?push&db="+db+"&offset="+ offset + "&value="+ value);}.bind(this);
+
     //ensure PLC connection
     if (this.platform.S7ClientConnect()) {
         S7Client.ReadArea(S7Client.S7AreaDB, db, offset, 1, S7Client.S7WLDWord, function(err, res) {
@@ -3420,6 +3428,7 @@ GenericPLCAccessory.prototype = {
               log.debug(logprefix , String(value));
             }
             callback(null, value);
+            pushMirror(valuePLC);
           }
         });
     }
