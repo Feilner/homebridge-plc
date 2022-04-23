@@ -189,13 +189,14 @@ PLC_Platform.prototype = {
 
   mirrorGet: function(logprefix, parameter) {
     if ( 'mirror' in this.config && this.config.mirror) {
-      require('http').get(this.config.mirror + "/?push" + parameter, (resp) => {
+      var url = this.config.mirror + "/?push" + parameter;
+      require('http').put(url, (resp) => {
         if (resp.statusCode !== 200) {
-          this.log.error(logprefix, "Mirror failed with HTTP status: " + resp.statusCode);
+          this.log.error(logprefix, "Mirror failed (" + url + "): HTTP status " + resp.statusCode);
           return;
         }
       }).on('error', function(e) {
-        this.log.error(logprefix, "Mirror failed: " + e.message);
+        this.log.error(logprefix, "Mirror failed (" + url + "): "+ e.message);
       }.bind(this));
     }
     return;

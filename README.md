@@ -76,7 +76,7 @@ Parameters:
 - `enablePush`: **(optional)** when set to `true` a the configured `port` is opened to push updates of values form plc to the plugin
 - `enableControl`: **(optional)** when set to `true` a the configured `port` is opened to control accessories by http request
 - `port`: **(optional)** port for http server to handle incoming http requests for push and control functionality. Default port is `8888`
-- `forward`: **(optional)** there is a limit of maximum 150 supported accessories by homebridge. To overcome this is limited you can create a second instance of homebridge running homebridge-plc and forward all **push** and **control** with no matching `db`  to the other instance. Set the destination address of the second instance e.g. `http:\\127.0.0.1:8889`.
+- `forward`: **(optional)** there is a limit of maximum 149 supported accessories by homebridge. To overcome this is limited you can create a second instance of homebridge running homebridge-plc and forward all **push** and **control** with no matching `db`  to the other instance. Set the destination address of the second instance e.g. `http:\\127.0.0.1:8889`.
 - `mirror` **(optional)** There are environments where it could make sense to share the same accessories on two homebridge instances. To allow pairing with another Home with Apple Home App or Home Assistant. This option mirrors all values read from PLC by this instance to a second instance. It also forwards all **push** requests to the second instance. The option `enablePush` has to be enabled on the second instance. on the destination instance.  Set the destination address of the second instance e.g. `http:\\192.168.1.11:8888`. (expirimental feature)
 ## Accessories
 - In the platform, you can declare different types of accessories
