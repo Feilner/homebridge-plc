@@ -68,15 +68,16 @@ The plugin is configured as single platform by defining a `PLC` platform.
 Parameters:
 - `ip`: the IPv4 address of the PLC
 - `rack`: the rack number of the PLC typically 0
-- `slot`: the slot number of the PLC for S7 300/400 typically `2`, for 1200/1500 typically `1`
+- `slot`: the slot number of the PLC for S7 300/400 typically `2`, for 1200/1500 typically `1`.
 - `communicationOP`: **(optional)** when set to `true` OP-Communication is used instead of PG-Communication
 - `enablePolling`: **(optional)** when set to `true` a background task is executed every second enable polling for the accessories
-- `defaultPollInterval` **(optional)** default polling interval for all accessories in seconds. Default value is `10` seconds.
-- `distributePolling` **(optional)** when set to `true` the polling of the accessories does not start at the same time. In order to distribute the PLC load for the queries.
+- `defaultPollInterval` **(optional)** default polling interval for all accessories in seconds. Default value is `10` seconds
+- `distributePolling` **(optional)** when set to `true` the polling of the accessories does not start at the same time. In order to distribute the PLC load for the queries
 - `enablePush`: **(optional)** when set to `true` a the configured `port` is opened to push updates of values form plc to the plugin
 - `enableControl`: **(optional)** when set to `true` a the configured `port` is opened to control accessories by http request
 - `port`: **(optional)** port for http server to handle incoming http requests for push and control functionality. Default port is `8888`
-
+- `forward`: **(optional)** there is a limit of maximum 149 supported accessories by homebridge. To overcome this is limited you can create a second instance of homebridge running homebridge-plc and forward all **push** and **control** with no matching `db`  to the other instance. Set the destination address of the second instance e.g. `http:\\127.0.0.1:8889`.
+- `mirror` **(optional)** There are environments where it could make sense to share the same accessories on two homebridge instances. To allow pairing with another Home with Apple Home App or Home Assistant. This option mirrors all values read from PLC by this instance to a second instance. It also forwards all **push** requests to the second instance. The option `enablePush` has to be enabled on the second instance. on the destination instance.  Set the destination address of the second instance e.g. `http:\\192.168.1.11:8888`. (expirimental feature)
 ## Accessories
 - In the platform, you can declare different types of accessories
 - The notation **(push support)** identifies that parameter supports direct updates from the PLC
@@ -1014,6 +1015,8 @@ The interface that the PLC has to use consists only of the keyword 'push', the d
 
 The value is assigned to all matching ('db' and 'offset') get_* accessory configurations. All information is transmitted within the URL and in decimal. Parameters that supports push are marked with [push] in the description.
 
+It's also possible to forward all push where no matching accessory no matches the `db` configuration to another instance of homebridge-plc see parameter `forward`.
+
 For example the push from the PLC is done as 'http://homebridgeIp:8080/?push&db=1014&offset=1&value=3'
 With the following configuration:
 
@@ -1046,15 +1049,15 @@ The Request has to be done as HTTP `PUT` or `GET` operation. There will be no lo
 ### Format
 Example for float values when trigger from browser:
 
-  http://homebridgeIp:8080/?push&db=3&offset=22&value=12.5
+  http://homebridgeIp:8888/?push&db=3&offset=22&value=12.5
 
 Example for bool values when trigger from browser
 
-  http://homebridgeIp:8080/?push&db=5&offset=5.1&value=1
+  http://homebridgeIp:8888/?push&db=5&offset=5.1&value=1
 
 Example for byte values when trigger from browser
 
-  http://homebridgeIp:8080/?push&db=2&offset=3&value=255
+  http://homebridgeIp:8888/?push&db=2&offset=3&value=255
 
 **NOTE:** Chrome/Edge does at minimum two requests with different parameters resulting in some error messages. I recommend `Talend API Tester - Free Edition`
 
@@ -1071,6 +1074,8 @@ The value is assigned to the matching ('db' and 'offset') set_* accessory config
 For accessories with separate on/off configurations e.g. `PLC_LightBulb` `set_On`/`set_Off` the `set_On` or `PLC_LockMechanismBool` `set_Secured`/`set_Unsecured` the `set_Secured` has to be used. With `1` for on and `0` for off.
 
 All information is transmitted within the URL and in decimal.
+
+It's also possible to forward all control requests where no matching accessory no matches the `db` configuration to another instance of homebridge-plc see parameter `forward`.
 
 **NOTE: Options like `invert`, `mapGet` and `mapSet` are not affecting the control interface. In example for PLC_Window is the value `0`: **closed** and `100`: **open** regardless if `invert` is set or not.
 

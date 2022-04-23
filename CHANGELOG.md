@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.0.36] 2022-04-23
+### Added
+- option `forward` to forward push and control http requests to another instance of homebridge-plc useful to overcome the 150 devices limit of homebridge or if you like to mirror to another instance.
+- option `mirror` to mirror all readings from PLC and push requests to by a http push operation to another homebridge instance where homebridge-plc is installed. (experimental)
+- optimize log output for http control and push requests
+
 ## [1.0.35] 2022-01-25
 ### Changed
 - add range limit 0.0001~100000 for `PLC_LightSensor` to avoid warning when value 0 is used.
