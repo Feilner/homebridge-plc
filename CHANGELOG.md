@@ -1,5 +1,9 @@
 # Changelog
 
+## [1.0.37] 2022-04-23
+### Fixed
+- fixed **http control**
+
 ## [1.0.36] 2022-04-23
 ### Added
 - option `forward` to forward push and control http requests to another instance of homebridge-plc useful to overcome the 150 devices limit of homebridge or if you like to mirror to another instance.
