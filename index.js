@@ -100,13 +100,10 @@ PLC_Platform.prototype = {
         });
     }
     else if (req.method == 'PUT' || req.method == 'GET') {
-        var doLog = (req.method == 'GET');
         req.on('end', () => {
             url = require('url').parse(req.url, true); // will parse parameters into query string
             if (this.config.enablePush && 'push' in url.query && 'db' in url.query && 'offset' in url.query && 'value' in url.query) {
-              if(doLog) {
-                this.log.debug("[HTTP Push] (" + req.socket.remoteAddress + ") Received update for accessory:" + url.query.db + " offset:" + url.query.offset +" value:" + url.query.value);
-              }
+              this.log.debug("[HTTP Push] (" + req.socket.remoteAddress + ") Received update for accessory:" + url.query.db + " offset:" + url.query.offset +" value:" + url.query.value);
               var db = parseInt(url.query.db);
               var offset = parseFloat(url.query.offset);
               var value = url.query.value;
@@ -118,6 +115,11 @@ PLC_Platform.prototype = {
                   offsetHandled = accessory.updatePush(offset, value) || offsetHandled;
                 }
               });
+
+              if  (typeof(this.config.mirror) != 'undefined' && this.config.mirror) {
+                this.forwardHTTP("[HTTP Push]", this.config.mirror + req.url);
+              }
+
               if(!dbHandled) {
                 if  (typeof(this.config.forward) != 'undefined' && this.config.forward) {
                   this.forwardHTTP("[HTTP Push]", this.config.forward + req.url);
@@ -145,11 +147,12 @@ PLC_Platform.prototype = {
                   offsetHandled = accessory.updateControl(offset, value) || offsetHandled;
                 }
               });
+
               if(!dbHandled) {
                 if (typeof(this.config.forward) != 'undefined' && this.config.forward) {
                   this.forwardHTTP("[HTTP Control]", this.config.forward + req.url);
                 }
-                else if(doLog) {
+                else {
                   this.log.warn("[HTTP Control] (" + req.socket.remoteAddress + ") " + "No accessory configured for db:" + url.query.db + " offset:" + url.query.offset +" value:" + url.query.value);
                 }
               }
@@ -157,7 +160,7 @@ PLC_Platform.prototype = {
                 this.log.warn("[HTTP Control] (" + req.socket.remoteAddress + ") " + "Offset not configured for accessory db:" + url.query.db + " offset:" + url.query.offset +" value:" + url.query.value);
               }
             }
-            else if(doLog)
+            else
             {
               if (!this.config.enablePush && 'push' in url.query) {
                 this.log.warn("[HTTP Push]  (" + req.socket.remoteAddress + ") enablePush is not set in platform config!");
@@ -166,16 +169,16 @@ PLC_Platform.prototype = {
                 this.log.warn("[HTTP Control]  (" + req.socket.remoteAddress + ") enableControl is not set in platform config!");
               }
               else if (!('push' in url.query) && !('control' in url.query) ) {
-                this.log.warn("[HTTP Push/Control]  (" + req.socket.remoteAddress + ") operation push or control in url" + req.url);
+                this.log.warn("[HTTP Push/Control]  (" + req.socket.remoteAddress + ") unknown operation: " + req.url);
               }
               else if (!('db' in url.query)) {
-                this.log.warn("[HTTP Push/Control]  (" + req.socket.remoteAddress + ") parameter db is missing in url" + req.url);
+                this.log.warn("[HTTP Push/Control]  (" + req.socket.remoteAddress + ") parameter db is missing in url: " + req.url);
               }
               else if (!('offset' in url.query)) {
-                this.log.warn("[HTTP Push/Control]  (" + req.socket.remoteAddress + ") parameter offset is missing in url" + req.url);
+                this.log.warn("[HTTP Push/Control]  (" + req.socket.remoteAddress + ") parameter offset is missing in url: " + req.url);
               }
               else if (!('value' in url.query)) {
-                this.log.warn("[HTTP Push/Control]  (" + req.socket.remoteAddress + ") parameter value is missing in url" + req.url);
+                this.log.warn("[HTTP Push/Control]  (" + req.socket.remoteAddress + ") parameter value is missing in url: " + req.url);
               }
             }
         });
@@ -184,11 +187,10 @@ PLC_Platform.prototype = {
     res.end();
 },
 
-  mirror: function(logprefix, url) {
-
+  mirrorGet: function(logprefix, parameter) {
     if ( 'mirror' in this.config && this.config.mirror) {
-      require('http').get(this.config.mirror + url, (resp) => {
-        if (resp.statusCode !== 201) {
+      require('http').get(this.config.mirror + "/?push" + parameter, (resp) => {
+        if (resp.statusCode !== 200) {
           this.log.error(logprefix, "Mirror failed with HTTP status: " + resp.statusCode);
           return;
         }
@@ -3016,7 +3018,7 @@ GenericPLCAccessory.prototype = {
     else {
       callback(new Error('PLC not connected'), false);
     }
-    this.platform.mirror(logprefix, "/?push&db="+db+"&offset="+ on_offset + "." + on_bit + "&value="+ value);
+    //this.platform.mirrorSet(logprefix, "&db="+db+"&offset="+ on_offset + "." + on_bit + "&value="+ value);
   },
 
   setBit: function(value, callback, db, offset, bit, characteristic, inform, valueMod) {
@@ -3059,7 +3061,7 @@ GenericPLCAccessory.prototype = {
     else {
       callback(new Error('PLC not connected'), false);
     }
-    this.platform.mirror(logprefix, "/?push&db="+db+"&offset="+ offset + "." + bit + "&value="+ valuePLC);
+    //this.platform.mirrorSet(logprefix, "&db="+db+"&offset="+ offset + "." + bit + "&value="+ valuePLC);
   },
 
 
@@ -3068,7 +3070,7 @@ GenericPLCAccessory.prototype = {
     var logprefix = "[" + this.name + "] " + characteristic + ": %s (getBit DB" + db + "DBX"+ offset + "." + bit + ")";
     var S7Client = this.platform.S7Client;
     var log = this.log;
-    var pushMirror = function(value) { this.platform.mirror(logprefix, "/?push&db="+db+"&offset="+ offset + "." + bit + "&value="+ value);}.bind(this);
+    var pushMirror = function(value) { this.platform.mirrorGet(logprefix, "&db="+db+"&offset="+ offset + "." + bit + "&value="+ value);}.bind(this);
 
     //check PLC connection
     if (this.platform.S7ClientConnect()) {
@@ -3143,7 +3145,7 @@ GenericPLCAccessory.prototype = {
     else {
         callback(new Error('PLC not connected'));
     }
-    this.platform.mirror(logprefix, "/?push&db="+db+"&offset="+ offset + "&value="+ valuePLC);
+    //this.platform.mirrorSet(logprefix, "&db="+db+"&offset="+ offset + "&value="+ valuePLC);
   },
 
   getReal: function(callback, db, offset, characteristic, valueMod) {
@@ -3151,7 +3153,7 @@ GenericPLCAccessory.prototype = {
     var S7Client = this.platform.S7Client;
     var log = this.log;
     var value = 0;
-    var pushMirror = function(value) { this.platform.mirror(logprefix, "/?push&db="+db+"&offset="+ offset + "&value="+ value);}.bind(this);
+    var pushMirror = function(value) { this.platform.mirrorGet(logprefix, "&db="+db+"&offset="+ offset + "&value="+ value);}.bind(this);
 
     //ensure PLC connection
     if (this.platform.S7ClientConnect()) {
@@ -3227,7 +3229,7 @@ GenericPLCAccessory.prototype = {
     else {
         callback(new Error('PLC not connected'));
     }
-    this.platform.mirror(logprefix, "/?push&db="+db+"&offset="+ offset + "&value="+ valuePLC);
+    //this.platform.mirrorSet(logprefix, "&db="+db+"&offset="+ offset + "&value="+ valuePLC);
   },
 
   getByte: function(callback, db, offset, characteristic, valueMod) {
@@ -3235,7 +3237,7 @@ GenericPLCAccessory.prototype = {
     var S7Client = this.platform.S7Client;
     var log = this.log;
     var value = 0;
-    var pushMirror = function(value) { this.platform.mirror(logprefix, "/?push&db="+db+"&offset="+ offset + "&value="+ value);}.bind(this);
+    var pushMirror = function(value) { this.platform.mirrorGet(logprefix, "&db="+db+"&offset="+ offset + "&value="+ value);}.bind(this);
 
     //ensure PLC connection
     if (this.platform.S7ClientConnect()) {
@@ -3310,7 +3312,7 @@ GenericPLCAccessory.prototype = {
     else {
         callback(new Error('PLC not connected'));
     }
-    this.platform.mirror(logprefix, "/?push&db="+db+"&offset="+ offset + "&value="+ valuePLC);
+    //this.platform.mirrorSet(logprefix, "&db="+db+"&offset="+ offset + "&value="+ valuePLC);
   },
 
   getInt: function(callback, db, offset, characteristic, valueMod) {
@@ -3319,7 +3321,7 @@ GenericPLCAccessory.prototype = {
     var log = this.log;
     var value = 0;
     var valuePLC = 0;
-    var pushMirror = function(value) { this.platform.mirror(logprefix, "/?push&db="+db+"&offset="+ offset + "&value="+ value);}.bind(this);
+    var pushMirror = function(value) { this.platform.mirrorGet(logprefix, "&db="+db+"&offset="+ offset + "&value="+ value);}.bind(this);
 
     //ensure PLC connection
     if (this.platform.S7ClientConnect()) {
@@ -3396,7 +3398,7 @@ GenericPLCAccessory.prototype = {
     else {
         callback(new Error('PLC not connected'));
     }
-    this.platform.mirror(logprefix, "/?push&db="+db+"&offset="+ offset + "&value="+ valuePLC);
+    //this.platform.mirrorSet(logprefix, "&db="+db+"&offset="+ offset + "&value="+ valuePLC);
   },
 
   getDInt: function(callback, db, offset, characteristic, valueMod) {
@@ -3405,7 +3407,7 @@ GenericPLCAccessory.prototype = {
     var log = this.log;
     var value = 0;
     var valuePLC = 0;
-    var pushMirror = function(value) { this.platform.mirror(logprefix, "/?push&db="+db+"&offset="+ offset + "&value="+ value);}.bind(this);
+    var pushMirror = function(value) { this.platform.mirrorGet(logprefix, "&db="+db+"&offset="+ offset + "&value="+ value);}.bind(this);
 
     //ensure PLC connection
     if (this.platform.S7ClientConnect()) {
