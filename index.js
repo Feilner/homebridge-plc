@@ -133,9 +133,7 @@ PLC_Platform.prototype = {
               }
             }
             else if (this.config.enableControl && 'control' in url.query && 'db' in url.query && 'offset' in url.query && 'value' in url.query) {
-              if(doLog) {
-                this.log.debug("[HTTP Control] (" + req.socket.remoteAddress + ") Received control request for accessory:" + url.query.db + " offset:" + url.query.offset +" value:" + url.query.value);
-              }
+              this.log.debug("[HTTP Control] (" + req.socket.remoteAddress + ") Received control request for accessory:" + url.query.db + " offset:" + url.query.offset +" value:" + url.query.value);
               var db = parseInt(url.query.db);
               var offset = parseFloat(url.query.offset);
               var value = url.query.value;
