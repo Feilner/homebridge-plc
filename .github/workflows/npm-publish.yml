@@ -17,14 +17,17 @@ jobs:
         uses: actions/setup-node@v1
         with:
           node-version: 12
-          registry-url: https://registry.npmjs.org/
-      - name: Publish
+      - name: Publish release
         if: "!contains(github.event.release.tag_name, 'beta')"
-        run: npm publish --access public
-        env:
-          NODE_AUTH_TOKEN: ${{secrets.npm_token}}
-      - name: Publish as beta
-        if: contains(github.event.release.tag_name, 'beta')
-        run: npm publish --tag beta --access public
-        env:
-          NODE_AUTH_TOKEN: ${{secrets.npm_token}}
+        uses: JS-DevTools/npm-publish@v1
+        with:
+          token: ${{ secrets.NPM_TOKEN }}
+          tag: latest
+          access: public
+      - name: Publish beta
+        if: "contains(github.event.release.tag_name, 'beta')"
+        uses: JS-DevTools/npm-publish@v1
+        with:
+          token: ${{ secrets.NPM_TOKEN }}
+          tag: beta
+          access: public
