@@ -12,19 +12,19 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v2
       - name: Setup
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v1
         with:
-          node-version: 16
-          registry-url: 'https://registry.npmjs.org'
+          node-version: 12
+          registry-url: https://registry.npmjs.org/
       - name: Publish
         if: "!contains(github.event.release.tag_name, 'beta')"
         run: npm publish --access public
         env:
-          NODE_AUTH_TOKEN: ${{secrets.NPM_TOKEN}}
+          NODE_AUTH_TOKEN: ${{secrets.npm_token}}
       - name: Publish as beta
         if: contains(github.event.release.tag_name, 'beta')
         run: npm publish --tag beta --access public
         env:
-          NODE_AUTH_TOKEN: ${{secrets.NPM_TOKEN}}
+          NODE_AUTH_TOKEN: ${{secrets.npm_token}}
