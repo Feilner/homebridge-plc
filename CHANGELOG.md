@@ -1,5 +1,9 @@
 # Changelog
 
+## [1.0.38] 2022-04-28
+### Updated
+- updated documentation
+
 ## [1.0.37] 2022-04-23
 ### Fixed
 - fixed **http control**

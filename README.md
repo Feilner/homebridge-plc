@@ -2,7 +2,9 @@
 Homebridge plugin for Siemens Step7 and compatible PLCs
 
 [![NPM Version](https://img.shields.io/npm/v/homebridge-plc.svg)](https://www.npmjs.com/package/homebridge-plc)
-[![npm](https://img.shields.io/npm/l/homebridge-plc.svg)](https://www.npmjs.com/package/homebridge-plc) [![npm](https://img.shields.io/npm/dt/homebridge-plc.svg)](https://www.npmjs.com/package/homebridge-plc)
+[![NPM Version](https://img.shields.io/npm/v/homebridge-plc/beta.svg)](https://www.npmjs.com/package/homebridge-plc)
+[![npm](https://img.shields.io/npm/l/homebridge-plc.svg)](https://www.npmjs.com/package/homebridge-plc) 
+[![npm](https://img.shields.io/npm/dt/homebridge-plc.svg)](https://www.npmjs.com/package/homebridge-plc)
 [![donate](https://img.shields.io/badge/donate-PayPal-blue.svg)](https://www.paypal.me/OFeilner)
 
 SIEMENS S7 PLC plugin for [Homebridge](https://homebridge.io)
@@ -671,7 +673,7 @@ Note: The example is just an example it contains also some optional settings. Fo
       "platforms": [
         {
           "name": "Config",
-          "port": 8080,
+          "port": 8888,
           "platform": "config"
         },
         {
@@ -1017,7 +1019,7 @@ The value is assigned to all matching ('db' and 'offset') get_* accessory config
 
 It's also possible to forward all push where no matching accessory no matches the `db` configuration to another instance of homebridge-plc see parameter `forward`.
 
-For example the push from the PLC is done as 'http://homebridgeIp:8080/?push&db=1014&offset=1&value=3'
+For example the push from the PLC is done as 'http://homebridgeIp:8888/?push&db=1014&offset=1&value=3'
 With the following configuration:
 
     {
@@ -1106,11 +1108,11 @@ Example to switch a light bulb from browser. Lets say the light bulb has the fol
 
 Use this to switch the light bulb on from browser:
 
-  http://homebridgeIp:8080/?control&db=6096&offset=1.1&value=1
+  http://homebridgeIp:8888/?control&db=6096&offset=1.1&value=1
 
 Use this to switch the light bulb off from browser:
 
-  http://homebridgeIp:8080/?control&db=6096&offset=1.1&value=0
+  http://homebridgeIp:8888/?control&db=6096&offset=1.1&value=0
 
 **NOTE:** Chrome/Edge does at minimum two requests with different parameters resulting in some error messages. I recommend `Talend API Tester - Free Edition`
 
