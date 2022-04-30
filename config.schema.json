@@ -1,0 +1,563 @@
+{
+  "pluginAlias": "PLC",
+  "pluginType": "platform",
+  "singular": true,
+  "schema": {
+    "type": "object",
+    "properties": {
+      "ip": {
+        "title": "IPv4 address of the PLC",
+        "type": "string",
+        "default": "192.168.1.100",
+        "format": "ipv4",
+        "required": true
+      },
+      "rack": {
+        "title": "Rack number of the PLC",
+        "description": "typically 0",
+        "type": "integer",
+        "default": 0,
+        "minimum": 0,
+        "required": true
+      },
+      "slot": {
+        "title": "Slot number of the PLC",
+        "description": "for S7 300/400 typically 2, for 1200/1500 typically 1",
+        "type": "integer",
+        "default": 2,
+        "minimum": 0,
+        "required": true
+      },
+      "communicationOP": {
+        "title": "Use OP-Communication instead of default PG-Communication",
+        "description": "On some PLCs the number of PG connections is limited so it could make sense to switch to OP.",
+        "type": "boolean",
+        "placeholder": false
+      },
+      "enablePolling": {
+        "title": "Enable polling",
+        "description": "When enabled a background task is executed every second enable polling for the accessories",
+        "type": "boolean",
+        "placeholder": false
+      },
+      "defaultPollInterval": {
+        "title": "Default polling interval in seconds",
+        "description": "This defines the default polling interval when no interval is set per accessory",
+        "type": "int",
+        "minimum": 1,
+        "placeholder": 10
+      },
+      "distributePolling": {
+        "title": "Distribute polling",
+        "description": "When enabled he polling of the accessories does not start at the same time. In order to distribute the PLC load for the queries.",
+        "type": "boolean",
+        "placeholder": false
+      },
+      "enablePush": {
+        "title": "Enable push server",
+        "description": "When enabled a http server is started to receive push updates of values form PLC. The PLC has send an http request <br>e.g: 'http://homebridgeIp:8888/?push&db=6096&offset=1.1&value=1'",
+        "type": "boolean",
+        "placeholder": false
+      },
+      "enableControl": {
+        "title": "Enable control server",
+        "description": "When enabled a http server is started to allow control accessories by http. <br>e.g.: 'http://homebridgeIp:8888/?control&db=1014&offset=1&value=3'",
+        "type": "boolean",
+        "placeholder": false
+      },
+      "port": {
+        "title": "Port for server",
+        "description": "Port for http server to handle incoming http requests for push and control functionality. Default port is 8888",
+        "type": "int",
+        "minimum": 1,
+        "placeholder": 8888
+      },
+      "forward": {
+        "title": "Enable Forward of push and control requests",
+        "description": "There is a limit of maximum 149 supported accessories by homebridge. To overcome this is limited you can create a second instance of homebridge running homebridge-plc and forward all push and control with no matching db to the other instance. Set the destination address of the second instance e.g. http:\\127.0.0.1:8889",
+        "type": "boolean",
+        "placeholder": false
+      },
+      "mirror": {
+        "title": "Mirror readings and push requests from PLC",
+        "description": "There are environments where it could make sense to share the same accessories on two homebridge instances. To allow pairing with another Home with Apple Home App or Home Assistant. This option mirrors all values read from PLC by this instance to a second instance. It also forwards all push requests to the second instance. The option enablePush has to be enabled on the second instance. on the destination instance. Set the destination address of the second instance e.g. http:\\192.168.1.11:8888. (expirimental feature)",
+        "type": "boolean",
+        "placeholder": false
+      },
+
+
+      "accessories": {
+        "type": "array",
+        "items": {
+          "title": "Accessory",
+          "type": "object",
+          "properties": {
+            "accessory" : {
+              "title": "PLC Accessory",
+              "type": "string",
+              "required": true,
+              "default": "PLC_Dummy",
+
+              "oneOf": [
+                {
+                  "title": "Select...",
+                  "enum": ["PLC_Dummy"]
+                },
+                {
+                  "title": "PLC_LightBulb",
+                  "enum": ["PLC_LightBulb"]
+                },
+                {
+                  "title": "PLC_Outlet",
+                  "enum": ["PLC_Outlet"]
+                },
+                {
+                  "title": "PLC_Switch",
+                  "enum": ["PLC_Switch"]
+                },
+                {
+                  "title": "PLC_TemperatureSensor",
+                  "enum": ["PLC_TemperatureSensor"]
+                },
+                {
+                  "title": "PLC_HumiditySensor",
+                  "enum": ["PLC_HumiditySensor"]
+                },
+                {
+                  "title": "PLC_Thermostat",
+                  "enum": ["PLC_Thermostat"]
+                },
+                {
+                  "title": "PLC_HumidifierDehumidifier",
+                  "enum": ["PLC_HumidifierDehumidifier"]
+                },
+                {
+                  "title": "PLC_WindowCovering",
+                  "enum": ["PLC_WindowCovering"]
+                },
+                {
+                  "title": "PLC_Window",
+                  "enum": ["PLC_Window"]
+                },
+                {
+                  "title": "PLC_Door",
+                  "enum": ["PLC_Door"]
+                },
+                {
+                  "title": "PLC_OccupancySensor",
+                  "enum": ["PLC_OccupancySensor"]
+                },
+                {
+                  "title": "PLC_MotionSensor",
+                  "enum": ["PLC_MotionSensor"]
+                },
+                {
+                  "title": "PLC_ContactSensor",
+                  "enum": ["PLC_ContactSensor"]
+                },
+                {
+                  "title": "PLC_LeakSensor",
+                  "enum": ["PLC_LeakSensor"]
+                },
+                {
+                  "title": "PLC_Faucet",
+                  "enum": ["PLC_Faucet"]
+                },
+                {
+                  "title": "PLC_Valve",
+                  "enum": ["PLC_Valve"]
+                },
+                {
+                  "title": "PLC_SecuritySystem",
+                  "enum": ["PLC_SecuritySystem"]
+                },
+                {
+                  "title": "PLC_StatelessProgrammableSwitch",
+                  "enum": ["PLC_StatelessProgrammableSwitch"]
+                },
+                {
+                  "title": "PLC_Doorbell",
+                  "enum": ["PLC_Doorbell"]
+                },
+                {
+                  "title": "PLC_LockMechanism",
+                  "enum": ["PLC_LockMechanism"]
+                },
+                {
+                  "title": "PLC_LockMechanismBool",
+                  "enum": ["PLC_LockMechanismBool"]
+                },
+                {
+                  "title": "PLC_GarageDoorOpener",
+                  "enum": ["PLC_GarageDoorOpener"]
+                },
+                {
+                  "title": "PLC_SmokeSensor",
+                  "enum": ["PLC_SmokeSensor"]
+                },
+                {
+                  "title": "PLC_Fan",
+                  "enum": ["PLC_Fan"]
+                },
+                {
+                  "title": "PLC_LightSensor",
+                  "enum": ["PLC_LightSensor"]
+                },
+                {
+                  "title": "PLC_LightSensor_DInt",
+                  "enum": ["PLC_LightSensor_DInt"]
+                }
+                ]
+            },
+          "disable": {
+            "title": "Disable",
+            "description": "Disables the camera and removes it from HomeKit.",
+            "type": "boolean"
+          },
+            "name": {
+              "title": "Name",
+              "type": "string",
+              "required": true,
+              "description": "Define the uniqe name for the accessory.",
+              "placeholder": "Enter uniqe name..."
+            },
+            "db": {
+              "title": " s7 data base number e.g. 4 for DB4",
+              "type": "integer",
+              "minimum" : 1,
+              "required": true
+            },
+            "manufacturer": {
+              "name": "Manufacturer",
+              "type": "string",
+              "placeholder": "Homebridge",
+              "description": "Set the manufacturer name for display in the Home app."
+            },
+            "enablePolling": {
+              "title": "Enable polling",
+              "description": "Has only effect when polling is enabled on platform level.",
+              "type": "boolean",
+              "placeholder": false
+            },
+            "pollInterval": {
+               "title": "Polling interval in seconds",
+              "description": "Overwrites platform defined default polling interval",
+              "type": "integer",
+              "minimum": 1,
+              "placeholder": 10
+            },
+            "get_On": {
+              "name": "offset get_On (bool)",
+              "type": "number",
+              "required": true,
+              "description": "offset and bit to read current on/off state from PLC. S7 type Bool e.g. 55.1",
+              "condition": {
+                "functionBody": "return ['PLC_LightBulb','PLC_Outlet','PLC_Switch'].includes(model.accessories[arrayIndices[0]].accessory);"
+              }
+            },
+
+            "set_On": {
+              "name": "offset set_On (bool)",
+              "type": "number",
+              "required": true,
+              "description": "Single Bit mode: offset and bit to set to 1/0 to PLC when switching on/off S7 type Bool PLC e.g. 55.1 for DB4DBX55.1 could be same as get_On <br>Separate Bits mode: offset and bit set to 1 when switching off. PLC has to set to 0 S7 type Bool e.g. 55.2",
+              "condition": {
+                "functionBody": "return ['PLC_LightBulb','PLC_Outlet','PLC_Switch'].includes(model.accessories[arrayIndices[0]].accessory);"
+              }
+            },
+            "set_On_Set": {
+              "name": "offset set_On (bool)",
+              "type": "number",
+              "required": true,              
+              "description": "Separate Bits mode: offset and bit set to 1 when switching off. PLC has to set to 0 S7 type Bool e.g. 55.2",
+              "condition": {
+                "functionBody": "return ['PLC_LightBulb','PLC_Outlet','PLC_Switch'].includes(model.accessories[arrayIndices[0]].accessory);"
+              }
+            },
+            "set_On_Reset": {
+              "name": "offset set_Off (bool)",
+              "type": "number",
+              "description": "Separate Bits mode: offset and bit set to 1 when switching off. PLC has to set to 0 S7 type Bool e.g. 55.3 <br>NOTE: When defining this the behaviour of set_On changes to Seperate Bit mode." ,
+              "condition": {
+                "functionBody": "return ['PLC_LightBulb','PLC_Outlet','PLC_Switch'].includes(model.accessories[arrayIndices[0]].accessory);"
+              }
+            },
+            "get_Brightness": {
+              "name": "offset get_Brightness (byte)",
+              "type": "number",
+              "description": "get brightness value S7 type Byte e.g. 56 for DB4DBB56",
+              "condition": {
+                "functionBody": "return ['PLC_LightBulb'].includes(model.accessories[arrayIndices[0]].accessory);"
+              }
+            },
+            "set_Brightness": {
+              "name": "offset set_Brightness (byte)",
+              "type": "number",
+              "description": "set brightness value S7 type Byte e.g. 57 for DB4DBB57",
+              "condition": {
+                "functionBody": "return ['PLC_LightBulb'].includes(model.accessories[arrayIndices[0]].accessory);"
+              }
+            },
+            "minTemperatureValue": {
+              "name": "minTemperatureValue",
+              "type": "number",
+              "placeholder": -270
+            },
+            "maxTemperatureValue": {
+              "name": "maxTemperatureValue",
+              "type": "number",
+              "placeholder": 100
+            },
+            "minTemperatureStep": {
+              "name": "minTemperatureStep",
+              "type": "number",
+              "placeholder": 0.1
+            },
+            "minHumidityValue": {
+              "name": "minHumidityValue",
+              "type": "number",
+              "placeholder": 0
+            },
+            "maxHumidityValue": {
+              "name": "maxHumidityValue",
+              "type": "number",
+              "placeholder": 100
+            },
+            "minHumidityStep": {
+              "name": "minHumidityStep",
+              "type": "number",
+              "placeholder": 1
+            },
+            "minTargetTemperatureValue": {
+              "name": "minTargetTemperatureValue",
+              "type": "number",
+              "placeholder": 10
+            },
+            "maxTargetTemperatureValue": {
+              "name": "maxTargetTemperatureValue",
+              "type": "number",
+              "placeholder": 38
+            },
+            "minTargetTemperatureStep": {
+              "name": "minTargetTemperatureStep",
+              "type": "number",
+              "placeholder": 0.1
+            },
+            "minTargetHumidityValue": {
+              "name": "minTargetHumidityValue",
+              "type": "number",
+              "placeholder": 0
+            },
+            "maxTargetHumidityValue": {
+              "name": "maxTargetHumidityValue",
+              "type": "number",
+              "placeholder": 100
+            },
+            "minTargetHumidityStep": {
+              "name": "minTargetHumidityStep",
+              "type": "number",
+              "placeholder": 1
+            },
+            "minBrightnessValue": {
+              "name": "minTargetHumidityValue",
+              "type": "number",
+              "placeholder": 0
+            },
+            "maxBrightnessValue": {
+              "name": "maxTargetHumidityValue",
+              "type": "number",
+              "placeholder": 100
+            },
+            "minBrightnessStep": {
+              "name": "minTargetHumidityStep",
+              "type": "number",
+              "placeholder": 1
+            },
+            "get_CurrentTemperature": {
+              "name": "offset get_CurrentTemperature (real)",
+              "type": "number",
+              "description": "offset to get current temperature S7 type Real e.g. 55 for DB4DBD55"
+            },
+            "get_CurrentRelativeHumidity": {
+              "name": "offset get_CurrentRelativeHumidity (real)",
+              "type": "number",
+              "description": "offset to get current humidity S7 type Real e.g. 55 for DB4DBD55"
+            },
+            "get_TargetTemperature": {
+              "name": "offset get_TargetTemperature (real)",
+              "type": "number",
+              "required": true,
+              "description": "offset to get target temperature S7 type `Real` e.g. `4` for `DB4DBD4"
+            },
+            "set_TargetTemperature": {
+              "name": "offset get_TargetTemperature (real)",
+              "type": "number",
+              "required": true,
+              "description": "offset to set current temperature S7 type `Real` e.g. `4` for `DB4DBD4` (can have same value as get_TargetTemperature)"
+            },
+            "get_CurrentHeatingCoolingState": {
+              "name": "offset get_CurrentHeatingCoolingState (byte)",
+              "type": "number",
+              "description": "offset to get current heating/cooling state S7 type `Byte` e.g. `8` for `DB4DBB8`. When not defined fixed `1`: heating is used.<br>- `0`: inactive (shown as green in home app)<br>- `1`: heating (shown as orange in home app)<br>- `2`: cooling (shown as blue in home app)"
+            },
+            "get_TargetHeatingCoolingState": {
+              "name": "offset get_CurrentHeatingCoolingState (byte)",
+              "type": "number",
+              "description": "offset to get target heating/cooling state. S7 type `Byte` e.g. `9` for `DB4DBB9`. When not defined fixed `3`: automatic is used.<br>- `0`: off<br>- `1`: heat<br>- `2`: cool<br>- `3`: automatic"
+            },
+            "set_TargetHeatingCoolingState": {
+              "name": "offset set_TargetHeatingCoolingState (byte)",
+              "type": "number",
+              "description": "offset to set target heating/cooling state. Can be identical with `get_TargetHeatingCoolingState`. Has to be defined when `get_TargetHeatingCoolingState` is defined. When not defined writes changes are ignored. S7 type `Byte` e.g. `9` for `DB4DBB9`.<br>- `0`: off<br>- `1`: heat<br>- `2`: cool<br>- `3`: automatic"
+            }
+          }
+        }
+      }
+    }
+  },
+  "layout": [
+    {
+      "type": "section",
+      "title": "PLC connection",
+      "expandable": true,
+      "expanded": false,
+      "orderable": false,
+      "items": [
+        "ip",
+        "rack",
+        "slot",
+        "communicationOP"
+      ]
+    },
+    {
+      "type": "section",
+      "title": "Polling",
+      "expandable": true,
+      "expanded": false,
+      "orderable": false,
+      "items": [
+        "enablePolling",
+        "defaultPollInterval",
+        "distributePolling"
+      ]
+    },
+    {
+      "type": "section",
+      "title": "Advanced",
+      "expandable": true,
+      "expanded": false,
+      "orderable": false,
+      "items": [
+        "enablePush",
+        "enableControl",
+        "port",
+        "forward",
+        "mirror"
+      ]
+    },
+    {
+      "type": "section",
+      "title": "Accessories",
+      "expandable": true,
+      "expanded": true,
+      "items": [
+        {
+          "key": "accessories",
+          "type": "tabarray",
+          "title": "{{ value.name || 'new Accessory' }}",
+          "items": [
+            "accessories[].accessory",
+            "accessories[].name",
+            "accessories[].db",
+            "accessories[].manufacturer",
+            {
+              "key": "accessories[]",
+              "type": "section",
+              "title": "Polling mode",
+              "expandable": true,
+              "expanded": false,
+              "items": ["accessories[].enablePolling", "accessories[].pollInterval"]
+            },            {
+              "key": "accessories[]",
+              "type": "section",
+              "title": "On/Off",
+              "description": "Provides seperate bits for switching on and off by setting to TRUE. PLC has to set to FALSE after handling",
+              "expandable": true,
+              "expanded": false,
+              "items": ["accessories[].get_On", "accessories[].set_On", "accessories[].set_On_Set", "accessories[].set_On_Reset"],
+              "condition": {
+                "functionBody": "return ['PLC_LightBulb','PLC_Outlet','PLC_Switch'].includes(model.accessories[arrayIndices[0]].accessory);"
+              }
+            },
+            {
+              "key": "accessories[]",
+              "type": "section",
+              "title": "Brightness",
+              "expandable": true,
+              "expanded": false,
+              "items": ["accessories[].get_Brightness", "accessories[].set_Brightness", "accessories[].minBrightnessValue", "accessories[].maxBrightnessValue", "accessories[].minBrightnessStep"],
+              "condition": {
+                "functionBody": "return ['PLC_LightBulb'].includes(model.accessories[arrayIndices[0]].accessory);"
+              }
+            },
+            {
+              "key": "accessories[]",
+              "type": "section",
+              "title": "Target Temperature",
+              "expandable": true,
+              "expanded": false,
+              "items": ["accessories[].get_TargetTemperature", "accessories[].set_TargetTemperature", "accessories[].minTargetTemperatureValue", "accessories[].maxTargetTemperatureValue", "accessories[].minTargetTemperatureStep"],
+              "condition": {
+                "functionBody": "return ['PLC_Thermostat'].includes(model.accessories[arrayIndices[0]].accessory);"
+              }
+            },
+            {
+              "key": "accessories[]",
+              "type": "section",
+              "title": "Temperature sensor",
+              "expandable": true,
+              "expanded": false,
+              "items": ["accessories[].get_CurrentTemperature", "accessories[].minTemperatureValue", "accessories[].maxTemperatureValue", "accessories[].minTemperatureStep"],
+              "condition": {
+                "functionBody": "return ['PLC_TemperatureSensor','PLC_Thermostat'].includes(model.accessories[arrayIndices[0]].accessory);"
+              }
+            },
+            {
+              "key": "accessories[]",
+              "type": "section",
+              "title": "Humidity sensor",
+              "expandable": true,
+              "expanded": false,
+              "items": ["accessories[].get_CurrentRelativeHumidity", "accessories[].minHumidityValue", "accessories[].maxHumidityValue", "accessories[].minHumidityStep"],
+              "condition": {
+                "functionBody": "return ['PLC_HumiditySensor','PLC_Thermostat'].includes(model.accessories[arrayIndices[0]].accessory);"
+              }
+            },
+            {
+              "key": "accessories[]",
+              "type": "section",
+              "title": "Status",
+              "expandable": true,
+              "expanded": false,
+              "items": ["accessories[].get_StatusTampered", "accessories[].get_StatusLowBattery"],
+              "condition": {
+                "functionBody": "return ['PLC_TemperatureSensor','PLC_HumiditySensor','PLC_Thermostat'].includes(model.accessories[arrayIndices[0]].accessory);"
+              }
+            },
+            {
+              "key": "accessories[]",
+              "type": "section",
+              "title": "Heating Cooling State",
+              "expandable": true,
+              "expanded": false,
+              "items": ["accessories[].get_CurrentHeatingCoolingState", "accessories[].get_TargetHeatingCoolingState", "accessories[].set_TargetHeatingCoolingState"],
+              "condition": {
+                "functionBody": "return ['PLC_Thermostat'].includes(model.accessories[arrayIndices[0]].accessory);"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

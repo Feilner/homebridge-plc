@@ -3,7 +3,7 @@ Homebridge plugin for Siemens Step7 and compatible PLCs
 
 [![NPM Version](https://img.shields.io/npm/v/homebridge-plc.svg)](https://www.npmjs.com/package/homebridge-plc)
 [![NPM Version](https://img.shields.io/npm/v/homebridge-plc/beta.svg)](https://www.npmjs.com/package/homebridge-plc)
-[![npm](https://img.shields.io/npm/l/homebridge-plc.svg)](https://www.npmjs.com/package/homebridge-plc) 
+[![npm](https://img.shields.io/npm/l/homebridge-plc.svg)](https://www.npmjs.com/package/homebridge-plc)
 [![npm](https://img.shields.io/npm/dt/homebridge-plc.svg)](https://www.npmjs.com/package/homebridge-plc)
 [![donate](https://img.shields.io/badge/donate-PayPal-blue.svg)](https://www.paypal.me/OFeilner)
 
@@ -103,9 +103,9 @@ normal light see also simple PLC example for [single bit](doc/ligtbulb_plc_examp
 - `get_Brightness`: **(optional)** **(push support)** get brightness value S7 type `Byte` e.g. `56` for `DB4DBB56`
 - `set_Brightness`: **(optional but required when `get_Brightness` is defined)** **(control support)** set brightness value S7 type `Byte` e.g. `57` for `DB4DBB57`
 - brightness range definitions **(optional)**
-  - `minValue` default value: 20
-  - `maxValue` default value: 100
-  - `minStep` default value: 1
+  - `minBrightnessValue` default value: 0
+  - `maxBrightnessValue` default value: 100
+  - `minBrightnessStep` default value: 1
 
 ### <a name='PLC_Outlet'></a>Outlet as `PLC_Outlet`
 outlet possible to show also as ventilator or light
@@ -148,11 +148,12 @@ normal temperature sensor
 - `db`: s7 data base number e.g. `4` for `DB4`
 - `enablePolling`: **(optional)** when set to `true` the current state will be polled. It is mandatory as well to enable polling mode on platform level.
 - `pollInterval`: **(optional)** poll interval in seconds. Default value see platform definition.
-- `get_CurrentTemperature`: **(push support)** offset to get current temperature S7 type `Real` e.g. `55` for `DB4DBD55`
-- temperature range **(optional)**
-  - `minValue` default value: -50
-  - `maxValue` default value: 110
-  - `minStep` default value: 0.5
+- Current Temperature
+  - `get_CurrentTemperature`: **(push support)** offset to get current temperature S7 type `Real` e.g. `55` for `DB4DBD55`
+  - Temperature range **(optional)**
+    - `minTemperatureValue` default value: -270
+    - `maxTemperatureValue` default value: 100
+    - `minTemperatureStep` default value: 0.1
 - `get_StatusTampered`: **(optional)** **(push support)** offset and bit to tamper detection. (Home app shows this only within the options) S7 type `Bool` e.g. `55.2` for `DB4DBX55.2`
   - `false`: ok
   - `true`: tampered
@@ -169,11 +170,12 @@ normal humidity sensor
 - `db`: s7 data base number e.g. `4` for `DB4`
 - `enablePolling`: **(optional)** when set to `true` the current state will be polled. It is mandatory as well to enable polling mode on platform level.
 - `pollInterval`: **(optional)** poll interval in seconds. Default value see platform definition.
-- `get_CurrentRelativeHumidity`: **(push support)** offset to get current humidity S7 type `Real` e.g. `55` for `DB4DBD55`
-- humidity range **(optional)**
-  - `minValue` default value: 0
-  - `maxValue` default value: 100
-  - `minStep` default value: 1
+- Current Humidity
+  - `get_CurrentRelativeHumidity`: **(push support)** offset to get current humidity S7 type `Real` e.g. `55` for `DB4DBD55`
+  - Humidity range **(optional)**
+    - `minHumidityValue` default value: 0
+    - `maxHumidityValue` default value: 100
+    - `minHumidityStep` default value: 1
 - `get_StatusTampered`: **(optional)** **(push support)** offset and bit to tamper detection. (Home app shows this only within the options) S7 type `Bool` e.g. `55.2` for `DB4DBX55.2`
   - `false`: ok
   - `true`: tampered
@@ -190,41 +192,51 @@ temperature / humidity sensor with temperature / humidity regulation
 - `db`: s7 data base number e.g. `4` for `DB4`
 - `enablePolling`: **(optional)** when set to `true` the current state will be polled. It is mandatory as well to enable polling mode on platform level.
 - `pollInterval`: **(optional)** poll interval in seconds. Default value see platform definition.
-- `get_CurrentTemperature`: **(push support)** offset to get current temperature S7 type `Real` e.g. `0` for `DB4DBD0`
+- Current Temperature
+  - `get_CurrentTemperature`: **(push support)** offset to get current temperature S7 type `Real` e.g. `0` for `DB4DBD0`
+  - Temperature range **(optional)**
+    - `minTemperatureValue` default value: -270
+    - `maxTemperatureValue` default value: 100
+    - `minTemperatureStep` default value: 0.1
 - Target Temperature
   - `get_TargetTemperature`: **(push support)** offset to get target temperature S7 type `Real` e.g. `4` for `DB4DBD4`
   - `set_TargetTemperature`: **(control support)** offset to set current temperature S7 type `Real` e.g. `4` for `DB4DBD4` (can have same value as get_TargetTemperature)
-  - target temperature range definitions **(optional)**
-    - `minValue` default value: 15
-    - `maxValue` default value: 27
-    - `minStep` default value: 0.5 **Note:** lower values seems not be supported by Homekit
-- `get_CurrentRelativeHumidity`: **(optional)** **(push support)** offset to get current humidity S7 type `Real` e.g. `0` for `DB4DBD0`
-- Target Humidity
-  - `get_TargetRelativeHumidity`: **(optional)** **(push support)** offset to get target temperature S7 type `Real` e.g. `4` for `DB4DBD4`
-  - `set_TargetRelativeHumidity`: **(optional)** **(control support)** offset to set current temperature S7 type `Real` e.g. `4` for `DB4DBD4` (can have same value as get_TargetTemperature)
-  - target relative humidity range definitions **(optional)**
+  - Target temperature range definitions **(optional)**
+    - `minTargetTemperatureValue` default value: 10
+    - `maxTargetTemperatureValue` default value: 38
+    - `minTargetTemperatureStep` default value: 0.1 **Note:** lower values seems not be supported by Homekit
+  - Current Humidity
+    - `get_CurrentRelativeHumidity`: **(optional)** **(push support)** offset to get current humidity S7 type `Real` e.g. `0` for `DB4DBD0`
+  - Humidity range **(optional)**
     - `minHumidityValue` default value: 0
     - `maxHumidityValue` default value: 100
     - `minHumidityStep` default value: 1
+- Target Humidity
+  - `get_TargetRelativeHumidity`: **(optional)** **(push support)** offset to get target temperature S7 type `Real` e.g. `4` for `DB4DBD4`
+  - `set_TargetRelativeHumidity`: **(optional)** **(control support)** offset to set current temperature S7 type `Real` e.g. `4` for `DB4DBD4` (can have same value as get_TargetTemperature)
+  - Target relative humidity target range definitions **(optional)**
+    - `minTargetHumidityValue` default value: 0
+    - `maxTargetHumidityValue` default value: 100
+    - `minTargetHumidityStep` default value: 1
 - Current State:
   - `get_CurrentHeatingCoolingState`: **(optional)** **(push support)** offset to get current heating/cooling state S7 type `Byte` e.g. `8` for `DB4DBB8`. When not defined fixed `1`: heating is used.
     - `0`: inactive (shown as green in home app)
     - `1`: heating (shown as orange in home app)
     - `2`: cooling (shown as blue in home app)
-  - `mapGetCurrent`: **(optional)** define mapping array for `get_CurrentHeatingCoolingState`. The PLC value is used as index into the table. e.g. `[0, 2]` which maps the PLC value `0->0 1->2` when the PLC supports only two states with `0:inactive` and `1:cooling`.
+  - `mapGetCurrentHeatingCoolingState`: **(optional)** define mapping array for `get_CurrentHeatingCoolingState`. The PLC value is used as index into the table. e.g. `[0, 2]` which maps the PLC value `0->0 1->2` when the PLC supports only two states with `0:inactive` and `1:cooling`.
 - Target State:
   - `get_TargetHeatingCoolingState` **(optional)** **(push support)** offset to get target heating/cooling state. S7 type `Byte` e.g. `9` for `DB4DBB9`. When not defined fixed `3`: automatic is used.
     - `0`: off
     - `1`: heat
     - `2`: cool
     - `3`: automatic
-  - `mapGetTarget`: **(optional)** define mapping array for `get_TargetHeatingCoolingState`. The PLC value is used as index into the table. e.g. `[0, 3]` which maps the PLC value `0->0 1->3` when the PLC supports only two states with `0:off` and `1:automatic`.
+  - `mapGetTargetHeatingCoolingState`: **(optional)** define mapping array for `get_TargetHeatingCoolingState`. The PLC value is used as index into the table. e.g. `[0, 3]` which maps the PLC value `0->0 1->3` when the PLC supports only two states with `0:off` and `1:automatic`.
   - `set_TargetHeatingCoolingState` **(optional)** **(control support)** offset to set target heating/cooling state. Can be identical with `get_TargetHeatingCoolingState`. Has to be defined when `get_TargetHeatingCoolingState` is defined. When not defined writes changes are ignored. S7 type `Byte` e.g. `9` for `DB4DBB9`.
     - `0`: off
     - `1`: heat
     - `2`: cool
     - `3`: automatic
-  - `mapSetTarget`: **(optional)** define mapping array for `set_TargetHeatingCoolingState`. The home app value is used as index into the table. e.g. `[0, 1, 0, 3]` which maps the PLC value `0->0 1->1 2->0, 3->3` when the PLC supports only two states with `0:off` and `1:heat` and `3:automatic`. The state cool is mapped to off.
+  - `mapSetTargetHeatingCoolingState`: **(optional)** define mapping array for `set_TargetHeatingCoolingState`. The home app value is used as index into the table. e.g. `[0, 1, 0, 3]` which maps the PLC value `0->0 1->1 2->0, 3->3` when the PLC supports only two states with `0:off` and `1:heat` and `3:automatic`. The state cool is mapped to off.
 - `get_StatusTampered`: **(optional)** **(push support)** offset and bit to tamper detection. (Home app shows this only within the options) S7 type `Bool` e.g. `55.2` for `DB4DBX55.2`
   - `false`: ok
   - `true`: tampered
@@ -254,7 +266,7 @@ Humidifier and/or Dehumidifier
     - `1`: idle
     - `2`: humidifying
     - `3`: dehumidifying
-  - `mapGetCurrent`: **(optional)** define mapping array for `get_CurrentHumidifierDehumidifierState`. The PLC value is used as index into the table. e.g. `[1, 3]` which maps the PLC value `0->1 1->3` when the PLC supports only two states with `0:idle` and `1:dehumidifying`.
+  - `mapGetCurrentHumidifierDehumidifierState`: **(optional)** define mapping array for `get_CurrentHumidifierDehumidifierState`. The PLC value is used as index into the table. e.g. `[1, 3]` which maps the PLC value `0->1 1->3` when the PLC supports only two states with `0:idle` and `1:dehumidifying`.
 - Target State
   - `default_TargetHumidifierDehumidifierState`: **(optional)** defines alternative value thats returned then `get_TargetHumidifierDehumidifierState` is not defined. Default value `0:auto`
     - `0`: auto (humidifier or dehumidifier)
@@ -268,8 +280,8 @@ Humidifier and/or Dehumidifier
     - `0`: auto (humidifier or dehumidifier)
     - `1`: humidifier
     - `2`: dehumidifier
-  - `mapGetTarget`: **(optional)** define mapping array for `get_TargetHumidifierDehumidifierState`. The PLC value is used as index into the table. e.g. `[0]` which maps the PLC value `0->2 1->3` when the PLC supports only one states with `0:dehumidifier.
-  - `mapSetTarget`: **(optional)** define mapping array for `set_TargetHumidifierDehumidifierState`. The home app value is used as index into the table. e.g. `[2, 2, 2
+  - `mapGetTargetHumidifierDehumidifierState`: **(optional)** define mapping array for `get_TargetHumidifierDehumidifierState`. The PLC value is used as index into the table. e.g. `[0]` which maps the PLC value `0->2 1->3` when the PLC supports only one states with `0:dehumidifier.
+  - `mapSetTargetHumidifierDehumidifierState`: **(optional)** define mapping array for `set_TargetHumidifierDehumidifierState`. The home app value is used as index into the table. e.g. `[2, 2, 2
 - Rotation Speed
   - Byte
     - `get_RotationSpeedByte`: **(optional)** **(push support)** offset to get rotation speed state S7 type `Byte` e.g. `8` for `DB4DBB8`.
@@ -462,7 +474,7 @@ alarm system
     - `2`: armed night
     - `3`: disarmed
     - `4`: alarm triggered
-  - `mapGetCurrent`: **(optional)** define mapping array for get security system state. The PLC value is used as index into the table. e.g. `[3, 1]` which maps the PLC value `0->3 1->2` when the PLC supports only two states with `0:disarmed` and `1:armed` and `2:alarm`.
+  - `mapGetSecuritySystemCurrentState`: **(optional)** define mapping array for get security system state. The PLC value is used as index into the table. e.g. `[3, 1]` which maps the PLC value `0->3 1->2` when the PLC supports only two states with `0:disarmed` and `1:armed` and `2:alarm`.
 - Target State:
   - `set_SecuritySystemTargetState`: **(control support)** offset to set target security system state S7 type `Byte` e.g. `5` for `DB4DBB4`
   - `get_SecuritySystemTargetState`: **(push support)** offset to set target security system state S7 type `Byte` e.g. `6` for `DB4DBB6`
@@ -470,10 +482,8 @@ alarm system
     - `1`: armed away from home
     - `2`: armed night
     - `3`: disarmed
-  - `mapSetTarget`: **(optional)** define mapping array for set security system state. The home app value is used as index into the table. e.g. `[1, 1, 1, 0, 2]` which maps the PLC value `0->1 1->1 2->1, 3->0, 4->2` when the PLC supports only two states with `0:disarmed` and `1:armed` and `2:alarm`.
-  - `mapGetTarget`: **(optional)** define mapping array for get security system state. The PLC value is used as index into the table. e.g. `[3, 1]` which maps the PLC value `0->3 1->2` when the PLC supports only two states with `0:disarmed` and `1:armed` and `2:alarm`.
-- `mapGet` **(obsolete)** **(optional)** overwrites `mapGetCurrent`and `mapGetTarget`
-- `mapSet` **(obsolete)** **(optional)** overwrites `mapSetTarget`
+  - `mapSetSecuritySystemTargetState`: **(optional)** define mapping array for set security system state. The home app value is used as index into the table. e.g. `[1, 1, 1, 0, 2]` which maps the PLC value `0->1 1->1 2->1, 3->0, 4->2` when the PLC supports only two states with `0:disarmed` and `1:armed` and `2:alarm`.
+  - `mapGetSecuritySystemTargetState`: **(optional)** define mapping array for get security system state. The PLC value is used as index into the table. e.g. `[3, 1]` which maps the PLC value `0->3 1->2` when the PLC supports only two states with `0:disarmed` and `1:armed` and `2:alarm`.
 
 ### <a name='PLC_StatelessProgrammableSwitch'></a>Button as `PLC_StatelessProgrammableSwitch`, Doorbell as `PLC_Doorbell`
 stateless switch from PLC to home app.
@@ -504,7 +514,7 @@ lock mechanism
 - `db`: s7 data base number e.g. `4` for `DB4`
 - `enablePolling`: **(optional)** when set to `true` the current state will be polled. It is mandatory as well to enable polling mode on platform level.
 - `pollInterval`: **(optional)** poll interval in seconds. Default value see platform definition.
-- `forceCurrentState`: **(optional)** when set to `true` the position set by `set_LockTargetState` is directly used as current state. By this it seems in the home app as the target state was directly reached. This is recommended when not using `enablePolling` or pushing the value from the plc.
+- `forceCurrentLockState`: **(optional)** when set to `true` the position set by `set_LockTargetState` is directly used as current state. By this it seems in the home app as the target state was directly reached. This is recommended when not using `enablePolling` or pushing the value from the plc.
   - `get_LockCurrentState`: **(push support)** offset to read current state current state S7 type `Byte` e.g. `3` for `DB4DBB3`
     - `0`: unsecured
     - `1`: secured
@@ -527,21 +537,21 @@ lock mechanism implemented as bool on the PLC
 - `db`: s7 data base number e.g. `4` for `DB4`
 - `enablePolling`: **(optional)** when set to `true` the current state will be polled. t is mandatory as well to enable polling mode on platform level.
 - `pollInterval`: **(optional)** poll interval in seconds. Default value see platform definition.
-- `forceCurrentState`: **(optional)** when set to `true` the state set by `set_LockTargetState` is directly used as current state. By this it seems in the home app as the target state was directly reached. This is recommended when not using `enablePolling` or pushing the value from the plc.
-- `invert`: **(optional)** when set to `true` all states are inverted (current and target state) `false`: **unsecured** and `true`: **secured**.
-- `get_LockCurrentState`: **(push support)** offset to read current state current state S7 type `Bool` .g. `3.1` for `DB4DBB3`
+- `forceCurrentLockState`: **(optional)** when set to `true` the state set by `set_LockTargetState` is directly used as current state. By this it seems in the home app as the target state was directly reached. This is recommended when not using `enablePolling` or pushing the value from the plc.
+- `invertLockState`: **(optional)** when set to `true` all states are inverted (current and target state) `false`: **unsecured** and `true`: **secured**.
+- `get_LockCurrentStateBool`: **(push support)** offset to read current state current state S7 type `Bool` .g. `3.1` for `DB4DBB3`
   - `false`: secured
   - `true`: unsecured
-- `get_LockTargetState`: **(push support)** offset to read target state current state S7 type `Bool` e.. `3.1` for `DB4DBB3`
+- `get_LockTargetStateBool`: **(push support)** offset to read target state current state S7 type `Bool` e.. `3.1` for `DB4DBB3`
   - `false`: secured
   - `true`: unsecured
 - Single Bit for secure/unsecured:
-  - `set_LockTargetState`: **(control support)** offset to write target state current state S7 type `Bool` e.g. `3.1` for `DB4DBB3`
+  - `set_LockTargetStateBool`: **(control support)** offset to write target state current state S7 type `Bool` e.g. `3.1` for `DB4DBB3`
     - `false`: secured
     - `true`: unsecured
 - Separate Bits for secure/unsecured:
-  - `set_Secured`: **(control support)** offset and bit set to `true` when switching to target state secured S7 type `Bool` **PLC has to set to `false`** e.g. `3.3` for `DB4DBX55.1`
-  - `set_Unsecured`: offset and bit set to `true` when switching to target state unsecured S7 type `Bool` **PLC has to set to `false`** e.g. `3.4` for `DB4DBX55.2`
+  - `set_LockTargetStateBool_Secured`: **(control support)** offset and bit set to `true` when switching to target state secured S7 type `Bool` **PLC has to set to `false`** e.g. `3.3` for `DB4DBX55.1`
+  - `set_LockTargetStateBool_Unsecured`: offset and bit set to `true` when switching to target state unsecured S7 type `Bool` **PLC has to set to `false`** e.g. `3.4` for `DB4DBX55.2`
 
 
 ### <a name='PLC_GarageDoorOpener'></a>Garage door as `PLC_GarageDoorOpener`
@@ -553,7 +563,7 @@ garage door
 - `db`: s7 data base number e.g. `4` for `DB4`
 - `enablePolling`: **(optional)** when set to `true` the current state will be polled. It is mandatory as well to enable polling mode on platform level.
 - `pollInterval`: **(optional)** poll interval in seconds. Default value see platform definition.
-- `forceCurrentState`: **(optional)** when set to `true` the position set by `set_TargetDoorState` is directly used as current state. By this it seems in the home app as the target state was directly reached. This is recommended when not using `enablePolling` or pushing the value from the plc.
+- `forceCurrentDoorState`: **(optional)** when set to `true` the position set by `set_TargetDoorState` is directly used as current state. By this it seems in the home app as the target state was directly reached. This is recommended when not using `enablePolling` or pushing the value from the plc.
 - `get_ObstructionDetected` **(optional)** **(push support)** offset and bit to obfuscation detection true means that the door was blocked S7 type `Bool` e.g. `55.1` for `DB4DBX55.1`
 - `get_CurrentDoorState`: **(push support)** offset to read current state current state S7 type `Byte` e.g. `3` for `DB4DBB3`
   - `0`: open
@@ -1079,7 +1089,7 @@ All information is transmitted within the URL and in decimal.
 
 It's also possible to forward all control requests where no matching accessory no matches the `db` configuration to another instance of homebridge-plc see parameter `forward`.
 
-**NOTE: Options like `invert`, `mapGet` and `mapSet` are not affecting the control interface. In example for PLC_Window is the value `0`: **closed** and `100`: **open** regardless if `invert` is set or not.
+**NOTE: Options like `invert*`, `mapGet*` and `mapSet*` are not affecting the control interface. In example for PLC_Window is the value `0`: **closed** and `100`: **open** regardless if `invert` is set or not.
 
 The Request has to be done as HTTP `PUT` or `GET` operation. There will be no logging when doing a `PUT` operation while there will be detailed output when during a `GET` operation. This in especially intended for testing with the browser as the browser performs a `GET` operation per default.
 

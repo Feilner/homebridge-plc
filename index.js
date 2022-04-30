@@ -37,10 +37,36 @@ PLC_Platform.prototype = {
       this.config.accessories.forEach((config, index) => {
           var accessoryNumber = index +1;
           var numberOfAccessories = this.config.accessories.length;
-          log.info("[" + String(accessoryNumber) + "/" + String(numberOfAccessories) + "] " + config.name + " (" +  config.accessory + ")" );
-          //call accessory construction
-          var accessory = new GenericPLCAccessory(this, config, accessoryNumber);
-          this.s7PlatformAccessories.push(accessory);
+
+
+          var removedOptions = ['minValue', 'maxValue', 'minStep', 'minHumidityValue', 'maxHumidityValue', 'minHumidityStep', 'mapGetCurrent', 'mapGetTarget', 'mapSetTarget', 'invert', 'set_Secured', 'set_Unsecured', 'forceCurrentState', 'set_Deactivate', 'set_Off', 'mapSet', 'mapGet'];
+          var removedOptionsLockMechanismBool = ['get_LockCurrentState', 'get_LockTargetState', 'set_LockTargetState', 'set_Secured', 'set_Unsecured'];
+
+          var hasRemovedOption = false;
+          removedOptions.forEach((item) => {
+            if (item in config) {
+              log.warn("[" + config.name + "] Parameter " + item + " was renamed please update your config");
+              hasRemovedOption = true;
+            }
+          });
+
+          if (config.accessory == 'PLC_LockMechanismBool') {
+            removedOptionsLockMechanismBool.forEach((item) => {
+              if (item in config) {
+                log.warn("[" + config.name + "] Parameter " + item + " was renamed please update your config");
+                hasRemovedOption = true;
+              }
+            });
+          }
+          if (hasRemovedOption) {
+                log.error("[" + String(accessoryNumber) + "/" + String(numberOfAccessories) + "] " + config.name + " (" +  config.accessory + ") needs update of config and was not added!" );
+          }
+          else {
+            log.info("[" + String(accessoryNumber) + "/" + String(numberOfAccessories) + "] " + config.name + " (" +  config.accessory + ")" );
+            //call accessory construction
+            var accessory = new GenericPLCAccessory(this, config, accessoryNumber);
+            this.s7PlatformAccessories.push(accessory);
+          }
       });
       callback(this.s7PlatformAccessories);
 
@@ -291,30 +317,30 @@ function GenericPLCAccessory(platform, config, accessoryNumber) {
     }
 
     this.accessory.addService(this.service);
-    if ('set_Off' in config) {
+    if ('set_On' in config) {
       this.service.getCharacteristic(Characteristic.On)
-        .on('get', function(callback) {this.getBit(callback,
-          config.db,
-          Math.floor(config.get_On), Math.floor((config.get_On*10)%10),
-          'get On'
-        );}.bind(this))
-        .on('set', function(powerOn, callback) { this.setOnOffBit(powerOn, callback,
-          config.db,
-          Math.floor(config.set_On), Math.floor((config.set_On*10)%10),
-          Math.floor(config.set_Off), Math.floor((config.set_Off*10)%10),
-          'set On'
+      .on('get', function(callback) {this.getBit(callback,
+        config.db,
+        Math.floor(config.get_On), Math.floor((config.get_On*10)%10),
+        'get On'
+      );}.bind(this))
+      .on('set', function(powerOn, callback) { this.setBit(powerOn, callback,
+        config.db,
+        Math.floor(config.set_On), Math.floor((config.set_On*10)%10),
+        'set On'
         );}.bind(this));
     } else {
       this.service.getCharacteristic(Characteristic.On)
-        .on('get', function(callback) {this.getBit(callback,
-          config.db,
-          Math.floor(config.get_On), Math.floor((config.get_On*10)%10),
-          'get On'
-        );}.bind(this))
-        .on('set', function(powerOn, callback) { this.setBit(powerOn, callback,
-          config.db,
-          Math.floor(config.set_On), Math.floor((config.set_On*10)%10),
-          'set On'
+      .on('get', function(callback) {this.getBit(callback,
+        config.db,
+        Math.floor(config.get_On), Math.floor((config.get_On*10)%10),
+        'get On'
+      );}.bind(this))
+      .on('set', function(powerOn, callback) { this.setOnOffBit(powerOn, callback,
+        config.db,
+        Math.floor(config.set_On_Set), Math.floor((config.set_On_Set*10)%10),
+        Math.floor(config.set_On_Reset), Math.floor((config.set_On_Reset*10)%10),
+        'set On'
         );}.bind(this));
     }
 
@@ -331,11 +357,11 @@ function GenericPLCAccessory(platform, config, accessoryNumber) {
           config.set_Brightness,
           'set Brightness'
           );}.bind(this))
-          .setProps({
-            minValue: ('minValue' in config) ? config.minValue : 20,
-            maxValue: ('maxValue' in config) ? config.maxValue : 100,
-            minStep: config.minStep || 1
-        });
+        .setProps({
+          minValue: ('minBrightnessValue' in config) ? config.minBrightnessValue : 0,
+          maxValue: ('maxBrightnessValue' in config) ? config.maxBrightnessValue : 100,
+          minStep: ('minBrightnessStep' in config) ? config.minBrightnessStep : 1
+          });
       }
     }
   }
@@ -353,11 +379,11 @@ function GenericPLCAccessory(platform, config, accessoryNumber) {
       config.get_CurrentTemperature,
       'get CurrentTemperature'
       );}.bind(this))
-    .setProps({
-      minValue: ('minValue' in config) ? config.minValue : -50,
-      maxValue: ('maxValue' in config) ? config.maxValue : 110,
-      minStep: config.minStep || 0.5
-    });
+     .setProps({
+       minValue: ('minTemperatureValue' in config) ? config.minTemperatureValue : -270,
+       maxValue: ('maxTemperatureValue' in config) ? config.maxTemperatureValue : 100,
+       minStep: ('minTemperatureStep' in config) ? config.minTemperatureStep : 0.1
+     });
 
     if ('get_StatusTampered' in config) {
       this.service.getCharacteristic(Characteristic.StatusTampered)
@@ -391,11 +417,11 @@ function GenericPLCAccessory(platform, config, accessoryNumber) {
       config.get_CurrentRelativeHumidity,
       'get CurrentRelativeHumidity'
       );}.bind(this))
-    .setProps({
-      minValue: ('minValue' in config) ? config.minValue : 0,
-      maxValue: ('maxValue' in config) ? config.maxValue : 100,
-      minStep: config.minStep || 1
-    });
+     .setProps({
+       minValue: ('minHumidityValue' in config) ? config.minHumidityValue : 0,
+       maxValue: ('maxHumidityValue' in config) ? config.maxHumidityValue : 100,
+       minStep: ('minHumidityStep' in config) ? config.minHumidityStep : 0.1
+       });
     if ('get_StatusTampered' in config) {
       this.service.getCharacteristic(Characteristic.StatusTampered)
       .on('get', function(callback) {this.getBit(callback,
@@ -438,17 +464,17 @@ function GenericPLCAccessory(platform, config, accessoryNumber) {
       }.bind(this));
      }.bind(this);
 
-    if ('mapSetTarget' in config && config.mapSetTarget) {
-      this.modFunctionSet = function(value){return this.mapFunction(value, config.mapSetTarget);}.bind(this);
+    if ('mapSetTargetHeatingCoolingState' in config && config.mapSetTargetHeatingCoolingState) {
+      this.modFunctionSet = function(value){return this.mapFunction(value, config.mapSetTargetHeatingCoolingState);}.bind(this);
     }
 
-    if ('mapGetTarget' in config && config.mapGetTarget) {
-      this.modFunctionGet = function(value){return this.mapFunction(value, config.mapGetTarget);}.bind(this);
+    if ('mapGetTargetHeatingCoolingState' in config && config.mapGetTargetHeatingCoolingState) {
+      this.modFunctionGet = function(value){return this.mapFunction(value, config.mapGetTargetHeatingCoolingState);}.bind(this);
     }
 
     this.modFunctionGetCurrent = this.plain;
-    if ('mapGetCurrent' in config && config.mapGetCurrent) {
-      this.modFunctionGetCurrent = function(value){return this.mapFunction(value, config.mapGetCurrent);}.bind(this);
+    if ('mapGetCurrentHeatingCoolingState' in config && config.mapGetCurrentHeatingCoolingState) {
+      this.modFunctionGetCurrent = function(value){return this.mapFunction(value, config.mapGetCurrentHeatingCoolingState);}.bind(this);
     }
 
     if ('get_CurrentHeatingCoolingState' in config) {
@@ -512,7 +538,12 @@ function GenericPLCAccessory(platform, config, accessoryNumber) {
       config.db,
       config.get_CurrentTemperature,
       'get CurrentTemperature'
-      );}.bind(this));
+      );}.bind(this))
+      .setProps({
+        minValue: ('minTemperatureValue' in config) ? config.minTemperatureValue : -270,
+        maxValue: ('maxTemperatureValue' in config) ? config.maxTemperatureValue : 100,
+        minStep: ('minTemperatureStep' in config) ? config.minTemperatureStep : 0.1
+      });
 
     this.service.getCharacteristic(Characteristic.TargetTemperature)
     .on('get', function(callback) {this.getReal(callback,
@@ -525,11 +556,11 @@ function GenericPLCAccessory(platform, config, accessoryNumber) {
       config.set_TargetTemperature,
       'set TargetTemperature'
       );}.bind(this))
-      .setProps({
-        minValue: ('minValue' in config) ? config.minValue : 15,
-        maxValue: ('maxValue' in config) ? config.maxValue : 27,
-        minStep: config.minStep || 0.5
-    });
+       .setProps({
+         minValue: ('minTargetTemperatureValue' in config) ? config.minTargetTemperatureValue : 10,
+         maxValue: ('maxTargetTemperatureValue' in config) ? config.maxTargetTemperatureValue : 38,
+         minStep: ('minTargetTemperatureStep' in config) ? config.minTargetTemperatureStep : 0.1
+       });
 
     if ('get_CurrentRelativeHumidity' in config) {
       this.service.getCharacteristic(Characteristic.CurrentRelativeHumidity)
@@ -538,6 +569,11 @@ function GenericPLCAccessory(platform, config, accessoryNumber) {
         config.get_CurrentRelativeHumidity,
         'get CurrentRelativeHumidity'
         );}.bind(this))
+      .setProps({
+        minValue: ('minHumidityValue' in config) ? config.minHumidityValue : 0,
+        maxValue: ('maxHumidityValue' in config) ? config.maxHumidityValue : 100,
+        minStep: ('minHumidityStep' in config) ? config.minHumidityStep : 0.1
+        });
     }
     if ('get_TargetRelativeHumidity' in config) {
       this.service.getCharacteristic(Characteristic.TargetRelativeHumidity)
@@ -551,11 +587,12 @@ function GenericPLCAccessory(platform, config, accessoryNumber) {
         config.set_TargetRelativeHumidity,
         'set TargetRelativeHumidity'
         );}.bind(this))
-        .setProps({
-          minValue: ('minHumidityValue' in config) ? config.minValue : 0,
-          maxValue: ('maxHumidityValue' in config) ? config.maxValue : 100,
-          minStep: config.minHumidityStep || 1
-      });
+       .setProps({
+           minValue: ('minTargetHumidityValue' in config) ? config.minTargetHumidityValue : 0,
+           maxValue: ('maxTargetHumidityValue' in config) ? config.maxTargetHumidityValue : 100,
+           minStep: ('minTargetHumidityStep' in config) ? config.minTargetHumidityStep : 1
+       })
+      ;
     }
 
     if ('get_StatusTampered' in config) {
@@ -601,17 +638,17 @@ function GenericPLCAccessory(platform, config, accessoryNumber) {
       }.bind(this));
      }.bind(this);
 
-    if ('mapSetTarget' in config && config.mapSetTarget) {
-      this.modFunctionSet = function(value){return this.mapFunction(value, config.mapSetTarget);}.bind(this);
+    if ('mapSetTargetHumidifierDehumidifierState' in config && config.mapSetTargetHumidifierDehumidifierState) {
+      this.modFunctionSet = function(value){return this.mapFunction(value, config.mapSetTargetHumidifierDehumidifierState);}.bind(this);
     }
 
-    if ('mapGetTarget' in config && config.mapGetTarget) {
-      this.modFunctionGet = function(value){return this.mapFunction(value, config.mapGetTarget);}.bind(this);
+    if ('mapGetTargetHumidifierDehumidifierState' in config && config.mapGetTargetHumidifierDehumidifierState) {
+      this.modFunctionGet = function(value){return this.mapFunction(value, config.mapGetTargetHumidifierDehumidifierState);}.bind(this);
     }
 
     this.modFunctionGetCurrent = this.plain;
-    if ('mapGetCurrent' in config && config.mapGetCurrent) {
-      this.modFunctionGetCurrent = function(value){return this.mapFunction(value, config.mapGetCurrent);}.bind(this);
+    if ('mapGetCurrentHumidifierDehumidifierState' in config && config.mapGetCurrentHumidifierDehumidifierState) {
+      this.modFunctionGetCurrent = function(value){return this.mapFunction(value, config.mapGetCurrentHumidifierDehumidifierState);}.bind(this);
     }
 
     if ('get_CurrentHumidifierDehumidifierState' in config) {
@@ -722,30 +759,30 @@ function GenericPLCAccessory(platform, config, accessoryNumber) {
         );}.bind(this));
     }
 
-    if ('set_Deactivate' in config) {
+    if ('set_Active' in config) {
       this.service.getCharacteristic(Characteristic.Active)
-        .on('get', function(callback) {this.getBit(callback,
-          config.db,
-          Math.floor(config.get_Active), Math.floor((config.get_Active*10)%10),
-          'get Active'
-        );}.bind(this))
-        .on('set', function(powerOn, callback) { this.setOnOffBit(powerOn, callback,
-          config.db,
-          Math.floor(config.set_Active), Math.floor((config.set_Active*10)%10),
-          Math.floor(config.set_Deactivate), Math.floor((config.set_Deactivate*10)%10),
-          'set Active'
+      .on('get', function(callback) {this.getBit(callback,
+        config.db,
+        Math.floor(config.get_Active), Math.floor((config.get_Active*10)%10),
+        'get Active'
+      );}.bind(this))
+      .on('set', function(powerOn, callback) { this.setBit(powerOn, callback,
+        config.db,
+        Math.floor(config.set_Active), Math.floor((config.set_Active*10)%10),
+        'set Active'
         );}.bind(this));
     } else if ('get_Active' in config) {
       this.service.getCharacteristic(Characteristic.Active)
-        .on('get', function(callback) {this.getBit(callback,
-          config.db,
-          Math.floor(config.get_Active), Math.floor((config.get_Active*10)%10),
-          'get Active'
-        );}.bind(this))
-        .on('set', function(powerOn, callback) { this.setBit(powerOn, callback,
-          config.db,
-          Math.floor(config.set_Active), Math.floor((config.set_Active*10)%10),
-          'set Active'
+      .on('get', function(callback) {this.getBit(callback,
+        config.db,
+        Math.floor(config.get_Active), Math.floor((config.get_Active*10)%10),
+        'get Active'
+      );}.bind(this))
+      .on('set', function(powerOn, callback) { this.setOnOffBit(powerOn, callback,
+        config.db,
+        Math.floor(config.set_Active_Set), Math.floor((config.set_Active_Set*10)%10),
+        Math.floor(config.set_Active_Reset), Math.floor((config.set_Active_Reset*10)%10),
+        'set Active'
         );}.bind(this));
     } else {
       this.service.getCharacteristic(Characteristic.Active)
@@ -821,6 +858,10 @@ function GenericPLCAccessory(platform, config, accessoryNumber) {
     }
     this.accessory.addService(this.service);
     this.lastTargetPos = 0;
+    this.modFunctionGetCurrent = this.plain;
+    this.modFunctionGetTarget = this.plain;
+    this.modFunctionSetTarget = this.plain;
+
 
     // default do nothing after set of target position
     var informFunction = function(value){}.bind(this);
@@ -841,14 +882,22 @@ function GenericPLCAccessory(platform, config, accessoryNumber) {
         }
     }
 
-    if ('invert' in config && config.invert) {
-      this.modFunctionGet = this.invert_0_100;
-      this.modFunctionSet = this.invert_0_100;
+    if ('invertPosition' in config && config.invertPosition) {
+      this.modFunctionGetCurrent = this.invert_0_100;
+      this.modFunctionGetTarget = this.invert_0_100;
+      this.modFunctionSetTarget = this.invert_0_100;
     }
 
-    if ('mapGet' in config && config.mapGet) {
-      this.modFunctionGet = function(value){return this.mapFunction(value, config.mapGet);}.bind(this);
+    if ('mapGetCurrentPosition' in config && config.mapGetCurrentPosition) {
+      this.modFunctionGetCurrent = function(value){return this.mapFunction(value, config.mapGetCurrentPosition);}.bind(this);
     }
+    if ('mapGetTargetPosition' in config && config.mapGetTargetPosition) {
+      this.modFunctionGetTarget = function(value){return this.mapFunction(value, config.mapGetTargetPosition);}.bind(this);
+    }
+    if ('mapSetTargetPosition' in config && config.mapSetTargetPosition) {
+      this.modFunctionSetTarget = function(value){return this.mapFunction(value, config.mapSetTargetPosition);}.bind(this);
+    }
+
 
     // create handlers for required characteristics
     this.service.getCharacteristic(Characteristic.CurrentPosition)
@@ -856,7 +905,7 @@ function GenericPLCAccessory(platform, config, accessoryNumber) {
         config.db,
         config.get_CurrentPosition,
         'get CurrentPosition',
-        this.modFunctionGet
+        this.modFunctionGetCurrent
         );}.bind(this));
 
     if ('get_TargetPosition' in config) {
@@ -866,14 +915,14 @@ function GenericPLCAccessory(platform, config, accessoryNumber) {
           config.db,
           config.get_TargetPosition,
           'get TargetPosition',
-          this.modFunctionGet
+          this.modFunctionGetTarget
           );}.bind(this))
         .on('set', function(value, callback) {this.setByte(value, callback,
           config.db,
           config.set_TargetPosition,
           'set TargetPosition',
           informFunction,
-          this.modFunctionSet
+          this.modFunctionSetTarget
           );}.bind(this));
     }
     else
@@ -884,7 +933,7 @@ function GenericPLCAccessory(platform, config, accessoryNumber) {
         config.db,
         config.get_CurrentPosition,  // always use current position as target position
         'get CurrentPosition',
-        this.modFunctionGet
+        this.modFunctionGetCurrent
         );}.bind(this))
       .on('set', function(value, callback) {this.setDummy(value, callback,
         'set TargetPosition',
@@ -1084,30 +1133,30 @@ function GenericPLCAccessory(platform, config, accessoryNumber) {
     this.service =  new Service.Faucet(this.name);
     this.accessory.addService(this.service);
 
-    if ('set_Deactivate' in config) {
+    if ('set_Active' in config) {
       this.service.getCharacteristic(Characteristic.Active)
-        .on('get', function(callback) {this.getBit(callback,
-          config.db,
-          Math.floor(config.get_Active), Math.floor((config.get_Active*10)%10),
-          'get Active'
-        );}.bind(this))
-        .on('set', function(powerOn, callback) { this.setOnOffBit(powerOn, callback,
-          config.db,
-          Math.floor(config.set_Active), Math.floor((config.set_Active*10)%10),
-          Math.floor(config.set_Deactivate), Math.floor((config.set_Deactivate*10)%10),
-          'set Active'
+      .on('get', function(callback) {this.getBit(callback,
+        config.db,
+        Math.floor(config.get_Active), Math.floor((config.get_Active*10)%10),
+        'get Active'
+      );}.bind(this))
+      .on('set', function(powerOn, callback) { this.setBit(powerOn, callback,
+        config.db,
+        Math.floor(config.set_Active), Math.floor((config.set_Active*10)%10),
+        'set Active'
         );}.bind(this));
     } else {
       this.service.getCharacteristic(Characteristic.Active)
-        .on('get', function(callback) {this.getBit(callback,
-          config.db,
-          Math.floor(config.get_Active), Math.floor((config.get_Active*10)%10),
-          'get Active'
-        );}.bind(this))
-        .on('set', function(powerOn, callback) { this.setBit(powerOn, callback,
-          config.db,
-          Math.floor(config.set_Active), Math.floor((config.set_Active*10)%10),
-          'set Active'
+      .on('get', function(callback) {this.getBit(callback,
+        config.db,
+        Math.floor(config.get_Active), Math.floor((config.get_Active*10)%10),
+        'get Active'
+      );}.bind(this))
+      .on('set', function(powerOn, callback) { this.setOnOffBit(powerOn, callback,
+        config.db,
+        Math.floor(config.set_Active_Set), Math.floor((config.set_Active_Set*10)%10),
+        Math.floor(config.set_Active_Reset), Math.floor((config.set_Active_Reset*10)%10),
+        'set Active'
         );}.bind(this));
     }
   }
@@ -1118,32 +1167,30 @@ function GenericPLCAccessory(platform, config, accessoryNumber) {
     this.service = new Service.Valve(this.name);
     this.accessory.addService(this.service);
 
-    if ('set_Deactivate' in config) {
+    if ('set_Active' in config) {
       this.service.getCharacteristic(Characteristic.Active)
-        .on('get', function(callback) {this.getBit(callback,
-          config.db,
-          Math.floor(config.get_Active), Math.floor((config.get_Active*10)%10),
-          'get Active'
-        );}.bind(this))
-        .on('set', function(powerOn, callback) { this.setOnOffBit(powerOn, callback,
-          config.db,
-          Math.floor(config.set_Active), Math.floor((config.set_Active*10)%10),
-          Math.floor(config.set_Deactivate), Math.floor((config.set_Deactivate*10)%10),
-          'set Active',
-          function(value){this.service.getCharacteristic(Characteristic.InUse).updateValue(value);}.bind(this)
+      .on('get', function(callback) {this.getBit(callback,
+        config.db,
+        Math.floor(config.get_Active), Math.floor((config.get_Active*10)%10),
+        'get Active'
+      );}.bind(this))
+      .on('set', function(powerOn, callback) { this.setBit(powerOn, callback,
+        config.db,
+        Math.floor(config.set_Active), Math.floor((config.set_Active*10)%10),
+        'set Active'
         );}.bind(this));
     } else {
       this.service.getCharacteristic(Characteristic.Active)
-        .on('get', function(callback) {this.getBit(callback,
-          config.db,
-          Math.floor(config.get_Active), Math.floor((config.get_Active*10)%10),
-          'get Active'
-        );}.bind(this))
-        .on('set', function(powerOn, callback) { this.setBit(powerOn, callback,
-          config.db,
-          Math.floor(config.set_Active), Math.floor((config.set_Active*10)%10),
-          'set Active',
-          function(value){this.service.getCharacteristic(Characteristic.InUse).updateValue(value);}.bind(this)
+      .on('get', function(callback) {this.getBit(callback,
+        config.db,
+        Math.floor(config.get_Active), Math.floor((config.get_Active*10)%10),
+        'get Active'
+      );}.bind(this))
+      .on('set', function(powerOn, callback) { this.setOnOffBit(powerOn, callback,
+        config.db,
+        Math.floor(config.set_Active_Set), Math.floor((config.set_Active_Set*10)%10),
+        Math.floor(config.set_Active_Reset), Math.floor((config.set_Active_Reset*10)%10),
+        'set Active'
         );}.bind(this));
     }
 
@@ -1210,25 +1257,16 @@ function GenericPLCAccessory(platform, config, accessoryNumber) {
       }.bind(this));
      }.bind(this);
 
-    if ('mapSet' in config && config.mapSet) {
-      this.modFunctionSet = function(value){return this.mapFunction(value, config.mapSet);}.bind(this);
-    }
-    else if ('mapSetTarget' in config && config.mapSetTarget) {
-      this.modFunctionSet = function(value){return this.mapFunction(value, config.mapSetTarget);}.bind(this);
+    if ('mapSetSecuritySystemTargetState' in config && config.mapSetSecuritySystemTargetState) {
+      this.modFunctionSet = function(value){return this.mapFunction(value, config.mapSetSecuritySystemTargetState);}.bind(this);
     }
 
-    if ('mapGet' in config && config.mapGet) {
-      this.modFunctionGet = function(value){return this.mapFunction(value, config.mapGet);}.bind(this);
-      this.modFunctionGetCurrent = function(value){return this.mapFunction(value, config.mapGet);}.bind(this);
+    if ('mapGetSecuritySystemTargetState' in config && config.mapGetSecuritySystemTargetState) {
+      this.modFunctionGet = function(value){return this.mapFunction(value, config.mapGetSecuritySystemTargetState);}.bind(this);
     }
-    else {
-      if ('mapGetTarget' in config && config.mapGetTarget) {
-        this.modFunctionGet = function(value){return this.mapFunction(value, config.mapGetTarget);}.bind(this);
-      }
 
-      if ('mapGetCurrent' in config && config.mapGetCurrent) {
-        this.modFunctionGetCurrent = function(value){return this.mapFunction(value, config.mapGetCurrent);}.bind(this);
-      }
+    if ('mapGetSecuritySystemCurrentState' in config && config.mapGetSecuritySystemCurrentState) {
+      this.modFunctionGetCurrent = function(value){return this.mapFunction(value, config.mapGetSecuritySystemCurrentState);}.bind(this);
     }
 
     this.service.getCharacteristic(Characteristic.SecuritySystemCurrentState)
@@ -1289,7 +1327,7 @@ function GenericPLCAccessory(platform, config, accessoryNumber) {
     this.service = new Service.LockMechanism(this.name);
     this.accessory.addService(this.service);
 
-    if ('forceCurrentState' in config && config.forceCurrentState) {
+    if ('forceCurrentLockState' in config && config.forceCurrentLockState) {
       informFunction = function(value){this.service.getCharacteristic(Characteristic.LockCurrentState).updateValue(value);}.bind(this);
     }
 
@@ -1331,7 +1369,7 @@ function GenericPLCAccessory(platform, config, accessoryNumber) {
     this.service = new Service.LockMechanism(this.name);
     this.accessory.addService(this.service);
 
-    if ('forceCurrentState' in config && config.forceCurrentState) {
+    if ('forceCurrentLockState' in config && config.forceCurrentLockState) {
       informFunction = function(value){this.service.getCharacteristic(Characteristic.LockCurrentState).updateValue(value);}.bind(this);
     }
 
@@ -1344,40 +1382,42 @@ function GenericPLCAccessory(platform, config, accessoryNumber) {
     this.service.getCharacteristic(Characteristic.LockCurrentState)
       .on('get', function(callback) {this.getBit(callback,
         config.db,
-        Math.floor(config.get_LockCurrentState), Math.floor((config.get_LockCurrentState*10)%10),
+        Math.floor(config.get_LockCurrentStateBool), Math.floor((config.get_LockCurrentStateBool*10)%10),
         "get LockCurrentState",
         this.modFunctionGet
       );}.bind(this));
 
-    if ('set_Unsecured' in config) {
+    if ('set_LockTargetStateBool' in config) {
       this.service.getCharacteristic(Characteristic.LockTargetState)
       .on('get', function(callback) {this.getBit(callback,
         config.db,
-        Math.floor(config.get_LockTargetState), Math.floor((config.get_LockTargetState*10)%10),
-        "get LockTargetState",
-        this.modFunctionGet
-      );}.bind(this))
-      .on('set', function(value, callback) { this.setOnOffBit(value, callback,
-        config.db,
-        Math.floor(config.set_Secured), Math.floor((config.set_Secured*10)%10),
-        Math.floor(config.set_Unsecured), Math.floor((config.set_Unsecured*10)%10),
-        'set LockTargetState',
-        informFunction
-      );}.bind(this));
-    } else {
-      this.service.getCharacteristic(Characteristic.LockTargetState)
-      .on('get', function(callback) {this.getBit(callback,
-        config.db,
-        Math.floor(config.get_LockTargetState), Math.floor((config.get_LockTargetState*10)%10),
+        Math.floor(config.get_LockTargetStateBool), Math.floor((config.get_LockTargetStateBool*10)%10),
         "get LockTargetState",
         this.modFunctionGet
       );}.bind(this))
       .on('set', function(value, callback) {this.setBit(value, callback,
         config.db,
-        Math.floor(config.set_LockTargetState), Math.floor((config.set_LockTargetState*10)%10),
+        Math.floor(config.set_LockTargetStateBool), Math.floor((config.set_LockTargetStateBool*10)%10),
         "set LockTargetState",
         informFunction,
         this.modFunctionSet
+      );}.bind(this));
+
+
+    } else {
+      this.service.getCharacteristic(Characteristic.LockTargetState)
+      .on('get', function(callback) {this.getBit(callback,
+        config.db,
+        Math.floor(config.get_LockTargetStateBool), Math.floor((config.get_LockTargetStateBool*10)%10),
+        "get LockTargetState",
+        this.modFunctionGet
+      );}.bind(this))
+      .on('set', function(value, callback) { this.setOnOffBit(value, callback,
+        config.db,
+        Math.floor(config.set_LockTargetStateBool_Set), Math.floor((config.set_LockTargetStateBool_Set*10)%10),
+        Math.floor(config.set_LockTargetStateBool_Reset), Math.floor((config.set_LockTargetStateBool_Reset*10)%10),
+        'set LockTargetState',
+        informFunction
       );}.bind(this));
     }
   }
@@ -1388,7 +1428,7 @@ function GenericPLCAccessory(platform, config, accessoryNumber) {
     this.service = new Service.GarageDoorOpener(this.name);
     this.accessory.addService(this.service);
 
-    if ('forceCurrentState' in config && config.forceCurrentState) {
+    if ('forceCurrentGarageDoorState' in config && config.forceCurrentGarageDoorState) {
       informFunction = function(value){this.service.getCharacteristic(Characteristic.CurrentDoorState).updateValue(value);}.bind(this);
     }
     this.service.getCharacteristic(Characteristic.CurrentDoorState)
@@ -1550,30 +1590,30 @@ function GenericPLCAccessory(platform, config, accessoryNumber) {
         );}.bind(this));
     }
 
-    if ('set_Deactivate' in config) {
+    if ('set_Active' in config) {
       this.service.getCharacteristic(Characteristic.Active)
-        .on('get', function(callback) {this.getBit(callback,
-          config.db,
-          Math.floor(config.get_Active), Math.floor((config.get_Active*10)%10),
-          'get Active'
-        );}.bind(this))
-        .on('set', function(powerOn, callback) { this.setOnOffBit(powerOn, callback,
-          config.db,
-          Math.floor(config.set_Active), Math.floor((config.set_Active*10)%10),
-          Math.floor(config.set_Deactivate), Math.floor((config.set_Deactivate*10)%10),
-          'set Active'
+      .on('get', function(callback) {this.getBit(callback,
+        config.db,
+        Math.floor(config.get_Active), Math.floor((config.get_Active*10)%10),
+        'get Active'
+      );}.bind(this))
+      .on('set', function(powerOn, callback) { this.setBit(powerOn, callback,
+        config.db,
+        Math.floor(config.set_Active), Math.floor((config.set_Active*10)%10),
+        'set Active'
         );}.bind(this));
     } else {
       this.service.getCharacteristic(Characteristic.Active)
-        .on('get', function(callback) {this.getBit(callback,
-          config.db,
-          Math.floor(config.get_Active), Math.floor((config.get_Active*10)%10),
-          'get Active'
-        );}.bind(this))
-        .on('set', function(powerOn, callback) { this.setBit(powerOn, callback,
-          config.db,
-          Math.floor(config.set_Active), Math.floor((config.set_Active*10)%10),
-          'set Active'
+      .on('get', function(callback) {this.getBit(callback,
+        config.db,
+        Math.floor(config.get_Active), Math.floor((config.get_Active*10)%10),
+        'get Active'
+      );}.bind(this))
+      .on('set', function(powerOn, callback) { this.setOnOffBit(powerOn, callback,
+        config.db,
+        Math.floor(config.set_Active_Set), Math.floor((config.set_Active_Set*10)%10),
+        Math.floor(config.set_Active_Reset), Math.floor((config.set_Active_Reset*10)%10),
+        'set Active'
         );}.bind(this));
     }
 
@@ -1904,16 +1944,16 @@ GenericPLCAccessory.prototype = {
       if (this.config.get_CurrentPosition == offset)
       {
         if(!has_get_TargetPosition) {
-          this.log.debug( "[" + this.name + "] Push TargetPosition:" + String(this.modFunctionGet(parseInt(value))) + "<-" + String(value));
+          this.log.debug( "[" + this.name + "] Push TargetPosition:" + String(this.modFunctionGetTarget(parseInt(value))) + "<-" + String(value));
           this.service.getCharacteristic(Characteristic.TargetPosition).updateValue(this.modFunctionGet(parseInt(value)));
         }
-        this.log.debug( "[" + this.name + "] Push CurrentPosition:" + String(this.modFunctionGet(parseInt(value))) + "<-" + String(value));
+        this.log.debug( "[" + this.name + "] Push CurrentPosition:" + String(this.modFunctionGetCurrent(parseInt(value))) + "<-" + String(value));
         this.service.getCharacteristic(Characteristic.CurrentPosition).updateValue(this.modFunctionGet(parseInt(value)));
         rv = true;
       }
       if ( this.config.get_TargetPosition == offset)
       {
-        this.log.debug( "[" + this.name + "] Push TargetPosition:" + String(this.modFunctionGet(parseInt(value))) + "<-" + String(value));
+        this.log.debug( "[" + this.name + "] Push TargetPosition:" + String(this.modFunctionGetTarget(parseInt(value))) + "<-" + String(value));
         this.service.getCharacteristic(Characteristic.TargetPosition).updateValue(this.modFunctionGet(parseInt(value)));
         rv = true;
       }
@@ -2225,7 +2265,7 @@ GenericPLCAccessory.prototype = {
     if (this.config.accessory == 'PLC_LightBulb' ||
         this.config.accessory == 'PLC_Outlet' ||
         this.config.accessory == 'PLC_Switch') {
-      if (this.config.set_On == offset)
+      if ('set_On' in this.config && this.config.set_On == offset || 'set_On_Set' in this.config && this.config.set_On_Set == offset)
       {
         this.log.debug( "[" + this.name + "] Control On:" + value);
         this.service.getCharacteristic(Characteristic.On).setValue(value);

@@ -1,8 +1,64 @@
 # Changelog
 
-## [1.0.38] 2022-04-28
-### Updated
-- updated documentation
+## [1.1.0-beta.0] 2022-04-28
+### Changed
+**Action required** Breaking changes!
+In order to support configuration by GUI some configuration options needs to be adapted.
+- `PLC_LightBulb`:
+  - renamed option `minValue` -> `minBrightnessValue` and changed default value from `20` to `0`
+  - renamed option `maxValue` -> `maxBrightnessValue`
+  - renamed option `minStep`  -> `minBrightnessStep`
+-`PLC_TemperatureSensor`
+  - renamed option `minValue` -> `minTemperatureValue` and changed default value from `-50` to `-270`
+  - renamed option `maxValue` -> `maxTemperatureValue` and changed default value from `110` to `100`
+  - renamed option `minStep`  -> `minTemperatureStep`  and changed default value from `0.5` to `0.1`
+-`PLC_HumiditySensor`
+  - renamed option `minValue` -> `minHumidityValue`
+  - renamed option `maxValue` -> `maxHumidityValue`
+  - renamed option `minStep`  -> `minHumidityStep`
+- `PLC_Thermostat`
+  - renamed option `minValue` -> `minTargetTemperatureValue` and changed default value from `15` to `10`
+  - renamed option `maxValue` -> `maxTargetTemperatureValue` and changed default value from `27` to `38`
+  - renamed option `minStep`  -> `minTargetTemperatureStep`  and changed default value from `0.5` to `0.1`
+  - renamed option `minHumidityValue` -> `minTargetHumidityValue`
+  - renamed option `maxHumidityValue` -> `maxTargetHumidityValue`
+  - renamed option `minHumidityStep`  -> `minTargetHumidityStep`
+  - renamed option `mapGetCurrent` -> `mapGetCurrentHeatingCoolingState`
+  - renamed option `mapGetTarget`  -> `mapGetTargetHeatingCoolingState`
+  - renamed option `mapSetTarget`  -> `mapSetTargetHeatingCoolingState`
+- `PLC_SecuritySystem`
+  - renamed option `mapGetCurrent` -> `mapGetSecuritySystemCurrentState`
+  - renamed option `mapGetTarget`  -> `mapGetSecuritySystemTargetState`
+  - renamed option `mapSetTarget`  -> `mapSetSecuritySystemTargetState`
+  - the obsolete options `mapGet` and `mapSet` are no longer supported
+- `PLC_HumidifierDehumidifier`
+  - renamed option `mapGetCurrent` -> `mapGetCurrentHumidifierDehumidifierState`
+  - renamed option `mapGetTarget`  -> `mapGetTargetHumidifierDehumidifierState`
+  - renamed option `mapSetTarget`  -> `mapSetTargetHumidifierDehumidifierState`
+- `PLC_LockMechanismBool`
+  - renamed option `invert` -> `invertLockState`
+  - renamed option `get_LockCurrentState` -> `get_LockCurrentStateBool`
+  - renamed option `get_LockTargetState` -> `get_LockTargetStateBool`
+  - renamed option `set_LockTargetState` -> `set_LockTargetStateBool`
+  - renamed option `set_Secured` -> `set_LockTargetStateBool_Secured`
+  - renamed option `set_Unsecured` -> `set_LockTargetStateBool_Unsecured`
+  - renamed option `forceCurrentState` -> `forceCurrentLockState`
+- `PLC_LockMechanism`
+  - renamed option `forceCurrentState` -> `forceCurrentLockState`
+- `PLC_GarageDoorOpener`
+  - renamed option `forceCurrentState` -> `forceCurrentGarageDoorState`
+
+- ### Added
+- `PLC_Thermostat`
+  - option `minTemperatureValue`
+  - option `maxTemperatureValue`
+  - option `minTemperatureStep`
+  - option `minHumidityValue`
+  - option `maxHumidityValue`
+  - option `minHumidityStep`
+
+### Fixed
+- fixed **http control**
 
 ## [1.0.37] 2022-04-23
 ### Fixed
