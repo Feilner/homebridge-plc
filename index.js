@@ -985,7 +985,7 @@ function GenericPLCAccessory(platform, config, accessoryNumber) {
     this.service = new Service.OccupancySensor(this.name);
     this.accessory.addService(this.service);
 
-    if ('invert' in config && config.invert) {
+    if ('invertOccupancy' in config && config.invertOccupancy) {
         this.modFunctionGet = this.invert_bit;
     }
 
@@ -1022,7 +1022,7 @@ function GenericPLCAccessory(platform, config, accessoryNumber) {
     this.service = new Service.MotionSensor(this.name);
     this.accessory.addService(this.service);
 
-    if ('invert' in config && config.invert) {
+    if ('invertMotionDetected' in config && config.invertMotionDetected) {
         this.modFunctionGet = this.invert_bit;
     }
 
@@ -1096,7 +1096,7 @@ function GenericPLCAccessory(platform, config, accessoryNumber) {
     this.service = new Service.LeakSensor(this.name);
     this.accessory.addService(this.service);
 
-    if ('invert' in config && config.invert) {
+    if ('invertLeakDetected' in config && config.invertLeakDetected) {
         this.modFunctionGet = this.invert_bit;
     }
 
@@ -1374,7 +1374,7 @@ function GenericPLCAccessory(platform, config, accessoryNumber) {
     }
 
     // note the invert is inverted! To invert is normal behaviour.
-    if (!('invert' in config && config.invert)) {
+    if (!('invertLockState' in config && config.invertLockState)) {
       this.modFunctionGet = this.invert_bit;
       this.modFunctionSet = this.invert_bit;
     }
@@ -1753,13 +1753,13 @@ GenericPLCAccessory.prototype = {
     if (this.config.accessory == 'PLC_LightBulb' ||
         this.config.accessory == 'PLC_Outlet' ||
         this.config.accessory == 'PLC_Switch') {
-      if (this.config.get_On == offset)
+      if ('get_On' in this.config && this.config.get_On == offset || 'get_On_Set' in this.config && this.config.get_On_Set == offset)
       {
         this.log.debug( "[" + this.name + "] Push On:" + value);
         this.service.getCharacteristic(Characteristic.On).updateValue(value);
         rv = true;
       }
-      if (this.config.accessory == 'PLC_LightBulb' && this.config.get_Brightness == offset)
+      if (this.config.accessory == 'PLC_LightBulb' && 'get_Brightness' in this.config && this.config.get_Brightness == offset)
       {
         this.log.debug( "[" + this.name + "] Push Brightness:" + value);
         this.service.getCharacteristic(Characteristic.Brightness).updateValue(value);
@@ -1770,19 +1770,19 @@ GenericPLCAccessory.prototype = {
     // TemperatureSensor
     ////////////////////////////////////////////////////////////////
     else if (this.config.accessory == 'PLC_TemperatureSensor'){
-      if (this.config.get_CurrentTemperature == offset)
+      if ('get_CurrentTemperature' in this.config && this.config.get_CurrentTemperature == offset)
       {
         this.log.debug( "[" + this.name + "] Push CurrentTemperature:" + value);
         this.service.getCharacteristic(Characteristic.CurrentTemperature).updateValue(value);
         rv = true;
       }
-      if (this.config.get_StatusTampered == offset)
+      if ('get_StatusTampered' in this.config && this.config.get_StatusTampered == offset)
       {
         this.log.debug( "[" + this.name + "] Push StatusTampered:" + value);
         this.service.getCharacteristic(Characteristic.StatusTampered).updateValue(value);
         rv = true;
       }
-      if (this.config.get_StatusLowBattery == offset)
+      if ('get_StatusLowBattery' in this.config && this.config.get_StatusLowBattery == offset)
       {
         this.log.debug( "[" + this.name + "] Push StatusLowBattery:" + value);
         this.service.getCharacteristic(Characteristic.StatusLowBattery).updateValue(value);
@@ -1793,19 +1793,19 @@ GenericPLCAccessory.prototype = {
     // HumiditySensor
     ////////////////////////////////////////////////////////////////
     else if (this.config.accessory == 'PLC_HumiditySensor'){
-      if (this.config.get_CurrentRelativeHumidity == offset)
+      if ('get_CurrentRelativeHumidity' in this.config && this.config.get_CurrentRelativeHumidity == offset)
       {
         this.log.debug( "[" + this.name + "] Push CurrentRelativeHumidity:" + value);
         this.service.getCharacteristic(Characteristic.CurrentRelativeHumidity).updateValue(value);
         rv = true;
       }
-      if (this.config.get_StatusTampered == offset)
+      if ('get_StatusTampered' in this.config && this.config.get_StatusTampered == offset)
       {
         this.log.debug( "[" + this.name + "] Push StatusTampered:" + value);
         this.service.getCharacteristic(Characteristic.StatusTampered).updateValue(value);
         rv = true;
       }
-      if (this.config.get_StatusLowBattery == offset)
+      if ('get_StatusLowBattery' in this.config && this.config.get_StatusLowBattery == offset)
       {
         this.log.debug( "[" + this.name + "] Push StatusLowBattery:" + value);
         this.service.getCharacteristic(Characteristic.StatusLowBattery).updateValue(value);
@@ -1816,49 +1816,49 @@ GenericPLCAccessory.prototype = {
     // Thermostat
     ////////////////////////////////////////////////////////////////
     else if (this.config.accessory == 'PLC_Thermostat'){
-      if (this.config.get_CurrentTemperature == offset)
+      if ('get_CurrentTemperature' in this.config && this.config.get_CurrentTemperature == offset)
       {
         this.log.debug( "[" + this.name + "] Push CurrentTemperature :" + value);
         this.service.getCharacteristic(Characteristic.CurrentTemperature).updateValue(value);
         rv = true;
       }
-      if (this.config.get_TargetTemperature == offset)
+      if ('get_TargetTemperature' in this.config && this.config.get_TargetTemperature == offset)
       {
         this.log.debug( "[" + this.name + "] Push TargetTemperature:" + value);
         this.service.getCharacteristic(Characteristic.TargetTemperature).updateValue(value);
         rv = true;
       }
-      if (this.config.get_CurrentRelativeHumidity == offset)
+      if ('get_CurrentRelativeHumidity' in this.config && this.config.get_CurrentRelativeHumidity == offset)
       {
         this.log.debug( "[" + this.name + "] Push CurrentRelativeHumidity:" + value);
         this.service.getCharacteristic(Characteristic.CurrentRelativeHumidity).updateValue(value);
         rv = true;
       }
-      if (this.config.get_TargetRelativeHumidity == offset)
+      if ('get_TargetRelativeHumidity' in this.config && this.config.get_TargetRelativeHumidity == offset)
       {
         this.log.debug( "[" + this.name + "] Push TargetRelativeHumidity:" + value);
         this.service.getCharacteristic(Characteristic.TargetRelativeHumidity).updateValue(value);
         rv = true;
       }
-      if (this.config.get_CurrentHeatingCoolingState == offset)
+      if ('get_CurrentHeatingCoolingState' in this.config && this.config.get_CurrentHeatingCoolingState == offset)
       {
         this.log.debug( "[" + this.name + "] Push CurrentHeatingCoolingState:" + String(this.modFunctionGetCurrent(parseInt(value))) + "<-" + String(value));
         this.service.getCharacteristic(Characteristic.CurrentHeatingCoolingState).updateValue(this.modFunctionGetCurrent(parseInt(value)));
         rv = true;
       }
-      if (this.config.get_TargetHeatingCoolingState == offset)
+      if ('get_TargetHeatingCoolingState' in this.config && this.config.get_TargetHeatingCoolingState == offset)
       {
         this.log.debug( "[" + this.name + "] Push TargetHeatingCoolingState:" + String(this.modFunctionGet(parseInt(value))) + "<-" + String(value));
         this.service.getCharacteristic(Characteristic.TargetHeatingCoolingState).updateValue(this.modFunctionGet(parseInt(value)));
         rv = true;
       }
-      if (this.config.get_StatusTampered == offset)
+      if ('get_StatusTampered' in this.config && this.config.get_StatusTampered == offset)
       {
         this.log.debug( "[" + this.name + "] Push StatusTampered:" + value);
         this.service.getCharacteristic(Characteristic.StatusTampered).updateValue(value);
         rv = true;
       }
-      if (this.config.get_StatusLowBattery == offset)
+      if ('get_StatusLowBattery' in this.config && this.config.get_StatusLowBattery == offset)
       {
         this.log.debug( "[" + this.name + "] Push StatusLowBattery:" + value);
         this.service.getCharacteristic(Characteristic.StatusLowBattery).updateValue(value);
@@ -1869,67 +1869,67 @@ GenericPLCAccessory.prototype = {
     // Humidifier Dehumidifier
     ////////////////////////////////////////////////////////////////
     else if (this.config.accessory == 'PLC_HumidifierDehumidifier'){
-      if (this.config.get_Active == offset)
+      if ('get_Active' in this.config && this.config.get_Active == offset)
       {
         this.log.debug( "[" + this.name + "] Push Active :" + value);
         this.service.getCharacteristic(Characteristic.Active).updateValue(value);
         rv = true;
       }
-      if (this.config.get_CurrentHumidifierDehumidifierState == offset)
+      if ('get_CurrentHumidifierDehumidifierState' in this.config && this.config.get_CurrentHumidifierDehumidifierState == offset)
       {
         this.log.debug( "[" + this.name + "] Push CurrentHumidifierDehumidifierState:" + String(this.modFunctionGetCurrent(parseInt(value))) + "<-" + String(value));
         this.service.getCharacteristic(Characteristic.CurrentHumidifierDehumidifierState).updateValue(this.modFunctionGetCurrent(parseInt(value)));
         rv = true;
       }
-      if (this.config.get_TargetHumidifierDehumidifierState == offset)
+      if ('get_TargetHumidifierDehumidifierState' in this.config && this.config.get_TargetHumidifierDehumidifierState == offset)
       {
         this.log.debug( "[" + this.name + "] Push TargetHumidifierDehumidifierState:" + String(this.modFunctionGet(parseInt(value))) + "<-" + String(value));
         this.service.getCharacteristic(Characteristic.TargetHumidifierDehumidifierState).updateValue(this.modFunctionGet(parseInt(value)));
         rv = true;
       }
-      if (this.config.get_CurrentRelativeHumidity == offset)
+      if ('get_CurrentRelativeHumidity' in this.config && this.config.get_CurrentRelativeHumidity == offset)
       {
         this.log.debug( "[" + this.name + "] Push CurrentRelativeHumidity:" + value);
         this.service.getCharacteristic(Characteristic.CurrentRelativeHumidity).updateValue(value);
         rv = true;
       }
-      if (this.config.get_RelativeHumidityDehumidifierThreshold == offset)
+      if ('get_RelativeHumidityDehumidifierThreshold' in this.config && this.config.get_RelativeHumidityDehumidifierThreshold == offset)
       {
         this.log.debug( "[" + this.name + "] Push RelativeHumidityDehumidifierThreshold:" + value);
         this.service.getCharacteristic(Characteristic.RelativeHumidityDehumidifierThreshold).updateValue(value);
         rv = true;
       }
-      if (this.config.get_RelativeHumidityHumidifierThreshold == offset)
+      if ('get_RelativeHumidityHumidifierThreshold' in this.config && this.config.get_RelativeHumidityHumidifierThreshold == offset)
       {
         this.log.debug( "[" + this.name + "] Push RelativeHumidityHumidifierThreshold:" + value);
         this.service.getCharacteristic(Characteristic.RelativeHumidityHumidifierThreshold).updateValue(value);
         rv = true;
       }
-      if (this.config.get_RotationSpeed == offset || this.config.get_RotationSpeedByte)
+      if ('get_RotationSpeed' in this.config && this.config.get_RotationSpeed == offset || 'get_RotationSpeedByte' in this.config && this.config.get_RotationSpeedByte  == offset )
       {
         this.log.debug( "[" + this.name + "] Push RotationSpeed:" + value);
         this.service.getCharacteristic(Characteristic.RotationSpeed).updateValue(value);
         rv = true;
       }
-      if (this.config.get_SwingMode == offset)
+      if ('get_SwingMode' in this.config && this.config.get_SwingMode == offset)
       {
         this.log.debug( "[" + this.name + "] Push SwingMode:" + value);
         this.service.getCharacteristic(Characteristic.SwingMode).updateValue(value);
         rv = true;
       }
-      if (this.config.get_WaterLevel == offset)
+      if ('get_WaterLevel' in this.config && this.config.get_WaterLevel == offset)
       {
         this.log.debug( "[" + this.name + "] Push WaterLevel:" + value);
         this.service.getCharacteristic(Characteristic.WaterLevel).updateValue(value);
         rv = true;
       }
-      if (this.config.get_StatusTampered == offset)
+      if ('get_StatusTampered' in this.config && this.config.get_StatusTampered == offset)
       {
         this.log.debug( "[" + this.name + "] Push StatusTampered:" + value);
         this.service.getCharacteristic(Characteristic.StatusTampered).updateValue(value);
         rv = true;
       }
-      if (this.config.get_StatusLowBattery == offset)
+      if ('get_StatusLowBattery' in this.config && this.config.get_StatusLowBattery == offset)
       {
         this.log.debug( "[" + this.name + "] Push StatusLowBattery:" + value);
         this.service.getCharacteristic(Characteristic.StatusLowBattery).updateValue(value);
@@ -1941,7 +1941,7 @@ GenericPLCAccessory.prototype = {
     ////////////////////////////////////////////////////////////////
     else if (this.config.accessory == 'PLC_Window' || this.config.accessory == 'PLC_WindowCovering' || this.config.accessory == 'PLC_Door'){
       var has_get_TargetPosition = ('get_TargetPosition' in this.config);
-      if (this.config.get_CurrentPosition == offset)
+      if ('get_CurrentPosition' in this.config && this.config.get_CurrentPosition == offset)
       {
         if(!has_get_TargetPosition) {
           this.log.debug( "[" + this.name + "] Push TargetPosition:" + String(this.modFunctionGetTarget(parseInt(value))) + "<-" + String(value));
@@ -1951,13 +1951,13 @@ GenericPLCAccessory.prototype = {
         this.service.getCharacteristic(Characteristic.CurrentPosition).updateValue(this.modFunctionGet(parseInt(value)));
         rv = true;
       }
-      if ( this.config.get_TargetPosition == offset)
+      if ('get_TargetPosition' in this.config && this.config.get_TargetPosition == offset)
       {
         this.log.debug( "[" + this.name + "] Push TargetPosition:" + String(this.modFunctionGetTarget(parseInt(value))) + "<-" + String(value));
         this.service.getCharacteristic(Characteristic.TargetPosition).updateValue(this.modFunctionGet(parseInt(value)));
         rv = true;
       }
-      if (this.config.get_PositionState == offset)
+      if ('get_PositionState' in this.config && this.config.get_PositionState == offset)
       {
         this.log.debug( "[" + this.name + "] Push PositionState:" + value);
         this.service.getCharacteristic(Characteristic.PositionState).updateValue(value);
@@ -1968,19 +1968,19 @@ GenericPLCAccessory.prototype = {
     // OccupancySensor
     ////////////////////////////////////////////////////////////////
     else if (this.config.accessory == 'PLC_OccupancySensor'){
-      if (this.config.get_OccupancyDetected == offset)
+      if ('get_OccupancyDetected' in this.config && this.config.get_OccupancyDetected == offset)
       {
         this.log.debug( "[" + this.name + "] Push OccupancyDetected:" + String(this.modFunctionGet(parseInt(value))) + "<-" + String(value));
         this.service.getCharacteristic(Characteristic.OccupancyDetected).updateValue(this.modFunctionGet(parseInt(value)));
         rv = true;
       }
-      if (this.config.get_StatusTampered == offset)
+      if ('get_StatusTampered' in this.config && this.config.get_StatusTampered == offset)
       {
         this.log.debug( "[" + this.name + "] Push StatusTampered:" + value);
         this.service.getCharacteristic(Characteristic.StatusTampered).updateValue(value);
         rv = true;
       }
-      if (this.config.get_StatusLowBattery == offset)
+      if ('get_StatusLowBattery' in this.config && this.config.get_StatusLowBattery == offset)
       {
         this.log.debug( "[" + this.name + "] Push StatusLowBattery:" + value);
         this.service.getCharacteristic(Characteristic.StatusLowBattery).updateValue(value);
@@ -1991,19 +1991,19 @@ GenericPLCAccessory.prototype = {
     // MotionSensor
     ////////////////////////////////////////////////////////////////
     else if (this.config.accessory == 'PLC_MotionSensor'){
-      if (this.config.get_MotionDetected == offset)
+      if ('get_MotionDetected' in this.config && this.config.get_MotionDetected == offset)
       {
         this.log.debug( "[" + this.name + "] Push MotionDetected:" + String(this.modFunctionGet(parseInt(value))) + "<-" + String(value));
         this.service.getCharacteristic(Characteristic.MotionDetected).updateValue(this.modFunctionGet(parseInt(value)));
         rv = true;
       }
-      if (this.config.get_StatusTampered == offset)
+      if ('get_StatusTampered' in this.config && this.config.get_StatusTampered == offset)
       {
         this.log.debug( "[" + this.name + "] Push StatusTampered:" + value);
         this.service.getCharacteristic(Characteristic.StatusTampered).updateValue(value);
         rv = true;
       }
-      if (this.config.get_StatusLowBattery == offset)
+      if ('get_StatusLowBattery' in this.config && this.config.get_StatusLowBattery == offset)
       {
         this.log.debug( "[" + this.name + "] Push StatusLowBattery:" + value);
         this.service.getCharacteristic(Characteristic.StatusLowBattery).updateValue(value);
@@ -2014,19 +2014,19 @@ GenericPLCAccessory.prototype = {
     // ContactSensor
     ////////////////////////////////////////////////////////////////
     else if (this.config.accessory == 'PLC_ContactSensor'){
-      if (this.config.get_ContactSensorState == offset)
+      if ('get_ContactSensorState' in this.config && this.config.get_ContactSensorState == offset)
       {
         this.log.debug( "[" + this.name + "] Push ContactSensorState:" + String(this.modFunctionGet(parseInt(value))) + "<-" + String(value));
         this.service.getCharacteristic(Characteristic.ContactSensorState).updateValue(this.modFunctionGet(parseInt(value)));
         rv = true;
       }
-      if (this.config.get_StatusTampered == offset)
+      if ('get_StatusTampered' in this.config && this.config.get_StatusTampered == offset)
       {
         this.log.debug( "[" + this.name + "] Push StatusTampered:" + value);
         this.service.getCharacteristic(Characteristic.StatusTampered).updateValue(value);
         rv = true;
       }
-      if (this.config.get_StatusLowBattery == offset)
+      if ('get_StatusLowBattery' in this.config && this.config.get_StatusLowBattery == offset)
       {
         this.log.debug( "[" + this.name + "] Push StatusLowBattery:" + value);
         this.service.getCharacteristic(Characteristic.StatusLowBattery).updateValue(value);
@@ -2037,19 +2037,19 @@ GenericPLCAccessory.prototype = {
     // LeakSensor
     ////////////////////////////////////////////////////////////////
     else if (this.config.accessory == 'PLC_LeakSensor'){
-      if (this.config.get_LeakDetected == offset)
+      if ('get_LeakDetected' in this.config && this.config.get_LeakDetected == offset)
       {
         this.log.debug( "[" + this.name + "] Push LeakDetected:" + String(this.modFunctionGet(parseInt(value))) + "<-" + String(value));
         this.service.getCharacteristic(Characteristic.LeakDetected).updateValue(this.modFunctionGet(parseInt(value)));
         rv = true;
       }
-      if (this.config.get_StatusTampered == offset)
+      if ('get_StatusTampered' in this.config && this.config.get_StatusTampered == offset)
       {
         this.log.debug( "[" + this.name + "] Push StatusTampered:" + value);
         this.service.getCharacteristic(Characteristic.StatusTampered).updateValue(value);
         rv = true;
       }
-      if (this.config.get_StatusLowBattery == offset)
+      if ('get_StatusLowBattery' in this.config && this.config.get_StatusLowBattery == offset)
       {
         this.log.debug( "[" + this.name + "] Push StatusLowBattery:" + value);
         this.service.getCharacteristic(Characteristic.StatusLowBattery).updateValue(value);
@@ -2060,7 +2060,7 @@ GenericPLCAccessory.prototype = {
     // Faucet
     ////////////////////////////////////////////////////////////////
     else if (this.config.accessory == 'PLC_Faucet'){
-      if (this.config.get_Active == offset)
+      if ('get_Active' in this.config && this.config.get_Active == offset)
       {
         this.log.debug( "[" + this.name + "] Push Active:" + value);
         this.service.getCharacteristic(Characteristic.Active).updateValue(value);
@@ -2071,19 +2071,19 @@ GenericPLCAccessory.prototype = {
     // Valve
     ////////////////////////////////////////////////////////////////
     else if (this.config.accessory == 'PLC_Valve'){
-      if (this.config.get_Active == offset)
+      if ('get_Active' in this.config && this.config.get_Active == offset)
       {
         this.log.debug( "[" + this.name + "] Push Active:" + value);
         this.service.getCharacteristic(Characteristic.Active).updateValue(value);
         rv = true;
       }
-      if (this.config.get_SetDuration == offset)
+      if ('get_SetDuration' in this.config && this.config.get_SetDuration == offset)
       {
         this.log.debug( "[" + this.name + "] Push SetDuration:" + value);
         this.service.getCharacteristic(Characteristic.SetDuration).updateValue(value);
         rv = true;
       }
-      if (this.config.get_RemainingDuration == offset)
+      if ('get_RemainingDuration' in this.config && this.config.get_RemainingDuration == offset)
       {
         this.log.debug( "[" + this.name + "] Push RemainingDuration:" + value);
         this.service.getCharacteristic(Characteristic.RemainingDuration).updateValue(value);
@@ -2094,13 +2094,13 @@ GenericPLCAccessory.prototype = {
     // SecuritySystem
     ////////////////////////////////////////////////////////////////
     else if (this.config.accessory == 'PLC_SecuritySystem'){
-      if (this.config.get_SecuritySystemCurrentState == offset)
+      if ('get_SecuritySystemCurrentState' in this.config && this.config.get_SecuritySystemCurrentState == offset)
       {
         this.log.debug( "[" + this.name + "] Push SecuritySystemCurrentState:" + String(this.modFunctionGetCurrent(parseInt(value))) + "<-" + String(value));
         this.service.getCharacteristic(Characteristic.SecuritySystemCurrentState).updateValue(this.modFunctionGetCurrent(parseInt(value)));
         rv = true;
       }
-      if (this.config.get_SecuritySystemTargetState == offset)
+      if ('get_SecuritySystemTargetState' in this.config && this.config.get_SecuritySystemTargetState == offset)
       {
         this.log.debug( "[" + this.name + "] Push SecuritySystemTargetState:" + String(this.modFunctionGet(parseInt(value))) + "<-" + String(value));
         this.service.getCharacteristic(Characteristic.SecuritySystemTargetState).updateValue(this.modFunctionGet(parseInt(value)));
@@ -2111,7 +2111,7 @@ GenericPLCAccessory.prototype = {
     // StatelessProgrammableSwitch, Doorbell
     ////////////////////////////////////////////////////////////////
     else if (this.config.accessory == 'PLC_StatelessProgrammableSwitch' || this.config.accessory == 'PLC_Doorbell'){
-      if (this.config.get_ProgrammableSwitchEvent == offset)
+      if ('get_ProgrammableSwitchEvent' in this.config && this.config.get_ProgrammableSwitchEvent == offset)
       {
         this.log.debug( "[" + this.name + "] Push ProgrammableSwitchEvent:" + value);
         this.service.getCharacteristic(Characteristic.ProgrammableSwitchEvent).updateValue(value);
@@ -2122,13 +2122,13 @@ GenericPLCAccessory.prototype = {
     // LockMechanism, LockMechanismBool
     ////////////////////////////////////////////////////////////////
     else if (this.config.accessory == 'PLC_LockMechanism' || this.config.accessory == 'PLC_LockMechanismBool'){
-      if (this.config.get_LockCurrentState == offset)
+      if ('get_LockCurrentState' in this.config && this.config.get_LockCurrentState == offset || 'get_LockCurrentStateBool' in this.config && this.config.get_LockCurrentStateBool == offset)
       {
         this.log.debug( "[" + this.name + "] Push LockCurrentState:" + String(this.modFunctionGet(parseInt(value))) + "<-" + String(value));
         this.service.getCharacteristic(Characteristic.LockCurrentState).updateValue(this.modFunctionGet(parseInt(value)));
         rv = true;
       }
-      if (this.config.get_LockTargetState == offset)
+      if ('get_LockTargetState' in this.config && this.config.get_LockTargetState == offset || 'get_LockTargetStateBool' in this.config && this.config.get_LockTargetStateBool == offset)
       {
         this.log.debug( "[" + this.name + "] Push LockTargetState:" + String(this.modFunctionGet(parseInt(value))) + "<-" + String(value));
         this.service.getCharacteristic(Characteristic.LockTargetState).updateValue(this.modFunctionGet(parseInt(value)));
@@ -2139,19 +2139,19 @@ GenericPLCAccessory.prototype = {
     // GarageDoorOpener
     ////////////////////////////////////////////////////////////////
     else if (this.config.accessory == 'PLC_GarageDoorOpener'){
-      if (this.config.get_CurrentDoorState == offset)
+      if ('get_CurrentDoorState' in this.config && this.config.get_CurrentDoorState == offset)
       {
         this.log.debug( "[" + this.name + "] Push CurrentDoorState:" + value);
         this.service.getCharacteristic(Characteristic.CurrentDoorState).updateValue(value);
         rv = true;
       }
-      if (this.config.get_TargetDoorState == offset)
+      if ('get_TargetDoorState' in this.config && this.config.get_TargetDoorState == offset)
       {
         this.log.debug( "[" + this.name + "] Push TargetDoorState:" + value);
         this.service.getCharacteristic(Characteristic.TargetDoorState).updateValue(value);
         rv = true;
       }
-      if (this.config.get_ObstructionDetected == offset)
+      if ('get_ObstructionDetected' in this.config && this.config.get_ObstructionDetected == offset)
       {
         this.log.debug( "[" + this.name + "] Push ObstructionDetected:" + value);
         this.service.getCharacteristic(Characteristic.TargetDoorState).updateValue(value);
@@ -2162,19 +2162,19 @@ GenericPLCAccessory.prototype = {
     // SmokeSensor
     ////////////////////////////////////////////////////////////////
     else if (this.config.accessory == 'PLC_SmokeSensor'){
-      if (this.config.get_SmokeDetected == offset)
+      if ('get_LockCurrentState' in this.config && this.config.get_SmokeDetected == offset)
       {
         this.log.debug( "[" + this.name + "] Push SmokeDetected:" + value);
         this.service.getCharacteristic(Characteristic.SmokeDetected).updateValue(value);
         rv = true;
       }
-      if (this.config.get_StatusTampered == offset)
+      if ('get_StatusTampered' in this.config && this.config.get_StatusTampered == offset)
       {
         this.log.debug( "[" + this.name + "] Push StatusTampered:" + value);
         this.service.getCharacteristic(Characteristic.StatusTampered).updateValue(value);
         rv = true;
       }
-      if (this.config.get_StatusLowBattery == offset)
+      if ('get_StatusLowBattery' in this.config && this.config.get_StatusLowBattery == offset)
       {
         this.log.debug( "[" + this.name + "] Push StatusLowBattery:" + value);
         this.service.getCharacteristic(Characteristic.StatusLowBattery).updateValue(value);
@@ -2185,31 +2185,31 @@ GenericPLCAccessory.prototype = {
     // Fan
     ////////////////////////////////////////////////////////////////
     else if (this.config.accessory == 'PLC_Fan'){
-      if (this.config.get_Active == offset)
+      if ('get_Active' in this.config && this.config.get_Active == offset)
       {
         this.log.debug( "[" + this.name + "] Push Active:" + value);
         this.service.getCharacteristic(Characteristic.Active).updateValue(value);
         rv = true;
       }
-      if (this.config.get_TargetFanState == offset)
+      if ('get_TargetFanState' in this.config && this.config.get_TargetFanState == offset)
       {
         this.log.debug( "[" + this.name + "] Push TargetFanState:" + String(this.modTargetGet(parseInt(value))) + "<-" + String(value));
         this.service.getCharacteristic(Characteristic.TargetFanState).updateValue(this.modTargetGet(parseInt(value)));
         rv = true;
       }
-      if (this.config.get_CurrentFanState == offset)
+      if ('get_CurrentFanState' in this.config && this.config.get_CurrentFanState == offset)
       {
         this.log.debug( "[" + this.name + "] Push CurrentFanState:" + String(this.modCurrentGet(parseInt(value))) + "<-" + String(value));
         this.service.getCharacteristic(Characteristic.CurrentFanState).updateValue(this.modCurrentGet(parseInt(value)));
         rv = true;
       }
-      if (this.config.get_RotationSpeed == offset || this.config.get_RotationSpeedByte)
+      if ('get_RotationSpeed' in this.config && this.config.get_RotationSpeed == offset || 'get_RotationSpeedByte' in this.config && this.config.get_RotationSpeedByte == offset)
       {
         this.log.debug( "[" + this.name + "] Push RotationSpeed:" + value);
         this.service.getCharacteristic(Characteristic.Active).RotationSpeed(value);
         rv = true;
       }
-      if (this.config.get_RotationDirection == offset)
+      if ('get_RotationDirection' in this.config && this.config.get_RotationDirection == offset)
       {
         this.log.debug( "[" + this.name + "] Push RotationDirection:" + String(this.mapDirectionGet(parseInt(value))) + "<-" + String(value));
         this.service.getCharacteristic(Characteristic.LockTargetState).updateValue(this.mapDirectionGet(parseInt(value)));
@@ -2221,25 +2221,25 @@ GenericPLCAccessory.prototype = {
     ////////////////////////////////////////////////////////////////
     else if (this.config.accessory == 'PLC_LightSensor'){
 
-      if ( this.config.get_CurrentAmbientLightLevelDInt == offset )
+      if ('get_CurrentAmbientLightLevelDInt' in this.config && this.config.get_CurrentAmbientLightLevelDInt == offset )
       {
         this.log.debug( "[" + this.name + "] Push CurrentAmbientLightLevel:" + String(this.modFunctionGet(parseInt(value))) + "<-" + String(value));
         this.service.getCharacteristic(Characteristic.CurrentAmbientLightLevel).updateValue(this.modFunctionGet(parseInt(value)));
         rv = true;
       }
-      if (this.config.get_CurrentAmbientLightLevel == offset )
+      if ('get_CurrentAmbientLightLevel' in this.config && this.config.get_CurrentAmbientLightLevel == offset )
       {
         this.log.debug( "[" + this.name + "] Push CurrentAmbientLightLevel:" + String(this.modFunctionGet(parseFloat(value))) + "<-" + String(value));
         this.service.getCharacteristic(Characteristic.CurrentAmbientLightLevel).updateValue(this.modFunctionGet(parseFloat(value)));
         rv = true;
       }
-      if (this.config.get_StatusTampered == offset)
+      if ('get_StatusTampered' in this.config && this.config.get_StatusTampered == offset)
       {
         this.log.debug( "[" + this.name + "] Push StatusTampered:" + value);
         this.service.getCharacteristic(Characteristic.StatusTampered).updateValue(value);
         rv = true;
       }
-      if (this.config.get_StatusLowBattery == offset)
+      if ('get_StatusLowBattery' in this.config && this.config.get_StatusLowBattery == offset)
       {
         this.log.debug( "[" + this.name + "] Push StatusLowBattery:" + value);
         this.service.getCharacteristic(Characteristic.StatusLowBattery).updateValue(value);
@@ -2288,19 +2288,19 @@ GenericPLCAccessory.prototype = {
     // Thermostat
     ////////////////////////////////////////////////////////////////
     else if (this.config.accessory == 'PLC_Thermostat'){
-      if (this.config.set_TargetTemperature == offset)
+      if ('set_TargetTemperature' in this.config && this.config.set_TargetTemperature == offset)
       {
         this.log.debug( "[" + this.name + "] Control TargetTemperature:" + value);
         this.service.getCharacteristic(Characteristic.TargetTemperature).setValue(value);
         rv = true;
       }
-      if (this.config.set_TargetRelativeHumidity == offset)
+      if ('set_TargetRelativeHumidity' in this.config && this.config.set_TargetRelativeHumidity == offset)
       {
         this.log.debug( "[" + this.name + "] Control TargetRelativeHumidity:" + value);
         this.service.getCharacteristic(Characteristic.TargetRelativeHumidity).setValue(value);
         rv = true;
       }
-      if (this.config.set_TargetHeatingCoolingState == offset)
+      if ('set_TargetHeatingCoolingState' in this.config && this.config.set_TargetHeatingCoolingState == offset)
       {
         this.log.debug( "[" + this.name + "] Control TargetHeatingCoolingState:" + value);
         this.service.getCharacteristic(Characteristic.TargetHeatingCoolingState).setValue(value);
@@ -2311,31 +2311,31 @@ GenericPLCAccessory.prototype = {
     // Humidifier Dehumidifier
     ////////////////////////////////////////////////////////////////
     else if (this.config.accessory == 'PLC_HumidifierDehumidifier'){
-      if (this.config.set_TargetHumidifierDehumidifierState == offset)
+      if ('set_TargetHumidifierDehumidifierState' in this.config && this.config.set_TargetHumidifierDehumidifierState == offset)
       {
         this.log.debug( "[" + this.name + "] Control TargetHumidifierDehumidifierState:" + value);
         this.service.getCharacteristic(Characteristic.TargetHumidifierDehumidifierState).setValue(value);
         rv = true;
       }
-      if (this.config.set_RelativeHumidityDehumidifierThreshold == offset)
+      if ('set_RelativeHumidityDehumidifierThreshold' in this.config && this.config.set_RelativeHumidityDehumidifierThreshold == offset)
       {
         this.log.debug( "[" + this.name + "] Control RelativeHumidityDehumidifierThreshold:" + value);
         this.service.getCharacteristic(Characteristic.RelativeHumidityDehumidifierThreshold).setValue(value);
         rv = true;
       }
-      if (this.config.set_RelativeHumidityHumidifierThreshold == offset)
+      if ('set_RelativeHumidityHumidifierThreshold' in this.config && this.config.set_RelativeHumidityHumidifierThreshold == offset)
       {
         this.log.debug( "[" + this.name + "] Control RelativeHumidityHumidifierThreshold:" + value);
         this.service.getCharacteristic(Characteristic.RelativeHumidityHumidifierThreshold).setValue(value);
         rv = true;
       }
-      if (this.config.set_RotationSpeed == offset || this.config.set_RotationSpeedByte == offset)
+      if ('set_RotationSpeed' in this.config && this.config.set_RotationSpeed == offset ||'set_RotationSpeedByte' in this.config &&  this.config.set_RotationSpeedByte == offset)
       {
         this.log.debug( "[" + this.name + "] Control RotationSpeed:" + value);
         this.service.getCharacteristic(Characteristic.RotationSpeed).setValue(value);
         rv = true;
       }
-      if (this.config.set_SwingMode == offset)
+      if ('set_SwingMode' in this.config && this.config.set_SwingMode == offset)
       {
         this.log.debug( "[" + this.name + "] Control SwingMode:" + value);
         this.service.getCharacteristic(Characteristic.SwingMode).setValue(value);
@@ -2346,12 +2346,12 @@ GenericPLCAccessory.prototype = {
     // Window, WindowCovering and Door
     ////////////////////////////////////////////////////////////////
     else if (this.config.accessory == 'PLC_Window' || this.config.accessory == 'PLC_WindowCovering' || this.config.accessory == 'PLC_Door'){
-      if (this.config.set_TargetPosition == offset)
+      if ('set_TargetPosition' in this.config && this.config.set_TargetPosition == offset)
       {
           this.log.debug( "[" + this.name + "] Control TargetPosition:" + String(value) );
           this.service.getCharacteristic(Characteristic.TargetPosition).setValue(value);
       }
-      if ( this.config.set_HoldPosition == offset)
+      if ('set_HoldPosition' in this.config && this.config.set_HoldPosition == offset)
       {
         this.log.debug( "[" + this.name + "] Control HoldPosition:" + String(value));
         this.service.getCharacteristic(Characteristic.HoldPosition).setValue(this.value);
@@ -2374,7 +2374,7 @@ GenericPLCAccessory.prototype = {
     // Faucet
     ////////////////////////////////////////////////////////////////
     else if (this.config.accessory == 'PLC_Faucet'){
-      if (this.config.set_Active == offset)
+      if ('set_Active' in this.config && this.config.set_Active == offset || 'set_Active_Set' in this.config && this.config.set_Active_Set == offset)
       {
         this.log.debug( "[" + this.name + "] Control Active:" + value);
         this.service.getCharacteristic(Characteristic.Active).setValue(value);
@@ -2385,13 +2385,13 @@ GenericPLCAccessory.prototype = {
     // Valve
     ////////////////////////////////////////////////////////////////
     else if (this.config.accessory == 'PLC_Valve'){
-      if (this.config.set_Active == offset)
+      if ('set_Active' in this.config && this.config.set_Active == offset || 'set_Active_Set' in this.config && this.config.set_Active_Set == offset)
       {
         this.log.debug( "[" + this.name + "] Control Active:" + value);
         this.service.getCharacteristic(Characteristic.Active).setValue(value);
         rv = true;
       }
-      if (this.config.set_SetDuration == offset)
+      if ('set_SetDuration' in this.config && this.config.set_SetDuration == offset)
       {
         this.log.debug( "[" + this.name + "] Control SetDuration:" + value);
         this.service.getCharacteristic(Characteristic.SetDuration).setValue(value);
@@ -2402,7 +2402,7 @@ GenericPLCAccessory.prototype = {
     // SecuritySystem
     ////////////////////////////////////////////////////////////////
     else if (this.config.accessory == 'PLC_SecuritySystem'){
-      if (this.config.set_SecuritySystemTargetState == offset)
+      if ('set_SecuritySystemTargetState' in this.config && this.config.set_SecuritySystemTargetState == offset)
       {
         this.log.debug( "[" + this.name + "] Control SecuritySystemTargetState:" + value);
         this.service.getCharacteristic(Characteristic.SecuritySystemTargetState).setValue(value);
@@ -2413,7 +2413,7 @@ GenericPLCAccessory.prototype = {
     // StatelessProgrammableSwitch, Doorbell
     ////////////////////////////////////////////////////////////////
     else if (this.config.accessory == 'PLC_StatelessProgrammableSwitch' || this.config.accessory == 'PLC_Doorbell'){
-      if (this.config.get_ProgrammableSwitchEvent == offset)
+      if ('get_ProgrammableSwitchEvent' in this.config && this.config.get_ProgrammableSwitchEvent == offset)
       {
         // Note: In contrast to all others accessories the control does not set the value in the PLC instead it simulates a key event.
         //       Therefore updateValue is
@@ -2426,7 +2426,7 @@ GenericPLCAccessory.prototype = {
     // LockMechanism
     ////////////////////////////////////////////////////////////////
     else if (this.config.accessory == 'PLC_LockMechanism'){
-      if (this.config.set_LockTargetState == offset || this.config.set_Secured == offset)
+      if ('set_LockTargetState' in this.config && this.config.set_LockTargetState == offset || 'set_Secured' in this.config && this.config.set_Secured == offset)
       {
         this.log.debug( "[" + this.name + "] Control LockTargetState:" + value);
         this.service.getCharacteristic(Characteristic.LockTargetState).setValue(value);
@@ -2437,7 +2437,7 @@ GenericPLCAccessory.prototype = {
     // LockMechanismBool
     ////////////////////////////////////////////////////////////////
     else if (this.config.accessory == 'PLC_LockMechanismBool'){
-      if (this.config.set_LockTargetState == offset || this.config.set_Secured == offset)
+      if ('set_LockTargetStateBool' in this.config && this.config.set_LockTargetStateBool == offset || 'set_LockTargetStateBool_Secured' in this.config && this.config.set_LockTargetStateBool_Secured == offset)
       {
         var valuePLC = this.invert_bit(parseInt(value));
         this.log.debug( "[" + this.name + "] Control LockTargetState:" + String(value) + "->" + String(valuePLC));
@@ -2449,7 +2449,7 @@ GenericPLCAccessory.prototype = {
     // GarageDoorOpener
     ////////////////////////////////////////////////////////////////
     else if (this.config.accessory == 'PLC_GarageDoorOpener'){
-      if (this.config.set_TargetDoorState == offset)
+      if ('set_TargetDoorState' in this.config && this.config.set_TargetDoorState == offset)
       {
         this.log.debug( "[" + this.name + "] Control TargetDoorState:" + value);
         this.service.getCharacteristic(Characteristic.TargetDoorState).setValue(value);
@@ -2464,25 +2464,25 @@ GenericPLCAccessory.prototype = {
     // Fan
     ////////////////////////////////////////////////////////////////
     else if (this.config.accessory == 'PLC_Fan'){
-      if (this.config.set_Active == offset)
+      if ('set_Active' in this.config && this.config.set_Active == offset || 'set_Active_Set' in this.config && this.config.set_Active_Set == offset)
       {
         this.log.debug( "[" + this.name + "] Control Active:" + value);
         this.service.getCharacteristic(Characteristic.Active).setValue(value);
         rv = true;
       }
-      if (this.config.set_TargetFanState == offset)
+      if ('set_TargetFanState' in this.config && this.config.set_TargetFanState == offset)
       {
         this.log.debug( "[" + this.name + "] Control TargetFanState:" + value);
         this.service.getCharacteristic(Characteristic.TargetFanState).setValue(value);
         rv = true;
       }
-      if (this.config.set_RotationSpeed == offset || this.config.set_RotationSpeedByte == offset)
+      if ('set_RotationSpeed' in this.config && this.config.set_RotationSpeed == offset || 'set_RotationSpeedByte' in this.config && this.config.set_RotationSpeedByte == offset)
       {
         this.log.debug( "[" + this.name + "] Control RotationSpeed:" + value);
         this.service.getCharacteristic(Characteristic.RotationSpeed).setValue(value);
         rv = true;
       }
-      if (this.config.set_RotationDirection == offset)
+      if ('set_RotationDirection' in this.config && this.config.set_RotationDirection == offset)
       {
         this.log.debug( "[" + this.name + "] Control RotationDirection:" + value);
         this.service.getCharacteristic(Characteristic.RotationDirection).setValue(value);

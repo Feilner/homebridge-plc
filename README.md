@@ -120,8 +120,8 @@ outlet possible to show also as ventilator or light
 - Single Bit for on/off:
   - `set_On`: **(control support)** offset and bit set to 1/0 when switching on/off S7 type `Bool` PLC e.g. `55.0` for `DB4DBX55.0` could be same as get_On
 - Separate Bits for on/off:
-  - `set_On`: **(control support)** offset and bit set to 1 when switching on S7 type `Bool` **PLC has to set to 0** e.g. `55.1` for `DB4DBX55.1`
-  - `set_Off`: offset and bit set to 1 when switching off S7 type `Bool` **PLC has to set to 0** e.g. `55.2` for `DB4DBX55.2`
+  - `set_On_Set`: **(control support)** offset and bit set to 1 when switching on S7 type `Bool` **PLC has to set to 0** e.g. `55.1` for `DB4DBX55.1`
+  - `set_On_Reset`: offset and bit set to 1 when switching off S7 type `Bool` **PLC has to set to 0** e.g. `55.2` for `DB4DBX55.2`
 
 ### <a name='PLC_Switch'></a>Switch as `PLC_Switch`
  switch possible to show also as ventilator or light
@@ -258,8 +258,8 @@ Humidifier and/or Dehumidifier
 - Single Bit for on/off:
   - `set_Active`: **(control support)** offset and bit set to 1/0 when switching on/off S7 type `Bool` PLC e.g. `55.0` for `DB4DBX55.0` could be same as get_Active
 - Separate Bits for on/off:
-  - `set_Active`: **(control support)** offset and bit set to 1 when switching on S7 type `Bool` **PLC has to set to 0** e.g. `55.1` for `DB4DBX55.1`
-  - `set_Deactivate`: offset and bit set to 1 when switching off S7 type `Bool` **PLC has to set to 0** e.g. `55.2` for `DB4DBX55.2`
+  - `set_Active_Set`: **(control support)** offset and bit set to 1 when switching on S7 type `Bool` **PLC has to set to 0** e.g. `55.1` for `DB4DBX55.1`
+  - `set_Active_Reset`: offset and bit set to 1 when switching off S7 type `Bool` **PLC has to set to 0** e.g. `55.2` for `DB4DBX55.2`
 - Current State
   - `get_CurrentHumidifierDehumidifierState`: **(optional)** **(push support)** offset to get current state. Default value `1:idle`. S7 type `Byte` e.g. `55` for `DB4DBD55`
     - `0`: inactive
@@ -318,7 +318,7 @@ motor driven blinds, windows and doors. Supports also manual driven blinds, wind
     - `0`: closed
     - `in between`: partly open
     - `100`: open
-  - `invert`: **(optional)** set to `true` to inverts the values of current and target position from `0:closed 100:open` to `100:closed 0:open`
+  - `invertPosition`: **(optional)** set to `true` to inverts the values of current and target position from `0:closed 100:open` to `100:closed 0:open`
   - `mapGet`: **(optional)** define mapping array for get position. The PLC value is used as index into the table. e.g. `[0, 25, 100]` which maps the PLC value `0->0 1->25 2->100` this this is useful e.g. for window open state.
 - Target position:
   - if one of the **(optional)** target position settings need specified all are needed. If not specified it os not movable ans sticks to current position.
@@ -330,7 +330,6 @@ motor driven blinds, windows and doors. Supports also manual driven blinds, wind
     - `0`: closed
     - `in between`: partly open
     - `100`: open
-  - `invert`: **(optional)** set to `true` to inverts the values of current and target position from `0:closed 100:open` to `100:closed 0:open`
 - `get_PositionState`: **(optional)** **(push support)** offset to current movement state if not defined fixed `2`is returned S7 type `Byte` e.g. `3` for `DB4DBB3`
   - `0`: down
   - `1`: up
@@ -344,7 +343,7 @@ presence detection sensor
 - `name`: unique name of the accessory
 - `manufacturer`: **(optional)** description
 - `db`: s7 data base number e.g. `4` for `DB4`
-- `invert`: **(optional)** set to `true` inverts the bit to `false:presence` and `true:no-presence`.
+- `invertOccupancy`: **(optional)** set to `true` inverts the bit to `false:presence` and `true:no-presence`.
 - `enablePolling`: **(optional)** when set to `true` the current state will be polled. It is mandatory as well to enable polling mode on platform level.
 - `pollInterval`: **(optional)** poll interval in seconds. Default value see platform definition.
 - `get_OccupancyDetected`: **(push support)** offset and bit get the current status S7 type `Bool` e.g. `55.0` for `DB4DBX55.0`
@@ -364,7 +363,7 @@ movement detection sensor
 - `name`: unique name of the accessory
 - `manufacturer`: **(optional)** description
 - `db`: s7 data base number e.g. `4` for `DB4`
-- `invert`: **(optional)** set to `true` inverts the bit to `false:motion` and `true:no-motion`.
+- `invertMotionDetected`: **(optional)** set to `true` inverts the bit to `false:motion` and `true:no-motion`.
 - `enablePolling`: **(optional)** when set to `true` the current state will be polled. It is mandatory as well to enable polling mode on platform level.
 - `pollInterval`: **(optional)** poll interval in seconds. Default value see platform definition.
 - `get_MotionDetected`: **(push support)** offset and bit get the current status S7 type `Bool` e.g. `55.0` for `DB4DBX55.0`
@@ -384,7 +383,7 @@ generic contact sensor. The home app allows to display as window, door, blind/sh
 - `name`: unique name of the accessory
 - `manufacturer`: **(optional)** description
 - `db`: s7 data base number e.g. `4` for `DB4`
-- `invert`: **(optional)** set to `true` inverts the bit to `false:closed` and `true:open`.
+- `invertContactSensorState`: **(optional)** set to `true` inverts the bit to `false:closed` and `true:open`.
 - `enablePolling`: **(optional)** when set to `true` the current state will be polled. It is mandatory as well to enable polling mode on platform level.
 - `pollInterval`: **(optional)** poll interval in seconds. Default value see platform definition.
 - `get_ContactSensorState`: **(push support)** offset and bit get the current status S7 type `Bool` e.g. `55.0` for `DB4DBX55.0`
@@ -645,8 +644,8 @@ ventilator
 - Single Bit for on/off:
   - `set_Active`: **(control support)** offset and bit set to 1/0 when switching on/off S7 type `Bool` PLC e.g. `55.0` for `DB4DBX55.0` could be same as get_Active
 - Separate Bits for on/off:
-  - `set_Active`: **(control support)** offset and bit set to 1 when switching on S7 type `Bool` **PLC has to set to 0** e.g. `55.1` for `DB4DBX55.1`
-  - `set_Deactivate`: offset and bit set to 1 when switching off S7 type `Bool` **PLC has to set to 0** e.g. `55.2` for `DB4DBX55.2`
+  - `set_Active_Set`: **(control support)** offset and bit set to 1 when switching on S7 type `Bool` **PLC has to set to 0** e.g. `55.1` for `DB4DBX55.1`
+  - `set_Active_Reset`: offset and bit set to 1 when switching off S7 type `Bool` **PLC has to set to 0** e.g. `55.2` for `DB4DBX55.2`
 
 ### <a name='PLC_LightSensor'></a>Light Sensor as `PLC_LightSensor` or `PLC_LightSensor_DInt`
 Illuminance sensor
@@ -773,7 +772,7 @@ Note: The example is just an example it contains also some optional settings. Fo
               "get_TargetTemperature": 16,
               "set_TargetTemperature": 16,
               "get_CurrentHeatingCoolingState": 20
-              "mapSetTarget": [
+              "mapSetTargetHeatingCoolingState": [
                   0,
                   1,
                   0,
@@ -785,7 +784,7 @@ Note: The example is just an example it contains also some optional settings. Fo
               "name": "Blind",
               "manufacturer": "ground floor",
               "db": 12,
-              "invert": false,
+              "invertPosition": false,
               "adaptivePolling": true,
               "adaptivePollingInterval": 1,
               "enablePolling": true,
@@ -802,7 +801,7 @@ Note: The example is just an example it contains also some optional settings. Fo
               "pollInterval": 60,
               "db": 12,
               "get_CurrentPosition": 23,
-              "mapGet": [
+              "mapGetCurrentPosition": [
                   0,
                   25,
                   100
@@ -816,7 +815,7 @@ Note: The example is just an example it contains also some optional settings. Fo
               "pollInterval": 10,
               "db": 12,
               "get_CurrentPosition": 24,
-              "mapGet": [
+              "mapGetCurrentPosition": [
                   0,
                   100
               ]
@@ -880,16 +879,16 @@ Note: The example is just an example it contains also some optional settings. Fo
               "get_SecuritySystemCurrentState": 26,
               "set_SecuritySystemTargetState": 27,
               "get_SecuritySystemTargetState": 27,
-              "mapGetCurrent": [
+              "mapGetSecuritySystemCurrentState": [
                   3,
                   1,
                   4
               ],
-              "mapGetTarget": [
+              "mapGetSecuritySystemTargetState": [
                   3,
                   1
               ]
-              "mapSetTarget": [
+              "mapSetSecuritySystemTargetState": [
                   1,
                   1,
                   1,
@@ -1089,7 +1088,7 @@ All information is transmitted within the URL and in decimal.
 
 It's also possible to forward all control requests where no matching accessory no matches the `db` configuration to another instance of homebridge-plc see parameter `forward`.
 
-**NOTE: Options like `invert*`, `mapGet*` and `mapSet*` are not affecting the control interface. In example for PLC_Window is the value `0`: **closed** and `100`: **open** regardless if `invert` is set or not.
+**NOTE: Options like `invert*`, `mapGet*` and `mapSet*` are not affecting the control interface. In example for PLC_Window is the value `0`: **closed** and `100`: **open** regardless if `invertPosition` is set or not.
 
 The Request has to be done as HTTP `PUT` or `GET` operation. There will be no logging when doing a `PUT` operation while there will be detailed output when during a `GET` operation. This in especially intended for testing with the browser as the browser performs a `GET` operation per default.
 
