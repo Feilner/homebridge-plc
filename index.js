@@ -273,6 +273,7 @@ PLC_Platform.prototype = {
 };
 
 
+
 function GenericPLCAccessory(platform, config, accessoryNumber) {
   this.platform = platform;
   this.log = platform.log;
@@ -373,35 +374,9 @@ function GenericPLCAccessory(platform, config, accessoryNumber) {
     this.service =  new Service.TemperatureSensor(this.name);
     this.accessory.addService(this.service);
 
-    this.service.getCharacteristic(Characteristic.CurrentTemperature)
-    .on('get', function(callback) {this.getReal(callback,
-      config.db,
-      config.get_CurrentTemperature,
-      'get CurrentTemperature'
-      );}.bind(this))
-     .setProps({
-       minValue: ('minTemperatureValue' in config) ? config.minTemperatureValue : -270,
-       maxValue: ('maxTemperatureValue' in config) ? config.maxTemperatureValue : 100,
-       minStep: ('minTemperatureStep' in config) ? config.minTemperatureStep : 0.1
-     });
-
-    if ('get_StatusTampered' in config) {
-      this.service.getCharacteristic(Characteristic.StatusTampered)
-      .on('get', function(callback) {this.getBit(callback,
-        config.db,
-        Math.floor(config.get_StatusTampered), Math.floor((config.get_StatusTampered*10)%10),
-        'get StatusTampered'
-      );}.bind(this));
-    }
-
-    if ('get_StatusLowBattery' in config) {
-      this.service.getCharacteristic(Characteristic.StatusLowBattery)
-      .on('get', function(callback) {this.getBit(callback,
-        config.db,
-        Math.floor(config.get_StatusLowBattery), Math.floor((config.get_StatusLowBattery*10)%10),
-        'get StatusLowBattery'
-      );}.bind(this));
-    }
+    this.initCurrentTemperature(true);
+    this.initStatusTampered();
+    this.initStatusLowBattery();
   }
 
   // INIT handling ///////////////////////////////////////////////
@@ -411,34 +386,9 @@ function GenericPLCAccessory(platform, config, accessoryNumber) {
     this.service =  new Service.HumiditySensor(this.name);
     this.accessory.addService(this.service);
 
-    this.service.getCharacteristic(Characteristic.CurrentRelativeHumidity)
-    .on('get', function(callback) {this.getReal(callback,
-      config.db,
-      config.get_CurrentRelativeHumidity,
-      'get CurrentRelativeHumidity'
-      );}.bind(this))
-     .setProps({
-       minValue: ('minHumidityValue' in config) ? config.minHumidityValue : 0,
-       maxValue: ('maxHumidityValue' in config) ? config.maxHumidityValue : 100,
-       minStep: ('minHumidityStep' in config) ? config.minHumidityStep : 0.1
-       });
-    if ('get_StatusTampered' in config) {
-      this.service.getCharacteristic(Characteristic.StatusTampered)
-      .on('get', function(callback) {this.getBit(callback,
-        config.db,
-        Math.floor(config.get_StatusTampered), Math.floor((config.get_StatusTampered*10)%10),
-        'get StatusTampered'
-      );}.bind(this));
-    }
-
-    if ('get_StatusLowBattery' in config) {
-      this.service.getCharacteristic(Characteristic.StatusLowBattery)
-      .on('get', function(callback) {this.getBit(callback,
-        config.db,
-        Math.floor(config.get_StatusLowBattery), Math.floor((config.get_StatusLowBattery*10)%10),
-        'get StatusLowBattery'
-      );}.bind(this));
-    }
+    this.initCurrentRelativeHumidity(true);
+    this.initStatusTampered();
+    this.initStatusLowBattery();
   }
 
   // INIT handling ///////////////////////////////////////////////
@@ -533,17 +483,7 @@ function GenericPLCAccessory(platform, config, accessoryNumber) {
       'set TemperatureDisplayUnits'
       );}.bind(this));
 
-    this.service.getCharacteristic(Characteristic.CurrentTemperature)
-    .on('get', function(callback) {this.getReal(callback,
-      config.db,
-      config.get_CurrentTemperature,
-      'get CurrentTemperature'
-      );}.bind(this))
-      .setProps({
-        minValue: ('minTemperatureValue' in config) ? config.minTemperatureValue : -270,
-        maxValue: ('maxTemperatureValue' in config) ? config.maxTemperatureValue : 100,
-        minStep: ('minTemperatureStep' in config) ? config.minTemperatureStep : 0.1
-      });
+    this.initCurrentTemperature(true);
 
     this.service.getCharacteristic(Characteristic.TargetTemperature)
     .on('get', function(callback) {this.getReal(callback,
@@ -562,19 +502,8 @@ function GenericPLCAccessory(platform, config, accessoryNumber) {
          minStep: ('minTargetTemperatureStep' in config) ? config.minTargetTemperatureStep : 0.1
        });
 
-    if ('get_CurrentRelativeHumidity' in config) {
-      this.service.getCharacteristic(Characteristic.CurrentRelativeHumidity)
-      .on('get', function(callback) {this.getReal(callback,
-        config.db,
-        config.get_CurrentRelativeHumidity,
-        'get CurrentRelativeHumidity'
-        );}.bind(this))
-      .setProps({
-        minValue: ('minHumidityValue' in config) ? config.minHumidityValue : 0,
-        maxValue: ('maxHumidityValue' in config) ? config.maxHumidityValue : 100,
-        minStep: ('minHumidityStep' in config) ? config.minHumidityStep : 0.1
-        });
-    }
+    this.initCurrentRelativeHumidity(false);
+
     if ('get_TargetRelativeHumidity' in config) {
       this.service.getCharacteristic(Characteristic.TargetRelativeHumidity)
       .on('get', function(callback) {this.getReal(callback,
@@ -595,25 +524,10 @@ function GenericPLCAccessory(platform, config, accessoryNumber) {
       ;
     }
 
-    if ('get_StatusTampered' in config) {
-      //This will generate a warning but will work anyway.
-      this.service.getCharacteristic(Characteristic.StatusTampered)
-      .on('get', function(callback) {this.getBit(callback,
-        config.db,
-        Math.floor(config.get_StatusTampered), Math.floor((config.get_StatusTampered*10)%10),
-        'get StatusTampered'
-      );}.bind(this));
-    }
-
-    if ('get_StatusLowBattery' in config) {
-      //This will generate a warning but will work anyway.
-      this.service.getCharacteristic(Characteristic.StatusLowBattery)
-      .on('get', function(callback) {this.getBit(callback,
-        config.db,
-        Math.floor(config.get_StatusLowBattery), Math.floor((config.get_StatusLowBattery*10)%10),
-        'get StatusLowBattery'
-      );}.bind(this));
-    }
+    //This will generate a warning but will work anyway.
+    this.initStatusTampered();
+    //This will generate a warning but will work anyway.
+    this.initStatusLowBattery();
 
   }
   // INIT handling ///////////////////////////////////////////////
@@ -698,12 +612,7 @@ function GenericPLCAccessory(platform, config, accessoryNumber) {
         );}.bind(this));
     }
 
-    this.service.getCharacteristic(Characteristic.CurrentRelativeHumidity)
-    .on('get', function(callback) {this.getReal(callback,
-      config.db,
-      config.get_CurrentRelativeHumidity,
-      'get CurrentRelativeHumidity'
-      );}.bind(this));
+
 
     if ('get_RelativeHumidityDehumidifierThreshold' in config) {
       this.service.getCharacteristic(Characteristic.RelativeHumidityDehumidifierThreshold)
@@ -759,42 +668,8 @@ function GenericPLCAccessory(platform, config, accessoryNumber) {
         );}.bind(this));
     }
 
-    if ('set_Active' in config) {
-      this.service.getCharacteristic(Characteristic.Active)
-      .on('get', function(callback) {this.getBit(callback,
-        config.db,
-        Math.floor(config.get_Active), Math.floor((config.get_Active*10)%10),
-        'get Active'
-      );}.bind(this))
-      .on('set', function(powerOn, callback) { this.setBit(powerOn, callback,
-        config.db,
-        Math.floor(config.set_Active), Math.floor((config.set_Active*10)%10),
-        'set Active'
-        );}.bind(this));
-    } else if ('get_Active' in config) {
-      this.service.getCharacteristic(Characteristic.Active)
-      .on('get', function(callback) {this.getBit(callback,
-        config.db,
-        Math.floor(config.get_Active), Math.floor((config.get_Active*10)%10),
-        'get Active'
-      );}.bind(this))
-      .on('set', function(powerOn, callback) { this.setOnOffBit(powerOn, callback,
-        config.db,
-        Math.floor(config.set_Active_Set), Math.floor((config.set_Active_Set*10)%10),
-        Math.floor(config.set_Active_Reset), Math.floor((config.set_Active_Reset*10)%10),
-        'set Active'
-        );}.bind(this));
-    } else {
-      this.service.getCharacteristic(Characteristic.Active)
-        .on('get', function(callback) {this.getDummy(callback,
-          1,
-          'get Active'
-        );}.bind(this))
-        .on('set', function(value, callback) { this.setDummy(value, callback,
-          'set Active',
-          function(value){this.service.getCharacteristic(Characteristic.Active).updateValue(value);}.bind(this)
-        );}.bind(this));
-      }
+    this.initCurrentRelativeHumidity(true);
+    this.initActive(true);
 
     if ('get_SwingMode' in config) {
       this.service.getCharacteristic(Characteristic.SwingMode)
@@ -819,25 +694,11 @@ function GenericPLCAccessory(platform, config, accessoryNumber) {
         );}.bind(this));
     }
 
-    if ('get_StatusTampered' in config) {
-      //This will generate a warning but will work anyway.
-      this.service.getCharacteristic(Characteristic.StatusTampered)
-      .on('get', function(callback) {this.getBit(callback,
-        config.db,
-        Math.floor(config.get_StatusTampered), Math.floor((config.get_StatusTampered*10)%10),
-        'get StatusTampered'
-      );}.bind(this));
-    }
+    //This will generate a warning but will work anyway.
+    this.initStatusTampered();
+    //This will generate a warning but will work anyway.
+    this.initStatusLowBattery();
 
-    if ('get_StatusLowBattery' in config) {
-      //This will generate a warning but will work anyway.
-      this.service.getCharacteristic(Characteristic.StatusLowBattery)
-      .on('get', function(callback) {this.getBit(callback,
-        config.db,
-        Math.floor(config.get_StatusLowBattery), Math.floor((config.get_StatusLowBattery*10)%10),
-        'get StatusLowBattery'
-      );}.bind(this));
-    }
 
   }
   // INIT handling ///////////////////////////////////////////////
@@ -997,23 +858,9 @@ function GenericPLCAccessory(platform, config, accessoryNumber) {
         this.modFunctionGet
       );}.bind(this));
 
-      if ('get_StatusTampered' in config) {
-        this.service.getCharacteristic(Characteristic.StatusTampered)
-        .on('get', function(callback) {this.getBit(callback,
-          config.db,
-          Math.floor(config.get_StatusTampered), Math.floor((config.get_StatusTampered*10)%10),
-          'get StatusTampered'
-        );}.bind(this));
-      }
+    this.initStatusTampered();
+    this.initStatusLowBattery();
 
-      if ('get_StatusLowBattery' in config) {
-        this.service.getCharacteristic(Characteristic.StatusLowBattery)
-        .on('get', function(callback) {this.getBit(callback,
-          config.db,
-          Math.floor(config.get_StatusLowBattery), Math.floor((config.get_StatusLowBattery*10)%10),
-          'get StatusLowBattery'
-        );}.bind(this));
-      }
   }
   // INIT handling ///////////////////////////////////////////////
   // MotionSensor
@@ -1034,23 +881,9 @@ function GenericPLCAccessory(platform, config, accessoryNumber) {
         this.modFunctionGet
       );}.bind(this));
 
-      if ('get_StatusTampered' in config) {
-        this.service.getCharacteristic(Characteristic.StatusTampered)
-        .on('get', function(callback) {this.getBit(callback,
-          config.db,
-          Math.floor(config.get_StatusTampered), Math.floor((config.get_StatusTampered*10)%10),
-          'get StatusTampered'
-        );}.bind(this));
-      }
+    this.initStatusTampered();
+    this.initStatusLowBattery();
 
-      if ('get_StatusLowBattery' in config) {
-        this.service.getCharacteristic(Characteristic.StatusLowBattery)
-        .on('get', function(callback) {this.getBit(callback,
-          config.db,
-          Math.floor(config.get_StatusLowBattery), Math.floor((config.get_StatusLowBattery*10)%10),
-          'get StatusLowBattery'
-        );}.bind(this));
-      }
   }
   // INIT handling ///////////////////////////////////////////////
   // ContactSensor
@@ -1071,23 +904,9 @@ function GenericPLCAccessory(platform, config, accessoryNumber) {
         this.modFunctionGet
       );}.bind(this));
 
-      if ('get_StatusTampered' in config) {
-        this.service.getCharacteristic(Characteristic.StatusTampered)
-        .on('get', function(callback) {this.getBit(callback,
-          config.db,
-          Math.floor(config.get_StatusTampered), Math.floor((config.get_StatusTampered*10)%10),
-          'get StatusTampered'
-        );}.bind(this));
-      }
+    this.initStatusTampered();
+    this.initStatusLowBattery();
 
-      if ('get_StatusLowBattery' in config) {
-        this.service.getCharacteristic(Characteristic.StatusLowBattery)
-        .on('get', function(callback) {this.getBit(callback,
-          config.db,
-          Math.floor(config.get_StatusLowBattery), Math.floor((config.get_StatusLowBattery*10)%10),
-          'get StatusLowBattery'
-        );}.bind(this));
-      }
   }
   // INIT handling ///////////////////////////////////////////////
   // LeakSensor
@@ -1108,23 +927,9 @@ function GenericPLCAccessory(platform, config, accessoryNumber) {
         this.modFunctionGet
       );}.bind(this));
 
-      if ('get_StatusTampered' in config) {
-        this.service.getCharacteristic(Characteristic.StatusTampered)
-        .on('get', function(callback) {this.getBit(callback,
-          config.db,
-          Math.floor(config.get_StatusTampered), Math.floor((config.get_StatusTampered*10)%10),
-          'get StatusTampered'
-        );}.bind(this));
-      }
+    this.initStatusTampered();
+    this.initStatusLowBattery();
 
-      if ('get_StatusLowBattery' in config) {
-        this.service.getCharacteristic(Characteristic.StatusLowBattery)
-        .on('get', function(callback) {this.getBit(callback,
-          config.db,
-          Math.floor(config.get_StatusLowBattery), Math.floor((config.get_StatusLowBattery*10)%10),
-          'get StatusLowBattery'
-        );}.bind(this));
-      }
   }
   // INIT handling ///////////////////////////////////////////////
   // Faucet
@@ -1133,32 +938,7 @@ function GenericPLCAccessory(platform, config, accessoryNumber) {
     this.service =  new Service.Faucet(this.name);
     this.accessory.addService(this.service);
 
-    if ('set_Active' in config) {
-      this.service.getCharacteristic(Characteristic.Active)
-      .on('get', function(callback) {this.getBit(callback,
-        config.db,
-        Math.floor(config.get_Active), Math.floor((config.get_Active*10)%10),
-        'get Active'
-      );}.bind(this))
-      .on('set', function(powerOn, callback) { this.setBit(powerOn, callback,
-        config.db,
-        Math.floor(config.set_Active), Math.floor((config.set_Active*10)%10),
-        'set Active'
-        );}.bind(this));
-    } else {
-      this.service.getCharacteristic(Characteristic.Active)
-      .on('get', function(callback) {this.getBit(callback,
-        config.db,
-        Math.floor(config.get_Active), Math.floor((config.get_Active*10)%10),
-        'get Active'
-      );}.bind(this))
-      .on('set', function(powerOn, callback) { this.setOnOffBit(powerOn, callback,
-        config.db,
-        Math.floor(config.set_Active_Set), Math.floor((config.set_Active_Set*10)%10),
-        Math.floor(config.set_Active_Reset), Math.floor((config.set_Active_Reset*10)%10),
-        'set Active'
-        );}.bind(this));
-    }
+    this.initActive(true);
   }
   // INIT handling ///////////////////////////////////////////////
   // Valve
@@ -1167,32 +947,7 @@ function GenericPLCAccessory(platform, config, accessoryNumber) {
     this.service = new Service.Valve(this.name);
     this.accessory.addService(this.service);
 
-    if ('set_Active' in config) {
-      this.service.getCharacteristic(Characteristic.Active)
-      .on('get', function(callback) {this.getBit(callback,
-        config.db,
-        Math.floor(config.get_Active), Math.floor((config.get_Active*10)%10),
-        'get Active'
-      );}.bind(this))
-      .on('set', function(powerOn, callback) { this.setBit(powerOn, callback,
-        config.db,
-        Math.floor(config.set_Active), Math.floor((config.set_Active*10)%10),
-        'set Active'
-        );}.bind(this));
-    } else {
-      this.service.getCharacteristic(Characteristic.Active)
-      .on('get', function(callback) {this.getBit(callback,
-        config.db,
-        Math.floor(config.get_Active), Math.floor((config.get_Active*10)%10),
-        'get Active'
-      );}.bind(this))
-      .on('set', function(powerOn, callback) { this.setOnOffBit(powerOn, callback,
-        config.db,
-        Math.floor(config.set_Active_Set), Math.floor((config.set_Active_Set*10)%10),
-        Math.floor(config.set_Active_Reset), Math.floor((config.set_Active_Reset*10)%10),
-        'set Active'
-        );}.bind(this));
-    }
+    this.initActive(true);
 
     this.service.getCharacteristic(Characteristic.InUse)
     .on('get', function(callback) {this.getBit(callback,
@@ -1481,23 +1236,9 @@ function GenericPLCAccessory(platform, config, accessoryNumber) {
       'get SmokeDetected'
     );}.bind(this));
 
-    if ('get_StatusTampered' in config) {
-      this.service.getCharacteristic(Characteristic.StatusTampered)
-      .on('get', function(callback) {this.getBit(callback,
-        config.db,
-        Math.floor(config.get_StatusTampered), Math.floor((config.get_StatusTampered*10)%10),
-        'get StatusTampered'
-      );}.bind(this));
-    }
+    this.initStatusTampered();
+    this.initStatusLowBattery();
 
-    if ('get_StatusLowBattery' in config) {
-      this.service.getCharacteristic(Characteristic.StatusLowBattery)
-      .on('get', function(callback) {this.getBit(callback,
-        config.db,
-        Math.floor(config.get_StatusLowBattery), Math.floor((config.get_StatusLowBattery*10)%10),
-        'get StatusLowBattery'
-      );}.bind(this));
-    }
   }
   // INIT handling ///////////////////////////////////////////////
   // Fan
@@ -1590,32 +1331,7 @@ function GenericPLCAccessory(platform, config, accessoryNumber) {
         );}.bind(this));
     }
 
-    if ('set_Active' in config) {
-      this.service.getCharacteristic(Characteristic.Active)
-      .on('get', function(callback) {this.getBit(callback,
-        config.db,
-        Math.floor(config.get_Active), Math.floor((config.get_Active*10)%10),
-        'get Active'
-      );}.bind(this))
-      .on('set', function(powerOn, callback) { this.setBit(powerOn, callback,
-        config.db,
-        Math.floor(config.set_Active), Math.floor((config.set_Active*10)%10),
-        'set Active'
-        );}.bind(this));
-    } else {
-      this.service.getCharacteristic(Characteristic.Active)
-      .on('get', function(callback) {this.getBit(callback,
-        config.db,
-        Math.floor(config.get_Active), Math.floor((config.get_Active*10)%10),
-        'get Active'
-      );}.bind(this))
-      .on('set', function(powerOn, callback) { this.setOnOffBit(powerOn, callback,
-        config.db,
-        Math.floor(config.set_Active_Set), Math.floor((config.set_Active_Set*10)%10),
-        Math.floor(config.set_Active_Reset), Math.floor((config.set_Active_Reset*10)%10),
-        'set Active'
-        );}.bind(this));
-    }
+    this.initActive(true);
 
     if ('get_RotationSpeed' in config) {
       this.service.getCharacteristic(Characteristic.RotationSpeed)
@@ -1690,23 +1406,9 @@ function GenericPLCAccessory(platform, config, accessoryNumber) {
       );}.bind(this));
     }
 
-    if ('get_StatusTampered' in config) {
-      this.service.getCharacteristic(Characteristic.StatusTampered)
-      .on('get', function(callback) {this.getBit(callback,
-        config.db,
-        Math.floor(config.get_StatusTampered), Math.floor((config.get_StatusTampered*10)%10),
-        'get StatusTampered'
-      );}.bind(this));
-    }
+    this.initStatusTampered();
+    this.initStatusLowBattery();
 
-    if ('get_StatusLowBattery' in config) {
-      this.service.getCharacteristic(Characteristic.StatusLowBattery)
-      .on('get', function(callback) {this.getBit(callback,
-        config.db,
-        Math.floor(config.get_StatusLowBattery), Math.floor((config.get_StatusLowBattery*10)%10),
-        'get StatusLowBattery'
-      );}.bind(this));
-    }
   }
   // INIT handling ///////////////////////////////////////////////
   // Undefined
@@ -1725,6 +1427,118 @@ function GenericPLCAccessory(platform, config, accessoryNumber) {
 }
 
 GenericPLCAccessory.prototype = {
+
+
+
+  initStatusTampered: function() {
+    if ('get_StatusTampered' in this.config) {
+      this.service.getCharacteristic(Characteristic.StatusTampered)
+      .on('get', function(callback) {this.getBit(callback,
+        this.config.db,
+        Math.floor(this.config.get_StatusTampered), Math.floor((this.config.get_StatusTampered*10)%10),
+        'get StatusTampered'
+      );}.bind(this));
+    }
+  },
+
+  initStatusLowBattery: function() {
+    if ('get_StatusLowBattery' in this.config) {
+      this.service.getCharacteristic(Characteristic.StatusLowBattery)
+      .on('get', function(callback) {this.getBit(callback,
+        this.config.db,
+        Math.floor(this.config.get_StatusLowBattery), Math.floor((this.config.get_StatusLowBattery*10)%10),
+        'get StatusLowBattery'
+      );}.bind(this));
+    }
+  },
+
+  initCurrentTemperature: function(mandatory) {
+    if ('get_CurrentTemperature' in this.config) {
+      this.service.getCharacteristic(Characteristic.CurrentTemperature)
+      .on('get', function(callback) {this.getReal(callback,
+        this.config.db,
+        this.config.get_CurrentTemperature,
+        'get CurrentTemperature'
+        );}.bind(this))
+       .setProps({
+         minValue: ('minTemperatureValue' in this.config) ? this.config.minTemperatureValue : -270,
+         maxValue: ('maxTemperatureValue' in this.config) ? this.config.maxTemperatureValue : 100,
+         minStep: ('minTemperatureStep' in this.config) ? this.config.minTemperatureStep : 0.1
+       });
+    }
+    else if (mandatory){
+      this.log.error("Mandatory config get_CurrentTemperature missing")
+      this.service.getCharacteristic(Characteristic.CurrentTemperature)
+      .on('get', function(callback) {this.getDummy(callback,
+        0,
+        'get CurrentTemperature'
+      );}.bind(this))
+    }
+  },
+
+  initCurrentRelativeHumidity: function(mandatory) {
+    if ('get_CurrentRelativeHumidity' in this.config) {
+      this.service.getCharacteristic(Characteristic.CurrentRelativeHumidity)
+      .on('get', function(callback) {this.getReal(callback,
+        this.config.db,
+        this.config.get_CurrentRelativeHumidity,
+        'get CurrentRelativeHumidity'
+        );}.bind(this))
+       .setProps({
+         minValue: ('minHumidityValue' in this.config) ? this.config.minHumidityValue : 0,
+         maxValue: ('maxHumidityValue' in this.config) ? this.config.maxHumidityValue : 100,
+         minStep: ('minHumidityStep' in this.config) ? this.config.minHumidityStep : 0.1
+         });
+    }
+    else if (mandatory){
+      this.log.error("Mandatory config get_CurrentRelativeHumidity missing using dummy")
+      this.service.getCharacteristic(Characteristic.CurrentRelativeHumidity)
+      .on('get', function(callback) {this.getDummy(callback,
+        0,
+        'get CurrentRelativeHumidity'
+      );}.bind(this))
+    }
+  },
+
+  initActive: function(mandatory) {
+    if ('set_Active' in this.config && 'get_Active' in this.config) {
+      this.service.getCharacteristic(Characteristic.Active)
+      .on('get', function(callback) {this.getBit(callback,
+        this.config.db,
+        Math.floor(this.config.get_Active), Math.floor((this.config.get_Active*10)%10),
+        'get Active'
+      );}.bind(this))
+      .on('set', function(powerOn, callback) { this.setBit(powerOn, callback,
+        this.config.db,
+        Math.floor(this.config.set_Active), Math.floor((this.config.set_Active*10)%10),
+        'set Active'
+        );}.bind(this));
+    } else if ('set_Active' in this.config && 'set_Active_Set' in this.config && 'set_Active_Reset' in this.config) {
+      this.service.getCharacteristic(Characteristic.Active)
+      .on('get', function(callback) {this.getBit(callback,
+        this.config.db,
+        Math.floor(this.config.get_Active), Math.floor((this.config.get_Active*10)%10),
+        'get Active'
+      );}.bind(this))
+      .on('set', function(powerOn, callback) { this.setOnOffBit(powerOn, callback,
+        this.config.db,
+        Math.floor(this.config.set_Active_Set), Math.floor((this.config.set_Active_Set*10)%10),
+        Math.floor(this.config.set_Active_Reset), Math.floor((this.config.set_Active_Reset*10)%10),
+        'set Active'
+        );}.bind(this));
+    } else if (mandatory) {
+      this.log.error("Mandatory config get_Active or set_Active* missing using dummy")
+      this.service.getCharacteristic(Characteristic.Active)
+        .on('get', function(callback) {this.getDummy(callback,
+          1,
+          'get Active'
+        );}.bind(this))
+        .on('set', function(value, callback) { this.setDummy(value, callback,
+          'set Active',
+          function(value){this.service.getCharacteristic(Characteristic.Active).updateValue(value);}.bind(this)
+        );}.bind(this));
+      }
+  },
 
   poll: function() {
     if (this.config.enablePolling || this.config.adaptivePolling) {

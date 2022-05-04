@@ -280,8 +280,8 @@ Humidifier and/or Dehumidifier
     - `0`: auto (humidifier or dehumidifier)
     - `1`: humidifier
     - `2`: dehumidifier
-  - `mapGetTargetHumidifierDehumidifierState`: **(optional)** define mapping array for `get_TargetHumidifierDehumidifierState`. The PLC value is used as index into the table. e.g. `[0]` which maps the PLC value `0->2 1->3` when the PLC supports only one states with `0:dehumidifier.
-  - `mapSetTargetHumidifierDehumidifierState`: **(optional)** define mapping array for `set_TargetHumidifierDehumidifierState`. The home app value is used as index into the table. e.g. `[2, 2, 2
+  - `mapGetTargetHumidifierDehumidifierState`: **(optional)** define mapping array for `get_TargetHumidifierDehumidifierState`. The PLC value is used as index into the table. e.g. `[2,1]` which maps the PLC value `0->1 1->2` when the PLC supports only one states with `0:dehumidifier 1:humidifier.
+  - `mapSetTargetHumidifierDehumidifierState`: **(optional)** define mapping array for `set_TargetHumidifierDehumidifierState`. The home app value is used as index into the table. e.g. `[2, 2, 2] writes always the value 2 to the plc regardless whats set in the home app
 - Rotation Speed
   - Byte
     - `get_RotationSpeedByte`: **(optional)** **(push support)** offset to get rotation speed state S7 type `Byte` e.g. `8` for `DB4DBB8`.
@@ -290,10 +290,14 @@ Humidifier and/or Dehumidifier
       - `get_RotationSpeed`: **(optional)** **(push support)** offset to get rotation speed state S7 type `Real` e.g. `8` for `DB4DBB8`.
       - `set_RotationSpeed` **(optional but required when `get_RotationSpeed` is defined)** **(push support)** offset to get set speed state. S7 type `Real` e.g. `9` for `DB4DBB9`.
 - Swing Mode
-  - `get_SwingMode`: **(optional)** **(push support)** offset to get rotation speed state S7 type `Bool` e.g. `8` for `DB4DBB8`.
-  - `set_SwingMode` **(optional)** **(push support)** offset to get set speed state. S7 type `Bool` e.g. `9` for `DB4DBB9`.
+  - `get_SwingMode`: **(optional)** **(push support)** offset to get swing mode. S7 type `byte` e.g. `8` for `DB4DBB8`.
+    - `0`: swing disabled
+    - `1`: swing enabled
+  - `set_SwingMode` **(optional)** **(control support)** offset to set swing mode. S7 type `byte` e.g. `9` for `DB4DBB9`.
+    - `0`: swing disabled
+    - `1`: swing enabled
 - Water Level
-  - `get_WaterLevel`: **(optional)** **(push support)** offset to get rotation speed state S7 type `Real` e.g. `8` for `DB4DBB8`.
+  - `get_WaterLevel`: **(optional)** **(push support)** offset to get rotation speed state S7 type `Real` e.g. `8` for `DB4DBD8`.
 - `get_StatusTampered`: **(optional)** **(push support)** offset and bit to tamper detection. (Home app shows this only within the options) S7 type `Bool` e.g. `55.2` for `DB4DBX55.2`
   - `false`: ok
   - `true`: tampered

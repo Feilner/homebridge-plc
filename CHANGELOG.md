@@ -1,14 +1,20 @@
 # Changelog
 
-## [1.1.0-beta.2] 2022-05-01
-## [1.1.0-beta.1] 2022-04-30
+## [1.1.0-beta.0] 2022-04-28
 ### Changed
 **Action required** Breaking changes!
-In order to support configuration by GUI some configuration options needs to be adapted.
+In order to support configuration by GUI some configuration options needs to be renamed.
 - `PLC_LightBulb`:
+  - renamed option `set_On`   -> `set_On_
   - renamed option `minValue` -> `minBrightnessValue` and changed default value from `20` to `0`
   - renamed option `maxValue` -> `maxBrightnessValue`
   - renamed option `minStep`  -> `minBrightnessStep`
+- `PLC_LightBulb`, `PLC_Outlet`, and `PLC_Switch`
+  - renamed options for separate set and reset bits. (Single bit option `set_On` is still functional)
+  - renamed option `set_Off` -> `set_On_Reset` and `set_On` -> `set_On_Set`
+- `PLC_Fan`, `PLC_HumidifierDehumidifier`, `PLC_Faucet`, `PLC_Valve`
+  - renamed options for separate set and reset bits. (Single bit option `set_Active` is still functional)
+  - renamed option `set_Deactivate` -> `set_Active_Reset` and `set_Active` -> `set_Active_Set`
 -`PLC_TemperatureSensor`
   - renamed option `minValue` -> `minTemperatureValue` and changed default value from `-50` to `-270`
   - renamed option `maxValue` -> `maxTemperatureValue` and changed default value from `110` to `100`
@@ -31,11 +37,17 @@ In order to support configuration by GUI some configuration options needs to be 
   - renamed option `mapGetCurrent` -> `mapGetSecuritySystemCurrentState`
   - renamed option `mapGetTarget`  -> `mapGetSecuritySystemTargetState`
   - renamed option `mapSetTarget`  -> `mapSetSecuritySystemTargetState`
-  - the obsolete options `mapGet` and `mapSet` are no longer supported
+  - the obsolete options `mapGet` and `mapSet` are no longer supported use above map functions.
 - `PLC_HumidifierDehumidifier`
   - renamed option `mapGetCurrent` -> `mapGetCurrentHumidifierDehumidifierState`
   - renamed option `mapGetTarget`  -> `mapGetTargetHumidifierDehumidifierState`
   - renamed option `mapSetTarget`  -> `mapSetTargetHumidifierDehumidifierState`
+- `PLC_Window`, `PLC_WindowCovering`, `PLC_Door`
+  - removed option `mapGet`
+  - added option `mapGetCurrentPosition`
+  - added option `mapGetTargetPosition`
+  - added option `mapSetTargetPosition`
+  - renamed option `invert`  -> `invertPosition`
 - `PLC_LockMechanismBool`
   - renamed option `invert` -> `invertLockState`
   - renamed option `get_LockCurrentState` -> `get_LockCurrentStateBool`
@@ -48,6 +60,17 @@ In order to support configuration by GUI some configuration options needs to be 
   - renamed option `forceCurrentState` -> `forceCurrentLockState`
 - `PLC_GarageDoorOpener`
   - renamed option `forceCurrentState` -> `forceCurrentGarageDoorState`
+- `PLC_LockMechanismBool`
+  - renamed option `invert` -> `invertLockState`
+- `PLC_OccupancySensor`
+  - renamed option `invert` -> `invertOccupancy`
+- `PLC_MotionSensor`
+  - renamed option `invert` -> `invertMotionDetected`
+- `PLC_LeakSensor`
+  - renamed option `invert` -> `invertLeakDetected`
+- `PLC_ContactSensor`
+  - renamed option `invert` -> `invertContactSensorState`
+
 
 - ### Added
 - `PLC_Thermostat`
