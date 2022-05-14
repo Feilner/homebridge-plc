@@ -1,11 +1,10 @@
 # Changelog
 
-## [1.1.0-beta.0] 2022-04-28
+## [1.1.0-beta.4] 2022-05-14
 ### Changed
 **Action required** Breaking changes!
 In order to support configuration by GUI some configuration options needs to be renamed.
 - `PLC_LightBulb`:
-  - renamed option `set_On`   -> `set_On_
   - renamed option `minValue` -> `minBrightnessValue` and changed default value from `20` to `0`
   - renamed option `maxValue` -> `maxBrightnessValue`
   - renamed option `minStep`  -> `minBrightnessStep`
@@ -70,8 +69,12 @@ In order to support configuration by GUI some configuration options needs to be 
   - renamed option `invert` -> `invertLeakDetected`
 - `PLC_ContactSensor`
   - renamed option `invert` -> `invertContactSensorState`
-
-
+- `PLC_Fan`
+  - renamed option `mapGetCurrent` -> `mapCurrentFanStateGet`
+  - renamed option `mapGetTarget`  -> `mapTargetFanStateGet`
+  - renamed option `mapSetTarget`  -> `mapTargetFanStateSet`
+  - renamed option `mapDirectionGet`  -> `mapRotationDirectionGet`
+  - renamed option `mapDirectionSet`  -> `mapRotationDirectionSet`
 - ### Added
 - `PLC_Thermostat`
   - option `minTemperatureValue`

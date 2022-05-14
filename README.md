@@ -297,7 +297,7 @@ Humidifier and/or Dehumidifier
     - `0`: swing disabled
     - `1`: swing enabled
 - Water Level
-  - `get_WaterLevel`: **(optional)** **(push support)** offset to get rotation speed state S7 type `Real` e.g. `8` for `DB4DBD8`.
+  - `get_WaterLevel`: **(optional)** **(push support)** offset to water level S7 type `Real` e.g. `8` for `DB4DBD8`.
 - `get_StatusTampered`: **(optional)** **(push support)** offset and bit to tamper detection. (Home app shows this only within the options) S7 type `Bool` e.g. `55.2` for `DB4DBX55.2`
   - `false`: ok
   - `true`: tampered
@@ -323,7 +323,7 @@ motor driven blinds, windows and doors. Supports also manual driven blinds, wind
     - `in between`: partly open
     - `100`: open
   - `invertPosition`: **(optional)** set to `true` to inverts the values of current and target position from `0:closed 100:open` to `100:closed 0:open`
-  - `mapGet`: **(optional)** define mapping array for get position. The PLC value is used as index into the table. e.g. `[0, 25, 100]` which maps the PLC value `0->0 1->25 2->100` this this is useful e.g. for window open state.
+  - `mapGetCurrentPosition`: **(optional)** define mapping array for get position. The PLC value is used as index into the table. e.g. `[0, 25, 100]` which maps the PLC value `0->0 1->25 2->100` this this is useful e.g. for window open state.
 - Target position:
   - if one of the **(optional)** target position settings need specified all are needed. If not specified it os not movable ans sticks to current position.
   - `get_TargetPosition`: **(optional)** **(push support)** offset to get target position S7 type `Byte` e.g. `1` for `DB4DBB1` (can have same value as set_TargetPosition)
@@ -338,7 +338,7 @@ motor driven blinds, windows and doors. Supports also manual driven blinds, wind
   - `0`: down
   - `1`: up
   - `2`: stop
-- `set_HoldPosition`: **(optional)** **(control support)** offset and bit set to 1 to stop movement. (Seems not to be used) when not defined writes will be ignoredS7 type `Bool` **PLC has to set to 0** e.g. `55.1` for `DB4DBX55.1`
+- `set_HoldPosition`: **(optional)** **(control support)** offset and bit set to 1 to stop movement. (Seems not to be used by HomeApp) when not defined writes will be ignoredS7 type `Bool` **PLC has to set to 0** e.g. `55.1` for `DB4DBX55.1`
 
 ### <a name='PLC_OccupancySensor'></a>Occupancy Sensor as `PLC_OccupancySensor`
 presence detection sensor
@@ -407,11 +407,11 @@ leak sensor
 - `name`: unique name of the accessory
 - `manufacturer`: **(optional)** description
 - `db`: s7 data base number e.g. `4` for `DB4`
-- `invert`: **(optional)** set to `true` inverts the bit to `false:closed` and `true:open`.
+- `invertLeakDetected`: **(optional)** set to `true` inverts the bit to `false:leak detected` and `true: no leak detected`.
 - `enablePolling`: **(optional)** when set to `true` the current state will be polled. It is mandatory as well to enable polling mode on platform level.
 - `pollInterval`: **(optional)** poll interval in seconds. Default value see platform definition.
 - `get_LeakDetected`: **(push support)** offset and bit get the current status S7 type `Bool` e.g. `55.0` for `DB4DBX55.0`
-  - `false`: leak not detected
+  - `false`: no leak detected
   - `true`: leak detected
 - `get_StatusTampered`: **(optional)** **(push support)** offset and bit to tamper detection. (Home app shows this only within the options) S7 type `Bool` e.g. `55.2` for `DB4DBX55.2`
   - `false`: ok
@@ -457,9 +457,9 @@ valve configurable as generic valve, irrigation, shower head or water faucet
   - `set_Active`: **(control support)** offset and bit set to 1 when switching on S7 type `Bool` **PLC has to set to 0** e.g. `55.1` for `DB4DBX55.1`
   - `set_Deactivate`: offset and bit set to 1 when switching off S7 type `Bool` **PLC has to set to 0** e.g. `55.2` for `DB4DBX55.2`
 - if one of the **(optional)** duration settings need specified all are needed
-  - `get_SetDuration`: **(optional)** **(push support)** duration 0..3600 sec S7 type `Time` e.g. `10` for `DB4DBD10`
-  - `set_SetDuration`: **(optional)** **(control support)** duration 0..3600 sec S7 type `Time` e.g. `14` for `DB4DBD14`
-  - `get_RemainingDuration`: **(optional)** **(push support)** duration 0..3600 sec S7 type `Time` e.g. `18` for `DB4DBD18`
+  - `get_SetDuration`: **(optional)** **(push support)** offset to get duration 0..3600 sec S7 type `Time` e.g. `10` for `DB4DBD10`
+  - `set_SetDuration`: **(optional)** **(control support)** offset to set duration 0..3600 sec S7 type `Time` e.g. `14` for `DB4DBD14`
+  - `get_RemainingDuration`: **(optional)** **(push support)** offset to get remaining duration 0..3600 sec S7 type `Time` e.g. `18` for `DB4DBD18`
 
 ### <a name='PLC_SecuritySystem'></a>Security System as `PLC_SecuritySystem`:
 alarm system
@@ -615,7 +615,7 @@ ventilator
     - `0`: inactive
     - `1`: idle
     - `2`: blowing
-  - `mapCurrentGet`: **(optional)** define mapping array for `get_CurrentFanState`. The PLC value is used as index into the table. e.g. `[0, 2]` which maps the PLC value `0->1 1->2` when the PLC supports only two states with `0:idle` and `1:blowing`.
+  - `mapCurrentFanStateGet`: **(optional)** define mapping array for `get_CurrentFanState`. The PLC value is used as index into the table. e.g. `[0, 2]` which maps the PLC value `0->1 1->2` when the PLC supports only two states with `0:idle` and `1:blowing`.
 - Target State:
   - `default_TargetFanState`: **(optional)** defines alternative value thats returned then `get_TargetFanState` is not defined. Default value `0:manual`
     - `0`: manual
@@ -626,7 +626,7 @@ ventilator
   - `set_TargetFanState` **(optional but required when `get_TargetFanState` is defined)** **(control support)** offset to get target heating/cooling state. S7 type `Byte` e.g. `9` for `DB4DBB9`. When not defined fixed `1`: automatic is used.
     - `0`: manual
     - `1`: automatic
-  - `mapTargetGet`: **(optional)** define mapping array for `get_TargetFanState`. The PLC value is used as index into the table. e.g. `[1, 0]` which maps the PLC value `0->1 1->0` when the PLC supports only two states with `0:automatic` and `1:manual`.
+  - `mapTargetFanStateGet`: **(optional)** define mapping array for `get_TargetFanState`. The PLC value is used as index into the table. e.g. `[1, 0]` which maps the PLC value `0->1 1->0` when the PLC supports only two states with `0:automatic` and `1:manual`.
   - `mapTargetSet`: **(optional)** define mapping array for `set_TargetFanState`. The home app value is used as index into the table. e.g. `[1, 0]` which maps the PLC value `0->1 1->0` when the PLC supports only two states with `0:automatic` and `1:manual`.
 - Rotation Direction
   - get_RotationDirection **(optional)** **(push support)** offset to get rotation direction state. S7 type `Byte` e.g. `9` for `DB4DBB9`. When not defined fixed `0`: clockwise is used.
@@ -635,8 +635,8 @@ ventilator
   - set_RotationDirection **(optional)** **(control support)** offset to set rotation directionstate. S7 type `Byte` e.g. `9` for `DB4DBB9`.
     - `0`: clockwise
     - `1`: counter clockwise
-  - `mapDirectionGet`: **(optional)** define mapping array for `get_RotationDirection`. The PLC value is used as index into the table. e.g. `[1, 0]` inverts the direction.
-  - `mapDirectionSet`: **(optional)** define mapping array for `set_RotationDirection`. The home app value is used as index into the table. e.g. `[1, 0]` inverts the direction.
+  - `mapRotationDirectionGet`: **(optional)** define mapping array for `get_RotationDirection`. The PLC value is used as index into the table. e.g. `[1, 0]` inverts the direction.
+  - `mapRotationDirectionSet`: **(optional)** define mapping array for `set_RotationDirection`. The home app value is used as index into the table. e.g. `[1, 0]` inverts the direction.
 - Rotation Speed
   - Byte
     - `get_RotationSpeedByte`: **(optional)** **(push support)** offset to get rotation speed state S7 type `Byte` e.g. `8` for `DB4DBB8`.

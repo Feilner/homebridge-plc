@@ -209,11 +209,6 @@
                 }
                 ]
             },
-          "disable": {
-            "title": "Disable",
-            "description": "Disables the camera and removes it from HomeKit.",
-            "type": "boolean"
-          },
             "name": {
               "title": "Name",
               "type": "string",
@@ -267,39 +262,62 @@
             },
 
             "get_On": {
-              "title": "offset get_On (bool)",
+              "title": "offset get_On **(push support)**",
               "type": "number",
-              "description": "offset and bit to read current on/off state from PLC. S7 type Bool e.g. 55.1"
+              "description": "offset and bit to read current on/off state from PLC. S7 type Bool e.g. 55.1",
+              "required": true
             },
             "set_On": {
-              "title": "Single Bit mode: offset set_On (bool)",
+              "title": "Single Bit mode: offset set_On **(control support)**",
               "type": "number",
-              "description": "Single Bit mode: offset and bit to set to 1/0 to PLC when switching on/off S7 type Bool PLC e.g. 55.1 for DB4DBX55.1 could be same as get_On."
+              "description": "Single Bit mode: offset and bit to set to 1/0 to PLC when switching on/off S7 type Bool PLC e.g. 55.1 for DB4DBX55.1 could be same as get_On.",
+              "required": true,
+              "condition": {
+                "functionBody": "return (!model.accessories[arrayIndices[0]].set_On_Set && !model.accessories[arrayIndices[0]].set_On_Reset);"
+              }
             },
             "set_On_Set": {
-              "title": "Separate Bits mode: offset set_On SET (bool)",
-              "type": "number",       
-              "description": "Separate Bits mode: offset and bit set to 1 when switching off. PLC has to set to 0 S7 type Bool e.g. 55.2"
+              "title": "Separate Bits mode: set_On_Set **(control support)**",
+              "type": "number",
+              "description": "Separate Bits mode: offset and bit set to 1 when switching off. PLC has to set to 0 S7 type Bool e.g. 55.2",
+              "required": true,
+              "condition": {
+                "functionBody": "return (!model.accessories[arrayIndices[0]].set_On);"
+              }
             },
             "set_On_Reset": {
-              "title": "Separate Bits mode: offset set_On RESET (bool)",
+              "title": "Separate Bits mode: offset set_On_Reset",
               "type": "number",
-              "description": "Separate Bits mode: offset and bit set to 1 when switching off. PLC has to set to 0 S7 type Bool e.g. 55.3 <br>NOTE: When defining this the behaviour of set_On changes to Seperate Bit mode."
+              "description": "Separate Bits mode: offset and bit set to 1 when switching off. PLC has to set to 0 S7 type Bool e.g. 55.3 <br>NOTE: When defining this the behaviour of set_On changes to Seperate Bit mode.",
+              "required": true,
+              "condition": {
+                "functionBody": "return (!model.accessories[arrayIndices[0]].set_On);"
+              }
             },
             "set_Active": {
               "title": "Single Bit mode: offset set_Active (bool)",
               "type": "number",
-              "description": "Single Bit mode: offset and bit to set to 1/0 to PLC when switching on/off S7 type Bool PLC e.g. 55.1 for DB4DBX55.1 could be same as get_Active <br>Separate Bits mode: offset and bit set to 1 when switching off. PLC has to set to 0 S7 type Bool e.g. 55.2"
+              "description": "Single Bit mode: offset and bit to set to 1/0 to PLC when switching on/off S7 type Bool PLC e.g. 55.1 for DB4DBX55.1 could be same as get_Active <br>Separate Bits mode: offset and bit set to 1 when switching off. PLC has to set to 0 S7 type Bool e.g. 55.2",
+              "condition": {
+                "functionBody": "return (!model.accessories[arrayIndices[0]].set_Active_Set && !model.accessories[arrayIndices[0]].set_Active_Reset);"
+              }
+
             },
             "set_Active_Set": {
-              "title": "Separate Bits mode: offset set_Active SET (bool)",
-              "type": "number",       
-              "description": "Separate Bits mode: offset and bit set to 1 when switching off. PLC has to set to 0 S7 type Bool e.g. 55.2"
+              "title": "Separate Bits mode: offset set_Active_Set",
+              "type": "number",
+              "description": "Separate Bits mode: offset and bit set to 1 when switching off. PLC has to set to 0 S7 type Bool e.g. 55.2",
+              "condition": {
+                "functionBody": "return (!model.accessories[arrayIndices[0]].set_Active);"
+              }
             },
             "set_Active_Reset": {
-              "title": "Separate Bits mode: offset set_Active RESET (bool)",
+              "title": "Separate Bits mode: offset set_Active_Reset",
               "type": "number",
-              "description": "Separate Bits mode: offset and bit set to 1 when switching off. PLC has to set to 0 S7 type Bool e.g. 55.3 <br>NOTE: When defining this the behaviour of set_Active changes to Seperate Bit mode."
+              "description": "Separate Bits mode: offset and bit set to 1 when switching off. PLC has to set to 0 S7 type Bool e.g. 55.3 <br>NOTE: When defining this the behaviour of set_Active changes to Seperate Bit mode.",
+              "condition": {
+                "functionBody": "return (!model.accessories[arrayIndices[0]].set_Active);"
+              }
             },
             "get_Brightness": {
               "title": "offset get_Brightness (byte)",
@@ -372,52 +390,62 @@
               "placeholder": 1
             },
             "minBrightnessValue": {
-              "title": "minTargetHumidityValue",
+              "title": "minBrightnessValue",
               "type": "number",
               "placeholder": 0
             },
             "maxBrightnessValue": {
-              "title": "maxTargetHumidityValue",
+              "title": "maxBrightnessValue",
               "type": "number",
               "placeholder": 100
             },
             "minBrightnessStep": {
-              "title": "minTargetHumidityStep",
+              "title": "minBrightnessStep",
               "type": "number",
               "placeholder": 1
             },
             "get_CurrentTemperature": {
-              "title": "offset get_CurrentTemperature (real)",
+              "title": "offset get_CurrentTemperature **(push support)**",
               "type": "number",
               "description": "offset to get current temperature S7 type Real e.g. 55 for DB4DBD55"
             },
             "get_CurrentRelativeHumidity": {
-              "title": "offset get_CurrentRelativeHumidity (real)",
+              "title": "offset get_CurrentRelativeHumidity **(push support)**",
               "type": "number",
               "description": "offset to get current humidity S7 type Real e.g. 55 for DB4DBD55"
             },
             "get_TargetTemperature": {
-              "title": "offset get_TargetTemperature (real)",
+              "title": "offset get_TargetTemperature **(push support)**",
               "type": "number",
-              "description": "offset to get target temperature S7 type `Real` e.g. `4` for `DB4DBD4"
+              "description": "offset to get target temperature S7 type `Real` e.g. `4` for `DB4DBD4`"
             },
             "set_TargetTemperature": {
-              "title": "offset get_TargetTemperature (real)",
+              "title": "offset get_TargetTemperature **(control support)*",
+              "type": "number",
+              "description": "offset to set current temperature S7 type `Real` e.g. `4` for `DB4DBD4` (can have same value as get_TargetTemperature)"
+            },
+            "get_TargetRelativeHumidity": {
+              "title": "offset get_TargetRelativeHumidity **(push support)**",
+              "type": "number",
+              "description": "offset to get target temperature S7 type `Real` e.g. `4` for `DB4DBD4`"
+            },
+            "set_TargetRelativeHumidity": {
+              "title": "offset get_TargetTemperature **(control support)**",
               "type": "number",
               "description": "offset to set current temperature S7 type `Real` e.g. `4` for `DB4DBD4` (can have same value as get_TargetTemperature)"
             },
             "get_CurrentHeatingCoolingState": {
-              "title": "offset get_CurrentHeatingCoolingState (byte)",
+              "title": "offset get_CurrentHeatingCoolingState **(push support)**",
               "type": "number",
               "description": "offset to get current heating/cooling state S7 type `Byte` e.g. `8` for `DB4DBB8`. When not defined fixed `1`: heating is used.<br>- `0`: inactive (shown as green in home app)<br>- `1`: heating (shown as orange in home app)<br>- `2`: cooling (shown as blue in home app)"
             },
             "get_TargetHeatingCoolingState": {
-              "title": "offset get_CurrentHeatingCoolingState (byte)",
+              "title": "offset get_TargetHeatingCoolingState **(push support)**",
               "type": "number",
               "description": "offset to get target heating/cooling state. S7 type `Byte` e.g. `9` for `DB4DBB9`. When not defined fixed `3`: automatic is used.<br>- `0`: off<br>- `1`: heat<br>- `2`: cool<br>- `3`: automatic"
             },
             "set_TargetHeatingCoolingState": {
-              "title": "offset set_TargetHeatingCoolingState (byte)",
+              "title": "offset set_TargetHeatingCoolingState **(control support)**",
               "type": "number",
               "description": "offset to set target heating/cooling state. Can be identical with `get_TargetHeatingCoolingState`. Has to be defined when `get_TargetHeatingCoolingState` is defined. When not defined writes changes are ignored. S7 type `Byte` e.g. `9` for `DB4DBB9`.<br>- `0`: off<br>- `1`: heat<br>- `2`: cool<br>- `3`: automatic"
             },
@@ -532,6 +560,65 @@
               "title": "offset set_HoldPosition **(optional)** **(control support)**",
               "type": "number",
               "description": "offset and bit set to 1 to stop movement. (Seems not to be used by HomeApp) when not defined writes will be ignoredS7 type `Bool` **PLC has to set to 0** e.g. `55.1` for `DB4DBX55.1`"
+            },
+            "get_OccupancyDetected": {
+              "title": "get_OccupancyDetected **(push support)**",
+              "type": "number",
+              "description": "offset and bit get the current status S7 type `Bool` e.g. `55.0` for `DB4DBX55.0`<br>- `false`: no occupancy<br>- `true`: occupancy detected"
+            },
+            "invertOccupancy": {
+              "title": "invertOccupancy",
+              "type": "boolean",
+              "placeholder": false,
+              "description": "when enabled it inverts the logic of get_OccupancyDetected to <br>`false:motion detected` and `true:no motion`."
+            },
+            "get_MotionDetected": {
+              "title": "get_MotionDetected **(push support)**",
+              "type": "number",
+              "description": "offset and bit get the current status S7 type `Bool` e.g. `55.0` for `DB4DBX55.0`<br>- `false`: no occupancy<br>- `true`: occupancy detected"
+            },
+            "invertMotionDetected": {
+              "title": "invertMotionDetected",
+              "type": "boolean",
+              "placeholder": false,
+              "description": "when enabled it inverts the logic of get_MotionDetected to <br>`false:closed` and `true:no motion`."
+            },
+            "get_ContactSensorState": {
+              "title": "get_ContactSensorState **(push support)**",
+              "type": "number",
+              "description": "offset and bit get the current status S7 type `Bool` e.g. `55.0` for `DB4DBX55.0`<br>- `false`: closed<br>- `true`: open"
+            },
+            "invertContactSensorState": {
+              "title": "invertContactSensorState",
+              "type": "boolean",
+              "placeholder": false,
+              "description": "when enabled it inverts the logic of get_ContactSensorState to <br>`false:open` and `true:closed."
+            },
+            "get_LeakDetected": {
+              "title": "get_LeakDetected **(push support)**",
+              "type": "number",
+              "description": "offset and bit get the current status S7 type `Bool` e.g. `55.0` for `DB4DBX55.0`<br>- `false`: no leak detected<br>- `true`: leak detected"
+            },
+            "invertLeakDetected": {
+              "title": "invertLeakDetected",
+              "type": "boolean",
+              "placeholder": false,
+              "description": "when enabled it inverts the logic of get_ContactSensorState to <br>`false:leak detected` and `true:no leak detected."
+            },
+            "get_SetDuration": {
+              "title": "get_SetDuration **(push support)**",
+              "type": "number",
+              "description": "offset to get duration 0..3600 sec S7 type `Time` e.g. `10` for `DB4DBD10`"
+            },
+            "set_SetDuration": {
+              "title": "set_SetDuration **(control support)**",
+              "type": "number",
+              "description": "offset to set duration 0..3600 sec S7 type `Time` e.g. `14` for `DB4DBD10`"
+            },
+            "get_RemainingDuration": {
+              "title": "get_RemainingDuration **(push support)**",
+              "type": "number",
+              "description": "offset to get remaining duration 0..3600 sec S7 type `Time` e.g. `18` for `DB4DBD10`"
             }
           }
         }
@@ -602,18 +689,34 @@
               "expandable": true,
               "expanded": false,
               "items": ["accessories[].enablePolling", "accessories[].pollInterval"]
-            },            
+            },
             {
               "key": "accessories[]",
               "type": "section",
-              "title": "Active",      
+              "title": "On/Off",
               "expandable": true,
               "expanded": false,
               "items": [
-                "accessories[].get_On", 
-                "accessories[].set_On", 
-                "accessories[].set_On_Set", 
+                "accessories[].get_On",
+                "accessories[].set_On",
+                "accessories[].set_On_Set",
                 "accessories[].set_On_Reset"
+              ],
+              "condition": {
+                "functionBody": "return ['PLC_LightBulb','PLC_Outlet','PLC_Switch'].includes(model.accessories[arrayIndices[0]].accessory);"
+              }
+            },
+            {
+              "key": "accessories[]",
+              "type": "section",
+              "title": "Active",
+              "expandable": true,
+              "expanded": false,
+              "items": [
+                "accessories[].get_Active",
+                "accessories[].set_Active",
+                "accessories[].set_Active_Set",
+                "accessories[].set_Active_Reset"
               ],
               "condition": {
                 "functionBody": "return ['PLC_HumidifierDehumidifier','PLC_Faucet','PLC_Valve','PLC_Fan'].includes(model.accessories[arrayIndices[0]].accessory);"
@@ -626,32 +729,17 @@
               "expandable": true,
               "expanded": false,
               "items": [
-                "accessories[].get_Brightness", 
-                "accessories[].set_Brightness", 
-                "accessories[].minBrightnessValue", 
-                "accessories[].maxBrightnessValue", 
+                "accessories[].get_Brightness",
+                "accessories[].set_Brightness",
+                "accessories[].minBrightnessValue",
+                "accessories[].maxBrightnessValue",
                 "accessories[].minBrightnessStep"
               ],
               "condition": {
                 "functionBody": "return ['PLC_LightBulb'].includes(model.accessories[arrayIndices[0]].accessory);"
               }
             },
-            {
-              "key": "accessories[]",
-              "type": "section",
-              "title": "On/Off",      
-              "expandable": true,
-              "expanded": false,
-              "items": [
-                "accessories[].get_Active", 
-                "accessories[].set_Active", 
-                "accessories[].set_Active_Set", 
-                "accessories[].set_Active_Reset"
-              ],
-              "condition": {
-                "functionBody": "return ['PLC_LightBulb','PLC_Outlet','PLC_Switch'].includes(model.accessories[arrayIndices[0]].accessory);"
-              }
-            },
+
             {
               "key": "accessories[]",
               "type": "section",
@@ -659,11 +747,28 @@
               "expandable": true,
               "expanded": false,
               "items": [
-                "accessories[].get_TargetTemperature", 
-                "accessories[].set_TargetTemperature", 
-                "accessories[].minTargetTemperatureValue", 
-                "accessories[].maxTargetTemperatureValue", 
+                "accessories[].get_TargetTemperature",
+                "accessories[].set_TargetTemperature",
+                "accessories[].minTargetTemperatureValue",
+                "accessories[].maxTargetTemperatureValue",
                 "accessories[].minTargetTemperatureStep"
+              ],
+              "condition": {
+                "functionBody": "return ['PLC_Thermostat'].includes(model.accessories[arrayIndices[0]].accessory);"
+              }
+            },
+            {
+              "key": "accessories[]",
+              "type": "section",
+              "title": "Target Relative Humidity",
+              "expandable": true,
+              "expanded": false,
+              "items": [
+                "accessories[].get_TargetRelativeHumidity",
+                "accessories[].set_TargetRelativeHumidity",
+                "accessories[].minTargetHumidityValue",
+                "accessories[].maxTargetHumidityValue",
+                "accessories[].minTargetHumidityStep"
               ],
               "condition": {
                 "functionBody": "return ['PLC_Thermostat'].includes(model.accessories[arrayIndices[0]].accessory);"
@@ -687,9 +792,9 @@
               "expandable": true,
               "expanded": false,
               "items": [
-                "accessories[].get_CurrentRelativeHumidity", 
-                "accessories[].minHumidityValue", 
-                "accessories[].maxHumidityValue", 
+                "accessories[].get_CurrentRelativeHumidity",
+                "accessories[].minHumidityValue",
+                "accessories[].maxHumidityValue",
                 "accessories[].minHumidityStep"
               ],
               "condition": {
@@ -703,7 +808,7 @@
               "expandable": true,
               "expanded": false,
               "items": [
-                "accessories[].get_StatusTampered", 
+                "accessories[].get_StatusTampered",
                 "accessories[].get_StatusLowBattery"
               ],
               "condition": {
@@ -717,8 +822,8 @@
               "expandable": true,
               "expanded": false,
               "items": [
-                "accessories[].get_CurrentHeatingCoolingState", 
-                "accessories[].get_TargetHeatingCoolingState", 
+                "accessories[].get_CurrentHeatingCoolingState",
+                "accessories[].get_TargetHeatingCoolingState",
                 "accessories[].set_TargetHeatingCoolingState"
               ],
               "condition": {
@@ -732,12 +837,12 @@
               "expandable": true,
               "expanded": false,
               "items": [
-                "accessories[].get_CurrentHumidifierDehumidifierState", 
-                "accessories[].get_TargetHumidifierDehumidifierState", 
-                "accessories[].set_TargetHumidifierDehumidifierState", 
-                "accessories[].default_TargetHumidifierDehumidifierState", 
-                "accessories[].mapGetCurrentHumidifierDehumidifierState", 
-                "accessories[].mapGetTargetHumidifierDehumidifierState", 
+                "accessories[].get_CurrentHumidifierDehumidifierState",
+                "accessories[].get_TargetHumidifierDehumidifierState",
+                "accessories[].set_TargetHumidifierDehumidifierState",
+                "accessories[].default_TargetHumidifierDehumidifierState",
+                "accessories[].mapGetCurrentHumidifierDehumidifierState",
+                "accessories[].mapGetTargetHumidifierDehumidifierState",
                 "accessories[].mapSetTargetHumidifierDehumidifierState"
               ],
               "condition": {
@@ -751,7 +856,7 @@
               "expandable": true,
               "expanded": false,
               "items": [
-                "accessories[].get_RotationSpeed", 
+                "accessories[].get_RotationSpeed",
                 "accessories[].set_RotationSpeed"
               ],
               "condition": {
@@ -765,7 +870,7 @@
               "expandable": true,
               "expanded": false,
               "items": [
-                "accessories[].get_RotationSpeedByte", 
+                "accessories[].get_RotationSpeedByte",
                 "accessories[].set_RotationSpeedByte"
               ],
               "condition": {
@@ -779,7 +884,7 @@
               "expandable": true,
               "expanded": false,
               "items": [
-                "accessories[].get_SwingMode", 
+                "accessories[].get_SwingMode",
                 "accessories[].set_SwingMode"
               ],
               "condition": {
@@ -830,7 +935,287 @@
               "condition": {
                 "functionBody": "return ['PLC_WindowCovering','PLC_Window','PLC_Door'].includes(model.accessories[arrayIndices[0]].accessory);"
               }
+            },
+            {
+              "key": "accessories[]",
+              "type": "section",
+              "title": "Occupancy",
+              "expandable": true,
+              "expanded": false,
+              "items": [
+                "accessories[].get_OccupancyDetected",
+                "accessories[].invertOccupancy"
+              ],
+              "condition": {
+                "functionBody": "return ['PLC_OccupancySensor'].includes(model.accessories[arrayIndices[0]].accessory);"
+              }
+            },
+            {
+              "key": "accessories[]",
+              "type": "section",
+              "title": "Motion",
+              "expandable": true,
+              "expanded": false,
+              "items": [
+                "accessories[].get_MotionDetected",
+                "accessories[].invertMotionDetected"
+              ],
+              "condition": {
+                "functionBody": "return ['PLC_MotionSensor'].includes(model.accessories[arrayIndices[0]].accessory);"
+              }
+            },
+            {
+              "key": "accessories[]",
+              "type": "section",
+              "title": "ContactSensorState",
+              "expandable": true,
+              "expanded": false,
+              "items": [
+                "accessories[].get_ContactSensorState",
+                "accessories[].invertContactSensorState"
+              ],
+              "condition": {
+                "functionBody": "return ['PLC_ContactSensor'].includes(model.accessories[arrayIndices[0]].accessory);"
+              }
+            },
+            {
+              "key": "accessories[]",
+              "type": "section",
+              "title": "Duration",
+              "expandable": true,
+              "expanded": false,
+              "items": [
+                "accessories[].get_SetDuration",
+                "accessories[].set_SetDuration",
+                "accessories[].get_RemainingDuration"
+              ],
+              "condition": {
+                "functionBody": "return ['PLC_Valve'].includes(model.accessories[arrayIndices[0]].accessory);"
+              }
+            },
+            {
+              "key": "accessories[]",
+              "type": "section",
+              "title": "SecuritySystemCurrentState xxxxx TO BE ADDED xxxxx",
+              "expandable": true,
+              "expanded": false,
+              "items": [
+                "accessories[].get_SecuritySystemCurrentState",
+                "accessories[].set_SetDuration"
+              ],
+              "condition": {
+                "functionBody": "return ['PLC_SecuritySystem'].includes(model.accessories[arrayIndices[0]].accessory);"
+              }
+            },
+            {
+              "key": "accessories[]",
+              "type": "section",
+              "title": "SecuritySystemTargetState xxxxx TO BE ADDED xxxxx",
+              "expandable": true,
+              "expanded": false,
+              "items": [
+                "accessories[].set_SecuritySystemTargetState",
+                "accessories[].get_SecuritySystemTargetState",
+                "accessories[].mapSetSecuritySystemTargetState",
+                "accessories[].mapGetSecuritySystemTargetState"
+              ],
+              "condition": {
+                "functionBody": "return ['PLC_SecuritySystem'].includes(model.accessories[arrayIndices[0]].accessory);"
+              }
+            },
+            {
+              "key": "accessories[]",
+              "type": "section",
+              "title": "ProgrammableSwitchEvent xxxxx TO BE ADDED xxxxx",
+              "expandable": true,
+              "expanded": false,
+              "items": [
+                "accessories[].isEvent",
+                "accessories[].get_ProgrammableSwitchEvent"
+              ],
+              "condition": {
+                "functionBody": "return ['PLC_StatelessProgrammableSwitch'].includes(model.accessories[arrayIndices[0]].accessory);"
+              }
+            },
+            {
+              "key": "accessories[]",
+              "type": "section",
+              "title": "LockCurrentState xxxxx TO BE ADDED xxxxx",
+              "expandable": true,
+              "expanded": false,
+              "items": [
+                "accessories[].get_LockCurrentState",
+                "accessories[].forceCurrentLockState"
+              ],
+              "condition": {
+                "functionBody": "return ['PLC_LockMechanism'].includes(model.accessories[arrayIndices[0]].accessory);"
+              }
+            },
+            {
+              "key": "accessories[]",
+              "type": "section",
+              "title": "LockTargetState xxxxx TO BE ADDED xxxxx",
+              "expandable": true,
+              "expanded": false,
+              "items": [
+                "accessories[].get_LockTargetState",
+                "accessories[].set_LockTargetState"
+              ],
+              "condition": {
+                "functionBody": "return ['PLC_LockMechanism'].includes(model.accessories[arrayIndices[0]].accessory);"
+              }
+            },
+            {
+              "key": "accessories[]",
+              "type": "section",
+              "title": "LockCurrentState xxxxx TO BE ADDED xxxxx",
+              "expandable": true,
+              "expanded": false,
+              "items": [
+                "accessories[].get_LockCurrentStateBool",
+                "accessories[].forceCurrentLockState",
+                "accessories[].invertLockState"
+              ],
+              "condition": {
+                "functionBody": "return ['PLC_LockMechanismBool'].includes(model.accessories[arrayIndices[0]].accessory);"
+              }
+            },
+            {
+              "key": "accessories[]",
+              "type": "section",
+              "title": "LockTargetState xxxxx TO BE ADDED xxxxx",
+              "expandable": true,
+              "expanded": false,
+              "items": [
+                "accessories[].get_LockTargetStateBool",
+                "accessories[].set_LockTargetStateBool",
+                "accessories[].set_LockTargetStateBool_Secured",
+                "accessories[].set_LockTargetStateBool_Unsecured"
+              ],
+              "condition": {
+                "functionBody": "return ['PLC_LockMechanismBool'].includes(model.accessories[arrayIndices[0]].accessory);"
+              }
+            },
+            {
+              "key": "accessories[]",
+              "type": "section",
+              "title": "CurrentDoorState xxxxx TO BE ADDED xxxxx",
+              "expandable": true,
+              "expanded": false,
+              "items": [
+                "accessories[].get_CurrentDoorState",
+                "accessories[].forceCurrentDoorState"
+              ],
+              "condition": {
+                "functionBody": "return ['PLC_GarageDoorOpener'].includes(model.accessories[arrayIndices[0]].accessory);"
+              }
+            },
+            {
+              "key": "accessories[]",
+              "type": "section",
+              "title": "TargetDoorState xxxxx TO BE ADDED xxxxx",
+              "expandable": true,
+              "expanded": false,
+              "items": [
+                "accessories[].get_TargetDoorState",
+                "accessories[].set_TargetDoorState"
+              ],
+              "condition": {
+                "functionBody": "return ['PLC_GarageDoorOpener'].includes(model.accessories[arrayIndices[0]].accessory);"
+              }
+            },
+            {
+              "key": "accessories[]",
+              "type": "section",
+              "title": "SmokeDetected xxxxx TO BE ADDED xxxxx",
+              "expandable": true,
+              "expanded": false,
+              "items": [
+                "accessories[].get_SmokeDetected"
+              ],
+              "condition": {
+                "functionBody": "return ['PLC_SmokeSensor'].includes(model.accessories[arrayIndices[0]].accessory);"
+              }
+            },
+            {
+              "key": "accessories[]",
+              "type": "section",
+              "title": "CurrentAmbientLightLevel xxxxx TO BE ADDED xxxxx",
+              "expandable": true,
+              "expanded": false,
+              "items": [
+                "accessories[].get_CurrentAmbientLightLevel",
+                "accessories[].get_CurrentAmbientLightLevelDInt"
+              ],
+              "condition": {
+                "functionBody": "return ['PLC_LightSensor','PLC_LightSensor_DInt'].includes(model.accessories[arrayIndices[0]].accessory);"
+              }
+            },
+            {
+              "key": "accessories[]",
+              "type": "section",
+              "title": "CurrentFanState xxxxx TO BE ADDED xxxxx",
+              "expandable": true,
+              "expanded": false,
+              "items": [
+                "accessories[].get_CurrentFanState",
+                "accessories[].default_CurrentFanState",
+                "accessories[].mapCurrentFanStateGet"
+              ],
+              "condition": {
+                "functionBody": "return ['PLC_Fan'].includes(model.accessories[arrayIndices[0]].accessory);"
+              }
+            },
+            {
+              "key": "accessories[]",
+              "type": "section",
+              "title": "CurrentFanState xxxxx TO BE ADDED xxxxx",
+              "expandable": true,
+              "expanded": false,
+              "items": [
+                "accessories[].get_TargetFanState",
+                "accessories[].set_TargetFanState",
+                "accessories[].mapCurrentFanStateGet",
+                "accessories[].mapTargetFanStateSet"
+              ],
+              "condition": {
+                "functionBody": "return ['PLC_Fan'].includes(model.accessories[arrayIndices[0]].accessory);"
+              }
+            },
+            {
+              "key": "accessories[]",
+              "type": "section",
+              "title": "Direction xxxxx TO BE ADDED xxxxx",
+              "expandable": true,
+              "expanded": false,
+              "items": [
+                "accessories[].get_RotationDirection",
+                "accessories[].set_RotationDirection",
+                "accessories[].mapRotationDirectionGet",
+                "accessories[].mapRotationDirectionSet"
+              ],
+              "condition": {
+                "functionBody": "return ['PLC_Fan'].includes(model.accessories[arrayIndices[0]].accessory);"
+              }
+            },
+            {
+              "key": "accessories[]",
+              "type": "section",
+              "title": "Speed xxxxx TO BE ADDED xxxxx",
+              "expandable": true,
+              "expanded": false,
+              "items": [
+                "accessories[].get_RotationSpeedByte",
+                "accessories[].set_RotationSpeedByte",
+                "accessories[].get_RotationSpeed",
+                "accessories[].set_RotationSpeed"
+              ],
+              "condition": {
+                "functionBody": "return ['PLC_Fan'].includes(model.accessories[arrayIndices[0]].accessory);"
+              }
             }
+
+
           ]
         }
       ]
