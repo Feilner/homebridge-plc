@@ -1269,20 +1269,20 @@ function GenericPLCAccessory(platform, config, accessoryNumber) {
       }.bind(this));
      }.bind(this);
 
-    if ('mapCurrentGet' in config && config.mapCurrentGet) {
-      this.modCurrentGet = function(value){return this.mapFunction(value, config.mapCurrentGet);}.bind(this);
+    if ('mapCurrentFanStateGet' in config && config.mapCurrentFanStateGet) {
+      this.modCurrentGet = function(value){return this.mapFunction(value, config.mapCurrentFanStateGet);}.bind(this);
     }
-    if ('mapTargetSet' in config && config.mapTargetSet) {
-      this.modTargetSet = function(value){return this.mapFunction(value, config.mapTargetSet);}.bind(this);
+    if ('mapTargetFanStateSet' in config && config.mapTargetFanStateSet) {
+      this.modTargetSet = function(value){return this.mapFunction(value, config.mapTargetFanStateSet);}.bind(this);
     }
-    if ('mapTargetGet' in config && config.mapTargetGet) {
-      this.modTargetGet = function(value){return this.mapFunction(value, config.mapTargetGet);}.bind(this);
+    if ('mapTargetFanStateGet' in config && config.mapTargetFanStateGet) {
+      this.modTargetGet = function(value){return this.mapFunction(value, config.mapTargetFanStateGet);}.bind(this);
     }
-    if ('mapDirectionGet' in config && config.mapDirectionGet) {
-      this.modDirectionGet = function(value){return this.mapFunction(value, config.mapDirectionGet);}.bind(this);
+    if ('mapRotationDirectionGet' in config && config.mapRotationDirectionGet) {
+      this.modDirectionGet = function(value){return this.mapFunction(value, config.mapRotationDirectionGet);}.bind(this);
     }
-    if ('mapDirectionSet' in config && config.mapDirectionSet) {
-      this.modDirectionSet = function(value){return this.mapFunction(value, config.mapDirectionSet);}.bind(this);
+    if ('mapRotationDirectionSet' in config && config.mapRotationDirectionSet) {
+      this.modDirectionSet = function(value){return this.mapFunction(value, config.mapRotationDirectionSet);}.bind(this);
     }
 
     if ('get_TargetFanState' in config) {
@@ -1382,7 +1382,7 @@ function GenericPLCAccessory(platform, config, accessoryNumber) {
   // INIT handling ///////////////////////////////////////////////
   // LightSensor
   ////////////////////////////////////////////////////////////////
-  else if (config.accessory == 'PLC_LightSensor'){
+  else if (config.accessory == 'PLC_LightSensor' || config.accessory == 'PLC_LightSensor_DInt'){
     this.service = new Service.LightSensor(this.name);
     this.accessory.addService(this.service);
 
@@ -1396,7 +1396,7 @@ function GenericPLCAccessory(platform, config, accessoryNumber) {
         "get CurrentAmbientLightLevel",
         this.modFunctionGet
       );}.bind(this));
-    }else{
+      }else if ('get_CurrentAmbientLightLevel' in config) {
       this.service.getCharacteristic(Characteristic.CurrentAmbientLightLevel)
       .on('get', function(callback) {this.getReal(callback,
         config.db,
@@ -1410,6 +1410,171 @@ function GenericPLCAccessory(platform, config, accessoryNumber) {
     this.initStatusLowBattery();
 
   }
+  // INIT handling ///////////////////////////////////////////////
+  // AirPurifier
+  ////////////////////////////////////////////////////////////////
+  else if (config.accessory == 'PLC_AirPurifier'){
+    this.service =  new Service.AirPurifier(this.name);
+    this.accessory.addService(this.service);
+    this.modDirectionGet = this.plain;
+    this.modDirectionSet = this.plain;
+    this.modTargetSet = this.plain;
+    this.modCurrentGet = this.plain;
+    this.modFunctionGetCurrent = this.plain;
+
+    var dummyInform = function(value){}.bind(this);
+
+    var informFunction = function(notUsed){
+      // update target state and current state value.
+      this.service.getCharacteristic(Characteristic.TargetAirPurifierState).getValue(function(err, value) {
+        if (!err) {
+          this.service.getCharacteristic(Characteristic.TargetAirPurifierState).updateValue(value);
+        }
+      }.bind(this));
+
+      this.service.getCharacteristic(Characteristic.CurrentAirPurifierState).getValue(function(err, value) {
+        if (!err) {
+          this.service.getCharacteristic(Characteristic.CurrentAirPurifierState).updateValue(value);
+        }
+      }.bind(this));
+     }.bind(this);
+
+    if ('mapCurrentAirPurifierState' in config && config.mapCurrentAirPurifierState) {
+      this.modCurrentGet = function(value){return this.mapFunction(value, config.mapCurrentAirPurifierState);}.bind(this);
+    }
+    if ('mapTargetAirPurifierStateGet' in config && config.mapTargetAirPurifierStateGet) {
+      this.modTargetSet = function(value){return this.mapFunction(value, config.mapTargetAirPurifierStateGet);}.bind(this);
+    }
+    if ('mapTargetAirPurifierStateSet' in config && config.mapTargetAirPurifierStateSet) {
+      this.modTargetGet = function(value){return this.mapFunction(value, config.mapTargetAirPurifierStateSet);}.bind(this);
+    }
+
+    if ('get_TargetAirPurifierState' in config) {
+      this.service.getCharacteristic(Characteristic.TargetAirPurifierState)
+      .on('get', function(callback) {this.getByte(callback,
+        config.db,
+        config.get_TargetAirPurifierState,
+        'get TargetAirPurifierState',
+        this.modTargetGet
+        );}.bind(this))
+      .on('set', function(value, callback) {this.setByte(value, callback,
+        config.db,
+        config.set_TargetAirPurifierState,
+        'set TargetAirPurifierState',
+        informFunction,
+        this.mapTargetSet
+        );}.bind(this));
+    }
+    else if ('default_TargetAirPurifierState' in config) {
+      this.service.getCharacteristic(Characteristic.TargetAirPurifierState)
+      .on('get', function(callback) {this.getDummy(callback,
+        config.default_TargetAirPurifierState || 0, // currently return fixed value inactive=0, idle=1, blowing=2
+        'get TargetAirPurifierState'
+        );}.bind(this))
+      .on('set', function(value, callback) {this.setDummy(value, callback,
+        'set TargetAirPurifierState',
+        // ignore set and return current fixed values
+        informFunction
+        );}.bind(this));
+    }
+
+    if ('get_CurrentAirPurifierState' in config) {
+      this.service.getCharacteristic(Characteristic.CurrentFanState)
+      .on('get', function(callback) {this.getByte(callback,
+        config.db,
+        config.get_CurrentFanState,
+        'get CurrentAirPurifierState',
+        this.modFunctionGetCurrent
+        );}.bind(this));
+    }
+    else if ('default_CurrentAirPurifierState' in config) {
+      this.service.getCharacteristic(Characteristic.CurrentFanState)
+      .on('get', function(callback) {this.getDummy(callback,
+        config.default_CurrentAirPurifierState,
+        'get CurrentAirPurifierState'
+        );}.bind(this));
+    }
+
+    this.initActive(true);
+
+    if ('get_RotationSpeed' in config) {
+      this.service.getCharacteristic(Characteristic.RotationSpeed)
+      .on('get', function(callback) {this.getReal(callback,
+        config.db,
+        config.get_RotationSpeed,
+        'get RotationSpeed'
+        );}.bind(this))
+      .on('set', function(value, callback) {this.setReal(value, callback,
+        config.db,
+        config.set_RotationSpeed,
+        'set RotationSpeed'
+        );}.bind(this));
+    } else if ('get_RotationSpeedByte' in config) {
+      this.service.getCharacteristic(Characteristic.RotationSpeed)
+      .on('get', function(callback) {this.getByte(callback,
+        config.db,
+        config.get_RotationSpeedByte,
+        'get RotationSpeed'
+        );}.bind(this))
+      .on('set', function(value, callback) {this.setByte(value, callback,
+        config.db,
+        config.set_RotationSpeedByte,
+        'set RotationSpeed'
+        );}.bind(this));
+    }
+
+    if ('get_SwingMode' in config) {
+      this.service.getCharacteristic(Characteristic.SwingMode)
+      .on('get', function(callback) {this.getByte(callback,
+        config.db,
+        config.get_SwingMode,
+        'get SwingMode'
+        );}.bind(this))
+      .on('set', function(value, callback) {this.setByte(value, callback,
+        config.db,
+        config.set_SwingMode,
+        'set SwingMode'
+        );}.bind(this));
+    }
+
+  }
+
+  // INIT handling ///////////////////////////////////////////////
+  // FilterMaintenance
+  ////////////////////////////////////////////////////////////////
+  else if (config.accessory == 'PLC_FilterMaintenance'){
+    this.service = new Service.FilterMaintenance(this.name);
+    this.accessory.addService(this.service);
+
+    if ('get_FilterChangeIndication' in this.config) {
+      this.service.getCharacteristic(Characteristic.FilterChangeIndication)
+      .on('get', function(callback) {this.getBit(callback,
+        this.config.db,
+        Math.floor(this.config.get_FilterChangeIndication), Math.floor((this.config.get_FilterChangeIndication*10)%10),
+        'get FilterChangeIndication'
+      );}.bind(this));
+    }
+
+    if ('get_FilterLifeLevel' in config) {
+      this.service.getCharacteristic(Characteristic.FilterLifeLevel)
+      .on('get', function(callback) {this.getByte(callback,
+        config.db,
+        config.get_FilterLifeLevel,
+        "get FilterLifeLevel",
+        this.modFunctionGet
+      );}.bind(this));      
+    }
+
+    if ('set_ResetFilterIndication' in this.config) {
+      this.service.getCharacteristic(Characteristic.ResetFilterIndication)
+      .on('set', function(powerOn, callback) { this.setBit(powerOn, callback,
+        this.config.db,
+        Math.floor(this.config.set_ResetFilterIndication), Math.floor((this.config.set_ResetFilterIndication*10)%10),
+        'set ResetFilterIndication'
+        );}.bind(this));
+    }
+  }
+
   // INIT handling ///////////////////////////////////////////////
   // Undefined
   ////////////////////////////////////////////////////////////////
@@ -1513,7 +1678,7 @@ GenericPLCAccessory.prototype = {
         Math.floor(this.config.set_Active), Math.floor((this.config.set_Active*10)%10),
         'set Active'
         );}.bind(this));
-    } else if ('set_Active' in this.config && 'set_Active_Set' in this.config && 'set_Active_Reset' in this.config) {
+    } else if ('get_Active' in this.config && 'set_Active_Set' in this.config && 'set_Active_Reset' in this.config) {
       this.service.getCharacteristic(Characteristic.Active)
       .on('get', function(callback) {this.getBit(callback,
         this.config.db,
@@ -2033,7 +2198,7 @@ GenericPLCAccessory.prototype = {
     // PUSH handling ///////////////////////////////////////////////
     // LightSensor
     ////////////////////////////////////////////////////////////////
-    else if (this.config.accessory == 'PLC_LightSensor'){
+    else if (this.config.accessory == 'PLC_LightSensor' || this.config.accessory == 'PLC_LightSensor_DInt'){
 
       if ('get_CurrentAmbientLightLevelDInt' in this.config && this.config.get_CurrentAmbientLightLevelDInt == offset )
       {
@@ -2060,7 +2225,58 @@ GenericPLCAccessory.prototype = {
         rv = true;
       }
     }
-
+    // PUSH handling ///////////////////////////////////////////////
+    // AirPurifier
+    ////////////////////////////////////////////////////////////////
+    else if (this.config.accessory == 'PLC_AirPurifier'){
+      if ('get_Active' in this.config && this.config.get_Active == offset)
+      {
+        this.log.debug( "[" + this.name + "] Push Active:" + value);
+        this.service.getCharacteristic(Characteristic.Active).updateValue(value);
+        rv = true;
+      }
+      if ('get_TargetAirPurifierState' in this.config && this.config.get_TargetAirPurifierState == offset)
+      {
+        this.log.debug( "[" + this.name + "] Push TargetAirPurifierState:" + String(this.modTargetGet(parseInt(value))) + "<-" + String(value));
+        this.service.getCharacteristic(Characteristic.TargetAirPurifierState).updateValue(this.modTargetGet(parseInt(value)));
+        rv = true;
+      }
+      if ('get_CurrentAirPurifierState' in this.config && this.config.get_CurrentAirPurifierState == offset)
+      {
+        this.log.debug( "[" + this.name + "] Push CurrentAirPurifierState:" + String(this.modCurrentGet(parseInt(value))) + "<-" + String(value));
+        this.service.getCharacteristic(Characteristic.CurrentAirPurifierState).updateValue(this.modCurrentGet(parseInt(value)));
+        rv = true;
+      }
+      if ('get_RotationSpeed' in this.config && this.config.get_RotationSpeed == offset || 'get_RotationSpeedByte' in this.config && this.config.get_RotationSpeedByte == offset)
+      {
+        this.log.debug( "[" + this.name + "] Push RotationSpeed:" + value);
+        this.service.getCharacteristic(Characteristic.Active).RotationSpeed(value);
+        rv = true;
+      }
+      if ('get_SwingMode' in this.config && this.config.get_SwingMode == offset)
+      {
+        this.log.debug( "[" + this.name + "] Push SwingMode:" + value);
+        this.service.getCharacteristic(Characteristic.SwingMode).updateValue(value);
+        rv = true;
+      }
+    }
+    // PUSH handling ///////////////////////////////////////////////
+    // FilterMaintenance
+    ////////////////////////////////////////////////////////////////
+    else if (this.config.accessory == 'PLC_FilterMaintenance'){
+      if ('get_FilterChangeIndication' in this.config && this.config.get_FilterChangeIndication == offset)
+      {
+        this.log.debug( "[" + this.name + "] Push FilterChangeIndication:" + value);
+        this.service.getCharacteristic(Characteristic.FilterChangeIndication).updateValue(value);
+        rv = true;
+      }
+      if ('get_FilterLifeLevel' in this.config && this.config.get_FilterLifeLevel == offset)
+      {
+        this.log.debug( "[" + this.name + "] Push FilterLifeLevel:" + value);
+        this.service.getCharacteristic(Characteristic.FilterLifeLevel).updateValue(value);
+        rv = true;
+      }
+    }
     return rv;
   },
 
@@ -2273,7 +2489,7 @@ GenericPLCAccessory.prototype = {
     // CONTROL handling ////////////////////////////////////////////
     // SmokeSensor
     ////////////////////////////////////////////////////////////////
-    ////////////////////////////////////////////////////////////////
+    
     // CONTROL handling ////////////////////////////////////////////
     // Fan
     ////////////////////////////////////////////////////////////////
@@ -2300,6 +2516,48 @@ GenericPLCAccessory.prototype = {
       {
         this.log.debug( "[" + this.name + "] Control RotationDirection:" + value);
         this.service.getCharacteristic(Characteristic.RotationDirection).setValue(value);
+        rv = true;
+      }
+    }
+    
+    // CONTROL handling ////////////////////////////////////////////
+    // AirPurifier
+    ////////////////////////////////////////////////////////////////
+    else if (this.config.accessory == 'PLC_AirPurifier'){
+      if ('set_Active' in this.config && this.config.set_Active == offset || 'set_Active_Set' in this.config && this.config.set_Active_Set == offset)
+      {
+        this.log.debug( "[" + this.name + "] Control Active:" + value);
+        this.service.getCharacteristic(Characteristic.Active).setValue(value);
+        rv = true;
+      }
+      if ('set_TargetAirPurifierState' in this.config && this.config.set_TargetAirPurifierState == offset)
+      {
+        this.log.debug( "[" + this.name + "] Control TargetAirPurifierState:" + value);
+        this.service.getCharacteristic(Characteristic.TargetAirPurifierState).setValue(value);
+        rv = true;
+      }
+      if ('set_RotationSpeed' in this.config && this.config.set_RotationSpeed == offset || 'set_RotationSpeedByte' in this.config && this.config.set_RotationSpeedByte == offset)
+      {
+        this.log.debug( "[" + this.name + "] Control RotationSpeed:" + value);
+        this.service.getCharacteristic(Characteristic.RotationSpeed).setValue(value);
+        rv = true;
+      }
+      if ('set_SwingMode' in this.config && this.config.set_SwingMode == offset)
+      {
+        this.log.debug( "[" + this.name + "] Control SwingMode:" + value);
+        this.service.getCharacteristic(Characteristic.SwingMode).setValue(value);
+        rv = true;
+      }
+    }
+
+    // CONTROL handling ////////////////////////////////////////////
+    // FilterMaintenance
+    ////////////////////////////////////////////////////////////////
+    else if (this.config.accessory == 'PLC_FilterMaintenance'){
+      if ('set_ResetFilterIndication' in this.config && this.config.set_ResetFilterIndication == offset)
+      {
+        this.log.debug( "[" + this.name + "] Control ResetFilterIndication:" + value);
+        this.service.getCharacteristic(Characteristic.ResetFilterIndication).setValue(value);
         rv = true;
       }
     }
@@ -2735,7 +2993,7 @@ GenericPLCAccessory.prototype = {
     // POLL handling ///////////////////////////////////////////////
     // LightSensor
     ////////////////////////////////////////////////////////////////
-    else if (this.config.accessory == 'PLC_LightSensor') {
+    else if (this.config.accessory == 'PLC_LightSensor' || this.config.accessory == 'PLC_LightSensor_DInt'){
       // get the current target system state and update the value.
       this.service.getCharacteristic(Characteristic.CurrentAmbientLightLevel).getValue(function(err, value) {
         if (!err) {
@@ -2752,6 +3010,53 @@ GenericPLCAccessory.prototype = {
           this.service.getCharacteristic(Characteristic.StatusLowBattery).updateValue(value);
         }
       }.bind(this));
+    }
+    // POLL handling ///////////////////////////////////////////////
+    // AirPurifier
+    ////////////////////////////////////////////////////////////////
+    else if (this.config.accessory == 'PLC_AirPurifier') {
+      // get the current target system state and update the value.
+      this.service.getCharacteristic(Characteristic.Active).getValue(function(err, value) {
+        if (!err) {
+          this.service.getCharacteristic(Characteristic.Active).updateValue(value);
+        }
+      }.bind(this));
+      this.service.getCharacteristic(Characteristic.TargetAirPurifierState).getValue(function(err, value) {
+        if (!err) {
+          this.service.getCharacteristic(Characteristic.TargetAirPurifierState).updateValue(value);
+        }
+      }.bind(this));
+      this.service.getCharacteristic(Characteristic.CurrentAirPurifierState).getValue(function(err, value) {
+        if (!err) {
+          this.service.getCharacteristic(Characteristic.CurrentAirPurifierState).updateValue(value);
+        }
+      }.bind(this));
+      this.service.getCharacteristic(Characteristic.RotationSpeed).getValue(function(err, value) {
+        if (!err) {
+          this.service.getCharacteristic(Characteristic.RotationSpeed).updateValue(value);
+        }
+      }.bind(this));
+      this.service.getCharacteristic(Characteristic.SwingMode).getValue(function(err, value) {
+        if (!err) {
+          this.service.getCharacteristic(Characteristic.SwingMode).updateValue(value);
+        }
+      }.bind(this));
+    }
+    // POLL handling ///////////////////////////////////////////////
+    // FilterMaintenance
+    ////////////////////////////////////////////////////////////////
+    else if (this.config.accessory == 'PLC_FilterMaintenance') {
+      // get the current target system state and update the value.
+      this.service.getCharacteristic(Characteristic.FilterChangeIndication).getValue(function(err, value) {
+        if (!err) {
+          this.service.getCharacteristic(Characteristic.FilterChangeIndication).updateValue(value);
+        }
+      }.bind(this));
+      this.service.getCharacteristic(Characteristic.FilterLifeLevel).getValue(function(err, value) {
+        if (!err) {
+          this.service.getCharacteristic(Characteristic.FilterLifeLevel).updateValue(value);
+        }
+      }.bind(this));      
     }
   },
 
@@ -3008,9 +3313,12 @@ GenericPLCAccessory.prototype = {
     var value = 0;
     var pushMirror = function(value) { this.platform.mirrorGet(logprefix, "&db="+db+"&offset="+ offset + "&value="+ value);}.bind(this);
 
+    log.debug(logprefix , "olitest step 1");
     //ensure PLC connection
     if (this.platform.S7ClientConnect()) {
+        log.debug(logprefix , "olitest step 2");
         S7Client.ReadArea(S7Client.S7AreaDB, db, offset, 1, S7Client.S7WLReal, function(err, res) {
+          log.debug(logprefix , "olitest step 3");
           if(err) {
             log.error(logprefix, "ReadArea failed #" + err.toString(16) + " - " + S7Client.ErrorText(err));
             if(err & 0xFFFFF) {S7Client.Disconnect();}

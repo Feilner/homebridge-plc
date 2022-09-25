@@ -48,6 +48,8 @@ SIEMENS S7 PLC plugin for [Homebridge](https://homebridge.io)
   * [Smoke Sensor as `PLC_SmokeSensor`](#PLC_SmokeSensor)
   * [Fan as `PLC_Fan`](#PLC_Fan)
   * [Light Sensor as `PLC_LightSensor`](#PLC_LightSensor)
+  * [Air Purifier as `PLC_AirPurifier`](#PLC_AirPurifier)
+  * [Filter Maintenance as `PLC_FilterMaintenance`](#PLC_FilterMaintenance)  
 
 # Installation
 
@@ -611,7 +613,7 @@ ventilator
 - `pollInterval`: **(optional)** poll interval in seconds. Default value see platform definition.
 - Current State:
   - `default_CurrentFanState`: **(optional)** defines alternative value thats returned then `get_CurrentFanState` is not defined. Default value `0:inactive
-  - ``: **(optional)** **(push support)** offset to get current heating/cooling state S7 type `Byte` e.g. `8` for `DB4DBB8`.
+  - `get_CurrentFanState`: **(optional)** **(push support)** offset to get current heating/cooling state S7 type `Byte` e.g. `8` for `DB4DBB8`.
     - `0`: inactive
     - `1`: idle
     - `2`: blowing
@@ -627,7 +629,7 @@ ventilator
     - `0`: manual
     - `1`: automatic
   - `mapTargetFanStateGet`: **(optional)** define mapping array for `get_TargetFanState`. The PLC value is used as index into the table. e.g. `[1, 0]` which maps the PLC value `0->1 1->0` when the PLC supports only two states with `0:automatic` and `1:manual`.
-  - `mapTargetSet`: **(optional)** define mapping array for `set_TargetFanState`. The home app value is used as index into the table. e.g. `[1, 0]` which maps the PLC value `0->1 1->0` when the PLC supports only two states with `0:automatic` and `1:manual`.
+  - `mapTargetFanStateSet`: **(optional)** define mapping array for `set_TargetFanState`. The home app value is used as index into the table. e.g. `[1, 0]` which maps the PLC value `0->1 1->0` when the PLC supports only two states with `0:automatic` and `1:manual`.
 - Rotation Direction
   - get_RotationDirection **(optional)** **(push support)** offset to get rotation direction state. S7 type `Byte` e.g. `9` for `DB4DBB9`. When not defined fixed `0`: clockwise is used.
     - `0`: clockwise
@@ -671,6 +673,73 @@ Illuminance sensor
 - `get_StatusLowBattery`: **(optional)** **(push support)** offset and bit to battery low detection. (Home app does not inform with push notification) S7 type `Bool` e.g. `55.3` for `DB4DBX55.3`
   - `false`: ok
   - `true`: battery low
+
+### <a name='PLC_AirPurifier'></a>Light Sensor as `PLC_AirPurifier`
+Air filter
+
+![homebridge pic](doc/airpurifier.png)
+- `name`: unique name of the accessory
+- `manufacturer`: **(optional)** description
+- `db`: s7 data base number e.g. `4` for `DB4`
+- `enablePolling`: **(optional)** when set to `true` the current state will be polled. It is mandatory as well to enable polling mode on platform level.
+- `pollInterval`: **(optional)** poll interval in seconds. Default value see platform definition.
+- Current State:
+  - `default_CurrentAirPurifierState`: **(optional)** defines alternative value thats returned then `get_CurrentAirPurifierState` is not defined. Default value `0:inactive
+  - `get_CurrentAirPurifierState`: **(optional)** **(push support)** offset to get current heating/cooling state S7 type `Byte` e.g. `8` for `DB4DBB8`.
+    - `0`: inactive
+    - `1`: idle
+    - `2`: purifying air
+  - `mapCurrentAirPurifierState`: **(optional)** define mapping array for `get_CurrentAirPurifierState`. The PLC value is used as index into the table. e.g. `[0, 2]` which maps the PLC value `0->1 1->2` when the PLC supports only two states with `0:inactive` and `1:idle`.
+- Target State:
+  - `default_TargetAirPurifierState`: **(optional)** defines alternative value thats returned then `get_TargetAirPurifierState` is not defined. Default value `0:manual`
+    - `0`: manual
+    - `1`: automatic
+  - `get_TargetAirPurifierState` **(optional)** **(push support)** offset to get target heating/cooling state. S7 type `Byte` e.g. `9` for `DB4DBB9`. When not defined fixed `1`: automatic is used.
+    - `0`: manual
+    - `1`: automatic
+  - `set_TargetAirPurifierState` **(optional but required when `get_TargetAirPurifierState` is defined)** **(control support)** offset to get target heating/cooling state. S7 type `Byte` e.g. `9` for `DB4DBB9`. When not defined fixed `1`: automatic is used.
+    - `0`: manual
+    - `1`: automatic
+  - `mapTargetAirPurifierStateGet`: **(optional)** define mapping array for `get_TargetAirPurifierState`. The PLC value is used as index into the table. e.g. `[1, 0]` which maps the PLC value `0->1 1->0` when the PLC supports only two states with `0:automatic` and `1:manual`.
+  - `mapTargetAirPurifierStateSet`: **(optional)** define mapping array for `set_TargetAirPurifierState`. The home app value is used as index into the table. e.g. `[1, 0]` which maps the PLC value `0->1 1->0` when the PLC supports only two states with `0:automatic` and `1:manual`.
+- Swing Mode
+  - `get_SwingMode`: **(optional)** **(push support)** offset to get swing mode. S7 type `byte` e.g. `8` for `DB4DBB8`.
+    - `0`: swing disabled
+    - `1`: swing enabled
+  - `set_SwingMode` **(optional)** **(control support)** offset to set swing mode. S7 type `byte` e.g. `9` for `DB4DBB9`.
+    - `0`: swing disabled
+    - `1`: swing enabled
+- Rotation Speed
+  - Byte
+    - `get_RotationSpeedByte`: **(optional)** **(push support)** offset to get rotation speed state S7 type `Byte` e.g. `8` for `DB4DBB8`.
+    - `set_RotationSpeedByte` **(optional but required when `set_RotationSpeedByte` is defined)** **(push support)** offset to get set speed state. S7 type `Byte` e.g. `9` for `DB4DBB9`.
+  - Real
+    - `get_RotationSpeed`:  **(push support)** offset to get rotation speed state S7 type `Real` e.g. `8` for `DB4DBB8`.
+    - `set_RotationSpeed` **(optional but required when `get_RotationSpeed` is defined)** **(push support)** offset to get set speed state. S7 type `Real` e.g. `9` for `DB4DBB9`.
+- `get_Active`: **(push support)** offset and bit get the current status S7 type `Bool` e.g. `55.0` for `DB4DBX55.0`
+- Single Bit for on/off:
+  - `set_Active`: **(control support)** offset and bit set to 1/0 when switching on/off S7 type `Bool` PLC e.g. `55.0` for `DB4DBX55.0` could be same as get_Active
+- Separate Bits for on/off:
+  - `set_Active_Set`: **(control support)** offset and bit set to 1 when switching on S7 type `Bool` **PLC has to set to 0** e.g. `55.1` for `DB4DBX55.1`
+  - `set_Active_Reset`: offset and bit set to 1 when switching off S7 type `Bool` **PLC has to set to 0** e.g. `55.2` for `DB4DBX55.2`
+
+
+### <a name='PLC_FilterMaintenance'></a>Light Sensor as `PLC_FilterMaintenance`
+Filter change indication
+![homebridge pic](doc/filtermaintenance.png)
+- `name`: unique name of the accessory
+- `manufacturer`: **(optional)** description
+- `db`: s7 data base number e.g. `4` for `DB4`
+- `enablePolling`: **(optional)** when set to `true` the current state will be polled. It is mandatory as well to enable polling mode on platform level.
+- `pollInterval`: **(optional)** poll interval in seconds. Default value see platform definition.
+- `get_FilterChangeIndication`: **(push support)** offset and bit to filter change indication S7 type `Bool` e.g. `55.3` for `DB4DBX55.3`
+  - `0`: filter ok
+  - `true`: change filter
+- `get_FilterLifeLevel`: **(optional)** **(push support)** offset and bit to filter live level S7 type `bate` e.g. `56` for `DB4DBX56`
+  - `0`: change filter
+  - `100`: filter is new
+- `set_ResetFilterIndication`: **(optional)** **(control support)** offset and bit to filter change indication S7 type `Bool` **PLC has to set to 0** after detecting change to true via homebridge e.g. `55.4` for `DB4DBX55.4` 
+
 
 ## config.json Example
 Note: The example is just an example it contains also some optional settings. For testing purposes all accessories are set to one DB.
