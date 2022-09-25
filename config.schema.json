@@ -498,7 +498,7 @@
             },
             "mapGetCurrentHumidifierDehumidifierState **(optional)**": {
               "title": "mapGetCurrentHumidifierDehumidifierState **(optional)**",
-              "type": "string",
+              "type": "array",
               "description": "define mapping array for `get_CurrentHumidifierDehumidifierState`. The PLC value is used as index into the table. e.g. `[1, 3]` which maps the PLC value `0->1 1->3` when the PLC supports only two states with `0:idle` and `1:dehumidifying`."
             },
             "default_TargetHumidifierDehumidifierState": {
@@ -518,12 +518,20 @@
             },
             "mapGetTargetHumidifierDehumidifierState **(optional)**": {
               "title": "mapGetTargetHumidifierDehumidifierState",
-              "type": "string",
+              "type": "array",
+              "items": {
+                "type": "integer",
+                "minimum": 0
+              },
               "description": "**(optional)** define mapping array for `get_TargetHumidifierDehumidifierState`. The PLC value is used as index into the table. e.g. `[2,1]` which maps the PLC value `0->1 1->2` when the PLC supports only one states with `0:dehumidifier 1:humidifier."
             },
             "mapSetTargetHumidifierDehumidifierState": {
               "title": "mapSetTargetHumidifierDehumidifierState **(optional)**",
-              "type": "string",
+              "type": "array",
+              "items": {
+                "type": "integer",
+                "minimum": 0
+              },
               "description": "define mapping array for `set_TargetHumidifierDehumidifierState`. The home app value is used as index into the table. e.g. `[2, 2, 2] writes always the value 2 to the plc regardless whats set in the home app"
             },
             "get_SwingMode": {
@@ -560,7 +568,11 @@
             },
             "mapGetCurrentPosition": {
               "title": "mapGetCurrentPosition **(optional)**",
-              "type": "string",
+              "type": "array",
+              "items": {
+                "type": "integer",
+                "minimum": 0
+              },
               "description": "define mapping array for get position. The PLC value is used as index into the table. e.g. `[0, 25, 100]` which maps the PLC value `0->0 1->25 2->100` this this is useful e.g. for window open state."
             },
             "get_TargetPosition": {
@@ -669,17 +681,29 @@
             },
             "mapGetSecuritySystemCurrentState": {
               "title": "mapGetSecuritySystemCurrentState **(optional)**",
-              "type": "string",
+              "type": "array",
+              "items": {
+                "type": "integer",
+                "minimum": 0
+              },
               "description":  "define mapping array for get security system state. The PLC value is used as index into the table. e.g. `[3, 1]` which maps the PLC value `0->3 1->2` when the PLC supports only two states with `0:disarmed` and `1:armed` and `2:alarm`."
             },
             "mapSetSecuritySystemTargetState": {
               "title": "mapSetSecuritySystemTargetState **(optional)**",
-              "type": "string",
+              "type": "array",
+              "items": {
+                "type": "integer",
+                "minimum": 0
+              },
               "description":  "define mapping array for set security system state. The home app value is used as index into the table. e.g. `[1, 1, 1, 0, 2]` which maps the PLC value `0->1 1->1 2->1, 3->0, 4->2` when the PLC supports only two states with `0:disarmed` and `1:armed` and `2:alarm`."
             },
             "mapGetSecuritySystemTargetState": {
               "title": "mapGetSecuritySystemTargetState **(optional)**",
-              "type": "string",
+              "type": "array",
+              "items": {
+                "type": "integer",
+                "minimum": 0
+              },
               "description":  "define mapping array for get security system state. The PLC value is used as index into the table. e.g. `[3, 1]` which maps the PLC value `0->3 1->2` when the PLC supports only two states with `0:disarmed` and `1:armed` and `2:alarm`."
             },                        
             "isEvent": {
@@ -790,11 +814,13 @@
             },
             "mapCurrentFanStateGet": {
               "title": "mapCurrentFanStateGet **(optional)**",
-              "type": "string",
+              "type": "array",
+              "items": {
+                "type": "integer",
+                "minimum": 0
+              },
               "description": "define mapping array for `get_CurrentFanState`. The PLC value is used as index into the table. e.g. `[0, 2]` which maps the PLC value `0->1 1->2` when the PLC supports only two states with `0:idle` and `1:blowing`."
             },
-
-
             "default_TargetFanState": {
               "title": "default_TargetFanState **(optional)**",
               "type": "number",
@@ -812,17 +838,22 @@
             },  
             "mapTargetFanStateGet": {
               "title": "mapTargetFanStateGet **(optional)** **(push support)**",
-              "type": "string",
+              "type": "array",
+              "items": {
+                "type": "integer",
+                "minimum": 0
+              },
               "description": "define mapping array for `get_TargetFanState`. The PLC value is used as index into the table. e.g. `[1, 0]` which maps the PLC value `0->1 1->0` when the PLC supports only two states with `0:automatic` and `1:manual`."
             },
             "mapTargetFanStateSet": {
               "title": "mapTargetFanStateSet **(optional)**",
-              "type": "string",
+              "type": "array",
+              "items": {
+                "type": "integer",
+                "minimum": 0
+              },
               "description": "The home app value is used as index into the table. e.g. `[1, 0]` which maps the PLC value `0->1 1->0` when the PLC supports only two states with `0:automatic` and `1:manual`."
             },
-
-
-
             "get_RotationSpeedByte": {
               "title": "get_RotationSpeedByte **(optional)** **(push support)**",
               "type": "number",
@@ -871,16 +902,22 @@
             },  
             "mapRotationDirectionGet": {
               "title": "mapRotationDirectionGet **(optional)**",
-              "type": "string",
+              "type": "array",
+              "items": {
+                "type": "integer",
+                "minimum": 0
+              },
               "description": "define mapping array for `get_RotationDirection`. The PLC value is used as index into the table. e.g. `[1, 0]` inverts the direction"
             },
             "mapRotationDirectionSet": {
               "title": "mapRotationDirectionSet **(optional)**",
-              "type": "string",
+              "type": "array",
+              "items": {
+                "type": "integer",
+                "minimum": 0
+              },
               "description": "define mapping array for `set_RotationDirection`. The home app value is used as index into the table. e.g. `[1, 0]` inverts the direction"
             },
-
-
             "get_CurrentAirPurifierState": {
               "title": "get_CurrentAirPurifierState **(optional)** **(push support)**",
               "type": "number",
@@ -893,12 +930,13 @@
             },
             "mapCurrentAirPurifierState": {
               "title": "mapCurrentAirPurifierState **(optional)**",
-              "type": "string",
+              "type": "array",
+              "items": {
+                "type": "integer",
+                "minimum": 0
+              },
               "description": "define mapping array for `get_CurrentFanState`. The PLC value is used as index into the table. e.g. `[0, 2]` which maps the PLC value `0->1 1->2` when the PLC supports only two states with `0:idle` and `1:blowing`."
             },
-
-
-            
             "default_TargetAirPurifierState": {
               "title": "default_TargetAirPurifierState **(optional)**",
               "type": "number",
@@ -916,12 +954,20 @@
             },  
             "mapTargetAirPurifierStateGet": {
               "title": "mapTargetAirPurifierStateGet **(optional)**",
-              "type": "string",
+              "type": "array",
+              "items": {
+                "type": "integer",
+                "minimum": 0
+              },
               "description": "define mapping array for `get_TargetAirPurifierState`. The PLC value is used as index into the table. e.g. `[1, 0]` which maps the PLC value `0->1 1->0` when the PLC supports only two states with `0:automatic` and `1:manual`."
             },
             "mapTargetAirPurifierStateSet": {
               "title": "mapTargetAirPurifierStateSet **(optional)**",
-              "type": "string",
+              "type": "array",
+              "items": {
+                "type": "integer",
+                "minimum": 0
+              },
               "description": "define mapping array for `set_TargetAirPurifierState`. The home app value is used as index into the table. e.g. `[1, 0]` which maps the PLC value `0->1 1->0` when the PLC supports only two states with `0:automatic` and `1:manual`"
             },                                 
             "get_FilterChangeIndication": {

@@ -1,6 +1,6 @@
 # Changelog
 
-## [1.1.0-beta.6] 2022-09-25
+## [1.1.0-beta.8] 2022-09-25
 ### Changed
 **Action required** Breaking changes!
 In order to support configuration by GUI some configuration options needs to be renamed.
