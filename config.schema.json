@@ -1598,7 +1598,7 @@
                 "accessories[].set_ResetFilterIndication"
               ],
               "condition": {
-                "functionBody": "return ['PLC_FilterMaintenance'].includes(model.accessories[arrayIndices[0]].accessory);"
+                "functionBody": "return ['PLC_FilterMaintenance','PLC_AirPurifier'].includes(model.accessories[arrayIndices[0]].accessory);"
               }
             },
             {
@@ -1611,7 +1611,7 @@
                 "accessories[].get_FilterLifeLevel"
               ],
               "condition": {
-                "functionBody": "return ['PLC_FilterMaintenance'].includes(model.accessories[arrayIndices[0]].accessory);"
+                "functionBody": "return ['PLC_FilterMaintenance','PLC_AirPurifier'].includes(model.accessories[arrayIndices[0]].accessory);"
               }
             }
           ]

@@ -722,23 +722,32 @@ Air filter
 - Separate Bits for on/off:
   - `set_Active_Set`: **(control support)** offset and bit set to 1 when switching on S7 type `Bool` **PLC has to set to 0** e.g. `55.1` for `DB4DBX55.1`
   - `set_Active_Reset`: offset and bit set to 1 when switching off S7 type `Bool` **PLC has to set to 0** e.g. `55.2` for `DB4DBX55.2`
-
+- Filter change
+  - `get_FilterChangeIndication`: **(push support)** offset and bit to filter change indication S7 type `Bool` e.g. `55.3` for `DB4DBX55.3`
+    - `0`: filter ok
+    - `true`: change filter
+  - `get_FilterLifeLevel`: **(optional)** **(push support)** offset and bit to filter live level S7 type `bate` e.g. `56` for `DB4DBX56`
+    - `0`: change filter
+    - `100`: filter is new
+  - `set_ResetFilterIndication`: **(optional)** **(control support)** offset and bit to filter change indication S7 type `Bool` **PLC has to set to 0** after detecting change to true via homebridge e.g. `55.4` for `DB4DBX55.4` NOTE: Currently not used by HomeApp
 
 ### <a name='PLC_FilterMaintenance'></a>Light Sensor as `PLC_FilterMaintenance`
-Filter change indication
+Filter change indication (Currently neither supported in HomeApp and HomeBridge)
+
 ![homebridge pic](doc/filtermaintenance.png)
 - `name`: unique name of the accessory
 - `manufacturer`: **(optional)** description
 - `db`: s7 data base number e.g. `4` for `DB4`
 - `enablePolling`: **(optional)** when set to `true` the current state will be polled. It is mandatory as well to enable polling mode on platform level.
 - `pollInterval`: **(optional)** poll interval in seconds. Default value see platform definition.
-- `get_FilterChangeIndication`: **(push support)** offset and bit to filter change indication S7 type `Bool` e.g. `55.3` for `DB4DBX55.3`
-  - `0`: filter ok
-  - `true`: change filter
-- `get_FilterLifeLevel`: **(optional)** **(push support)** offset and bit to filter live level S7 type `bate` e.g. `56` for `DB4DBX56`
-  - `0`: change filter
-  - `100`: filter is new
-- `set_ResetFilterIndication`: **(optional)** **(control support)** offset and bit to filter change indication S7 type `Bool` **PLC has to set to 0** after detecting change to true via homebridge e.g. `55.4` for `DB4DBX55.4` 
+- Filter change
+  - `get_FilterChangeIndication`: **(push support)** offset and bit to filter change indication S7 type `Bool` e.g. `55.3` for `DB4DBX55.3`
+    - `0`: filter ok
+    - `true`: change filter
+  - `get_FilterLifeLevel`: **(optional)** **(push support)** offset and bit to filter live level S7 type `bate` e.g. `56` for `DB4DBX56`
+    - `0`: change filter
+    - `100`: filter is new
+  - `set_ResetFilterIndication`: **(optional)** **(control support)** offset and bit to filter change indication S7 type `Bool` **PLC has to set to 0** after detecting change to true via homebridge e.g. `55.4` for `DB4DBX55.4` NOTE: Currently not used by HomeApp 
 
 
 ## config.json Example

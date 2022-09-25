@@ -1496,6 +1496,7 @@ function GenericPLCAccessory(platform, config, accessoryNumber) {
     }
 
     this.initActive(true);
+    this.initFilterMaintainance();
 
     if ('get_RotationSpeed' in config) {
       this.service.getCharacteristic(Characteristic.RotationSpeed)
@@ -1546,33 +1547,8 @@ function GenericPLCAccessory(platform, config, accessoryNumber) {
     this.service = new Service.FilterMaintenance(this.name);
     this.accessory.addService(this.service);
 
-    if ('get_FilterChangeIndication' in this.config) {
-      this.service.getCharacteristic(Characteristic.FilterChangeIndication)
-      .on('get', function(callback) {this.getBit(callback,
-        this.config.db,
-        Math.floor(this.config.get_FilterChangeIndication), Math.floor((this.config.get_FilterChangeIndication*10)%10),
-        'get FilterChangeIndication'
-      );}.bind(this));
-    }
-
-    if ('get_FilterLifeLevel' in config) {
-      this.service.getCharacteristic(Characteristic.FilterLifeLevel)
-      .on('get', function(callback) {this.getByte(callback,
-        config.db,
-        config.get_FilterLifeLevel,
-        "get FilterLifeLevel",
-        this.modFunctionGet
-      );}.bind(this));      
-    }
-
-    if ('set_ResetFilterIndication' in this.config) {
-      this.service.getCharacteristic(Characteristic.ResetFilterIndication)
-      .on('set', function(powerOn, callback) { this.setBit(powerOn, callback,
-        this.config.db,
-        Math.floor(this.config.set_ResetFilterIndication), Math.floor((this.config.set_ResetFilterIndication*10)%10),
-        'set ResetFilterIndication'
-        );}.bind(this));
-    }
+    this.initFilterMaintainance();
+    
   }
 
   // INIT handling ///////////////////////////////////////////////
@@ -1704,6 +1680,36 @@ GenericPLCAccessory.prototype = {
         );}.bind(this));
       }
   },
+
+  initFilterMaintainance: function() {
+    if ('get_FilterChangeIndication' in this.config) {
+      this.service.getCharacteristic(Characteristic.FilterChangeIndication)
+      .on('get', function(callback) {this.getBit(callback,
+        this.config.db,
+        Math.floor(this.config.get_FilterChangeIndication), Math.floor((this.config.get_FilterChangeIndication*10)%10),
+        'get FilterChangeIndication'
+      );}.bind(this));
+    }
+
+    if ('get_FilterLifeLevel' in config) {
+      this.service.getCharacteristic(Characteristic.FilterLifeLevel)
+      .on('get', function(callback) {this.getByte(callback,
+        config.db,
+        config.get_FilterLifeLevel,
+        "get FilterLifeLevel",
+        this.modFunctionGet
+      );}.bind(this));      
+    }
+
+    if ('set_ResetFilterIndication' in this.config) {
+      this.service.getCharacteristic(Characteristic.ResetFilterIndication)
+      .on('set', function(powerOn, callback) { this.setBit(powerOn, callback,
+        this.config.db,
+        Math.floor(this.config.set_ResetFilterIndication), Math.floor((this.config.set_ResetFilterIndication*10)%10),
+        'set ResetFilterIndication'
+        );}.bind(this));
+    }
+    },
 
   poll: function() {
     if (this.config.enablePolling || this.config.adaptivePolling) {
@@ -2259,6 +2265,18 @@ GenericPLCAccessory.prototype = {
         this.service.getCharacteristic(Characteristic.SwingMode).updateValue(value);
         rv = true;
       }
+      if ('get_FilterChangeIndication' in this.config && this.config.get_FilterChangeIndication == offset)
+      {
+        this.log.debug( "[" + this.name + "] Push FilterChangeIndication:" + value);
+        this.service.getCharacteristic(Characteristic.FilterChangeIndication).updateValue(value);
+        rv = true;
+      }
+      if ('get_FilterLifeLevel' in this.config && this.config.get_FilterLifeLevel == offset)
+      {
+        this.log.debug( "[" + this.name + "] Push FilterLifeLevel:" + value);
+        this.service.getCharacteristic(Characteristic.FilterLifeLevel).updateValue(value);
+        rv = true;
+      }
     }
     // PUSH handling ///////////////////////////////////////////////
     // FilterMaintenance
@@ -2546,6 +2564,12 @@ GenericPLCAccessory.prototype = {
       {
         this.log.debug( "[" + this.name + "] Control SwingMode:" + value);
         this.service.getCharacteristic(Characteristic.SwingMode).setValue(value);
+        rv = true;
+      }
+      if ('set_ResetFilterIndication' in this.config && this.config.set_ResetFilterIndication == offset)
+      {
+        this.log.debug( "[" + this.name + "] Control ResetFilterIndication:" + value);
+        this.service.getCharacteristic(Characteristic.ResetFilterIndication).setValue(value);
         rv = true;
       }
     }
@@ -3041,6 +3065,16 @@ GenericPLCAccessory.prototype = {
           this.service.getCharacteristic(Characteristic.SwingMode).updateValue(value);
         }
       }.bind(this));
+      this.service.getCharacteristic(Characteristic.FilterChangeIndication).getValue(function(err, value) {
+        if (!err) {
+          this.service.getCharacteristic(Characteristic.FilterChangeIndication).updateValue(value);
+        }
+      }.bind(this));
+      this.service.getCharacteristic(Characteristic.FilterLifeLevel).getValue(function(err, value) {
+        if (!err) {
+          this.service.getCharacteristic(Characteristic.FilterLifeLevel).updateValue(value);
+        }
+      }.bind(this));    
     }
     // POLL handling ///////////////////////////////////////////////
     // FilterMaintenance
