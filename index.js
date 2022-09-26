@@ -1693,8 +1693,8 @@ GenericPLCAccessory.prototype = {
     if ('get_FilterLifeLevel' in this.config) {
       this.service.getCharacteristic(Characteristic.FilterLifeLevel)
       .on('get', function(callback) {this.getByte(callback,
-        config.db,
-        config.get_FilterLifeLevel,
+        this.config.db,
+        this.config.get_FilterLifeLevel,
         "get FilterLifeLevel",
         this.modFunctionGet
       );}.bind(this));      
