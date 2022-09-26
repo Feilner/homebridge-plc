@@ -1,6 +1,6 @@
 # Changelog
 
-## [1.1.0-beta.8] 2022-09-25
+## [1.1.0-beta.9] 2022-09-26
 ### Changed
 **Action required** Breaking changes!
 In order to support configuration by GUI some configuration options needs to be renamed.
@@ -86,6 +86,8 @@ In order to support configuration by GUI some configuration options needs to be 
 - `PLC_AirPurifier`
 - `PLC_FilterMaintenance`
 
+### Changed
+- Use seperate buffer for each set operation
 
 ## [1.0.37] 2022-04-23
 ### Fixed
