@@ -1,5 +1,9 @@
 # Changelog
 
+## [1.0.39] 2022-09-28
+### Fixed
+- Possible buffer overwrite by using seperate buffer for each set operation
+
 ## [1.0.38] 2022-04-28
 ### Updated
 - updated documentation
