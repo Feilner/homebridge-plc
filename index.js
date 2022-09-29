@@ -1448,7 +1448,7 @@ function GenericPLCAccessory(platform, config, accessoryNumber) {
       this.modTargetGet = function(value){return this.mapFunction(value, config.mapTargetAirPurifierStateSet);}.bind(this);
     }
 
-    if ('get_TargetAirPurifierState' in config) {
+    if ('get_TargetAirPurifierState' in config && 'set_TargetAirPurifierState' in config ) {
       this.service.getCharacteristic(Characteristic.TargetAirPurifierState)
       .on('get', function(callback) {this.getByte(callback,
         config.db,
