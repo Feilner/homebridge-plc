@@ -1467,7 +1467,7 @@ function GenericPLCAccessory(platform, config, accessoryNumber) {
     else if ('default_TargetAirPurifierState' in config) {
       this.service.getCharacteristic(Characteristic.TargetAirPurifierState)
       .on('get', function(callback) {this.getDummy(callback,
-        config.default_TargetAirPurifierState || 0, // currently return fixed value inactive=0, idle=1, blowing=2
+        config.default_TargetAirPurifierState || 0, // currently return fixed value MANUAL=0, MANUAL=1
         'get TargetAirPurifierState'
         );}.bind(this))
       .on('set', function(value, callback) {this.setDummy(value, callback,
@@ -1478,16 +1478,16 @@ function GenericPLCAccessory(platform, config, accessoryNumber) {
     }
 
     if ('get_CurrentAirPurifierState' in config) {
-      this.service.getCharacteristic(Characteristic.CurrentFanState)
+      this.service.getCharacteristic(Characteristic.CurrentAirPurifierState)
       .on('get', function(callback) {this.getByte(callback,
         config.db,
-        config.get_CurrentFanState,
+        config.get_CurrentAirPurifierState,
         'get CurrentAirPurifierState',
         this.modFunctionGetCurrent
         );}.bind(this));
     }
     else if ('default_CurrentAirPurifierState' in config) {
-      this.service.getCharacteristic(Characteristic.CurrentFanState)
+      this.service.getCharacteristic(Characteristic.CurrentAirPurifierState)
       .on('get', function(callback) {this.getDummy(callback,
         config.default_CurrentAirPurifierState,
         'get CurrentAirPurifierState'
