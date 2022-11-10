@@ -317,33 +317,9 @@ function GenericPLCAccessory(platform, config, accessoryNumber) {
     }
 
     this.accessory.addService(this.service);
-    if ('set_On' in config) {
-      this.service.getCharacteristic(Characteristic.On)
-      .on('get', function(callback) {this.getBit(callback,
-        config.db,
-        Math.floor(config.get_On), Math.floor((config.get_On*10)%10),
-        'get On'
-      );}.bind(this))
-      .on('set', function(powerOn, callback) { this.setBit(powerOn, callback,
-        config.db,
-        Math.floor(config.set_On), Math.floor((config.set_On*10)%10),
-        'set On'
-        );}.bind(this));
-    } else {
-      this.service.getCharacteristic(Characteristic.On)
-      .on('get', function(callback) {this.getBit(callback,
-        config.db,
-        Math.floor(config.get_On), Math.floor((config.get_On*10)%10),
-        'get On'
-      );}.bind(this))
-      .on('set', function(powerOn, callback) { this.setOnOffBit(powerOn, callback,
-        config.db,
-        Math.floor(config.set_On_Set), Math.floor((config.set_On_Set*10)%10),
-        Math.floor(config.set_On_Reset), Math.floor((config.set_On_Reset*10)%10),
-        'set On'
-        );}.bind(this));
-    }
-
+    
+    this.initOn(true);
+    
     if (config.accessory == 'PLC_LightBulb') {
       if ('get_Brightness' in config) {
         this.service.getCharacteristic(Characteristic.Brightness)
@@ -1679,7 +1655,46 @@ GenericPLCAccessory.prototype = {
         );}.bind(this));
       }
   },
-
+  
+  initOn: function(mandatory) {
+    if ('set_On' in this.config && 'get_On' in this.config) {
+      this.service.getCharacteristic(Characteristic.On)
+      .on('get', function(callback) {this.getBit(callback,
+        this.config.db,
+        Math.floor(this.config.get_On), Math.floor((this.config.get_On*10)%10),
+        'get On'
+      );}.bind(this))
+      .on('set', function(powerOn, callback) { this.setBit(powerOn, callback,
+        this.config.db,
+        Math.floor(this.config.set_On), Math.floor((this.config.set_On*10)%10),
+        'set On'
+        );}.bind(this));
+    } else if ('get_On' in this.config && 'set_On_Set' in this.config && 'set_On_Reset' in this.config) {
+      this.service.getCharacteristic(Characteristic.On)
+      .on('get', function(callback) {this.getBit(callback,
+        this.config.db,
+        Math.floor(this.config.get_On), Math.floor((this.config.get_On*10)%10),
+        'get On'
+      );}.bind(this))
+      .on('set', function(powerOn, callback) { this.setOnOffBit(powerOn, callback,
+        this.config.db,
+        Math.floor(this.config.set_On_Set), Math.floor((this.config.set_On_Set*10)%10),
+        Math.floor(this.config.set_On_Reset), Math.floor((this.config.set_On_Reset*10)%10),
+        'set On'
+        );}.bind(this));
+    } else if (mandatory) {
+      this.log.error("Mandatory config get_On or set_On* missing using dummy")
+      this.service.getCharacteristic(Characteristic.On)
+        .on('get', function(callback) {this.getDummy(callback,
+          1,
+          'get On'
+        );}.bind(this))
+        .on('set', function(value, callback) { this.setDummy(value, callback,
+          'set On',
+          function(value){this.service.getCharacteristic(Characteristic.On).updateValue(value);}.bind(this)
+        );}.bind(this));
+      }
+  },
   initFilterMaintainance: function() {
     if ('get_FilterChangeIndication' in this.config) {
       this.service.getCharacteristic(Characteristic.FilterChangeIndication)
