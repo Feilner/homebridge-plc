@@ -3189,23 +3189,21 @@ GenericPLCAccessory.prototype = {
 
     //ensure PLC connection
     if (this.platform.S7ClientConnect()) {
-
       buf.writeUInt8(1);
-      S7Client.WriteArea(S7Client.S7AreaDB, db, ((offset*8) + bit), 1, S7Client.S7WLBit, buf, function(err) {
-        if(err) {
-          log.error(logprefix, "WriteArea failed #" + err.toString(16) + " - " + S7Client.ErrorText(err));
-          if(err & 0xFFFFF) {S7Client.Disconnect();}
-          callback(new Error('PLC error'));
-        }
-        else {
-          log.debug(logprefix , String(value));
-          callback(null);
-          if (typeof(inform) != 'undefined' && inform)
-          {
-            inform(value);
-          }
-        }
-      });
+      if (!S7Client.WriteArea(S7Client.S7AreaDB, db, ((offset*8) + bit), 1, S7Client.S7WLBit, buf)) {
+        var err = S7Client.LastError();
+        log.error(logprefix, "WriteArea failed #" + err.toString(16) + " - " + S7Client.ErrorText(err));
+        if(err & 0xFFFFF) {S7Client.Disconnect();}
+        callback(new Error('PLC error'));
+      }
+      else {
+        log.debug(logprefix , String(value));
+        callback(null);
+        if (typeof(inform) != 'undefined' && inform)
+        {
+          inform(value);
+        }        
+      }
     }
     else {
       callback(new Error('PLC not connected'), false);
@@ -3228,28 +3226,27 @@ GenericPLCAccessory.prototype = {
     //ensure PLC connection
     if (this.platform.S7ClientConnect()) {
       buf.writeInt8(valuePLC ? 1 : 0);
-      S7Client.WriteArea(S7Client.S7AreaDB, db, ((offset*8) + bit), 1, S7Client.S7WLBit, buf, function(err) {
-        if(err) {
-          log.error(logprefix, "WriteArea failed #" + err.toString(16) + " - " + S7Client.ErrorText(err));
-          if(err & 0xFFFFF) {S7Client.Disconnect();}
-          callback(new Error('PLC error'));
+      if (!S7Client.WriteArea(S7Client.S7AreaDB, db, ((offset*8) + bit), 1, S7Client.S7WLBit, buf)) {
+        var err = S7Client.LastError();
+        log.error(logprefix, "WriteArea failed #" + err.toString(16) + " - " + S7Client.ErrorText(err));
+        if(err & 0xFFFFF) {S7Client.Disconnect();}
+        callback(new Error('PLC error'));
+      }
+      else {
+        if (typeof(valueMod) != 'undefined' && valueMod)
+        {
+          log.debug(logprefix , String(value) + "->" + String(valuePLC));
         }
-        else {
-          if (typeof(valueMod) != 'undefined' && valueMod)
-          {
-            log.debug(logprefix , String(value) + "->" + String(valuePLC));
-          }
-          else
-          {
-            log.debug(logprefix , String(value));
-          }
-          callback(null);
-          if (typeof(inform) != 'undefined' && inform)
-          {
-            inform(value);
-          }
+        else
+        {
+          log.debug(logprefix , String(value));
         }
-      });
+        callback(null);
+        if (typeof(inform) != 'undefined' && inform)
+        {
+          inform(value);
+        }
+      }
     }
     else {
       callback(new Error('PLC not connected'), false);
@@ -3311,29 +3308,28 @@ GenericPLCAccessory.prototype = {
 
     //ensure PLC connection
     if (this.platform.S7ClientConnect()) {
-        buf.writeFloatBE(valuePLC);
-        S7Client.WriteArea(S7Client.S7AreaDB, db, offset, 1, S7Client.S7WLReal, buf, function(err) {
-          if(err) {
-            log.error(logprefix, "WriteArea failed #" + err.toString(16) + " - " + S7Client.ErrorText(err));
-            if(err & 0xFFFFF) {S7Client.Disconnect();}
-            callback(new Error('PLC error'));
-          }
-          else {
-            if (typeof(valueMod) != 'undefined' && valueMod)
-            {
-              log.debug(logprefix , String(value) + "->" + String(valuePLC));
-            }
-            else
-            {
-              log.debug(logprefix , String(value));
-            }
-            callback(null);
-            if (typeof(inform) != 'undefined' && inform)
-            {
-              inform(value);
-            }
-          }
-        });
+      buf.writeFloatBE(valuePLC);
+      if (!S7Client.WriteArea(S7Client.S7AreaDB, db, offset, 1, S7Client.S7WLReal, buf)) {
+        var err = S7Client.LastError();
+        log.error(logprefix, "WriteArea failed #" + err.toString(16) + " - " + S7Client.ErrorText(err));
+        if(err & 0xFFFFF) {S7Client.Disconnect();}
+        callback(new Error('PLC error'));
+      }
+      else {
+        if (typeof(valueMod) != 'undefined' && valueMod)
+        {
+          log.debug(logprefix , String(value) + "->" + String(valuePLC));
+        }
+        else
+        {
+          log.debug(logprefix , String(value));
+        }
+        callback(null);
+        if (typeof(inform) != 'undefined' && inform)
+        {
+          inform(value);
+        }
+      }
     }
     else {
         callback(new Error('PLC not connected'));
@@ -3395,29 +3391,28 @@ GenericPLCAccessory.prototype = {
 
     //ensure PLC connection
     if (this.platform.S7ClientConnect()) {
-        buf.writeUInt8(valuePLC);
-        S7Client.WriteArea(S7Client.S7AreaDB, db, offset, 1, S7Client.S7WLByte, buf, function(err) {
-          if(err) {
-            log.error(logprefix, "WriteArea failed #" + err.toString(16) + " - " + S7Client.ErrorText(err));
-            if(err & 0xFFFFF) {S7Client.Disconnect();}
-            callback(new Error('PLC error'));
-          }
-          else {
-            if (typeof(valueMod) != 'undefined' && valueMod)
-            {
-              log.debug(logprefix , String(value) + "->" + String(valuePLC));
-            }
-            else
-            {
-              log.debug(logprefix , String(value));
-            }
-            callback(null);
-            if (typeof(inform) != 'undefined' && inform)
-            {
-              inform(value);
-            }
-          }
-        });
+      buf.writeUInt8(valuePLC);
+      if (!S7Client.WriteArea(S7Client.S7AreaDB, db, offset, 1, S7Client.S7WLByte, buf)) {
+        var err = S7Client.LastError();
+        log.error(logprefix, "WriteArea failed #" + err.toString(16) + " - " + S7Client.ErrorText(err));
+        if(err & 0xFFFFF) {S7Client.Disconnect();}
+        callback(new Error('PLC error'));
+      }
+      else {
+        if (typeof(valueMod) != 'undefined' && valueMod)
+        {
+          log.debug(logprefix , String(value) + "->" + String(valuePLC));
+        }
+        else
+        {
+          log.debug(logprefix , String(value));
+        }
+        callback(null);
+        if (typeof(inform) != 'undefined' && inform)
+        {
+          inform(value);
+        }
+      }
     }
     else {
         callback(new Error('PLC not connected'));
@@ -3478,29 +3473,28 @@ GenericPLCAccessory.prototype = {
 
     //ensure PLC connection
     if (this.platform.S7ClientConnect()) {
-        buf.writeInt16BE(valuePLC);
-        S7Client.WriteArea(S7Client.S7AreaDB, db, offset, 1, S7Client.S7WLWord, buf, function(err) {
-          if(err) {
-            log.error(logprefix, "WriteArea failed #" + err.toString(16) + " - " + S7Client.ErrorText(err));
-            if(err & 0xFFFFF) {S7Client.Disconnect();}
-            callback(new Error('PLC error'));
-          }
-          else {
-            if (typeof(valueMod) != 'undefined' && valueMod)
-            {
-              log.debug(logprefix , String(value) + "->" + String(valuePLC));
-            }
-            else
-            {
-              log.debug(logprefix , String(value));
-            }
-            callback(null);
-            if (typeof(inform) != 'undefined' && inform)
-            {
-              inform(value);
-            }
-          }
-        });
+      buf.writeInt16BE(valuePLC);
+      if (!S7Client.WriteArea(S7Client.S7AreaDB, db, offset, 1, S7Client.S7WLWord, buf)) {
+        var err = S7Client.LastError();
+        log.error(logprefix, "WriteArea failed #" + err.toString(16) + " - " + S7Client.ErrorText(err));
+        if(err & 0xFFFFF) {S7Client.Disconnect();}
+        callback(new Error('PLC error'));
+      }
+      else {
+        if (typeof(valueMod) != 'undefined' && valueMod)
+        {
+          log.debug(logprefix , String(value) + "->" + String(valuePLC));
+        }
+        else
+        {
+          log.debug(logprefix , String(value));
+        }
+        callback(null);
+        if (typeof(inform) != 'undefined' && inform)
+        {
+          inform(value);
+        }
+      }
     }
     else {
         callback(new Error('PLC not connected'));
@@ -3564,29 +3558,28 @@ GenericPLCAccessory.prototype = {
 
     //ensure PLC connection
     if (this.platform.S7ClientConnect()) {
-        buf.writeInt32BE(valuePLC);
-        S7Client.WriteArea(S7Client.S7AreaDB, db, offset, 1, S7Client.S7WLDWord, buf, function(err) {
-          if(err) {
-            log.error(logprefix, "WriteArea failed #" + err.toString(16) + " - " + S7Client.ErrorText(err));
-            if(err & 0xFFFFF) {S7Client.Disconnect();}
-            callback(new Error('PLC error'));
-          }
-          else {
-            if (typeof(valueMod) != 'undefined' && valueMod)
-            {
-              log.debug(logprefix , String(value) + "->" + String(valuePLC));
-            }
-            else
-            {
-              log.debug(logprefix , String(value));
-            }
-            callback(null);
-            if (typeof(inform) != 'undefined' && inform)
-            {
-              inform(value);
-            }
-          }
-        });
+      buf.writeInt32BE(valuePLC);
+      if (!S7Client.WriteArea(S7Client.S7AreaDB, db, offset, 1, S7Client.S7WLDWord, buf)) {
+        var err = S7Client.LastError();
+        log.error(logprefix, "WriteArea failed #" + err.toString(16) + " - " + S7Client.ErrorText(err));
+        if(err & 0xFFFFF) {S7Client.Disconnect();}
+        callback(new Error('PLC error'));
+      }
+      else {
+        if (typeof(valueMod) != 'undefined' && valueMod)
+        {
+          log.debug(logprefix , String(value) + "->" + String(valuePLC));
+        }
+        else
+        {
+          log.debug(logprefix , String(value));
+        }
+        callback(null);
+        if (typeof(inform) != 'undefined' && inform)
+        {
+          inform(value);
+        }
+      }
     }
     else {
         callback(new Error('PLC not connected'));
