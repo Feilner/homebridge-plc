@@ -1,5 +1,10 @@
 # Changelog
 
+## [1.0.40] 2023-09-12
+### Fixed
+- Data corruption during multiple SET operations e.g. close all blinds
+  - Synchronous execution of SET oparations
+
 ## [1.0.39] 2022-09-28
 ### Fixed
 - Possible buffer overwrite by using separate buffer for each set operation
