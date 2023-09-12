@@ -1,9 +1,11 @@
 # Changelog
 
-## [1.1.0-beta.12] 2023-09-12
+## [2.0.0-beta.13] 2023-09-12
 ### Changed
-**Action required** Breaking changes!
+⚠️⚠️⚠️**Action required** breaking changes! ⚠️⚠️⚠️
+
 In order to support configuration by GUI some configuration options needs to be renamed.
+
 - `PLC_LightBulb`:
   - renamed option `minValue` -> `minBrightnessValue` and changed default value from `20` to `0`
   - renamed option `maxValue` -> `maxBrightnessValue`
@@ -14,11 +16,11 @@ In order to support configuration by GUI some configuration options needs to be 
 - `PLC_Fan`, `PLC_HumidifierDehumidifier`, `PLC_Faucet`, `PLC_Valve`
   - renamed options for separate set and reset bits. (Single bit option `set_Active` is still functional)
   - renamed option `set_Deactivate` -> `set_Active_Reset` and `set_Active` -> `set_Active_Set`
--`PLC_TemperatureSensor`
+- `PLC_TemperatureSensor`
   - renamed option `minValue` -> `minTemperatureValue` and changed default value from `-50` to `-270`
   - renamed option `maxValue` -> `maxTemperatureValue` and changed default value from `110` to `100`
   - renamed option `minStep`  -> `minTemperatureStep`  and changed default value from `0.5` to `0.1`
--`PLC_HumiditySensor`
+- `PLC_HumiditySensor`
   - renamed option `minValue` -> `minHumidityValue`
   - renamed option `maxValue` -> `maxHumidityValue`
   - renamed option `minStep`  -> `minHumidityStep`
@@ -89,6 +91,19 @@ In order to support configuration by GUI some configuration options needs to be 
 ### Fixed
 - Data corruption during multiple SET operations e.g. close all blinds
   - Synchronous execution of SET oparations
+
+## [1.0.40] 2023-09-12
+### Fixed
+- Data corruption during multiple SET operations e.g. close all blinds
+  - Synchronous execution of SET oparations
+
+## [1.0.39] 2022-09-28
+### Fixed
+- Possible buffer overwrite by using separate buffer for each set operation
+
+## [1.0.38] 2022-04-28
+### Updated
+- updated documentation
 
 ## [1.0.37] 2022-04-23
 ### Fixed
