@@ -3197,7 +3197,7 @@ GenericPLCAccessory.prototype = {
         callback(new Error('PLC error'));
       }
       else {
-        log.debug(logprefix , String(value));
+        log.debug(logprefix + " %d ms", String(value), S7Client.ExecTime());
         callback(null);
         if (typeof(inform) != 'undefined' && inform)
         {
@@ -3235,11 +3235,11 @@ GenericPLCAccessory.prototype = {
       else {
         if (typeof(valueMod) != 'undefined' && valueMod)
         {
-          log.debug(logprefix , String(value) + "->" + String(valuePLC));
+          log.debug(logprefix + " %d ms", String(value) + "->" + String(valuePLC), S7Client.ExecTime());
         }
         else
         {
-          log.debug(logprefix , String(value));
+          log.debug(logprefix + " %d ms", String(value), S7Client.ExecTime());
         }
         callback(null);
         if (typeof(inform) != 'undefined' && inform)
@@ -3318,11 +3318,11 @@ GenericPLCAccessory.prototype = {
       else {
         if (typeof(valueMod) != 'undefined' && valueMod)
         {
-          log.debug(logprefix , String(value) + "->" + String(valuePLC));
+          log.debug(logprefix + " %d ms", String(value) + "->" + String(valuePLC), S7Client.ExecTime());
         }
         else
         {
-          log.debug(logprefix , String(value));
+          log.debug(logprefix + " %d ms", String(value), S7Client.ExecTime());
         }
         callback(null);
         if (typeof(inform) != 'undefined' && inform)
@@ -3483,11 +3483,11 @@ GenericPLCAccessory.prototype = {
       else {
         if (typeof(valueMod) != 'undefined' && valueMod)
         {
-          log.debug(logprefix , String(value) + "->" + String(valuePLC));
+          log.debug(logprefix + " %d ms", String(value) + "->" + String(valuePLC)), S7Client.ExecTime();
         }
         else
         {
-          log.debug(logprefix , String(value));
+          log.debug(logprefix + " %d ms", String(value), S7Client.ExecTime());
         }
         callback(null);
         if (typeof(inform) != 'undefined' && inform)
@@ -3568,11 +3568,11 @@ GenericPLCAccessory.prototype = {
       else {
         if (typeof(valueMod) != 'undefined' && valueMod)
         {
-          log.debug(logprefix , String(value) + "->" + String(valuePLC));
+          log.debug(logprefix + " %d ms", String(value) + "->" + String(valuePLC), S7Client.ExecTime());
         }
         else
         {
-          log.debug(logprefix , String(value));
+          log.debug(logprefix + " %d ms", String(value), S7Client.ExecTime());
         }
         callback(null);
         if (typeof(inform) != 'undefined' && inform)
