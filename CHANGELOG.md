@@ -1,6 +1,6 @@
 # Changelog
 
-## [1.1.0-beta.11] 2022-09-29
+## [1.1.0-beta.12] 2023-09-12
 ### Changed
 **Action required** Breaking changes!
 In order to support configuration by GUI some configuration options needs to be renamed.
@@ -86,8 +86,9 @@ In order to support configuration by GUI some configuration options needs to be 
 - `PLC_AirPurifier`
 - `PLC_FilterMaintenance`
 
-### Changed
-- Use seperate buffer for each set operation
+### Fixed
+- Data corruption during multiple SET operations e.g. close all blinds
+  - Synchronous execution of SET oparations
 
 ## [1.0.37] 2022-04-23
 ### Fixed
