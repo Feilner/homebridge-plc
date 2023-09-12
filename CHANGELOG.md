@@ -1,9 +1,12 @@
 # Changelog
 
 ## [2.0.0-beta.14] 2023-09-12
-⚠️⚠️⚠️**Action required** breaking changes! ⚠️⚠️⚠️
+⚠️⚠️⚠️**Action required breaking changes!** ⚠️⚠️⚠️
+- Version 2.0.x has changed the name of some configurations.
+- Please stay on version 1.0.x if you do not want to adapt your configuration.
+
 ### Notable changes
-Configuration via GAI
+- Configuration via GUI
 
 ### Changed
 In order to support configuration by GUI some configuration options needs to be renamed.
