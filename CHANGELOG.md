@@ -1,9 +1,11 @@
 # Changelog
 
-## [2.0.0-beta.13] 2023-09-12
-### Changed
+## [2.0.0-beta.14] 2023-09-12
 ⚠️⚠️⚠️**Action required** breaking changes! ⚠️⚠️⚠️
+### Notable changes
+Configuration via GAI
 
+### Changed
 In order to support configuration by GUI some configuration options needs to be renamed.
 
 - `PLC_LightBulb`:
@@ -77,7 +79,8 @@ In order to support configuration by GUI some configuration options needs to be 
   - renamed option `mapSetTarget`  -> `mapTargetFanStateSet`
   - renamed option `mapDirectionGet`  -> `mapRotationDirectionGet`
   - renamed option `mapDirectionSet`  -> `mapRotationDirectionSet`
-- ### Added
+
+### Added
 - `PLC_Thermostat`
   - option `minTemperatureValue`
   - option `maxTemperatureValue`
@@ -90,12 +93,12 @@ In order to support configuration by GUI some configuration options needs to be 
 
 ### Fixed
 - Data corruption during multiple SET operations e.g. close all blinds
-  - Synchronous execution of SET oparations
+  - Synchronous execution of SET operations
 
 ## [1.0.40] 2023-09-12
 ### Fixed
 - Data corruption during multiple SET operations e.g. close all blinds
-  - Synchronous execution of SET oparations
+  - Synchronous execution of SET operations
 
 ## [1.0.39] 2022-09-28
 ### Fixed
