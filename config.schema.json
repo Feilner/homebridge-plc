@@ -1,5 +1,7 @@
 {
   "pluginAlias": "PLC",
+  "headerDisplay": "Homebridge plugin for plugin for Siemens Step7 and compatible PLCs. <br>Information about push and constroll support mentioned in description.",
+  "footerDisplay": "Please visit https://github.com/Feilner/homebridge-plc for more details.",
   "pluginType": "platform",
   "singular": true,
   "schema": {
@@ -43,7 +45,7 @@
       "defaultPollInterval": {
         "title": "Default polling interval in seconds",
         "description": "This defines the default polling interval when no interval is set per accessory",
-        "type": "int",
+        "type": "integer",
         "minimum": 1,
         "placeholder": 10
       },
@@ -66,9 +68,9 @@
         "placeholder": false
       },
       "port": {
-        "title": "Port for server",
-        "description": "Port for http server to handle incoming http requests for push and control functionality. Default port is 8888",
-        "type": "int",
+        "title": "Server port",
+        "description": "Port for http server to handle incoming http requests for <b>push</b> and <b>control</b> functionality. Default port is 8888",
+        "type": "integer",
         "minimum": 1,
         "placeholder": 8888
       },
@@ -250,7 +252,7 @@
               "placeholder": 10
             },
             "adaptivePolling": {
-              "title": "adaptive Polling **(optional)**",
+              "title": "adaptive Polling <b>(optional)</b>",
               "description": "When set to `true` the current position will be polled until target position is reached. Polling starts with set target position from home app. This allows to show the shutter as opening... or closing... in the home app during movement.",
               "type": "boolean",
               "placeholder": false,
@@ -259,8 +261,8 @@
               }
             },
             "adaptivePollingInterval": {
-               "title": "adaptivePollingInterval **(optional)**",
-              "description": "**(optional)** poll interval in seconds during high frequency polling. Default value is `1` second.",
+              "title": "adaptivePollingInterval <b>(optional)</b>",
+              "description": "<b>(optional)</b> poll interval in seconds during high frequency polling. Default value is `1` second.",
               "type": "integer",
               "minimum": 1,
               "placeholder": 1,
@@ -270,24 +272,24 @@
             },
 
             "get_On": {
-              "title": "get_On **(push support)**",
+              "title": "get_On <b>(push support)</b>",
               "type": "number",
               "description": "offset and bit to read current on/off state from PLC. S7 type Bool e.g. 55.1",
               "required": true
             },
             "set_On": {
-              "title": "Single Bit mode: offset set_On **(control support)**",
+              "title": "Single Bit mode: offset set_On <b>(control support)</b>",
               "type": "number",
-              "description": "Single Bit mode: offset and bit to set to 1/0 to PLC when switching on/off S7 type Bool PLC e.g. 55.1 for DB4DBX55.1 could be same as get_On.",
+              "description": "Single Bit mode: offset and bit to set to 1/0 to PLC when switching on/off. S7 type `Bool` PLC e.g. 55.1 for DB4DBX55.1 <br></b>Note:</b>Could be identical to get_On.",
               "required": true,
               "condition": {
                 "functionBody": "return (!model.accessories[arrayIndices[0]].set_On_Set && !model.accessories[arrayIndices[0]].set_On_Reset);"
               }
             },
             "set_On_Set": {
-              "title": "Separate Bits mode: set_On_Set **(control support)**",
+              "title": "Separate Bits mode: set_On_Set <b>(control support)</b>",
               "type": "number",
-              "description": "Separate Bits mode: offset and bit set to 1 when switching off. PLC has to set to 0 S7 type Bool e.g. 55.2",
+              "description": "Separate Bits mode: offset and bit set to 1 when switching off. S7 type `Bool` PLC e.g. 55.2 for DB4DBX55.2 <br><b>NOTE:</b>PLC has to set to 0 after handling the request.",
               "required": true,
               "condition": {
                 "functionBody": "return (!model.accessories[arrayIndices[0]].set_On);"
@@ -296,14 +298,14 @@
             "set_On_Reset": {
               "title": "Separate Bits mode: offset set_On_Reset",
               "type": "number",
-              "description": "Separate Bits mode: offset and bit set to 1 when switching off. PLC has to set to 0 S7 type Bool e.g. 55.3 <br>NOTE: When defining this the behaviour of set_On changes to Seperate Bit mode.",
+              "description": "Separate Bits mode: offset and bit set to 1 when switching off. S7 type `Bool` PLC e.g. 55.3 for DB4DBX55.3 <br><b>NOTE:</b>PLC has to set to 0 after handling the request.",
               "required": true,
               "condition": {
                 "functionBody": "return (!model.accessories[arrayIndices[0]].set_On);"
               }
             },
             "get_Active": {
-              "title": "get_Active **(push support)**",
+              "title": "get_Active <b>(push support)</b>",
               "type": "number",
               "description": "offset and bit get the current status S7 type `Bool` e.g. `55.0` for `DB4DBX55.0`",
               "condition": {
@@ -311,17 +313,17 @@
               }
             },
             "set_Active": {
-              "title": "Single Bit mode: offset set_Active (bool) **(control support)**",
+              "title": "Single Bit mode: offset set_Active (bool) <b>(control support)</b>",
               "type": "number",
-              "description": "Single Bit mode: offset and bit to set to 1/0 to PLC when switching on/off S7 type Bool PLC e.g. 55.1 for DB4DBX55.1 could be same as get_Active <br>Separate Bits mode: offset and bit set to 1 when switching off. PLC has to set to 0 S7 type Bool e.g. 55.2",
+              "description": "Single Bit mode: offset and bit to set to 1/0 to PLC when switching on/off S7 type `Bool` PLC e.g. 55.1 for DB4DBX55.1 could be same as get_Active <br>Separate Bits mode: offset and bit set to 1 when switching off. <br><b>NOTE:</b>PLC has to set to 0 after handling the request.",
               "condition": {
                 "functionBody": "return (!model.accessories[arrayIndices[0]].set_Active_Set && !model.accessories[arrayIndices[0]].set_Active_Reset);"
               }
             },
             "set_Active_Set": {
-              "title": "Separate Bits mode: offset set_Active_Set **(control support)**",
+              "title": "Separate Bits mode: offset set_Active_Set <b>(control support)</b>",
               "type": "number",
-              "description": "Separate Bits mode: offset and bit set to 1 when switching off. PLC has to set to 0 S7 type Bool e.g. 55.2",
+              "description": "Separate Bits mode: offset and bit set to 1 when switching on S7 type `Bool` PLC e.g. 55.2 for DB4DBX55.2. <br><b>NOTE:</b>PLC has to set to 0 after handling the request.",
               "condition": {
                 "functionBody": "return (!model.accessories[arrayIndices[0]].set_Active);"
               }
@@ -329,20 +331,20 @@
             "set_Active_Reset": {
               "title": "Separate Bits mode: offset set_Active_Reset",
               "type": "number",
-              "description": "Separate Bits mode: offset and bit set to 1 when switching off. PLC has to set to 0 S7 type Bool e.g. 55.3 <br>NOTE: When defining this the behaviour of set_Active changes to Seperate Bit mode.",
+              "description": "Separate Bits mode: offset and bit set to 1 S7  when switching off type `Bool` PLC e.g. 55.3 for DB4DBX55.3. <br><b>NOTE:</b>PLC has to set to 0 after handling the request.",
               "condition": {
                 "functionBody": "return (!model.accessories[arrayIndices[0]].set_Active);"
               }
             },
             "get_Brightness": {
-              "title": "get_Brightness (byte)",
+              "title": "get_Brightness",
               "type": "number",
-              "description": "get brightness value S7 type Byte e.g. 56 for DB4DBB56"
+              "description": "get brightness value S7 type `Byte` e.g. 56 for DB4DBB56"
             },
             "set_Brightness": {
-              "title": "set_Brightness (byte)",
+              "title": "set_Brightness",
               "type": "number",
-              "description": "set brightness value S7 type Byte e.g. 57 for DB4DBB57"
+              "description": "set brightness value S7 type `Byte` e.g. 57 for DB4DBB57"
             },
             "minTemperatureValue": {
               "title": "minTemperatureValue",
@@ -390,7 +392,7 @@
               "placeholder": 0.1
             },
             "mapGetCurrentHeatingCoolingState": {
-              "title": "mapGetCurrentHeatingCoolingState **(optional)**",
+              "title": "mapGetCurrentHeatingCoolingState <b>(optional)</b>",
               "type": "array",
               "items": {
                 "type": "integer",
@@ -399,7 +401,7 @@
               "description": "define mapping array for `get_CurrentHeatingCoolingState`. The PLC value is used as index into the table. e.g. `[0, 2]` which maps the PLC value `0->0 1->2` when the PLC supports only two states with `0:inactive` and `1:cooling`."
             },
             "mapSetTargetHeatingCoolingState": {
-              "title": "mapSetTargetHeatingCoolingState **(optional)**",
+              "title": "mapSetTargetHeatingCoolingState <b>(optional)</b>",
               "type": "array",
               "items": {
                 "type": "integer",
@@ -408,7 +410,7 @@
               "description": "define mapping array for `set_TargetHeatingCoolingState`. The home app value is used as index into the table. e.g. `[0, 1, 0, 3]` which maps the PLC value `0->0 1->1 2->0, 3->3` when the PLC supports only two states with `0:off` and `1:heat` and `3:automatic`. The state cool is mapped to off."
             },
             "mapGetTargetHeatingCoolingState": {
-              "title": "mapGetTargetHeatingCoolingState **(optional)**",
+              "title": "mapGetTargetHeatingCoolingState <b>(optional)</b>",
               "type": "array",
               "items": {
                 "type": "integer",
@@ -447,86 +449,86 @@
               "placeholder": 1
             },
             "get_CurrentTemperature": {
-              "title": "get_CurrentTemperature **(push support)**",
+              "title": "get_CurrentTemperature <b>(push support)</b>",
               "type": "number",
               "description": "offset to get current temperature S7 type Real e.g. 55 for DB4DBD55"
             },
             "get_CurrentRelativeHumidity": {
-              "title": "get_CurrentRelativeHumidity **(push support)**",
+              "title": "get_CurrentRelativeHumidity <b>(push support)</b>",
               "type": "number",
               "description": "offset to get current humidity S7 type Real e.g. 55 for DB4DBD55"
             },
             "get_TargetTemperature": {
-              "title": "get_TargetTemperature **(push support)**",
+              "title": "get_TargetTemperature <b>(push support)</b>",
               "type": "number",
               "description": "offset to get target temperature S7 type `Real` e.g. `4` for `DB4DBD4`"
             },
             "set_TargetTemperature": {
-              "title": "get_TargetTemperature **(control support)*",
+              "title": "set_TargetTemperature <b>(control support)</b>",
               "type": "number",
               "description": "offset to set current temperature S7 type `Real` e.g. `4` for `DB4DBD4` (can have same value as get_TargetTemperature)"
             },
             "get_TargetRelativeHumidity": {
-              "title": "get_TargetRelativeHumidity **(push support)**",
+              "title": "get_TargetRelativeHumidity <b>(push support)</b>",
               "type": "number",
               "description": "offset to get target temperature S7 type `Real` e.g. `4` for `DB4DBD4`"
             },
             "set_TargetRelativeHumidity": {
-              "title": "get_TargetTemperature **(control support)**",
+              "title": "set_TargetRelativeHumidity <b>(control support)</b>",
               "type": "number",
               "description": "offset to set current temperature S7 type `Real` e.g. `4` for `DB4DBD4` (can have same value as get_TargetTemperature)"
             },
             "get_CurrentHeatingCoolingState": {
-              "title": "get_CurrentHeatingCoolingState **(push support)**",
+              "title": "get_CurrentHeatingCoolingState <b>(push support)</b>",
               "type": "number",
               "description": "offset to get current heating/cooling state S7 type `Byte` e.g. `8` for `DB4DBB8`. When not defined fixed `1`: heating is used.<br>- `0`: inactive (shown as green in home app)<br>- `1`: heating (shown as orange in home app)<br>- `2`: cooling (shown as blue in home app)"
             },
             "get_TargetHeatingCoolingState": {
-              "title": "get_TargetHeatingCoolingState **(push support)**",
+              "title": "get_TargetHeatingCoolingState <b>(push support)</b>",
               "type": "number",
               "description": "offset to get target heating/cooling state. S7 type `Byte` e.g. `9` for `DB4DBB9`. When not defined fixed `3`: automatic is used.<br>- `0`: off<br>- `1`: heat<br>- `2`: cool<br>- `3`: automatic"
             },
             "set_TargetHeatingCoolingState": {
-              "title": "set_TargetHeatingCoolingState **(control support)**",
+              "title": "set_TargetHeatingCoolingState <b>(control support)</b>",
               "type": "number",
               "description": "offset to set target heating/cooling state. Can be identical with `get_TargetHeatingCoolingState`. Has to be defined when `get_TargetHeatingCoolingState` is defined. When not defined writes changes are ignored. S7 type `Byte` e.g. `9` for `DB4DBB9`.<br>- `0`: off<br>- `1`: heat<br>- `2`: cool<br>- `3`: automatic"
             },
             "get_CurrentHumidifierDehumidifierState": {
-              "title": "get_CurrentHumidifierDehumidifierState **(optional)** **(push support)**",
+              "title": "get_CurrentHumidifierDehumidifierState <b>(optional)</b> <b>(push support)</b>",
               "type": "number",
               "description": "offset to get current state. Default value `1:idle`. S7 type `Byte` e.g. `55` for `DB4DBD55` <br>- `0`: inactive <br>- `1`: idle <br>- `2`: humidifying <br>- `3`: dehumidifying"
             },
-            "mapGetCurrentHumidifierDehumidifierState **(optional)**": {
-              "title": "mapGetCurrentHumidifierDehumidifierState **(optional)**",
+            "mapGetCurrentHumidifierDehumidifierState": {
+              "title": "mapGetCurrentHumidifierDehumidifierState <b>(optional)</b>",
               "type": "array",
               "description": "define mapping array for `get_CurrentHumidifierDehumidifierState`. The PLC value is used as index into the table. e.g. `[1, 3]` which maps the PLC value `0->1 1->3` when the PLC supports only two states with `0:idle` and `1:dehumidifying`."
             },
             "default_TargetHumidifierDehumidifierState": {
-              "title": "default TargetHumidifierDehumidifierState **(optional)**",
+              "title": "default TargetHumidifierDehumidifierState <b>(optional)</b>",
               "type": "number",
               "description": "defines alternative value thats returned then `get_TargetHumidifierDehumidifierState` is not defined. Default value `0:auto`<br>- `0`: auto (humidifier or dehumidifier)<br>- `1`: humidifier<br>- `2`: dehumidifier"
             },
             "get_TargetHumidifierDehumidifierState": {
-              "title": "get_TargetHumidifierDehumidifierState **(optional)** **(push support)**",
+              "title": "get_TargetHumidifierDehumidifierState <b>(optional)</b> <b>(push support)</b>",
               "type": "number",
               "description": " offset to get current target state S7 type `Byte` e.g. `55` for `DB4DBD55`<br>- `0`: auto (humidifier or dehumidifier)<br>- `1`: humidifier<br>- `2`: dehumidifier"
             },
             "set_TargetHumidifierDehumidifierState": {
-              "title": "set_TargetHeatingCoolingState **(optional)** **(control support)**",
+              "title": "set_TargetHumidifierDehumidifierState <b>(optional)</b> <b>(control support)</b>",
               "type": "number",
               "description": "*offset to set current target state. Needs to be defined when `get_TargetHumidifierDehumidifierState` is set  S7 type `Byte` e.g. `55` for `DB4DBD55`<br>- `0`: auto (humidifier or dehumidifier)<br>- `1`: humidifier<br>- `2`: dehumidifier"
             },
-            "mapGetTargetHumidifierDehumidifierState **(optional)**": {
-              "title": "mapGetTargetHumidifierDehumidifierState",
+            "mapGetTargetHumidifierDehumidifierState": {
+              "title": "mapGetTargetHumidifierDehumidifierState <b>(optional)</b>",
               "type": "array",
               "items": {
                 "type": "integer",
                 "minimum": 0
               },
-              "description": "**(optional)** define mapping array for `get_TargetHumidifierDehumidifierState`. The PLC value is used as index into the table. e.g. `[2,1]` which maps the PLC value `0->1 1->2` when the PLC supports only one states with `0:dehumidifier 1:humidifier."
+              "description": "Define mapping array for `get_TargetHumidifierDehumidifierState`. The PLC value is used as index into the table. e.g. `[2,1]` which maps the PLC value `0->1 1->2` when the PLC supports only one states with `0:dehumidifier 1:humidifier."
             },
             "mapSetTargetHumidifierDehumidifierState": {
-              "title": "mapSetTargetHumidifierDehumidifierState **(optional)**",
+              "title": "mapSetTargetHumidifierDehumidifierState <b>(optional)</b>",
               "type": "array",
               "items": {
                 "type": "integer",
@@ -535,39 +537,39 @@
               "description": "define mapping array for `set_TargetHumidifierDehumidifierState`. The home app value is used as index into the table. e.g. `[2, 2, 2] writes always the value 2 to the plc regardless whats set in the home app"
             },
             "get_SwingMode": {
-              "title": "get_SwingMode **(optional)** **(push support)**",
+              "title": "get_SwingMode <b>(optional)</b> <b>(push support)</b>",
               "type": "number",
-              "description": "offset to get swing mode. S7 type `byte` e.g. `8` for `DB4DBB8`.<br>- `0`: swing disabled<br>- `1`: swing enabled"
+              "description": "offset to get swing mode. S7 type `Byte` e.g. `8` for `DB4DBB8`.<br>- `0`: swing disabled<br>- `1`: swing enabled"
             },
             "set_SwingMode": {
-              "title": "set_SwingMode **(optional but required when `get_SwingMode` is defined)** **(push support)**",
+              "title": "set_SwingMode <b>(optional but required when `get_SwingMode` is defined)</b> <b>(push support)</b>",
               "type": "number",
-              "description": "offset to set swing mode. S7 type `byte` e.g. `9` for `DB4DBB9`. <br>- `0`: swing disabled<br>- `1`: swing enabled"
+              "description": "offset to set swing mode. S7 type `Byte` e.g. `9` for `DB4DBB9`. <br>- `0`: swing disabled<br>- `1`: swing enabled"
             },
             "get_WaterLevel": {
-              "title": "get_WaterLevel **(optional)** **(push support)**",
+              "title": "get_WaterLevel <b>(optional)</b> <b>(push support)</b>",
               "type": "number",
               "description": "offset to get water level. S7 type `Real` e.g. `8` for `DB4DBD8`."
             },
             "get_CurrentPosition": {
-              "title": "get_CurrentPosition **(push support)**",
+              "title": "get_CurrentPosition <b>(push support)</b>",
               "type": "number",
               "description": "offset to get current position `0:closed 100:open` S7 type `Byte` e.g. `0` for `DB4DBB0`<br>- `0`: closed<br>- `in between`: partly open<br>- `100`: open"
             },
             "invertPosition": {
-              "title": "invertPosition **(optional)**",
+              "title": "invertPosition <b>(optional)</b>",
               "type": "boolean",
               "placeholder": false,
               "description": "set to `true` to inverts the values of current and target position from `0:closed 100:open` to `100:closed 0:open`"
             },
             "forceCurrentPosition": {
-              "title": "forceCurrentPosition **(optional)**",
+              "title": "forceCurrentPosition <b>(optional)</b>",
               "type": "boolean",
               "placeholder": false,
               "description": " when set to `true` the position set by `set_TargetPosition` is directly used as current position. By this it seems in tha home app as the target position was directly reached. This is recommended when not using `adaptivePolling` or pushing the value from the plc."
             },
             "mapGetCurrentPosition": {
-              "title": "mapGetCurrentPosition **(optional)**",
+              "title": "mapGetCurrentPosition <b>(optional)</b>",
               "type": "array",
               "items": {
                 "type": "integer",
@@ -576,27 +578,27 @@
               "description": "define mapping array for get position. The PLC value is used as index into the table. e.g. `[0, 25, 100]` which maps the PLC value `0->0 1->25 2->100` this this is useful e.g. for window open state."
             },
             "get_TargetPosition": {
-              "title": "get_TargetPosition **(optional)** **(push support)**",
+              "title": "get_TargetPosition <b>(optional)</b> <b>(push support)</b>",
               "type": "number",
               "description": "offset to get target position S7 type `Byte` e.g. `1` for `DB4DBB1` (can have same value as set_TargetPosition)<br>- `0`: closed<br>- `in between`: partly open<br>- `100`: open"
             },
             "set_TargetPosition": {
-              "title": "set_TargetPosition **(optional)** **(control support)**",
+              "title": "set_TargetPosition <b>(optional)</b> <b>(control support)</b>",
               "type": "number",
               "description": "offset to set current position `0:closed 100:open` S7 type `Byte` e.g. `2` for `DB4DBB2` (can have same value as get_TargetPosition)<br>- `0`: closed<br>- `in between`: partly open<br>- `100`: open"
             },
             "get_PositionState": {
-              "title": "get_PositionState **(optional)** **(push support)**",
+              "title": "get_PositionState <b>(optional)</b> <b>(push support)</b>",
               "type": "number",
               "description": "offset to current movement state if not defined fixed `2`is returned S7 type `Byte` e.g. `3` for `DB4DBB3`<br>- `0`: down<br>- `1`: up<br>- `2`: stop"
             },
             "set_HoldPosition": {
-              "title": "set_HoldPosition **(optional)** **(control support)**",
+              "title": "set_HoldPosition <b>(optional)</b> <b>(control support)</b>",
               "type": "number",
-              "description": "offset and bit set to 1 to stop movement. (Seems not to be used by HomeApp) when not defined writes will be ignoredS7 type `Bool` **PLC has to set to 0** e.g. `55.1` for `DB4DBX55.1`"
+              "description": "offset and bit set to 1 to stop movement. (Seems not to be used by HomeApp) when not defined writes will be ignoredS7 type `Bool` e.g. `55.1` for `DB4DBX55.1` <br><b>NOTE:</b>PLC has to set to 0 afer handling the request."
             },
             "get_OccupancyDetected": {
-              "title": "get_OccupancyDetected **(push support)**",
+              "title": "get_OccupancyDetected <b>(push support)</b>",
               "type": "number",
               "description": "offset and bit get the current status S7 type `Bool` e.g. `55.0` for `DB4DBX55.0`<br>- `false`: no occupancy<br>- `true`: occupancy detected"
             },
@@ -607,7 +609,7 @@
               "description": "when enabled it inverts the logic of get_OccupancyDetected to <br>`false:motion detected` and `true:no motion`."
             },
             "get_MotionDetected": {
-              "title": "get_MotionDetected **(push support)**",
+              "title": "get_MotionDetected <b>(push support)</b>",
               "type": "number",
               "description": "offset and bit get the current status S7 type `Bool` e.g. `55.0` for `DB4DBX55.0`<br>- `false`: no occupancy<br>- `true`: occupancy detected"
             },
@@ -618,7 +620,7 @@
               "description": "when enabled it inverts the logic of get_MotionDetected to <br>`false:closed` and `true:no motion`."
             },
             "get_ContactSensorState": {
-              "title": "get_ContactSensorState **(push support)**",
+              "title": "get_ContactSensorState <b>(push support)</b>",
               "type": "number",
               "description": "offset and bit get the current status S7 type `Bool` e.g. `55.0` for `DB4DBX55.0`<br>- `false`: closed<br>- `true`: open"
             },
@@ -629,7 +631,7 @@
               "description": "when enabled it inverts the logic of get_ContactSensorState to <br>`false:open` and `true:closed."
             },
             "get_LeakDetected": {
-              "title": "get_LeakDetected **(push support)**",
+              "title": "get_LeakDetected <b>(push support)</b>",
               "type": "number",
               "description": "offset and bit get the current status S7 type `Bool` e.g. `55.0` for `DB4DBX55.0`<br>- `false`: no leak detected<br>- `true`: leak detected"
             },
@@ -640,47 +642,47 @@
               "description": "when enabled it inverts the logic of get_ContactSensorState to <br>`false:leak detected` and `true:no leak detected."
             },
             "get_SetDuration": {
-              "title": "get_SetDuration **(push support)**",
+              "title": "get_SetDuration <b>(push support)</b>",
               "type": "number",
               "description": "offset to get duration 0..3600 sec S7 type `Time` e.g. `10` for `DB4DBD10`"
             },
             "set_SetDuration": {
-              "title": "set_SetDuration **(control support)**",
+              "title": "set_SetDuration <b>(control support)</b>",
               "type": "number",
               "description": "offset to set duration 0..3600 sec S7 type `Time` e.g. `14` for `DB4DBD10`"
             },
             "get_RemainingDuration": {
-              "title": "get_RemainingDuration **(push support)**",
+              "title": "get_RemainingDuration <b>(push support)</b>",
               "type": "number",
               "description": "offset to get remaining duration 0..3600 sec S7 type `Time` e.g. `18` for `DB4DBD10`"
             },
             "get_CurrentAmbientLightLevel": {
-              "title": "get_CurrentAmbientLightLevel **(push support)**",
+              "title": "get_CurrentAmbientLightLevel <b>(push support)</b>",
               "type": "number",
               "description": "offset to get current illumination in LUX S7 type `Real` value limited to 0.0001 ~ 100,000   e.g. `55` for `DB4DBD55`"
             },
             "get_CurrentAmbientLightLevelDInt": {
-              "title": "get_CurrentAmbientLightLevelDInt **(push support)**",
+              "title": "get_CurrentAmbientLightLevelDInt <b>(push support)</b>",
               "type": "number",
               "description":  "offset to get current illumination in LUX S7 type `DInt` value limited to 0.0001 ~ 100,000   e.g. `55` for `DB4DBD55`"
             },
             "get_SecuritySystemCurrentState": {
-              "title": "get_SecuritySystemCurrentState **(push support)**",
+              "title": "get_SecuritySystemCurrentState <b>(push support)</b>",
               "type": "number",
               "description":  "offset to current security system state S7 type `Byte` e.g. `3` for `DB4DBB3` <br> - `0`: armed stay at home <br> - `1`: armed away from home <br> - `2`: armed night <br> - `3`: disarmed <br> - `4`: alarm triggered`"
             },
             "get_SecuritySystemTargetState": {
-              "title": "get_SecuritySystemTargetState **(push support)**",
+              "title": "get_SecuritySystemTargetState <b>(push support)</b>",
               "type": "number",
               "description":  "offset to set target security system state S7 type `Byte` e.g. `5` for `DB4DBB4` <br> - `0`: armed stay at home <br> - `1`: armed away from home <br> - `2`: armed night <br> - `3`: disarmed"
             },
             "set_SecuritySystemTargetState": {
-              "title": "set_SecuritySystemTargetState **(control support)**",
+              "title": "set_SecuritySystemTargetState <b>(control support)</b>",
               "type": "number",
               "description":  "ooffset to set target security system state S7 type `Byte` e.g. `6` for `DB4DBB6` <br> - `0`: armed stay at home <br> - `1`: armed away from home <br> - `2`: armed night <br> - `3`: disarmed"
             },
             "mapGetSecuritySystemCurrentState": {
-              "title": "mapGetSecuritySystemCurrentState **(optional)**",
+              "title": "mapGetSecuritySystemCurrentState <b>(optional)</b>",
               "type": "array",
               "items": {
                 "type": "integer",
@@ -689,7 +691,7 @@
               "description":  "define mapping array for get security system state. The PLC value is used as index into the table. e.g. `[3, 1]` which maps the PLC value `0->3 1->2` when the PLC supports only two states with `0:disarmed` and `1:armed` and `2:alarm`."
             },
             "mapSetSecuritySystemTargetState": {
-              "title": "mapSetSecuritySystemTargetState **(optional)**",
+              "title": "mapSetSecuritySystemTargetState <b>(optional)</b>",
               "type": "array",
               "items": {
                 "type": "integer",
@@ -698,7 +700,7 @@
               "description":  "define mapping array for set security system state. The home app value is used as index into the table. e.g. `[1, 1, 1, 0, 2]` which maps the PLC value `0->1 1->1 2->1, 3->0, 4->2` when the PLC supports only two states with `0:disarmed` and `1:armed` and `2:alarm`."
             },
             "mapGetSecuritySystemTargetState": {
-              "title": "mapGetSecuritySystemTargetState **(optional)**",
+              "title": "mapGetSecuritySystemTargetState <b>(optional)</b>",
               "type": "array",
               "items": {
                 "type": "integer",
@@ -707,43 +709,43 @@
               "description":  "define mapping array for get security system state. The PLC value is used as index into the table. e.g. `[3, 1]` which maps the PLC value `0->3 1->2` when the PLC supports only two states with `0:disarmed` and `1:armed` and `2:alarm`."
             },                        
             "isEvent": {
-              "title": "isEvent **(optional)**",
+              "title": "isEvent <b>(optional)</b>",
               "type": "number",
-              "description":  "ooffset and bit that is polled by homebridge-plc. **PLC has to set to `true`.** When `true` the event is read from `get_ProgrammableSwitchEvent` and set to `false` by homebirdge-plc to confirm that the event is handled. S7 type `Bool` e.g. `55.1` for `DB4DBX55.1` (polling only, not used for push)"
+              "description":  "offset and bit that is polled by homebridge-plc. <br><b>NOTE:</b>PLC has to set to `true`. When polled with value `true` the actual event is read from `get_ProgrammableSwitchEvent` and this flas is set to `false` by homebirdge-plc to confirm that the event is handled. S7 type `Bool` e.g. `55.1` for `DB4DBX55.1` <b>(polling only, not used for push)</b>"
             },
             "get_LockCurrentState": {
-              "title": "get_LockCurrentState **(push support)** **(push support)**",
+              "title": "get_LockCurrentState <b>(push support)</b> <b>(push support)</b>",
               "type": "number",
               "description":  "offset to read current state current state S7 type `Bool` .g. `3.1` for `DB4DBB3`<br> - `false`: secured<br> - `true`: unsecured"
             },            
             "forceCurrentLockState": {
-              "title": "forceCurrentLockState **(optional)**",
+              "title": "forceCurrentLockState <b>(optional)</b>",
               "type": "boolean",
               "placeholder": false,
               "description":  "when set to `true` the state set by `set_LockTargetState` is directly used as current state. By this it seems in the home app as the target state was directly reached. This is recommended when not using `enablePolling` or pushing the value from the plc."
             },                  
             "get_LockTargetState": {
-              "title": "get_LockTargetState **(push support)**",
+              "title": "get_LockTargetState <b>(push support)</b>",
               "type": "number",
               "description":  "offset to read current state current state S7 type `Byte` e.g. `3` for `DB4DBB3`<br> - `0`: unsecured<br> - `1`: secured<br> - `2`: jammed<br> - `3`: unknown"
             },
             "set_LockTargetState": {
-              "title": "set_LockTargetState **(control support)**",
+              "title": "set_LockTargetState <b>(control support)</b>",
               "type": "number",
               "description":  "offset to write target state current state S7 type `Byte` e.g. `3` for `DB4DBB3`<br> - `0`: unsecured<br> - `1`: secured"
             },
             "get_LockCurrentStateBool": {
-              "title": "get_LockCurrentStateBool **(push support)**",
+              "title": "get_LockCurrentStateBool <b>(push support)</b>",
               "type": "number",
               "description":  "offset to read current state current state S7 type `Bool` .g. `3.1` for `DB4DBB3`<br> - `false`: secured<br> - `true`: unsecured"
             },
             "invertLockState": {
-              "title": "invertLockState **(optional)**",
+              "title": "invertLockState <b>(optional)</b>",
               "type": "boolean",
-              "description":  "when set to `true` all states are inverted (current and target state) `false`: **unsecured** and `true`: **secured**"
+              "description":  "when set to `true` all states are inverted (current and target state) <br> - `false`: unsecured<br> - `true`: secured"
             },
             "get_LockTargetStateBool": {
-              "title": "get_LockTargetStateBool **(push support)**",
+              "title": "get_LockTargetStateBool <b>(push support)</b>",
               "type": "number",
               "description":  "offset to read target state current state S7 type `Bool` e.. `3.1` for `DB4DBB3`<br> - `false`: secured<br> - `true`: unsecured"
             },
@@ -753,7 +755,7 @@
 
             
             "set_LockTargetStateBool": {
-              "title": "Single Bit mode: offset set_LockTargetStateBool **(control support)**",
+              "title": "Single Bit mode: offset set_LockTargetStateBool <b>(control support)</b>",
               "type": "number",
               "description": "Soffset to write target state current state S7 type `Bool` e.g. `3.1` for `DB4DBB3`<br> - `false`: secured<br> - `true`: unsecured",
               "condition": {
@@ -761,9 +763,9 @@
               }
             },
             "set_LockTargetStateBool_Secured": {
-              "title": "Separate Bits mode: offset set_LockTargetStateBool_Secured **(control support)**",
+              "title": "Separate Bits mode: offset set_LockTargetStateBool_Secured <b>(control support)</b>",
               "type": "number",
-              "description": "offset and bit set to `true` when switching to target state secured S7 type `Bool` **PLC has to set to `false`** e.g. `3.3` for `DB4DBX55.1`",
+              "description": "offset and bit set to `true` when switching to target state secured S7 type `Bool` e.g. `3.3` for `DB4DBX3.3` <br><b>NOTE:</b>PLC has to set to 0 after handling the request.",
               "condition": {
                 "functionBody": "return (!model.accessories[arrayIndices[0]].set_LockTargetStateBool);"
               }
@@ -771,49 +773,49 @@
             "set_LockTargetStateBool_Unsecured": {
               "title": "Separate Bits mode: offset set_LockTargetStateBool_Unsecured",
               "type": "number",
-              "description": "offset and bit set to `true` when switching to target state unsecured S7 type `Bool` **PLC has to set to `false`** e.g. `3.4` for `DB4DBX55.2`",
+              "description": "offset and bit set to `true` when switching to target state unsecured S7 type `Bool` e.g. `3.3` for `DB4DBX3.3` <br><b>NOTE:</b>PLC has to set to 0 after handling the request.",
               "condition": {
                 "functionBody": "return (!model.accessories[arrayIndices[0]].set_LockTargetStateBool);"
               }
             },
             "get_CurrentDoorState": {
-              "title": "get_CurrentDoorState **(push support)** **(push support)**",
+              "title": "get_CurrentDoorState <b>(push support)</b> <b>(push support)</b>",
               "type": "number",
               "description":  "offset to read current state current state S7 type `Byte` e.g. `3` for `DB4DBB3`<br> - `0`: open<br> - `1`: closed<br> - `2`: opening<br> - `3`: closing<br> - `4`: stopped"
             },            
             "forceCurrentDoorState": {
-              "title": "forceCurrentDoorState **(optional)**",
+              "title": "forceCurrentDoorState <b>(optional)</b>",
               "type": "boolean",
               "placeholder": false,
               "description":  "when set to `true` the position set by `set_TargetDoorState` is directly used as current state. By this it seems in the home app as the target state was directly reached. This is recommended when not using `enablePolling` or pushing the value from the plc."
             },   
             "get_TargetDoorState": {
-              "title": "get_TargetDoorState **(push support)**",
+              "title": "get_TargetDoorState <b>(push support)</b>",
               "type": "number",
               "description":  "offset to read target state current state S7 type `Byte` e.g. `3` for `DB4DBB3`<br> - `0`: open<br> - `1`: closed"
             },
             "set_TargetDoorState": {
-              "title": "set_TargetDoorState **(control support)**",
+              "title": "set_TargetDoorState <b>(control support)</b>",
               "type": "number",
               "description":  "offset to write target state current state S7 type `Byte` e.g. `3` for `DB4DBB3`<br> - `0`: open<br> - `1`: closed"
             },            
             "get_SmokeDetected": {
-              "title": "get_SmokeDetected **(push support)**",
+              "title": "get_SmokeDetected <b>(push support)</b>",
               "type": "number",
-              "description":  "**(push support)** offset and bit to smoke detection. S7 type `Bool` e.g. `55.1` for `DB4DBX55.1`<br> - `false`: ok<br> - `true`: smoke detected"
+              "description":  "<b>(push support)</b> offset and bit to smoke detection. S7 type `Bool` e.g. `55.1` for `DB4DBX55.1`<br> - `false`: ok<br> - `true`: smoke detected"
             },
             "get_CurrentFanState": {
-              "title": "get_CurrentFanState **(optional)** **(push support)**",
+              "title": "get_CurrentFanState <b>(optional)</b> <b>(push support)</b>",
               "type": "number",
-              "description":  "**(push support)** offset to get current heating/cooling state S7 type `Byte` e.g. `8` for `DB4DBB8`.<br> - `0`: inactive<br> - `1`: idle<br> - `2`: blowing"
+              "description":  "<b>(push support)</b> offset to get current heating/cooling state S7 type `Byte` e.g. `8` for `DB4DBB8`.<br> - `0`: inactive<br> - `1`: idle<br> - `2`: blowing"
             },
             "default_CurrentFanState": {
-              "title": "default_CurrentFanState **(optional)**",
+              "title": "default_CurrentFanState <b>(optional)</b>",
               "type": "number",
               "description":  "defines alternative value thats returned then `get_CurrentFanState` is not defined. Default value `0:inactive"
             },
             "mapCurrentFanStateGet": {
-              "title": "mapCurrentFanStateGet **(optional)**",
+              "title": "mapCurrentFanStateGet <b>(optional)</b>",
               "type": "array",
               "items": {
                 "type": "integer",
@@ -822,22 +824,22 @@
               "description": "define mapping array for `get_CurrentFanState`. The PLC value is used as index into the table. e.g. `[0, 2]` which maps the PLC value `0->1 1->2` when the PLC supports only two states with `0:idle` and `1:blowing`."
             },
             "default_TargetFanState": {
-              "title": "default_TargetFanState **(optional)**",
+              "title": "default_TargetFanState <b>(optional)</b>",
               "type": "number",
               "description":  "defines alternative value thats returned then `get_TargetFanState` is not defined. Default value `0:manual`<br> - `0`: manual<br> - `1`: automatic"
             },
             "get_TargetFanState": {
-              "title": "get_TargetFanState **(push support)**",
+              "title": "get_TargetFanState <b>(push support)</b>",
               "type": "number",
               "description":  "offset to get target heating/cooling state. S7 type `Byte` e.g. `9` for `DB4DBB9`. When not defined fixed `1`: automatic is used."
             },
             "set_TargetFanState": {
-              "title": "set_TargetFanState **(optional but required when `get_TargetFanState` is defined)** **(control support)**",
+              "title": "set_TargetFanState <b>(optional but required when `get_TargetFanState` is defined)</b> <b>(control support)</b>",
               "type": "number",
               "description":  "offset to get target heating/cooling state. S7 type `Byte` e.g. `9` for `DB4DBB9`. When not defined fixed `1`: automatic is used.<br> - `0`: manual<br> - `1`: automatic"
             },  
             "mapTargetFanStateGet": {
-              "title": "mapTargetFanStateGet **(optional)** **(push support)**",
+              "title": "mapTargetFanStateGet <b>(optional)</b> <b>(push support)</b>",
               "type": "array",
               "items": {
                 "type": "integer",
@@ -846,7 +848,7 @@
               "description": "define mapping array for `get_TargetFanState`. The PLC value is used as index into the table. e.g. `[1, 0]` which maps the PLC value `0->1 1->0` when the PLC supports only two states with `0:automatic` and `1:manual`."
             },
             "mapTargetFanStateSet": {
-              "title": "mapTargetFanStateSet **(optional)**",
+              "title": "mapTargetFanStateSet <b>(optional)</b>",
               "type": "array",
               "items": {
                 "type": "integer",
@@ -855,7 +857,7 @@
               "description": "The home app value is used as index into the table. e.g. `[1, 0]` which maps the PLC value `0->1 1->0` when the PLC supports only two states with `0:automatic` and `1:manual`."
             },
             "get_RotationSpeedByte": {
-              "title": "get_RotationSpeedByte **(optional)** **(push support)**",
+              "title": "get_RotationSpeedByte <b>(optional)</b> <b>(push support)</b>",
               "type": "number",
               "description": "offset to get rotation speed state S7 type `Byte` e.g. `8` for `DB4DBB8`.",
               "condition": {
@@ -863,7 +865,7 @@
               }
             },
             "set_RotationSpeedByte": {
-              "title": "set_RotationSpeedByte **(optional but required when `set_RotationSpeedByte` is defined)** **(push support)**",
+              "title": "set_RotationSpeedByte <b>(optional but required when `set_RotationSpeedByte` is defined)</b> <b>(push support)</b>",
               "type": "number",
               "description": "offset to get set speed state. S7 type `Byte` e.g. `9` for `DB4DBB9`.",
               "condition": {
@@ -872,7 +874,7 @@
             },
 
             "get_RotationSpeed": {
-              "title": "get_RotationSpeed **(optional)** **(push support)**",
+              "title": "get_RotationSpeed <b>(optional)</b> <b>(push support)</b>",
               "type": "number",
               "description": "offset to get rotation speed state S7 type `Real` e.g. `8` for `DB4DBB8`.",
               "condition": {
@@ -880,7 +882,7 @@
               }
             },
             "set_RotationSpeed": {
-              "title": "set_RotationSpeed **(optional but required when `get_RotationSpeed` is defined)** **(push support)**",
+              "title": "set_RotationSpeed <b>(optional but required when `get_RotationSpeed` is defined)</b> <b>(push support)</b>",
               "type": "number",
               "description": "offset to get set speed state. S7 type `Real` e.g. `9` for `DB4DBB9`.",
               "condition": {
@@ -891,17 +893,17 @@
 
 
             "get_RotationDirection": {
-              "title": "get_RotationDirection **(optional)** **(push support)**",
+              "title": "get_RotationDirection <b>(optional)</b> <b>(push support)</b>",
               "type": "number",
               "description":  "offset to get rotation direction state. S7 type `Byte` e.g. `9` for `DB4DBB9`. When not defined fixed `0`: clockwise is used.<br>- `0`: clockwise<br>- `1`: counter clockwise"
             },
             "set_RotationDirection": {
-              "title": "set_RotationDirection **(optional)** **(control support)**",
+              "title": "set_RotationDirection <b>(optional)</b> <b>(control support)</b>",
               "type": "number",
               "description":  "offset to set rotation directionstate. S7 type `Byte` e.g. `9` for `DB4DBB9`.<br> - `0`: clockwise<br> - `1`: counter clockwise"
             },  
             "mapRotationDirectionGet": {
-              "title": "mapRotationDirectionGet **(optional)**",
+              "title": "mapRotationDirectionGet <b>(optional)</b>",
               "type": "array",
               "items": {
                 "type": "integer",
@@ -910,7 +912,7 @@
               "description": "define mapping array for `get_RotationDirection`. The PLC value is used as index into the table. e.g. `[1, 0]` inverts the direction"
             },
             "mapRotationDirectionSet": {
-              "title": "mapRotationDirectionSet **(optional)**",
+              "title": "mapRotationDirectionSet <b>(optional)</b>",
               "type": "array",
               "items": {
                 "type": "integer",
@@ -919,17 +921,17 @@
               "description": "define mapping array for `set_RotationDirection`. The home app value is used as index into the table. e.g. `[1, 0]` inverts the direction"
             },
             "get_CurrentAirPurifierState": {
-              "title": "get_CurrentAirPurifierState **(optional)** **(push support)**",
+              "title": "get_CurrentAirPurifierState <b>(optional)</b> <b>(push support)</b>",
               "type": "number",
               "description":  "offset to get current heating/cooling state S7 type `Byte` e.g. `8` for `DB4DBB8`.<br> - `0`: inactive<br> - `1`: idle<br> - `2`: purifying air"
             },
             "default_CurrentAirPurifierState": {
-              "title": "default_CurrentAirPurifierState **(optional)**",
+              "title": "default_CurrentAirPurifierState <b>(optional)</b>",
               "type": "number",
               "description":  "defines alternative value thats returned then `get_CurrentAirPurifierState` is not defined. Default value `0:inactive"
             },
             "mapCurrentAirPurifierState": {
-              "title": "mapCurrentAirPurifierState **(optional)**",
+              "title": "mapCurrentAirPurifierState <b>(optional)</b>",
               "type": "array",
               "items": {
                 "type": "integer",
@@ -938,22 +940,22 @@
               "description": "define mapping array for `get_CurrentFanState`. The PLC value is used as index into the table. e.g. `[0, 2]` which maps the PLC value `0->1 1->2` when the PLC supports only two states with `0:idle` and `1:blowing`."
             },
             "default_TargetAirPurifierState": {
-              "title": "default_TargetAirPurifierState **(optional)**",
+              "title": "default_TargetAirPurifierState <b>(optional)</b>",
               "type": "number",
               "description":  "defines alternative value thats returned then `get_TargetAirPurifierState` is not defined. Default value `0:manual`<br> - `0`: manual<br> - `1`: automatic"
             },
             "get_TargetAirPurifierState": {
-              "title": "get_TargetAirPurifierState **(optional)** **(push support)**",
+              "title": "get_TargetAirPurifierState <b>(optional)</b> <b>(push support)</b>",
               "type": "number",
               "description":  "offset to get target heating/cooling state. S7 type `Byte` e.g. `9` for `DB4DBB9`. When not defined fixed `1`: automatic is used.<br> - `0`: manual<br> - `1`: automatic"
             },
             "set_TargetAirPurifierState": {
-              "title": "set_TargetAirPurifierState **(optional but required when `get_TargetAirPurifierState` is defined)** **(control support)**",
+              "title": "set_TargetAirPurifierState <b>(optional but required when `get_TargetAirPurifierState` is defined)</b> <b>(control support)</b>",
               "type": "number",
               "description":  "offset to get target heating/cooling state. S7 type `Byte` e.g. `9` for `DB4DBB9`. When not defined fixed `1`: automatic is used.<br> - `0`: manual<br> - `1`: automatic"
             },  
             "mapTargetAirPurifierStateGet": {
-              "title": "mapTargetAirPurifierStateGet **(optional)**",
+              "title": "mapTargetAirPurifierStateGet <b>(optional)</b>",
               "type": "array",
               "items": {
                 "type": "integer",
@@ -962,7 +964,7 @@
               "description": "define mapping array for `get_TargetAirPurifierState`. The PLC value is used as index into the table. e.g. `[1, 0]` which maps the PLC value `0->1 1->0` when the PLC supports only two states with `0:automatic` and `1:manual`."
             },
             "mapTargetAirPurifierStateSet": {
-              "title": "mapTargetAirPurifierStateSet **(optional)**",
+              "title": "mapTargetAirPurifierStateSet <b>(optional)</b>",
               "type": "array",
               "items": {
                 "type": "integer",
@@ -971,27 +973,27 @@
               "description": "define mapping array for `set_TargetAirPurifierState`. The home app value is used as index into the table. e.g. `[1, 0]` which maps the PLC value `0->1 1->0` when the PLC supports only two states with `0:automatic` and `1:manual`"
             },                                 
             "get_FilterChangeIndication": {
-              "title": "get_FilterChangeIndication **(push support)**",
+              "title": "get_FilterChangeIndication <b>(push support)</b>",
               "type": "number",
               "description":  "offset and bit to filter change indication S7 type `Bool` e.g. `55.3` for `DB4DBX55.3 <br> - `0`: filter ok<br> - `true`: change filter"
             },
             "get_FilterLifeLevel": {
-              "title": "get_FilterLifeLevel **(optional)** **(push support)**",
+              "title": "get_FilterLifeLevel <b>(optional)</b> <b>(push support)</b>",
               "type": "number",
               "description":  "offset and bit to filter live level S7 type `bate` e.g. `56` for `DB4DBX56<br> - `0`: change filter<br> - `100`: filter is new"
             },       
             "set_ResetFilterIndication": {
-              "title": "set_ResetFilterIndication **(optional but required when `get_TargetAirPurifierState` is defined)** **(control support)**",
+              "title": "set_ResetFilterIndication <b>(optional but required when `get_TargetAirPurifierState` is defined)</b> <b>(control support)</b>",
               "type": "number",
-              "description":  "offset and bit to filter change indication S7 type `Bool` **PLC has to set to 0** after detecting change to true via homebridge e.g. `55.4` for `DB4DBX55.4"
+              "description":  "offset and bit to filter change indication S7 type `Bool` e.g. `55.4` for `DB4DBX55.4 <br><b>NOTE:</b>PLC has to set to 0 after handling the request."
             },
             "get_StatusLowBattery": {
-              "title": "get_StatusLowBattery **(optional)** **(push support)**",
+              "title": "get_StatusLowBattery <b>(optional)</b> <b>(push support)</b>",
               "type": "number",
               "description":  "offset and bit to battery low detection. (Home app does not inform with push notification) S7 type `Bool` e.g. `55.3` for `DB4DBX55.3`<br> - `false`: ok<br> - `true`: battery low"
             },
             "get_StatusTampered": {
-              "title": "get_StatusTampered **(optional)** **(push support)**",
+              "title": "get_StatusTampered <b>(optional)</b> <b>(push support)</b>",
               "type": "number",
               "description":  "offset and bit to tamper detection. (Home app shows this only within the options) S7 type `Bool` e.g. `55.2` for `DB4DBX55.2`<br> - `false`: ok<br> - `true`: tampered"
             }
