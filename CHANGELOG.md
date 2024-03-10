@@ -1,6 +1,6 @@
 # Changelog
 
-## [2.0.0-beta.14] 2023-09-12
+## [2.0.1] 2023-09-12
 ⚠️⚠️⚠️**Action required breaking changes!** ⚠️⚠️⚠️
 - Version 2.0.x has changed the name of some configurations.
 - Please stay on version 1.0.x if you do not want to adapt your configuration.
@@ -412,4 +412,3 @@ Therefore the issue is fixed for shure by deinstalling and installing the homebr
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
-
