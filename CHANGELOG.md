@@ -1,9 +1,107 @@
 # Changelog
 
+## [2.0.1] 2023-09-12
+⚠️⚠️⚠️**Action required breaking changes!** ⚠️⚠️⚠️
+- Version 2.0.x has changed the name of some configurations.
+- Please stay on version 1.0.x if you do not want to adapt your configuration.
+
+### Notable changes
+- Configuration via GUI
+
+### Changed
+In order to support configuration by GUI some configuration options needs to be renamed.
+
+- `PLC_LightBulb`:
+  - renamed option `minValue` -> `minBrightnessValue` and changed default value from `20` to `0`
+  - renamed option `maxValue` -> `maxBrightnessValue`
+  - renamed option `minStep`  -> `minBrightnessStep`
+- `PLC_LightBulb`, `PLC_Outlet`, and `PLC_Switch`
+  - renamed options for separate set and reset bits. (Single bit option `set_On` is still functional)
+  - renamed option `set_Off` -> `set_On_Reset` and `set_On` -> `set_On_Set`
+- `PLC_Fan`, `PLC_HumidifierDehumidifier`, `PLC_Faucet`, `PLC_Valve`
+  - renamed options for separate set and reset bits. (Single bit option `set_Active` is still functional)
+  - renamed option `set_Deactivate` -> `set_Active_Reset` and `set_Active` -> `set_Active_Set`
+- `PLC_TemperatureSensor`
+  - renamed option `minValue` -> `minTemperatureValue` and changed default value from `-50` to `-270`
+  - renamed option `maxValue` -> `maxTemperatureValue` and changed default value from `110` to `100`
+  - renamed option `minStep`  -> `minTemperatureStep`  and changed default value from `0.5` to `0.1`
+- `PLC_HumiditySensor`
+  - renamed option `minValue` -> `minHumidityValue`
+  - renamed option `maxValue` -> `maxHumidityValue`
+  - renamed option `minStep`  -> `minHumidityStep`
+- `PLC_Thermostat`
+  - renamed option `minValue` -> `minTargetTemperatureValue` and changed default value from `15` to `10`
+  - renamed option `maxValue` -> `maxTargetTemperatureValue` and changed default value from `27` to `38`
+  - renamed option `minStep`  -> `minTargetTemperatureStep`  and changed default value from `0.5` to `0.1`
+  - renamed option `minHumidityValue` -> `minTargetHumidityValue`
+  - renamed option `maxHumidityValue` -> `maxTargetHumidityValue`
+  - renamed option `minHumidityStep`  -> `minTargetHumidityStep`
+  - renamed option `mapGetCurrent` -> `mapGetCurrentHeatingCoolingState`
+  - renamed option `mapGetTarget`  -> `mapGetTargetHeatingCoolingState`
+  - renamed option `mapSetTarget`  -> `mapSetTargetHeatingCoolingState`
+- `PLC_SecuritySystem`
+  - renamed option `mapGetCurrent` -> `mapGetSecuritySystemCurrentState`
+  - renamed option `mapGetTarget`  -> `mapGetSecuritySystemTargetState`
+  - renamed option `mapSetTarget`  -> `mapSetSecuritySystemTargetState`
+  - the obsolete options `mapGet` and `mapSet` are no longer supported use above map functions.
+- `PLC_HumidifierDehumidifier`
+  - renamed option `mapGetCurrent` -> `mapGetCurrentHumidifierDehumidifierState`
+  - renamed option `mapGetTarget`  -> `mapGetTargetHumidifierDehumidifierState`
+  - renamed option `mapSetTarget`  -> `mapSetTargetHumidifierDehumidifierState`
+- `PLC_Window`, `PLC_WindowCovering`, `PLC_Door`
+  - removed option `mapGet`
+  - added option `mapGetCurrentPosition`
+  - added option `mapGetTargetPosition`
+  - added option `mapSetTargetPosition`
+  - renamed option `invert`  -> `invertPosition`
+- `PLC_LockMechanismBool`
+  - renamed option `invert` -> `invertLockState`
+  - renamed option `get_LockCurrentState` -> `get_LockCurrentStateBool`
+  - renamed option `get_LockTargetState` -> `get_LockTargetStateBool`
+  - renamed option `set_LockTargetState` -> `set_LockTargetStateBool`
+  - renamed option `set_Secured` -> `set_LockTargetStateBool_Secured`
+  - renamed option `set_Unsecured` -> `set_LockTargetStateBool_Unsecured`
+  - renamed option `forceCurrentState` -> `forceCurrentLockState`
+- `PLC_LockMechanism`
+  - renamed option `forceCurrentState` -> `forceCurrentLockState`
+- `PLC_GarageDoorOpener`
+  - renamed option `forceCurrentState` -> `forceCurrentGarageDoorState`
+- `PLC_LockMechanismBool`
+  - renamed option `invert` -> `invertLockState`
+- `PLC_OccupancySensor`
+  - renamed option `invert` -> `invertOccupancy`
+- `PLC_MotionSensor`
+  - renamed option `invert` -> `invertMotionDetected`
+- `PLC_LeakSensor`
+  - renamed option `invert` -> `invertLeakDetected`
+- `PLC_ContactSensor`
+  - renamed option `invert` -> `invertContactSensorState`
+- `PLC_Fan`
+  - renamed option `mapGetCurrent` -> `mapCurrentFanStateGet`
+  - renamed option `mapGetTarget`  -> `mapTargetFanStateGet`
+  - renamed option `mapSetTarget`  -> `mapTargetFanStateSet`
+  - renamed option `mapDirectionGet`  -> `mapRotationDirectionGet`
+  - renamed option `mapDirectionSet`  -> `mapRotationDirectionSet`
+
+### Added
+- `PLC_Thermostat`
+  - option `minTemperatureValue`
+  - option `maxTemperatureValue`
+  - option `minTemperatureStep`
+  - option `minHumidityValue`
+  - option `maxHumidityValue`
+  - option `minHumidityStep`
+- `PLC_AirPurifier`
+- `PLC_FilterMaintenance`
+
+### Fixed
+- Data corruption during multiple SET operations e.g. close all blinds
+  - Synchronous execution of SET operations
+
 ## [1.0.40] 2023-09-12
 ### Fixed
 - Data corruption during multiple SET operations e.g. close all blinds
-  - Synchronous execution of SET oparations
+  - Synchronous execution of SET operations
 
 ## [1.0.39] 2022-09-28
 ### Fixed
@@ -314,4 +412,3 @@ Therefore the issue is fixed for shure by deinstalling and installing the homebr
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
-

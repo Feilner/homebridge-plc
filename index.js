@@ -37,10 +37,36 @@ PLC_Platform.prototype = {
       this.config.accessories.forEach((config, index) => {
           var accessoryNumber = index +1;
           var numberOfAccessories = this.config.accessories.length;
-          log.info("[" + String(accessoryNumber) + "/" + String(numberOfAccessories) + "] " + config.name + " (" +  config.accessory + ")" );
-          //call accessory construction
-          var accessory = new GenericPLCAccessory(this, config, accessoryNumber);
-          this.s7PlatformAccessories.push(accessory);
+
+
+          var removedOptions = ['minValue', 'maxValue', 'minStep', 'minHumidityValue', 'maxHumidityValue', 'minHumidityStep', 'mapGetCurrent', 'mapGetTarget', 'mapSetTarget', 'invert', 'set_Secured', 'set_Unsecured', 'forceCurrentState', 'set_Deactivate', 'set_Off', 'mapSet', 'mapGet'];
+          var removedOptionsLockMechanismBool = ['get_LockCurrentState', 'get_LockTargetState', 'set_LockTargetState', 'set_Secured', 'set_Unsecured'];
+
+          var hasRemovedOption = false;
+          removedOptions.forEach((item) => {
+            if (item in config) {
+              log.warn("[" + config.name + "] Parameter " + item + " was renamed please update your config");
+              hasRemovedOption = true;
+            }
+          });
+
+          if (config.accessory == 'PLC_LockMechanismBool') {
+            removedOptionsLockMechanismBool.forEach((item) => {
+              if (item in config) {
+                log.warn("[" + config.name + "] Parameter " + item + " was renamed please update your config");
+                hasRemovedOption = true;
+              }
+            });
+          }
+          if (hasRemovedOption) {
+                log.error("[" + String(accessoryNumber) + "/" + String(numberOfAccessories) + "] " + config.name + " (" +  config.accessory + ") needs update of config and was not added!" );
+          }
+          else {
+            log.info("[" + String(accessoryNumber) + "/" + String(numberOfAccessories) + "] " + config.name + " (" +  config.accessory + ")" );
+            //call accessory construction
+            var accessory = new GenericPLCAccessory(this, config, accessoryNumber);
+            this.s7PlatformAccessories.push(accessory);
+          }
       });
       callback(this.s7PlatformAccessories);
 
@@ -247,6 +273,7 @@ PLC_Platform.prototype = {
 };
 
 
+
 function GenericPLCAccessory(platform, config, accessoryNumber) {
   this.platform = platform;
   this.log = platform.log;
@@ -290,33 +317,9 @@ function GenericPLCAccessory(platform, config, accessoryNumber) {
     }
 
     this.accessory.addService(this.service);
-    if ('set_Off' in config) {
-      this.service.getCharacteristic(Characteristic.On)
-        .on('get', function(callback) {this.getBit(callback,
-          config.db,
-          Math.floor(config.get_On), Math.floor((config.get_On*10)%10),
-          'get On'
-        );}.bind(this))
-        .on('set', function(powerOn, callback) { this.setOnOffBit(powerOn, callback,
-          config.db,
-          Math.floor(config.set_On), Math.floor((config.set_On*10)%10),
-          Math.floor(config.set_Off), Math.floor((config.set_Off*10)%10),
-          'set On'
-        );}.bind(this));
-    } else {
-      this.service.getCharacteristic(Characteristic.On)
-        .on('get', function(callback) {this.getBit(callback,
-          config.db,
-          Math.floor(config.get_On), Math.floor((config.get_On*10)%10),
-          'get On'
-        );}.bind(this))
-        .on('set', function(powerOn, callback) { this.setBit(powerOn, callback,
-          config.db,
-          Math.floor(config.set_On), Math.floor((config.set_On*10)%10),
-          'set On'
-        );}.bind(this));
-    }
-
+    
+    this.initOn(true);
+    
     if (config.accessory == 'PLC_LightBulb') {
       if ('get_Brightness' in config) {
         this.service.getCharacteristic(Characteristic.Brightness)
@@ -330,11 +333,11 @@ function GenericPLCAccessory(platform, config, accessoryNumber) {
           config.set_Brightness,
           'set Brightness'
           );}.bind(this))
-          .setProps({
-            minValue: ('minValue' in config) ? config.minValue : 20,
-            maxValue: ('maxValue' in config) ? config.maxValue : 100,
-            minStep: config.minStep || 1
-        });
+        .setProps({
+          minValue: ('minBrightnessValue' in config) ? config.minBrightnessValue : 0,
+          maxValue: ('maxBrightnessValue' in config) ? config.maxBrightnessValue : 100,
+          minStep: ('minBrightnessStep' in config) ? config.minBrightnessStep : 1
+          });
       }
     }
   }
@@ -346,35 +349,9 @@ function GenericPLCAccessory(platform, config, accessoryNumber) {
     this.service =  new Service.TemperatureSensor(this.name);
     this.accessory.addService(this.service);
 
-    this.service.getCharacteristic(Characteristic.CurrentTemperature)
-    .on('get', function(callback) {this.getReal(callback,
-      config.db,
-      config.get_CurrentTemperature,
-      'get CurrentTemperature'
-      );}.bind(this))
-    .setProps({
-      minValue: ('minValue' in config) ? config.minValue : -50,
-      maxValue: ('maxValue' in config) ? config.maxValue : 110,
-      minStep: config.minStep || 0.5
-    });
-
-    if ('get_StatusTampered' in config) {
-      this.service.getCharacteristic(Characteristic.StatusTampered)
-      .on('get', function(callback) {this.getBit(callback,
-        config.db,
-        Math.floor(config.get_StatusTampered), Math.floor((config.get_StatusTampered*10)%10),
-        'get StatusTampered'
-      );}.bind(this));
-    }
-
-    if ('get_StatusLowBattery' in config) {
-      this.service.getCharacteristic(Characteristic.StatusLowBattery)
-      .on('get', function(callback) {this.getBit(callback,
-        config.db,
-        Math.floor(config.get_StatusLowBattery), Math.floor((config.get_StatusLowBattery*10)%10),
-        'get StatusLowBattery'
-      );}.bind(this));
-    }
+    this.initCurrentTemperature(true);
+    this.initStatusTampered();
+    this.initStatusLowBattery();
   }
 
   // INIT handling ///////////////////////////////////////////////
@@ -384,34 +361,9 @@ function GenericPLCAccessory(platform, config, accessoryNumber) {
     this.service =  new Service.HumiditySensor(this.name);
     this.accessory.addService(this.service);
 
-    this.service.getCharacteristic(Characteristic.CurrentRelativeHumidity)
-    .on('get', function(callback) {this.getReal(callback,
-      config.db,
-      config.get_CurrentRelativeHumidity,
-      'get CurrentRelativeHumidity'
-      );}.bind(this))
-    .setProps({
-      minValue: ('minValue' in config) ? config.minValue : 0,
-      maxValue: ('maxValue' in config) ? config.maxValue : 100,
-      minStep: config.minStep || 1
-    });
-    if ('get_StatusTampered' in config) {
-      this.service.getCharacteristic(Characteristic.StatusTampered)
-      .on('get', function(callback) {this.getBit(callback,
-        config.db,
-        Math.floor(config.get_StatusTampered), Math.floor((config.get_StatusTampered*10)%10),
-        'get StatusTampered'
-      );}.bind(this));
-    }
-
-    if ('get_StatusLowBattery' in config) {
-      this.service.getCharacteristic(Characteristic.StatusLowBattery)
-      .on('get', function(callback) {this.getBit(callback,
-        config.db,
-        Math.floor(config.get_StatusLowBattery), Math.floor((config.get_StatusLowBattery*10)%10),
-        'get StatusLowBattery'
-      );}.bind(this));
-    }
+    this.initCurrentRelativeHumidity(true);
+    this.initStatusTampered();
+    this.initStatusLowBattery();
   }
 
   // INIT handling ///////////////////////////////////////////////
@@ -437,17 +389,17 @@ function GenericPLCAccessory(platform, config, accessoryNumber) {
       }.bind(this));
      }.bind(this);
 
-    if ('mapSetTarget' in config && config.mapSetTarget) {
-      this.modFunctionSet = function(value){return this.mapFunction(value, config.mapSetTarget);}.bind(this);
+    if ('mapSetTargetHeatingCoolingState' in config && config.mapSetTargetHeatingCoolingState) {
+      this.modFunctionSet = function(value){return this.mapFunction(value, config.mapSetTargetHeatingCoolingState);}.bind(this);
     }
 
-    if ('mapGetTarget' in config && config.mapGetTarget) {
-      this.modFunctionGet = function(value){return this.mapFunction(value, config.mapGetTarget);}.bind(this);
+    if ('mapGetTargetHeatingCoolingState' in config && config.mapGetTargetHeatingCoolingState) {
+      this.modFunctionGet = function(value){return this.mapFunction(value, config.mapGetTargetHeatingCoolingState);}.bind(this);
     }
 
     this.modFunctionGetCurrent = this.plain;
-    if ('mapGetCurrent' in config && config.mapGetCurrent) {
-      this.modFunctionGetCurrent = function(value){return this.mapFunction(value, config.mapGetCurrent);}.bind(this);
+    if ('mapGetCurrentHeatingCoolingState' in config && config.mapGetCurrentHeatingCoolingState) {
+      this.modFunctionGetCurrent = function(value){return this.mapFunction(value, config.mapGetCurrentHeatingCoolingState);}.bind(this);
     }
 
     if ('get_CurrentHeatingCoolingState' in config) {
@@ -506,12 +458,7 @@ function GenericPLCAccessory(platform, config, accessoryNumber) {
       'set TemperatureDisplayUnits'
       );}.bind(this));
 
-    this.service.getCharacteristic(Characteristic.CurrentTemperature)
-    .on('get', function(callback) {this.getReal(callback,
-      config.db,
-      config.get_CurrentTemperature,
-      'get CurrentTemperature'
-      );}.bind(this));
+    this.initCurrentTemperature(true);
 
     this.service.getCharacteristic(Characteristic.TargetTemperature)
     .on('get', function(callback) {this.getReal(callback,
@@ -524,20 +471,14 @@ function GenericPLCAccessory(platform, config, accessoryNumber) {
       config.set_TargetTemperature,
       'set TargetTemperature'
       );}.bind(this))
-      .setProps({
-        minValue: ('minValue' in config) ? config.minValue : 15,
-        maxValue: ('maxValue' in config) ? config.maxValue : 27,
-        minStep: config.minStep || 0.5
-    });
+       .setProps({
+         minValue: ('minTargetTemperatureValue' in config) ? config.minTargetTemperatureValue : 10,
+         maxValue: ('maxTargetTemperatureValue' in config) ? config.maxTargetTemperatureValue : 38,
+         minStep: ('minTargetTemperatureStep' in config) ? config.minTargetTemperatureStep : 0.1
+       });
 
-    if ('get_CurrentRelativeHumidity' in config) {
-      this.service.getCharacteristic(Characteristic.CurrentRelativeHumidity)
-      .on('get', function(callback) {this.getReal(callback,
-        config.db,
-        config.get_CurrentRelativeHumidity,
-        'get CurrentRelativeHumidity'
-        );}.bind(this))
-    }
+    this.initCurrentRelativeHumidity(false);
+
     if ('get_TargetRelativeHumidity' in config) {
       this.service.getCharacteristic(Characteristic.TargetRelativeHumidity)
       .on('get', function(callback) {this.getReal(callback,
@@ -550,32 +491,18 @@ function GenericPLCAccessory(platform, config, accessoryNumber) {
         config.set_TargetRelativeHumidity,
         'set TargetRelativeHumidity'
         );}.bind(this))
-        .setProps({
-          minValue: ('minHumidityValue' in config) ? config.minValue : 0,
-          maxValue: ('maxHumidityValue' in config) ? config.maxValue : 100,
-          minStep: config.minHumidityStep || 1
-      });
+       .setProps({
+           minValue: ('minTargetHumidityValue' in config) ? config.minTargetHumidityValue : 0,
+           maxValue: ('maxTargetHumidityValue' in config) ? config.maxTargetHumidityValue : 100,
+           minStep: ('minTargetHumidityStep' in config) ? config.minTargetHumidityStep : 1
+       })
+      ;
     }
 
-    if ('get_StatusTampered' in config) {
-      //This will generate a warning but will work anyway.
-      this.service.getCharacteristic(Characteristic.StatusTampered)
-      .on('get', function(callback) {this.getBit(callback,
-        config.db,
-        Math.floor(config.get_StatusTampered), Math.floor((config.get_StatusTampered*10)%10),
-        'get StatusTampered'
-      );}.bind(this));
-    }
-
-    if ('get_StatusLowBattery' in config) {
-      //This will generate a warning but will work anyway.
-      this.service.getCharacteristic(Characteristic.StatusLowBattery)
-      .on('get', function(callback) {this.getBit(callback,
-        config.db,
-        Math.floor(config.get_StatusLowBattery), Math.floor((config.get_StatusLowBattery*10)%10),
-        'get StatusLowBattery'
-      );}.bind(this));
-    }
+    //This will generate a warning but will work anyway.
+    this.initStatusTampered();
+    //This will generate a warning but will work anyway.
+    this.initStatusLowBattery();
 
   }
   // INIT handling ///////////////////////////////////////////////
@@ -600,17 +527,17 @@ function GenericPLCAccessory(platform, config, accessoryNumber) {
       }.bind(this));
      }.bind(this);
 
-    if ('mapSetTarget' in config && config.mapSetTarget) {
-      this.modFunctionSet = function(value){return this.mapFunction(value, config.mapSetTarget);}.bind(this);
+    if ('mapSetTargetHumidifierDehumidifierState' in config && config.mapSetTargetHumidifierDehumidifierState) {
+      this.modFunctionSet = function(value){return this.mapFunction(value, config.mapSetTargetHumidifierDehumidifierState);}.bind(this);
     }
 
-    if ('mapGetTarget' in config && config.mapGetTarget) {
-      this.modFunctionGet = function(value){return this.mapFunction(value, config.mapGetTarget);}.bind(this);
+    if ('mapGetTargetHumidifierDehumidifierState' in config && config.mapGetTargetHumidifierDehumidifierState) {
+      this.modFunctionGet = function(value){return this.mapFunction(value, config.mapGetTargetHumidifierDehumidifierState);}.bind(this);
     }
 
     this.modFunctionGetCurrent = this.plain;
-    if ('mapGetCurrent' in config && config.mapGetCurrent) {
-      this.modFunctionGetCurrent = function(value){return this.mapFunction(value, config.mapGetCurrent);}.bind(this);
+    if ('mapGetCurrentHumidifierDehumidifierState' in config && config.mapGetCurrentHumidifierDehumidifierState) {
+      this.modFunctionGetCurrent = function(value){return this.mapFunction(value, config.mapGetCurrentHumidifierDehumidifierState);}.bind(this);
     }
 
     if ('get_CurrentHumidifierDehumidifierState' in config) {
@@ -660,12 +587,7 @@ function GenericPLCAccessory(platform, config, accessoryNumber) {
         );}.bind(this));
     }
 
-    this.service.getCharacteristic(Characteristic.CurrentRelativeHumidity)
-    .on('get', function(callback) {this.getReal(callback,
-      config.db,
-      config.get_CurrentRelativeHumidity,
-      'get CurrentRelativeHumidity'
-      );}.bind(this));
+
 
     if ('get_RelativeHumidityDehumidifierThreshold' in config) {
       this.service.getCharacteristic(Characteristic.RelativeHumidityDehumidifierThreshold)
@@ -721,42 +643,8 @@ function GenericPLCAccessory(platform, config, accessoryNumber) {
         );}.bind(this));
     }
 
-    if ('set_Deactivate' in config) {
-      this.service.getCharacteristic(Characteristic.Active)
-        .on('get', function(callback) {this.getBit(callback,
-          config.db,
-          Math.floor(config.get_Active), Math.floor((config.get_Active*10)%10),
-          'get Active'
-        );}.bind(this))
-        .on('set', function(powerOn, callback) { this.setOnOffBit(powerOn, callback,
-          config.db,
-          Math.floor(config.set_Active), Math.floor((config.set_Active*10)%10),
-          Math.floor(config.set_Deactivate), Math.floor((config.set_Deactivate*10)%10),
-          'set Active'
-        );}.bind(this));
-    } else if ('get_Active' in config) {
-      this.service.getCharacteristic(Characteristic.Active)
-        .on('get', function(callback) {this.getBit(callback,
-          config.db,
-          Math.floor(config.get_Active), Math.floor((config.get_Active*10)%10),
-          'get Active'
-        );}.bind(this))
-        .on('set', function(powerOn, callback) { this.setBit(powerOn, callback,
-          config.db,
-          Math.floor(config.set_Active), Math.floor((config.set_Active*10)%10),
-          'set Active'
-        );}.bind(this));
-    } else {
-      this.service.getCharacteristic(Characteristic.Active)
-        .on('get', function(callback) {this.getDummy(callback,
-          1,
-          'get Active'
-        );}.bind(this))
-        .on('set', function(value, callback) { this.setDummy(value, callback,
-          'set Active',
-          function(value){this.service.getCharacteristic(Characteristic.Active).updateValue(value);}.bind(this)
-        );}.bind(this));
-      }
+    this.initCurrentRelativeHumidity(true);
+    this.initActive(true);
 
     if ('get_SwingMode' in config) {
       this.service.getCharacteristic(Characteristic.SwingMode)
@@ -781,25 +669,11 @@ function GenericPLCAccessory(platform, config, accessoryNumber) {
         );}.bind(this));
     }
 
-    if ('get_StatusTampered' in config) {
-      //This will generate a warning but will work anyway.
-      this.service.getCharacteristic(Characteristic.StatusTampered)
-      .on('get', function(callback) {this.getBit(callback,
-        config.db,
-        Math.floor(config.get_StatusTampered), Math.floor((config.get_StatusTampered*10)%10),
-        'get StatusTampered'
-      );}.bind(this));
-    }
+    //This will generate a warning but will work anyway.
+    this.initStatusTampered();
+    //This will generate a warning but will work anyway.
+    this.initStatusLowBattery();
 
-    if ('get_StatusLowBattery' in config) {
-      //This will generate a warning but will work anyway.
-      this.service.getCharacteristic(Characteristic.StatusLowBattery)
-      .on('get', function(callback) {this.getBit(callback,
-        config.db,
-        Math.floor(config.get_StatusLowBattery), Math.floor((config.get_StatusLowBattery*10)%10),
-        'get StatusLowBattery'
-      );}.bind(this));
-    }
 
   }
   // INIT handling ///////////////////////////////////////////////
@@ -820,6 +694,10 @@ function GenericPLCAccessory(platform, config, accessoryNumber) {
     }
     this.accessory.addService(this.service);
     this.lastTargetPos = 0;
+    this.modFunctionGetCurrent = this.plain;
+    this.modFunctionGetTarget = this.plain;
+    this.modFunctionSetTarget = this.plain;
+
 
     // default do nothing after set of target position
     var informFunction = function(value){}.bind(this);
@@ -840,14 +718,22 @@ function GenericPLCAccessory(platform, config, accessoryNumber) {
         }
     }
 
-    if ('invert' in config && config.invert) {
-      this.modFunctionGet = this.invert_0_100;
-      this.modFunctionSet = this.invert_0_100;
+    if ('invertPosition' in config && config.invertPosition) {
+      this.modFunctionGetCurrent = this.invert_0_100;
+      this.modFunctionGetTarget = this.invert_0_100;
+      this.modFunctionSetTarget = this.invert_0_100;
     }
 
-    if ('mapGet' in config && config.mapGet) {
-      this.modFunctionGet = function(value){return this.mapFunction(value, config.mapGet);}.bind(this);
+    if ('mapGetCurrentPosition' in config && config.mapGetCurrentPosition) {
+      this.modFunctionGetCurrent = function(value){return this.mapFunction(value, config.mapGetCurrentPosition);}.bind(this);
     }
+    if ('mapGetTargetPosition' in config && config.mapGetTargetPosition) {
+      this.modFunctionGetTarget = function(value){return this.mapFunction(value, config.mapGetTargetPosition);}.bind(this);
+    }
+    if ('mapSetTargetPosition' in config && config.mapSetTargetPosition) {
+      this.modFunctionSetTarget = function(value){return this.mapFunction(value, config.mapSetTargetPosition);}.bind(this);
+    }
+
 
     // create handlers for required characteristics
     this.service.getCharacteristic(Characteristic.CurrentPosition)
@@ -855,7 +741,7 @@ function GenericPLCAccessory(platform, config, accessoryNumber) {
         config.db,
         config.get_CurrentPosition,
         'get CurrentPosition',
-        this.modFunctionGet
+        this.modFunctionGetCurrent
         );}.bind(this));
 
     if ('get_TargetPosition' in config) {
@@ -865,14 +751,14 @@ function GenericPLCAccessory(platform, config, accessoryNumber) {
           config.db,
           config.get_TargetPosition,
           'get TargetPosition',
-          this.modFunctionGet
+          this.modFunctionGetTarget
           );}.bind(this))
         .on('set', function(value, callback) {this.setByte(value, callback,
           config.db,
           config.set_TargetPosition,
           'set TargetPosition',
           informFunction,
-          this.modFunctionSet
+          this.modFunctionSetTarget
           );}.bind(this));
     }
     else
@@ -883,7 +769,7 @@ function GenericPLCAccessory(platform, config, accessoryNumber) {
         config.db,
         config.get_CurrentPosition,  // always use current position as target position
         'get CurrentPosition',
-        this.modFunctionGet
+        this.modFunctionGetCurrent
         );}.bind(this))
       .on('set', function(value, callback) {this.setDummy(value, callback,
         'set TargetPosition',
@@ -935,7 +821,7 @@ function GenericPLCAccessory(platform, config, accessoryNumber) {
     this.service = new Service.OccupancySensor(this.name);
     this.accessory.addService(this.service);
 
-    if ('invert' in config && config.invert) {
+    if ('invertOccupancy' in config && config.invertOccupancy) {
         this.modFunctionGet = this.invert_bit;
     }
 
@@ -947,23 +833,9 @@ function GenericPLCAccessory(platform, config, accessoryNumber) {
         this.modFunctionGet
       );}.bind(this));
 
-      if ('get_StatusTampered' in config) {
-        this.service.getCharacteristic(Characteristic.StatusTampered)
-        .on('get', function(callback) {this.getBit(callback,
-          config.db,
-          Math.floor(config.get_StatusTampered), Math.floor((config.get_StatusTampered*10)%10),
-          'get StatusTampered'
-        );}.bind(this));
-      }
+    this.initStatusTampered();
+    this.initStatusLowBattery();
 
-      if ('get_StatusLowBattery' in config) {
-        this.service.getCharacteristic(Characteristic.StatusLowBattery)
-        .on('get', function(callback) {this.getBit(callback,
-          config.db,
-          Math.floor(config.get_StatusLowBattery), Math.floor((config.get_StatusLowBattery*10)%10),
-          'get StatusLowBattery'
-        );}.bind(this));
-      }
   }
   // INIT handling ///////////////////////////////////////////////
   // MotionSensor
@@ -972,7 +844,7 @@ function GenericPLCAccessory(platform, config, accessoryNumber) {
     this.service = new Service.MotionSensor(this.name);
     this.accessory.addService(this.service);
 
-    if ('invert' in config && config.invert) {
+    if ('invertMotionDetected' in config && config.invertMotionDetected) {
         this.modFunctionGet = this.invert_bit;
     }
 
@@ -984,23 +856,9 @@ function GenericPLCAccessory(platform, config, accessoryNumber) {
         this.modFunctionGet
       );}.bind(this));
 
-      if ('get_StatusTampered' in config) {
-        this.service.getCharacteristic(Characteristic.StatusTampered)
-        .on('get', function(callback) {this.getBit(callback,
-          config.db,
-          Math.floor(config.get_StatusTampered), Math.floor((config.get_StatusTampered*10)%10),
-          'get StatusTampered'
-        );}.bind(this));
-      }
+    this.initStatusTampered();
+    this.initStatusLowBattery();
 
-      if ('get_StatusLowBattery' in config) {
-        this.service.getCharacteristic(Characteristic.StatusLowBattery)
-        .on('get', function(callback) {this.getBit(callback,
-          config.db,
-          Math.floor(config.get_StatusLowBattery), Math.floor((config.get_StatusLowBattery*10)%10),
-          'get StatusLowBattery'
-        );}.bind(this));
-      }
   }
   // INIT handling ///////////////////////////////////////////////
   // ContactSensor
@@ -1021,23 +879,9 @@ function GenericPLCAccessory(platform, config, accessoryNumber) {
         this.modFunctionGet
       );}.bind(this));
 
-      if ('get_StatusTampered' in config) {
-        this.service.getCharacteristic(Characteristic.StatusTampered)
-        .on('get', function(callback) {this.getBit(callback,
-          config.db,
-          Math.floor(config.get_StatusTampered), Math.floor((config.get_StatusTampered*10)%10),
-          'get StatusTampered'
-        );}.bind(this));
-      }
+    this.initStatusTampered();
+    this.initStatusLowBattery();
 
-      if ('get_StatusLowBattery' in config) {
-        this.service.getCharacteristic(Characteristic.StatusLowBattery)
-        .on('get', function(callback) {this.getBit(callback,
-          config.db,
-          Math.floor(config.get_StatusLowBattery), Math.floor((config.get_StatusLowBattery*10)%10),
-          'get StatusLowBattery'
-        );}.bind(this));
-      }
   }
   // INIT handling ///////////////////////////////////////////////
   // LeakSensor
@@ -1046,7 +890,7 @@ function GenericPLCAccessory(platform, config, accessoryNumber) {
     this.service = new Service.LeakSensor(this.name);
     this.accessory.addService(this.service);
 
-    if ('invert' in config && config.invert) {
+    if ('invertLeakDetected' in config && config.invertLeakDetected) {
         this.modFunctionGet = this.invert_bit;
     }
 
@@ -1058,23 +902,9 @@ function GenericPLCAccessory(platform, config, accessoryNumber) {
         this.modFunctionGet
       );}.bind(this));
 
-      if ('get_StatusTampered' in config) {
-        this.service.getCharacteristic(Characteristic.StatusTampered)
-        .on('get', function(callback) {this.getBit(callback,
-          config.db,
-          Math.floor(config.get_StatusTampered), Math.floor((config.get_StatusTampered*10)%10),
-          'get StatusTampered'
-        );}.bind(this));
-      }
+    this.initStatusTampered();
+    this.initStatusLowBattery();
 
-      if ('get_StatusLowBattery' in config) {
-        this.service.getCharacteristic(Characteristic.StatusLowBattery)
-        .on('get', function(callback) {this.getBit(callback,
-          config.db,
-          Math.floor(config.get_StatusLowBattery), Math.floor((config.get_StatusLowBattery*10)%10),
-          'get StatusLowBattery'
-        );}.bind(this));
-      }
   }
   // INIT handling ///////////////////////////////////////////////
   // Faucet
@@ -1083,32 +913,7 @@ function GenericPLCAccessory(platform, config, accessoryNumber) {
     this.service =  new Service.Faucet(this.name);
     this.accessory.addService(this.service);
 
-    if ('set_Deactivate' in config) {
-      this.service.getCharacteristic(Characteristic.Active)
-        .on('get', function(callback) {this.getBit(callback,
-          config.db,
-          Math.floor(config.get_Active), Math.floor((config.get_Active*10)%10),
-          'get Active'
-        );}.bind(this))
-        .on('set', function(powerOn, callback) { this.setOnOffBit(powerOn, callback,
-          config.db,
-          Math.floor(config.set_Active), Math.floor((config.set_Active*10)%10),
-          Math.floor(config.set_Deactivate), Math.floor((config.set_Deactivate*10)%10),
-          'set Active'
-        );}.bind(this));
-    } else {
-      this.service.getCharacteristic(Characteristic.Active)
-        .on('get', function(callback) {this.getBit(callback,
-          config.db,
-          Math.floor(config.get_Active), Math.floor((config.get_Active*10)%10),
-          'get Active'
-        );}.bind(this))
-        .on('set', function(powerOn, callback) { this.setBit(powerOn, callback,
-          config.db,
-          Math.floor(config.set_Active), Math.floor((config.set_Active*10)%10),
-          'set Active'
-        );}.bind(this));
-    }
+    this.initActive(true);
   }
   // INIT handling ///////////////////////////////////////////////
   // Valve
@@ -1117,34 +922,7 @@ function GenericPLCAccessory(platform, config, accessoryNumber) {
     this.service = new Service.Valve(this.name);
     this.accessory.addService(this.service);
 
-    if ('set_Deactivate' in config) {
-      this.service.getCharacteristic(Characteristic.Active)
-        .on('get', function(callback) {this.getBit(callback,
-          config.db,
-          Math.floor(config.get_Active), Math.floor((config.get_Active*10)%10),
-          'get Active'
-        );}.bind(this))
-        .on('set', function(powerOn, callback) { this.setOnOffBit(powerOn, callback,
-          config.db,
-          Math.floor(config.set_Active), Math.floor((config.set_Active*10)%10),
-          Math.floor(config.set_Deactivate), Math.floor((config.set_Deactivate*10)%10),
-          'set Active',
-          function(value){this.service.getCharacteristic(Characteristic.InUse).updateValue(value);}.bind(this)
-        );}.bind(this));
-    } else {
-      this.service.getCharacteristic(Characteristic.Active)
-        .on('get', function(callback) {this.getBit(callback,
-          config.db,
-          Math.floor(config.get_Active), Math.floor((config.get_Active*10)%10),
-          'get Active'
-        );}.bind(this))
-        .on('set', function(powerOn, callback) { this.setBit(powerOn, callback,
-          config.db,
-          Math.floor(config.set_Active), Math.floor((config.set_Active*10)%10),
-          'set Active',
-          function(value){this.service.getCharacteristic(Characteristic.InUse).updateValue(value);}.bind(this)
-        );}.bind(this));
-    }
+    this.initActive(true);
 
     this.service.getCharacteristic(Characteristic.InUse)
     .on('get', function(callback) {this.getBit(callback,
@@ -1209,25 +987,16 @@ function GenericPLCAccessory(platform, config, accessoryNumber) {
       }.bind(this));
      }.bind(this);
 
-    if ('mapSet' in config && config.mapSet) {
-      this.modFunctionSet = function(value){return this.mapFunction(value, config.mapSet);}.bind(this);
-    }
-    else if ('mapSetTarget' in config && config.mapSetTarget) {
-      this.modFunctionSet = function(value){return this.mapFunction(value, config.mapSetTarget);}.bind(this);
+    if ('mapSetSecuritySystemTargetState' in config && config.mapSetSecuritySystemTargetState) {
+      this.modFunctionSet = function(value){return this.mapFunction(value, config.mapSetSecuritySystemTargetState);}.bind(this);
     }
 
-    if ('mapGet' in config && config.mapGet) {
-      this.modFunctionGet = function(value){return this.mapFunction(value, config.mapGet);}.bind(this);
-      this.modFunctionGetCurrent = function(value){return this.mapFunction(value, config.mapGet);}.bind(this);
+    if ('mapGetSecuritySystemTargetState' in config && config.mapGetSecuritySystemTargetState) {
+      this.modFunctionGet = function(value){return this.mapFunction(value, config.mapGetSecuritySystemTargetState);}.bind(this);
     }
-    else {
-      if ('mapGetTarget' in config && config.mapGetTarget) {
-        this.modFunctionGet = function(value){return this.mapFunction(value, config.mapGetTarget);}.bind(this);
-      }
 
-      if ('mapGetCurrent' in config && config.mapGetCurrent) {
-        this.modFunctionGetCurrent = function(value){return this.mapFunction(value, config.mapGetCurrent);}.bind(this);
-      }
+    if ('mapGetSecuritySystemCurrentState' in config && config.mapGetSecuritySystemCurrentState) {
+      this.modFunctionGetCurrent = function(value){return this.mapFunction(value, config.mapGetSecuritySystemCurrentState);}.bind(this);
     }
 
     this.service.getCharacteristic(Characteristic.SecuritySystemCurrentState)
@@ -1288,7 +1057,7 @@ function GenericPLCAccessory(platform, config, accessoryNumber) {
     this.service = new Service.LockMechanism(this.name);
     this.accessory.addService(this.service);
 
-    if ('forceCurrentState' in config && config.forceCurrentState) {
+    if ('forceCurrentLockState' in config && config.forceCurrentLockState) {
       informFunction = function(value){this.service.getCharacteristic(Characteristic.LockCurrentState).updateValue(value);}.bind(this);
     }
 
@@ -1330,12 +1099,12 @@ function GenericPLCAccessory(platform, config, accessoryNumber) {
     this.service = new Service.LockMechanism(this.name);
     this.accessory.addService(this.service);
 
-    if ('forceCurrentState' in config && config.forceCurrentState) {
+    if ('forceCurrentLockState' in config && config.forceCurrentLockState) {
       informFunction = function(value){this.service.getCharacteristic(Characteristic.LockCurrentState).updateValue(value);}.bind(this);
     }
 
     // note the invert is inverted! To invert is normal behaviour.
-    if (!('invert' in config && config.invert)) {
+    if (!('invertLockState' in config && config.invertLockState)) {
       this.modFunctionGet = this.invert_bit;
       this.modFunctionSet = this.invert_bit;
     }
@@ -1343,40 +1112,42 @@ function GenericPLCAccessory(platform, config, accessoryNumber) {
     this.service.getCharacteristic(Characteristic.LockCurrentState)
       .on('get', function(callback) {this.getBit(callback,
         config.db,
-        Math.floor(config.get_LockCurrentState), Math.floor((config.get_LockCurrentState*10)%10),
+        Math.floor(config.get_LockCurrentStateBool), Math.floor((config.get_LockCurrentStateBool*10)%10),
         "get LockCurrentState",
         this.modFunctionGet
       );}.bind(this));
 
-    if ('set_Unsecured' in config) {
+    if ('set_LockTargetStateBool' in config) {
       this.service.getCharacteristic(Characteristic.LockTargetState)
       .on('get', function(callback) {this.getBit(callback,
         config.db,
-        Math.floor(config.get_LockTargetState), Math.floor((config.get_LockTargetState*10)%10),
-        "get LockTargetState",
-        this.modFunctionGet
-      );}.bind(this))
-      .on('set', function(value, callback) { this.setOnOffBit(value, callback,
-        config.db,
-        Math.floor(config.set_Secured), Math.floor((config.set_Secured*10)%10),
-        Math.floor(config.set_Unsecured), Math.floor((config.set_Unsecured*10)%10),
-        'set LockTargetState',
-        informFunction
-      );}.bind(this));
-    } else {
-      this.service.getCharacteristic(Characteristic.LockTargetState)
-      .on('get', function(callback) {this.getBit(callback,
-        config.db,
-        Math.floor(config.get_LockTargetState), Math.floor((config.get_LockTargetState*10)%10),
+        Math.floor(config.get_LockTargetStateBool), Math.floor((config.get_LockTargetStateBool*10)%10),
         "get LockTargetState",
         this.modFunctionGet
       );}.bind(this))
       .on('set', function(value, callback) {this.setBit(value, callback,
         config.db,
-        Math.floor(config.set_LockTargetState), Math.floor((config.set_LockTargetState*10)%10),
+        Math.floor(config.set_LockTargetStateBool), Math.floor((config.set_LockTargetStateBool*10)%10),
         "set LockTargetState",
         informFunction,
         this.modFunctionSet
+      );}.bind(this));
+
+
+    } else {
+      this.service.getCharacteristic(Characteristic.LockTargetState)
+      .on('get', function(callback) {this.getBit(callback,
+        config.db,
+        Math.floor(config.get_LockTargetStateBool), Math.floor((config.get_LockTargetStateBool*10)%10),
+        "get LockTargetState",
+        this.modFunctionGet
+      );}.bind(this))
+      .on('set', function(value, callback) { this.setOnOffBit(value, callback,
+        config.db,
+        Math.floor(config.set_LockTargetStateBool_Set), Math.floor((config.set_LockTargetStateBool_Set*10)%10),
+        Math.floor(config.set_LockTargetStateBool_Reset), Math.floor((config.set_LockTargetStateBool_Reset*10)%10),
+        'set LockTargetState',
+        informFunction
       );}.bind(this));
     }
   }
@@ -1387,7 +1158,7 @@ function GenericPLCAccessory(platform, config, accessoryNumber) {
     this.service = new Service.GarageDoorOpener(this.name);
     this.accessory.addService(this.service);
 
-    if ('forceCurrentState' in config && config.forceCurrentState) {
+    if ('forceCurrentGarageDoorState' in config && config.forceCurrentGarageDoorState) {
       informFunction = function(value){this.service.getCharacteristic(Characteristic.CurrentDoorState).updateValue(value);}.bind(this);
     }
     this.service.getCharacteristic(Characteristic.CurrentDoorState)
@@ -1440,23 +1211,9 @@ function GenericPLCAccessory(platform, config, accessoryNumber) {
       'get SmokeDetected'
     );}.bind(this));
 
-    if ('get_StatusTampered' in config) {
-      this.service.getCharacteristic(Characteristic.StatusTampered)
-      .on('get', function(callback) {this.getBit(callback,
-        config.db,
-        Math.floor(config.get_StatusTampered), Math.floor((config.get_StatusTampered*10)%10),
-        'get StatusTampered'
-      );}.bind(this));
-    }
+    this.initStatusTampered();
+    this.initStatusLowBattery();
 
-    if ('get_StatusLowBattery' in config) {
-      this.service.getCharacteristic(Characteristic.StatusLowBattery)
-      .on('get', function(callback) {this.getBit(callback,
-        config.db,
-        Math.floor(config.get_StatusLowBattery), Math.floor((config.get_StatusLowBattery*10)%10),
-        'get StatusLowBattery'
-      );}.bind(this));
-    }
   }
   // INIT handling ///////////////////////////////////////////////
   // Fan
@@ -1487,20 +1244,20 @@ function GenericPLCAccessory(platform, config, accessoryNumber) {
       }.bind(this));
      }.bind(this);
 
-    if ('mapCurrentGet' in config && config.mapCurrentGet) {
-      this.modCurrentGet = function(value){return this.mapFunction(value, config.mapCurrentGet);}.bind(this);
+    if ('mapCurrentFanStateGet' in config && config.mapCurrentFanStateGet) {
+      this.modCurrentGet = function(value){return this.mapFunction(value, config.mapCurrentFanStateGet);}.bind(this);
     }
-    if ('mapTargetSet' in config && config.mapTargetSet) {
-      this.modTargetSet = function(value){return this.mapFunction(value, config.mapTargetSet);}.bind(this);
+    if ('mapTargetFanStateSet' in config && config.mapTargetFanStateSet) {
+      this.modTargetSet = function(value){return this.mapFunction(value, config.mapTargetFanStateSet);}.bind(this);
     }
-    if ('mapTargetGet' in config && config.mapTargetGet) {
-      this.modTargetGet = function(value){return this.mapFunction(value, config.mapTargetGet);}.bind(this);
+    if ('mapTargetFanStateGet' in config && config.mapTargetFanStateGet) {
+      this.modTargetGet = function(value){return this.mapFunction(value, config.mapTargetFanStateGet);}.bind(this);
     }
-    if ('mapDirectionGet' in config && config.mapDirectionGet) {
-      this.modDirectionGet = function(value){return this.mapFunction(value, config.mapDirectionGet);}.bind(this);
+    if ('mapRotationDirectionGet' in config && config.mapRotationDirectionGet) {
+      this.modDirectionGet = function(value){return this.mapFunction(value, config.mapRotationDirectionGet);}.bind(this);
     }
-    if ('mapDirectionSet' in config && config.mapDirectionSet) {
-      this.modDirectionSet = function(value){return this.mapFunction(value, config.mapDirectionSet);}.bind(this);
+    if ('mapRotationDirectionSet' in config && config.mapRotationDirectionSet) {
+      this.modDirectionSet = function(value){return this.mapFunction(value, config.mapRotationDirectionSet);}.bind(this);
     }
 
     if ('get_TargetFanState' in config) {
@@ -1549,32 +1306,7 @@ function GenericPLCAccessory(platform, config, accessoryNumber) {
         );}.bind(this));
     }
 
-    if ('set_Deactivate' in config) {
-      this.service.getCharacteristic(Characteristic.Active)
-        .on('get', function(callback) {this.getBit(callback,
-          config.db,
-          Math.floor(config.get_Active), Math.floor((config.get_Active*10)%10),
-          'get Active'
-        );}.bind(this))
-        .on('set', function(powerOn, callback) { this.setOnOffBit(powerOn, callback,
-          config.db,
-          Math.floor(config.set_Active), Math.floor((config.set_Active*10)%10),
-          Math.floor(config.set_Deactivate), Math.floor((config.set_Deactivate*10)%10),
-          'set Active'
-        );}.bind(this));
-    } else {
-      this.service.getCharacteristic(Characteristic.Active)
-        .on('get', function(callback) {this.getBit(callback,
-          config.db,
-          Math.floor(config.get_Active), Math.floor((config.get_Active*10)%10),
-          'get Active'
-        );}.bind(this))
-        .on('set', function(powerOn, callback) { this.setBit(powerOn, callback,
-          config.db,
-          Math.floor(config.set_Active), Math.floor((config.set_Active*10)%10),
-          'set Active'
-        );}.bind(this));
-    }
+    this.initActive(true);
 
     if ('get_RotationSpeed' in config) {
       this.service.getCharacteristic(Characteristic.RotationSpeed)
@@ -1625,7 +1357,7 @@ function GenericPLCAccessory(platform, config, accessoryNumber) {
   // INIT handling ///////////////////////////////////////////////
   // LightSensor
   ////////////////////////////////////////////////////////////////
-  else if (config.accessory == 'PLC_LightSensor'){
+  else if (config.accessory == 'PLC_LightSensor' || config.accessory == 'PLC_LightSensor_DInt'){
     this.service = new Service.LightSensor(this.name);
     this.accessory.addService(this.service);
 
@@ -1639,7 +1371,7 @@ function GenericPLCAccessory(platform, config, accessoryNumber) {
         "get CurrentAmbientLightLevel",
         this.modFunctionGet
       );}.bind(this));
-    }else{
+      }else if ('get_CurrentAmbientLightLevel' in config) {
       this.service.getCharacteristic(Characteristic.CurrentAmbientLightLevel)
       .on('get', function(callback) {this.getReal(callback,
         config.db,
@@ -1649,24 +1381,151 @@ function GenericPLCAccessory(platform, config, accessoryNumber) {
       );}.bind(this));
     }
 
-    if ('get_StatusTampered' in config) {
-      this.service.getCharacteristic(Characteristic.StatusTampered)
-      .on('get', function(callback) {this.getBit(callback,
-        config.db,
-        Math.floor(config.get_StatusTampered), Math.floor((config.get_StatusTampered*10)%10),
-        'get StatusTampered'
-      );}.bind(this));
+    this.initStatusTampered();
+    this.initStatusLowBattery();
+
+  }
+  // INIT handling ///////////////////////////////////////////////
+  // AirPurifier
+  ////////////////////////////////////////////////////////////////
+  else if (config.accessory == 'PLC_AirPurifier'){
+    this.service =  new Service.AirPurifier(this.name);
+    this.accessory.addService(this.service);
+    this.modDirectionGet = this.plain;
+    this.modDirectionSet = this.plain;
+    this.modTargetSet = this.plain;
+    this.modCurrentGet = this.plain;
+    this.modFunctionGetCurrent = this.plain;
+
+    var dummyInform = function(value){}.bind(this);
+
+    var informFunction = function(notUsed){
+      // update target state and current state value.
+      this.service.getCharacteristic(Characteristic.TargetAirPurifierState).getValue(function(err, value) {
+        if (!err) {
+          this.service.getCharacteristic(Characteristic.TargetAirPurifierState).updateValue(value);
+        }
+      }.bind(this));
+
+      this.service.getCharacteristic(Characteristic.CurrentAirPurifierState).getValue(function(err, value) {
+        if (!err) {
+          this.service.getCharacteristic(Characteristic.CurrentAirPurifierState).updateValue(value);
+        }
+      }.bind(this));
+     }.bind(this);
+
+    if ('mapCurrentAirPurifierState' in config && config.mapCurrentAirPurifierState) {
+      this.modCurrentGet = function(value){return this.mapFunction(value, config.mapCurrentAirPurifierState);}.bind(this);
+    }
+    if ('mapTargetAirPurifierStateGet' in config && config.mapTargetAirPurifierStateGet) {
+      this.modTargetSet = function(value){return this.mapFunction(value, config.mapTargetAirPurifierStateGet);}.bind(this);
+    }
+    if ('mapTargetAirPurifierStateSet' in config && config.mapTargetAirPurifierStateSet) {
+      this.modTargetGet = function(value){return this.mapFunction(value, config.mapTargetAirPurifierStateSet);}.bind(this);
     }
 
-    if ('get_StatusLowBattery' in config) {
-      this.service.getCharacteristic(Characteristic.StatusLowBattery)
-      .on('get', function(callback) {this.getBit(callback,
+    if ('get_TargetAirPurifierState' in config && 'set_TargetAirPurifierState' in config ) {
+      this.service.getCharacteristic(Characteristic.TargetAirPurifierState)
+      .on('get', function(callback) {this.getByte(callback,
         config.db,
-        Math.floor(config.get_StatusLowBattery), Math.floor((config.get_StatusLowBattery*10)%10),
-        'get StatusLowBattery'
-      );}.bind(this));
+        config.get_TargetAirPurifierState,
+        'get TargetAirPurifierState',
+        this.modTargetGet
+        );}.bind(this))
+      .on('set', function(value, callback) {this.setByte(value, callback,
+        config.db,
+        config.set_TargetAirPurifierState,
+        'set TargetAirPurifierState',
+        informFunction,
+        this.mapTargetSet
+        );}.bind(this));
     }
+    else if ('default_TargetAirPurifierState' in config) {
+      this.service.getCharacteristic(Characteristic.TargetAirPurifierState)
+      .on('get', function(callback) {this.getDummy(callback,
+        config.default_TargetAirPurifierState || 0, // currently return fixed value MANUAL=0, MANUAL=1
+        'get TargetAirPurifierState'
+        );}.bind(this))
+      .on('set', function(value, callback) {this.setDummy(value, callback,
+        'set TargetAirPurifierState',
+        // ignore set and return current fixed values
+        informFunction
+        );}.bind(this));
+    }
+
+    if ('get_CurrentAirPurifierState' in config) {
+      this.service.getCharacteristic(Characteristic.CurrentAirPurifierState)
+      .on('get', function(callback) {this.getByte(callback,
+        config.db,
+        config.get_CurrentAirPurifierState,
+        'get CurrentAirPurifierState',
+        this.modFunctionGetCurrent
+        );}.bind(this));
+    }
+    else if ('default_CurrentAirPurifierState' in config) {
+      this.service.getCharacteristic(Characteristic.CurrentAirPurifierState)
+      .on('get', function(callback) {this.getDummy(callback,
+        config.default_CurrentAirPurifierState,
+        'get CurrentAirPurifierState'
+        );}.bind(this));
+    }
+
+    this.initActive(true);
+    this.initFilterMaintainance();
+
+    if ('get_RotationSpeed' in config) {
+      this.service.getCharacteristic(Characteristic.RotationSpeed)
+      .on('get', function(callback) {this.getReal(callback,
+        config.db,
+        config.get_RotationSpeed,
+        'get RotationSpeed'
+        );}.bind(this))
+      .on('set', function(value, callback) {this.setReal(value, callback,
+        config.db,
+        config.set_RotationSpeed,
+        'set RotationSpeed'
+        );}.bind(this));
+    } else if ('get_RotationSpeedByte' in config) {
+      this.service.getCharacteristic(Characteristic.RotationSpeed)
+      .on('get', function(callback) {this.getByte(callback,
+        config.db,
+        config.get_RotationSpeedByte,
+        'get RotationSpeed'
+        );}.bind(this))
+      .on('set', function(value, callback) {this.setByte(value, callback,
+        config.db,
+        config.set_RotationSpeedByte,
+        'set RotationSpeed'
+        );}.bind(this));
+    }
+
+    if ('get_SwingMode' in config) {
+      this.service.getCharacteristic(Characteristic.SwingMode)
+      .on('get', function(callback) {this.getByte(callback,
+        config.db,
+        config.get_SwingMode,
+        'get SwingMode'
+        );}.bind(this))
+      .on('set', function(value, callback) {this.setByte(value, callback,
+        config.db,
+        config.set_SwingMode,
+        'set SwingMode'
+        );}.bind(this));
+    }
+
   }
+
+  // INIT handling ///////////////////////////////////////////////
+  // FilterMaintenance
+  ////////////////////////////////////////////////////////////////
+  else if (config.accessory == 'PLC_FilterMaintenance'){
+    this.service = new Service.FilterMaintenance(this.name);
+    this.accessory.addService(this.service);
+
+    this.initFilterMaintainance();
+    
+  }
+
   // INIT handling ///////////////////////////////////////////////
   // Undefined
   ////////////////////////////////////////////////////////////////
@@ -1684,6 +1543,187 @@ function GenericPLCAccessory(platform, config, accessoryNumber) {
 }
 
 GenericPLCAccessory.prototype = {
+
+
+
+  initStatusTampered: function() {
+    if ('get_StatusTampered' in this.config) {
+      this.service.getCharacteristic(Characteristic.StatusTampered)
+      .on('get', function(callback) {this.getBit(callback,
+        this.config.db,
+        Math.floor(this.config.get_StatusTampered), Math.floor((this.config.get_StatusTampered*10)%10),
+        'get StatusTampered'
+      );}.bind(this));
+    }
+  },
+
+  initStatusLowBattery: function() {
+    if ('get_StatusLowBattery' in this.config) {
+      this.service.getCharacteristic(Characteristic.StatusLowBattery)
+      .on('get', function(callback) {this.getBit(callback,
+        this.config.db,
+        Math.floor(this.config.get_StatusLowBattery), Math.floor((this.config.get_StatusLowBattery*10)%10),
+        'get StatusLowBattery'
+      );}.bind(this));
+    }
+  },
+
+  initCurrentTemperature: function(mandatory) {
+    if ('get_CurrentTemperature' in this.config) {
+      this.service.getCharacteristic(Characteristic.CurrentTemperature)
+      .on('get', function(callback) {this.getReal(callback,
+        this.config.db,
+        this.config.get_CurrentTemperature,
+        'get CurrentTemperature'
+        );}.bind(this))
+       .setProps({
+         minValue: ('minTemperatureValue' in this.config) ? this.config.minTemperatureValue : -270,
+         maxValue: ('maxTemperatureValue' in this.config) ? this.config.maxTemperatureValue : 100,
+         minStep: ('minTemperatureStep' in this.config) ? this.config.minTemperatureStep : 0.1
+       });
+    }
+    else if (mandatory){
+      this.log.error("Mandatory config get_CurrentTemperature missing")
+      this.service.getCharacteristic(Characteristic.CurrentTemperature)
+      .on('get', function(callback) {this.getDummy(callback,
+        0,
+        'get CurrentTemperature'
+      );}.bind(this))
+    }
+  },
+
+  initCurrentRelativeHumidity: function(mandatory) {
+    if ('get_CurrentRelativeHumidity' in this.config) {
+      this.service.getCharacteristic(Characteristic.CurrentRelativeHumidity)
+      .on('get', function(callback) {this.getReal(callback,
+        this.config.db,
+        this.config.get_CurrentRelativeHumidity,
+        'get CurrentRelativeHumidity'
+        );}.bind(this))
+       .setProps({
+         minValue: ('minHumidityValue' in this.config) ? this.config.minHumidityValue : 0,
+         maxValue: ('maxHumidityValue' in this.config) ? this.config.maxHumidityValue : 100,
+         minStep: ('minHumidityStep' in this.config) ? this.config.minHumidityStep : 0.1
+         });
+    }
+    else if (mandatory){
+      this.log.error("Mandatory config get_CurrentRelativeHumidity missing using dummy")
+      this.service.getCharacteristic(Characteristic.CurrentRelativeHumidity)
+      .on('get', function(callback) {this.getDummy(callback,
+        0,
+        'get CurrentRelativeHumidity'
+      );}.bind(this))
+    }
+  },
+
+  initActive: function(mandatory) {
+    if ('set_Active' in this.config && 'get_Active' in this.config) {
+      this.service.getCharacteristic(Characteristic.Active)
+      .on('get', function(callback) {this.getBit(callback,
+        this.config.db,
+        Math.floor(this.config.get_Active), Math.floor((this.config.get_Active*10)%10),
+        'get Active'
+      );}.bind(this))
+      .on('set', function(powerOn, callback) { this.setBit(powerOn, callback,
+        this.config.db,
+        Math.floor(this.config.set_Active), Math.floor((this.config.set_Active*10)%10),
+        'set Active'
+        );}.bind(this));
+    } else if ('get_Active' in this.config && 'set_Active_Set' in this.config && 'set_Active_Reset' in this.config) {
+      this.service.getCharacteristic(Characteristic.Active)
+      .on('get', function(callback) {this.getBit(callback,
+        this.config.db,
+        Math.floor(this.config.get_Active), Math.floor((this.config.get_Active*10)%10),
+        'get Active'
+      );}.bind(this))
+      .on('set', function(powerOn, callback) { this.setOnOffBit(powerOn, callback,
+        this.config.db,
+        Math.floor(this.config.set_Active_Set), Math.floor((this.config.set_Active_Set*10)%10),
+        Math.floor(this.config.set_Active_Reset), Math.floor((this.config.set_Active_Reset*10)%10),
+        'set Active'
+        );}.bind(this));
+    } else if (mandatory) {
+      this.log.error("Mandatory config get_Active or set_Active* missing using dummy")
+      this.service.getCharacteristic(Characteristic.Active)
+        .on('get', function(callback) {this.getDummy(callback,
+          1,
+          'get Active'
+        );}.bind(this))
+        .on('set', function(value, callback) { this.setDummy(value, callback,
+          'set Active',
+          function(value){this.service.getCharacteristic(Characteristic.Active).updateValue(value);}.bind(this)
+        );}.bind(this));
+      }
+  },
+  
+  initOn: function(mandatory) {
+    if ('set_On' in this.config && 'get_On' in this.config) {
+      this.service.getCharacteristic(Characteristic.On)
+      .on('get', function(callback) {this.getBit(callback,
+        this.config.db,
+        Math.floor(this.config.get_On), Math.floor((this.config.get_On*10)%10),
+        'get On'
+      );}.bind(this))
+      .on('set', function(powerOn, callback) { this.setBit(powerOn, callback,
+        this.config.db,
+        Math.floor(this.config.set_On), Math.floor((this.config.set_On*10)%10),
+        'set On'
+        );}.bind(this));
+    } else if ('get_On' in this.config && 'set_On_Set' in this.config && 'set_On_Reset' in this.config) {
+      this.service.getCharacteristic(Characteristic.On)
+      .on('get', function(callback) {this.getBit(callback,
+        this.config.db,
+        Math.floor(this.config.get_On), Math.floor((this.config.get_On*10)%10),
+        'get On'
+      );}.bind(this))
+      .on('set', function(powerOn, callback) { this.setOnOffBit(powerOn, callback,
+        this.config.db,
+        Math.floor(this.config.set_On_Set), Math.floor((this.config.set_On_Set*10)%10),
+        Math.floor(this.config.set_On_Reset), Math.floor((this.config.set_On_Reset*10)%10),
+        'set On'
+        );}.bind(this));
+    } else if (mandatory) {
+      this.log.error("Mandatory config get_On or set_On* missing using dummy")
+      this.service.getCharacteristic(Characteristic.On)
+        .on('get', function(callback) {this.getDummy(callback,
+          1,
+          'get On'
+        );}.bind(this))
+        .on('set', function(value, callback) { this.setDummy(value, callback,
+          'set On',
+          function(value){this.service.getCharacteristic(Characteristic.On).updateValue(value);}.bind(this)
+        );}.bind(this));
+      }
+  },
+  initFilterMaintainance: function() {
+    if ('get_FilterChangeIndication' in this.config) {
+      this.service.getCharacteristic(Characteristic.FilterChangeIndication)
+      .on('get', function(callback) {this.getBit(callback,
+        this.config.db,
+        Math.floor(this.config.get_FilterChangeIndication), Math.floor((this.config.get_FilterChangeIndication*10)%10),
+        'get FilterChangeIndication'
+      );}.bind(this));
+    }
+
+    if ('get_FilterLifeLevel' in this.config) {
+      this.service.getCharacteristic(Characteristic.FilterLifeLevel)
+      .on('get', function(callback) {this.getByte(callback,
+        this.config.db,
+        this.config.get_FilterLifeLevel,
+        "get FilterLifeLevel",
+        this.modFunctionGet
+      );}.bind(this));      
+    }
+
+    if ('set_ResetFilterIndication' in this.config) {
+      this.service.getCharacteristic(Characteristic.ResetFilterIndication)
+      .on('set', function(powerOn, callback) { this.setBit(powerOn, callback,
+        this.config.db,
+        Math.floor(this.config.set_ResetFilterIndication), Math.floor((this.config.set_ResetFilterIndication*10)%10),
+        'set ResetFilterIndication'
+        );}.bind(this));
+    }
+    },
 
   poll: function() {
     if (this.config.enablePolling || this.config.adaptivePolling) {
@@ -1712,13 +1752,13 @@ GenericPLCAccessory.prototype = {
     if (this.config.accessory == 'PLC_LightBulb' ||
         this.config.accessory == 'PLC_Outlet' ||
         this.config.accessory == 'PLC_Switch') {
-      if (this.config.get_On == offset)
+      if ('get_On' in this.config && this.config.get_On == offset || 'get_On_Set' in this.config && this.config.get_On_Set == offset)
       {
         this.log.debug( "[" + this.name + "] Push On:" + value);
         this.service.getCharacteristic(Characteristic.On).updateValue(value);
         rv = true;
       }
-      if (this.config.accessory == 'PLC_LightBulb' && this.config.get_Brightness == offset)
+      if (this.config.accessory == 'PLC_LightBulb' && 'get_Brightness' in this.config && this.config.get_Brightness == offset)
       {
         this.log.debug( "[" + this.name + "] Push Brightness:" + value);
         this.service.getCharacteristic(Characteristic.Brightness).updateValue(value);
@@ -1729,19 +1769,19 @@ GenericPLCAccessory.prototype = {
     // TemperatureSensor
     ////////////////////////////////////////////////////////////////
     else if (this.config.accessory == 'PLC_TemperatureSensor'){
-      if (this.config.get_CurrentTemperature == offset)
+      if ('get_CurrentTemperature' in this.config && this.config.get_CurrentTemperature == offset)
       {
         this.log.debug( "[" + this.name + "] Push CurrentTemperature:" + value);
         this.service.getCharacteristic(Characteristic.CurrentTemperature).updateValue(value);
         rv = true;
       }
-      if (this.config.get_StatusTampered == offset)
+      if ('get_StatusTampered' in this.config && this.config.get_StatusTampered == offset)
       {
         this.log.debug( "[" + this.name + "] Push StatusTampered:" + value);
         this.service.getCharacteristic(Characteristic.StatusTampered).updateValue(value);
         rv = true;
       }
-      if (this.config.get_StatusLowBattery == offset)
+      if ('get_StatusLowBattery' in this.config && this.config.get_StatusLowBattery == offset)
       {
         this.log.debug( "[" + this.name + "] Push StatusLowBattery:" + value);
         this.service.getCharacteristic(Characteristic.StatusLowBattery).updateValue(value);
@@ -1752,19 +1792,19 @@ GenericPLCAccessory.prototype = {
     // HumiditySensor
     ////////////////////////////////////////////////////////////////
     else if (this.config.accessory == 'PLC_HumiditySensor'){
-      if (this.config.get_CurrentRelativeHumidity == offset)
+      if ('get_CurrentRelativeHumidity' in this.config && this.config.get_CurrentRelativeHumidity == offset)
       {
         this.log.debug( "[" + this.name + "] Push CurrentRelativeHumidity:" + value);
         this.service.getCharacteristic(Characteristic.CurrentRelativeHumidity).updateValue(value);
         rv = true;
       }
-      if (this.config.get_StatusTampered == offset)
+      if ('get_StatusTampered' in this.config && this.config.get_StatusTampered == offset)
       {
         this.log.debug( "[" + this.name + "] Push StatusTampered:" + value);
         this.service.getCharacteristic(Characteristic.StatusTampered).updateValue(value);
         rv = true;
       }
-      if (this.config.get_StatusLowBattery == offset)
+      if ('get_StatusLowBattery' in this.config && this.config.get_StatusLowBattery == offset)
       {
         this.log.debug( "[" + this.name + "] Push StatusLowBattery:" + value);
         this.service.getCharacteristic(Characteristic.StatusLowBattery).updateValue(value);
@@ -1775,49 +1815,49 @@ GenericPLCAccessory.prototype = {
     // Thermostat
     ////////////////////////////////////////////////////////////////
     else if (this.config.accessory == 'PLC_Thermostat'){
-      if (this.config.get_CurrentTemperature == offset)
+      if ('get_CurrentTemperature' in this.config && this.config.get_CurrentTemperature == offset)
       {
         this.log.debug( "[" + this.name + "] Push CurrentTemperature :" + value);
         this.service.getCharacteristic(Characteristic.CurrentTemperature).updateValue(value);
         rv = true;
       }
-      if (this.config.get_TargetTemperature == offset)
+      if ('get_TargetTemperature' in this.config && this.config.get_TargetTemperature == offset)
       {
         this.log.debug( "[" + this.name + "] Push TargetTemperature:" + value);
         this.service.getCharacteristic(Characteristic.TargetTemperature).updateValue(value);
         rv = true;
       }
-      if (this.config.get_CurrentRelativeHumidity == offset)
+      if ('get_CurrentRelativeHumidity' in this.config && this.config.get_CurrentRelativeHumidity == offset)
       {
         this.log.debug( "[" + this.name + "] Push CurrentRelativeHumidity:" + value);
         this.service.getCharacteristic(Characteristic.CurrentRelativeHumidity).updateValue(value);
         rv = true;
       }
-      if (this.config.get_TargetRelativeHumidity == offset)
+      if ('get_TargetRelativeHumidity' in this.config && this.config.get_TargetRelativeHumidity == offset)
       {
         this.log.debug( "[" + this.name + "] Push TargetRelativeHumidity:" + value);
         this.service.getCharacteristic(Characteristic.TargetRelativeHumidity).updateValue(value);
         rv = true;
       }
-      if (this.config.get_CurrentHeatingCoolingState == offset)
+      if ('get_CurrentHeatingCoolingState' in this.config && this.config.get_CurrentHeatingCoolingState == offset)
       {
         this.log.debug( "[" + this.name + "] Push CurrentHeatingCoolingState:" + String(this.modFunctionGetCurrent(parseInt(value))) + "<-" + String(value));
         this.service.getCharacteristic(Characteristic.CurrentHeatingCoolingState).updateValue(this.modFunctionGetCurrent(parseInt(value)));
         rv = true;
       }
-      if (this.config.get_TargetHeatingCoolingState == offset)
+      if ('get_TargetHeatingCoolingState' in this.config && this.config.get_TargetHeatingCoolingState == offset)
       {
         this.log.debug( "[" + this.name + "] Push TargetHeatingCoolingState:" + String(this.modFunctionGet(parseInt(value))) + "<-" + String(value));
         this.service.getCharacteristic(Characteristic.TargetHeatingCoolingState).updateValue(this.modFunctionGet(parseInt(value)));
         rv = true;
       }
-      if (this.config.get_StatusTampered == offset)
+      if ('get_StatusTampered' in this.config && this.config.get_StatusTampered == offset)
       {
         this.log.debug( "[" + this.name + "] Push StatusTampered:" + value);
         this.service.getCharacteristic(Characteristic.StatusTampered).updateValue(value);
         rv = true;
       }
-      if (this.config.get_StatusLowBattery == offset)
+      if ('get_StatusLowBattery' in this.config && this.config.get_StatusLowBattery == offset)
       {
         this.log.debug( "[" + this.name + "] Push StatusLowBattery:" + value);
         this.service.getCharacteristic(Characteristic.StatusLowBattery).updateValue(value);
@@ -1828,67 +1868,67 @@ GenericPLCAccessory.prototype = {
     // Humidifier Dehumidifier
     ////////////////////////////////////////////////////////////////
     else if (this.config.accessory == 'PLC_HumidifierDehumidifier'){
-      if (this.config.get_Active == offset)
+      if ('get_Active' in this.config && this.config.get_Active == offset)
       {
         this.log.debug( "[" + this.name + "] Push Active :" + value);
         this.service.getCharacteristic(Characteristic.Active).updateValue(value);
         rv = true;
       }
-      if (this.config.get_CurrentHumidifierDehumidifierState == offset)
+      if ('get_CurrentHumidifierDehumidifierState' in this.config && this.config.get_CurrentHumidifierDehumidifierState == offset)
       {
         this.log.debug( "[" + this.name + "] Push CurrentHumidifierDehumidifierState:" + String(this.modFunctionGetCurrent(parseInt(value))) + "<-" + String(value));
         this.service.getCharacteristic(Characteristic.CurrentHumidifierDehumidifierState).updateValue(this.modFunctionGetCurrent(parseInt(value)));
         rv = true;
       }
-      if (this.config.get_TargetHumidifierDehumidifierState == offset)
+      if ('get_TargetHumidifierDehumidifierState' in this.config && this.config.get_TargetHumidifierDehumidifierState == offset)
       {
         this.log.debug( "[" + this.name + "] Push TargetHumidifierDehumidifierState:" + String(this.modFunctionGet(parseInt(value))) + "<-" + String(value));
         this.service.getCharacteristic(Characteristic.TargetHumidifierDehumidifierState).updateValue(this.modFunctionGet(parseInt(value)));
         rv = true;
       }
-      if (this.config.get_CurrentRelativeHumidity == offset)
+      if ('get_CurrentRelativeHumidity' in this.config && this.config.get_CurrentRelativeHumidity == offset)
       {
         this.log.debug( "[" + this.name + "] Push CurrentRelativeHumidity:" + value);
         this.service.getCharacteristic(Characteristic.CurrentRelativeHumidity).updateValue(value);
         rv = true;
       }
-      if (this.config.get_RelativeHumidityDehumidifierThreshold == offset)
+      if ('get_RelativeHumidityDehumidifierThreshold' in this.config && this.config.get_RelativeHumidityDehumidifierThreshold == offset)
       {
         this.log.debug( "[" + this.name + "] Push RelativeHumidityDehumidifierThreshold:" + value);
         this.service.getCharacteristic(Characteristic.RelativeHumidityDehumidifierThreshold).updateValue(value);
         rv = true;
       }
-      if (this.config.get_RelativeHumidityHumidifierThreshold == offset)
+      if ('get_RelativeHumidityHumidifierThreshold' in this.config && this.config.get_RelativeHumidityHumidifierThreshold == offset)
       {
         this.log.debug( "[" + this.name + "] Push RelativeHumidityHumidifierThreshold:" + value);
         this.service.getCharacteristic(Characteristic.RelativeHumidityHumidifierThreshold).updateValue(value);
         rv = true;
       }
-      if (this.config.get_RotationSpeed == offset || this.config.get_RotationSpeedByte)
+      if ('get_RotationSpeed' in this.config && this.config.get_RotationSpeed == offset || 'get_RotationSpeedByte' in this.config && this.config.get_RotationSpeedByte  == offset )
       {
         this.log.debug( "[" + this.name + "] Push RotationSpeed:" + value);
         this.service.getCharacteristic(Characteristic.RotationSpeed).updateValue(value);
         rv = true;
       }
-      if (this.config.get_SwingMode == offset)
+      if ('get_SwingMode' in this.config && this.config.get_SwingMode == offset)
       {
         this.log.debug( "[" + this.name + "] Push SwingMode:" + value);
         this.service.getCharacteristic(Characteristic.SwingMode).updateValue(value);
         rv = true;
       }
-      if (this.config.get_WaterLevel == offset)
+      if ('get_WaterLevel' in this.config && this.config.get_WaterLevel == offset)
       {
         this.log.debug( "[" + this.name + "] Push WaterLevel:" + value);
         this.service.getCharacteristic(Characteristic.WaterLevel).updateValue(value);
         rv = true;
       }
-      if (this.config.get_StatusTampered == offset)
+      if ('get_StatusTampered' in this.config && this.config.get_StatusTampered == offset)
       {
         this.log.debug( "[" + this.name + "] Push StatusTampered:" + value);
         this.service.getCharacteristic(Characteristic.StatusTampered).updateValue(value);
         rv = true;
       }
-      if (this.config.get_StatusLowBattery == offset)
+      if ('get_StatusLowBattery' in this.config && this.config.get_StatusLowBattery == offset)
       {
         this.log.debug( "[" + this.name + "] Push StatusLowBattery:" + value);
         this.service.getCharacteristic(Characteristic.StatusLowBattery).updateValue(value);
@@ -1900,23 +1940,23 @@ GenericPLCAccessory.prototype = {
     ////////////////////////////////////////////////////////////////
     else if (this.config.accessory == 'PLC_Window' || this.config.accessory == 'PLC_WindowCovering' || this.config.accessory == 'PLC_Door'){
       var has_get_TargetPosition = ('get_TargetPosition' in this.config);
-      if (this.config.get_CurrentPosition == offset)
+      if ('get_CurrentPosition' in this.config && this.config.get_CurrentPosition == offset)
       {
         if(!has_get_TargetPosition) {
-          this.log.debug( "[" + this.name + "] Push TargetPosition:" + String(this.modFunctionGet(parseInt(value))) + "<-" + String(value));
+          this.log.debug( "[" + this.name + "] Push TargetPosition:" + String(this.modFunctionGetTarget(parseInt(value))) + "<-" + String(value));
           this.service.getCharacteristic(Characteristic.TargetPosition).updateValue(this.modFunctionGet(parseInt(value)));
         }
-        this.log.debug( "[" + this.name + "] Push CurrentPosition:" + String(this.modFunctionGet(parseInt(value))) + "<-" + String(value));
+        this.log.debug( "[" + this.name + "] Push CurrentPosition:" + String(this.modFunctionGetCurrent(parseInt(value))) + "<-" + String(value));
         this.service.getCharacteristic(Characteristic.CurrentPosition).updateValue(this.modFunctionGet(parseInt(value)));
         rv = true;
       }
-      if ( this.config.get_TargetPosition == offset)
+      if ('get_TargetPosition' in this.config && this.config.get_TargetPosition == offset)
       {
-        this.log.debug( "[" + this.name + "] Push TargetPosition:" + String(this.modFunctionGet(parseInt(value))) + "<-" + String(value));
+        this.log.debug( "[" + this.name + "] Push TargetPosition:" + String(this.modFunctionGetTarget(parseInt(value))) + "<-" + String(value));
         this.service.getCharacteristic(Characteristic.TargetPosition).updateValue(this.modFunctionGet(parseInt(value)));
         rv = true;
       }
-      if (this.config.get_PositionState == offset)
+      if ('get_PositionState' in this.config && this.config.get_PositionState == offset)
       {
         this.log.debug( "[" + this.name + "] Push PositionState:" + value);
         this.service.getCharacteristic(Characteristic.PositionState).updateValue(value);
@@ -1927,19 +1967,19 @@ GenericPLCAccessory.prototype = {
     // OccupancySensor
     ////////////////////////////////////////////////////////////////
     else if (this.config.accessory == 'PLC_OccupancySensor'){
-      if (this.config.get_OccupancyDetected == offset)
+      if ('get_OccupancyDetected' in this.config && this.config.get_OccupancyDetected == offset)
       {
         this.log.debug( "[" + this.name + "] Push OccupancyDetected:" + String(this.modFunctionGet(parseInt(value))) + "<-" + String(value));
         this.service.getCharacteristic(Characteristic.OccupancyDetected).updateValue(this.modFunctionGet(parseInt(value)));
         rv = true;
       }
-      if (this.config.get_StatusTampered == offset)
+      if ('get_StatusTampered' in this.config && this.config.get_StatusTampered == offset)
       {
         this.log.debug( "[" + this.name + "] Push StatusTampered:" + value);
         this.service.getCharacteristic(Characteristic.StatusTampered).updateValue(value);
         rv = true;
       }
-      if (this.config.get_StatusLowBattery == offset)
+      if ('get_StatusLowBattery' in this.config && this.config.get_StatusLowBattery == offset)
       {
         this.log.debug( "[" + this.name + "] Push StatusLowBattery:" + value);
         this.service.getCharacteristic(Characteristic.StatusLowBattery).updateValue(value);
@@ -1950,19 +1990,19 @@ GenericPLCAccessory.prototype = {
     // MotionSensor
     ////////////////////////////////////////////////////////////////
     else if (this.config.accessory == 'PLC_MotionSensor'){
-      if (this.config.get_MotionDetected == offset)
+      if ('get_MotionDetected' in this.config && this.config.get_MotionDetected == offset)
       {
         this.log.debug( "[" + this.name + "] Push MotionDetected:" + String(this.modFunctionGet(parseInt(value))) + "<-" + String(value));
         this.service.getCharacteristic(Characteristic.MotionDetected).updateValue(this.modFunctionGet(parseInt(value)));
         rv = true;
       }
-      if (this.config.get_StatusTampered == offset)
+      if ('get_StatusTampered' in this.config && this.config.get_StatusTampered == offset)
       {
         this.log.debug( "[" + this.name + "] Push StatusTampered:" + value);
         this.service.getCharacteristic(Characteristic.StatusTampered).updateValue(value);
         rv = true;
       }
-      if (this.config.get_StatusLowBattery == offset)
+      if ('get_StatusLowBattery' in this.config && this.config.get_StatusLowBattery == offset)
       {
         this.log.debug( "[" + this.name + "] Push StatusLowBattery:" + value);
         this.service.getCharacteristic(Characteristic.StatusLowBattery).updateValue(value);
@@ -1973,19 +2013,19 @@ GenericPLCAccessory.prototype = {
     // ContactSensor
     ////////////////////////////////////////////////////////////////
     else if (this.config.accessory == 'PLC_ContactSensor'){
-      if (this.config.get_ContactSensorState == offset)
+      if ('get_ContactSensorState' in this.config && this.config.get_ContactSensorState == offset)
       {
         this.log.debug( "[" + this.name + "] Push ContactSensorState:" + String(this.modFunctionGet(parseInt(value))) + "<-" + String(value));
         this.service.getCharacteristic(Characteristic.ContactSensorState).updateValue(this.modFunctionGet(parseInt(value)));
         rv = true;
       }
-      if (this.config.get_StatusTampered == offset)
+      if ('get_StatusTampered' in this.config && this.config.get_StatusTampered == offset)
       {
         this.log.debug( "[" + this.name + "] Push StatusTampered:" + value);
         this.service.getCharacteristic(Characteristic.StatusTampered).updateValue(value);
         rv = true;
       }
-      if (this.config.get_StatusLowBattery == offset)
+      if ('get_StatusLowBattery' in this.config && this.config.get_StatusLowBattery == offset)
       {
         this.log.debug( "[" + this.name + "] Push StatusLowBattery:" + value);
         this.service.getCharacteristic(Characteristic.StatusLowBattery).updateValue(value);
@@ -1996,19 +2036,19 @@ GenericPLCAccessory.prototype = {
     // LeakSensor
     ////////////////////////////////////////////////////////////////
     else if (this.config.accessory == 'PLC_LeakSensor'){
-      if (this.config.get_LeakDetected == offset)
+      if ('get_LeakDetected' in this.config && this.config.get_LeakDetected == offset)
       {
         this.log.debug( "[" + this.name + "] Push LeakDetected:" + String(this.modFunctionGet(parseInt(value))) + "<-" + String(value));
         this.service.getCharacteristic(Characteristic.LeakDetected).updateValue(this.modFunctionGet(parseInt(value)));
         rv = true;
       }
-      if (this.config.get_StatusTampered == offset)
+      if ('get_StatusTampered' in this.config && this.config.get_StatusTampered == offset)
       {
         this.log.debug( "[" + this.name + "] Push StatusTampered:" + value);
         this.service.getCharacteristic(Characteristic.StatusTampered).updateValue(value);
         rv = true;
       }
-      if (this.config.get_StatusLowBattery == offset)
+      if ('get_StatusLowBattery' in this.config && this.config.get_StatusLowBattery == offset)
       {
         this.log.debug( "[" + this.name + "] Push StatusLowBattery:" + value);
         this.service.getCharacteristic(Characteristic.StatusLowBattery).updateValue(value);
@@ -2019,7 +2059,7 @@ GenericPLCAccessory.prototype = {
     // Faucet
     ////////////////////////////////////////////////////////////////
     else if (this.config.accessory == 'PLC_Faucet'){
-      if (this.config.get_Active == offset)
+      if ('get_Active' in this.config && this.config.get_Active == offset)
       {
         this.log.debug( "[" + this.name + "] Push Active:" + value);
         this.service.getCharacteristic(Characteristic.Active).updateValue(value);
@@ -2030,19 +2070,19 @@ GenericPLCAccessory.prototype = {
     // Valve
     ////////////////////////////////////////////////////////////////
     else if (this.config.accessory == 'PLC_Valve'){
-      if (this.config.get_Active == offset)
+      if ('get_Active' in this.config && this.config.get_Active == offset)
       {
         this.log.debug( "[" + this.name + "] Push Active:" + value);
         this.service.getCharacteristic(Characteristic.Active).updateValue(value);
         rv = true;
       }
-      if (this.config.get_SetDuration == offset)
+      if ('get_SetDuration' in this.config && this.config.get_SetDuration == offset)
       {
         this.log.debug( "[" + this.name + "] Push SetDuration:" + value);
         this.service.getCharacteristic(Characteristic.SetDuration).updateValue(value);
         rv = true;
       }
-      if (this.config.get_RemainingDuration == offset)
+      if ('get_RemainingDuration' in this.config && this.config.get_RemainingDuration == offset)
       {
         this.log.debug( "[" + this.name + "] Push RemainingDuration:" + value);
         this.service.getCharacteristic(Characteristic.RemainingDuration).updateValue(value);
@@ -2053,13 +2093,13 @@ GenericPLCAccessory.prototype = {
     // SecuritySystem
     ////////////////////////////////////////////////////////////////
     else if (this.config.accessory == 'PLC_SecuritySystem'){
-      if (this.config.get_SecuritySystemCurrentState == offset)
+      if ('get_SecuritySystemCurrentState' in this.config && this.config.get_SecuritySystemCurrentState == offset)
       {
         this.log.debug( "[" + this.name + "] Push SecuritySystemCurrentState:" + String(this.modFunctionGetCurrent(parseInt(value))) + "<-" + String(value));
         this.service.getCharacteristic(Characteristic.SecuritySystemCurrentState).updateValue(this.modFunctionGetCurrent(parseInt(value)));
         rv = true;
       }
-      if (this.config.get_SecuritySystemTargetState == offset)
+      if ('get_SecuritySystemTargetState' in this.config && this.config.get_SecuritySystemTargetState == offset)
       {
         this.log.debug( "[" + this.name + "] Push SecuritySystemTargetState:" + String(this.modFunctionGet(parseInt(value))) + "<-" + String(value));
         this.service.getCharacteristic(Characteristic.SecuritySystemTargetState).updateValue(this.modFunctionGet(parseInt(value)));
@@ -2070,7 +2110,7 @@ GenericPLCAccessory.prototype = {
     // StatelessProgrammableSwitch, Doorbell
     ////////////////////////////////////////////////////////////////
     else if (this.config.accessory == 'PLC_StatelessProgrammableSwitch' || this.config.accessory == 'PLC_Doorbell'){
-      if (this.config.get_ProgrammableSwitchEvent == offset)
+      if ('get_ProgrammableSwitchEvent' in this.config && this.config.get_ProgrammableSwitchEvent == offset)
       {
         this.log.debug( "[" + this.name + "] Push ProgrammableSwitchEvent:" + value);
         this.service.getCharacteristic(Characteristic.ProgrammableSwitchEvent).updateValue(value);
@@ -2081,13 +2121,13 @@ GenericPLCAccessory.prototype = {
     // LockMechanism, LockMechanismBool
     ////////////////////////////////////////////////////////////////
     else if (this.config.accessory == 'PLC_LockMechanism' || this.config.accessory == 'PLC_LockMechanismBool'){
-      if (this.config.get_LockCurrentState == offset)
+      if ('get_LockCurrentState' in this.config && this.config.get_LockCurrentState == offset || 'get_LockCurrentStateBool' in this.config && this.config.get_LockCurrentStateBool == offset)
       {
         this.log.debug( "[" + this.name + "] Push LockCurrentState:" + String(this.modFunctionGet(parseInt(value))) + "<-" + String(value));
         this.service.getCharacteristic(Characteristic.LockCurrentState).updateValue(this.modFunctionGet(parseInt(value)));
         rv = true;
       }
-      if (this.config.get_LockTargetState == offset)
+      if ('get_LockTargetState' in this.config && this.config.get_LockTargetState == offset || 'get_LockTargetStateBool' in this.config && this.config.get_LockTargetStateBool == offset)
       {
         this.log.debug( "[" + this.name + "] Push LockTargetState:" + String(this.modFunctionGet(parseInt(value))) + "<-" + String(value));
         this.service.getCharacteristic(Characteristic.LockTargetState).updateValue(this.modFunctionGet(parseInt(value)));
@@ -2098,19 +2138,19 @@ GenericPLCAccessory.prototype = {
     // GarageDoorOpener
     ////////////////////////////////////////////////////////////////
     else if (this.config.accessory == 'PLC_GarageDoorOpener'){
-      if (this.config.get_CurrentDoorState == offset)
+      if ('get_CurrentDoorState' in this.config && this.config.get_CurrentDoorState == offset)
       {
         this.log.debug( "[" + this.name + "] Push CurrentDoorState:" + value);
         this.service.getCharacteristic(Characteristic.CurrentDoorState).updateValue(value);
         rv = true;
       }
-      if (this.config.get_TargetDoorState == offset)
+      if ('get_TargetDoorState' in this.config && this.config.get_TargetDoorState == offset)
       {
         this.log.debug( "[" + this.name + "] Push TargetDoorState:" + value);
         this.service.getCharacteristic(Characteristic.TargetDoorState).updateValue(value);
         rv = true;
       }
-      if (this.config.get_ObstructionDetected == offset)
+      if ('get_ObstructionDetected' in this.config && this.config.get_ObstructionDetected == offset)
       {
         this.log.debug( "[" + this.name + "] Push ObstructionDetected:" + value);
         this.service.getCharacteristic(Characteristic.TargetDoorState).updateValue(value);
@@ -2121,19 +2161,19 @@ GenericPLCAccessory.prototype = {
     // SmokeSensor
     ////////////////////////////////////////////////////////////////
     else if (this.config.accessory == 'PLC_SmokeSensor'){
-      if (this.config.get_SmokeDetected == offset)
+      if ('get_LockCurrentState' in this.config && this.config.get_SmokeDetected == offset)
       {
         this.log.debug( "[" + this.name + "] Push SmokeDetected:" + value);
         this.service.getCharacteristic(Characteristic.SmokeDetected).updateValue(value);
         rv = true;
       }
-      if (this.config.get_StatusTampered == offset)
+      if ('get_StatusTampered' in this.config && this.config.get_StatusTampered == offset)
       {
         this.log.debug( "[" + this.name + "] Push StatusTampered:" + value);
         this.service.getCharacteristic(Characteristic.StatusTampered).updateValue(value);
         rv = true;
       }
-      if (this.config.get_StatusLowBattery == offset)
+      if ('get_StatusLowBattery' in this.config && this.config.get_StatusLowBattery == offset)
       {
         this.log.debug( "[" + this.name + "] Push StatusLowBattery:" + value);
         this.service.getCharacteristic(Characteristic.StatusLowBattery).updateValue(value);
@@ -2144,31 +2184,31 @@ GenericPLCAccessory.prototype = {
     // Fan
     ////////////////////////////////////////////////////////////////
     else if (this.config.accessory == 'PLC_Fan'){
-      if (this.config.get_Active == offset)
+      if ('get_Active' in this.config && this.config.get_Active == offset)
       {
         this.log.debug( "[" + this.name + "] Push Active:" + value);
         this.service.getCharacteristic(Characteristic.Active).updateValue(value);
         rv = true;
       }
-      if (this.config.get_TargetFanState == offset)
+      if ('get_TargetFanState' in this.config && this.config.get_TargetFanState == offset)
       {
         this.log.debug( "[" + this.name + "] Push TargetFanState:" + String(this.modTargetGet(parseInt(value))) + "<-" + String(value));
         this.service.getCharacteristic(Characteristic.TargetFanState).updateValue(this.modTargetGet(parseInt(value)));
         rv = true;
       }
-      if (this.config.get_CurrentFanState == offset)
+      if ('get_CurrentFanState' in this.config && this.config.get_CurrentFanState == offset)
       {
         this.log.debug( "[" + this.name + "] Push CurrentFanState:" + String(this.modCurrentGet(parseInt(value))) + "<-" + String(value));
         this.service.getCharacteristic(Characteristic.CurrentFanState).updateValue(this.modCurrentGet(parseInt(value)));
         rv = true;
       }
-      if (this.config.get_RotationSpeed == offset || this.config.get_RotationSpeedByte)
+      if ('get_RotationSpeed' in this.config && this.config.get_RotationSpeed == offset || 'get_RotationSpeedByte' in this.config && this.config.get_RotationSpeedByte == offset)
       {
         this.log.debug( "[" + this.name + "] Push RotationSpeed:" + value);
         this.service.getCharacteristic(Characteristic.Active).RotationSpeed(value);
         rv = true;
       }
-      if (this.config.get_RotationDirection == offset)
+      if ('get_RotationDirection' in this.config && this.config.get_RotationDirection == offset)
       {
         this.log.debug( "[" + this.name + "] Push RotationDirection:" + String(this.mapDirectionGet(parseInt(value))) + "<-" + String(value));
         this.service.getCharacteristic(Characteristic.LockTargetState).updateValue(this.mapDirectionGet(parseInt(value)));
@@ -2178,34 +2218,97 @@ GenericPLCAccessory.prototype = {
     // PUSH handling ///////////////////////////////////////////////
     // LightSensor
     ////////////////////////////////////////////////////////////////
-    else if (this.config.accessory == 'PLC_LightSensor'){
+    else if (this.config.accessory == 'PLC_LightSensor' || this.config.accessory == 'PLC_LightSensor_DInt'){
 
-      if ( this.config.get_CurrentAmbientLightLevelDInt == offset )
+      if ('get_CurrentAmbientLightLevelDInt' in this.config && this.config.get_CurrentAmbientLightLevelDInt == offset )
       {
         this.log.debug( "[" + this.name + "] Push CurrentAmbientLightLevel:" + String(this.modFunctionGet(parseInt(value))) + "<-" + String(value));
         this.service.getCharacteristic(Characteristic.CurrentAmbientLightLevel).updateValue(this.modFunctionGet(parseInt(value)));
         rv = true;
       }
-      if (this.config.get_CurrentAmbientLightLevel == offset )
+      if ('get_CurrentAmbientLightLevel' in this.config && this.config.get_CurrentAmbientLightLevel == offset )
       {
         this.log.debug( "[" + this.name + "] Push CurrentAmbientLightLevel:" + String(this.modFunctionGet(parseFloat(value))) + "<-" + String(value));
         this.service.getCharacteristic(Characteristic.CurrentAmbientLightLevel).updateValue(this.modFunctionGet(parseFloat(value)));
         rv = true;
       }
-      if (this.config.get_StatusTampered == offset)
+      if ('get_StatusTampered' in this.config && this.config.get_StatusTampered == offset)
       {
         this.log.debug( "[" + this.name + "] Push StatusTampered:" + value);
         this.service.getCharacteristic(Characteristic.StatusTampered).updateValue(value);
         rv = true;
       }
-      if (this.config.get_StatusLowBattery == offset)
+      if ('get_StatusLowBattery' in this.config && this.config.get_StatusLowBattery == offset)
       {
         this.log.debug( "[" + this.name + "] Push StatusLowBattery:" + value);
         this.service.getCharacteristic(Characteristic.StatusLowBattery).updateValue(value);
         rv = true;
       }
     }
-
+    // PUSH handling ///////////////////////////////////////////////
+    // AirPurifier
+    ////////////////////////////////////////////////////////////////
+    else if (this.config.accessory == 'PLC_AirPurifier'){
+      if ('get_Active' in this.config && this.config.get_Active == offset)
+      {
+        this.log.debug( "[" + this.name + "] Push Active:" + value);
+        this.service.getCharacteristic(Characteristic.Active).updateValue(value);
+        rv = true;
+      }
+      if ('get_TargetAirPurifierState' in this.config && this.config.get_TargetAirPurifierState == offset)
+      {
+        this.log.debug( "[" + this.name + "] Push TargetAirPurifierState:" + String(this.modTargetGet(parseInt(value))) + "<-" + String(value));
+        this.service.getCharacteristic(Characteristic.TargetAirPurifierState).updateValue(this.modTargetGet(parseInt(value)));
+        rv = true;
+      }
+      if ('get_CurrentAirPurifierState' in this.config && this.config.get_CurrentAirPurifierState == offset)
+      {
+        this.log.debug( "[" + this.name + "] Push CurrentAirPurifierState:" + String(this.modCurrentGet(parseInt(value))) + "<-" + String(value));
+        this.service.getCharacteristic(Characteristic.CurrentAirPurifierState).updateValue(this.modCurrentGet(parseInt(value)));
+        rv = true;
+      }
+      if ('get_RotationSpeed' in this.config && this.config.get_RotationSpeed == offset || 'get_RotationSpeedByte' in this.config && this.config.get_RotationSpeedByte == offset)
+      {
+        this.log.debug( "[" + this.name + "] Push RotationSpeed:" + value);
+        this.service.getCharacteristic(Characteristic.Active).RotationSpeed(value);
+        rv = true;
+      }
+      if ('get_SwingMode' in this.config && this.config.get_SwingMode == offset)
+      {
+        this.log.debug( "[" + this.name + "] Push SwingMode:" + value);
+        this.service.getCharacteristic(Characteristic.SwingMode).updateValue(value);
+        rv = true;
+      }
+      if ('get_FilterChangeIndication' in this.config && this.config.get_FilterChangeIndication == offset)
+      {
+        this.log.debug( "[" + this.name + "] Push FilterChangeIndication:" + value);
+        this.service.getCharacteristic(Characteristic.FilterChangeIndication).updateValue(value);
+        rv = true;
+      }
+      if ('get_FilterLifeLevel' in this.config && this.config.get_FilterLifeLevel == offset)
+      {
+        this.log.debug( "[" + this.name + "] Push FilterLifeLevel:" + value);
+        this.service.getCharacteristic(Characteristic.FilterLifeLevel).updateValue(value);
+        rv = true;
+      }
+    }
+    // PUSH handling ///////////////////////////////////////////////
+    // FilterMaintenance
+    ////////////////////////////////////////////////////////////////
+    else if (this.config.accessory == 'PLC_FilterMaintenance'){
+      if ('get_FilterChangeIndication' in this.config && this.config.get_FilterChangeIndication == offset)
+      {
+        this.log.debug( "[" + this.name + "] Push FilterChangeIndication:" + value);
+        this.service.getCharacteristic(Characteristic.FilterChangeIndication).updateValue(value);
+        rv = true;
+      }
+      if ('get_FilterLifeLevel' in this.config && this.config.get_FilterLifeLevel == offset)
+      {
+        this.log.debug( "[" + this.name + "] Push FilterLifeLevel:" + value);
+        this.service.getCharacteristic(Characteristic.FilterLifeLevel).updateValue(value);
+        rv = true;
+      }
+    }
     return rv;
   },
 
@@ -2224,7 +2327,7 @@ GenericPLCAccessory.prototype = {
     if (this.config.accessory == 'PLC_LightBulb' ||
         this.config.accessory == 'PLC_Outlet' ||
         this.config.accessory == 'PLC_Switch') {
-      if (this.config.set_On == offset)
+      if ('set_On' in this.config && this.config.set_On == offset || 'set_On_Set' in this.config && this.config.set_On_Set == offset)
       {
         this.log.debug( "[" + this.name + "] Control On:" + value);
         this.service.getCharacteristic(Characteristic.On).setValue(value);
@@ -2247,19 +2350,19 @@ GenericPLCAccessory.prototype = {
     // Thermostat
     ////////////////////////////////////////////////////////////////
     else if (this.config.accessory == 'PLC_Thermostat'){
-      if (this.config.set_TargetTemperature == offset)
+      if ('set_TargetTemperature' in this.config && this.config.set_TargetTemperature == offset)
       {
         this.log.debug( "[" + this.name + "] Control TargetTemperature:" + value);
         this.service.getCharacteristic(Characteristic.TargetTemperature).setValue(value);
         rv = true;
       }
-      if (this.config.set_TargetRelativeHumidity == offset)
+      if ('set_TargetRelativeHumidity' in this.config && this.config.set_TargetRelativeHumidity == offset)
       {
         this.log.debug( "[" + this.name + "] Control TargetRelativeHumidity:" + value);
         this.service.getCharacteristic(Characteristic.TargetRelativeHumidity).setValue(value);
         rv = true;
       }
-      if (this.config.set_TargetHeatingCoolingState == offset)
+      if ('set_TargetHeatingCoolingState' in this.config && this.config.set_TargetHeatingCoolingState == offset)
       {
         this.log.debug( "[" + this.name + "] Control TargetHeatingCoolingState:" + value);
         this.service.getCharacteristic(Characteristic.TargetHeatingCoolingState).setValue(value);
@@ -2270,31 +2373,31 @@ GenericPLCAccessory.prototype = {
     // Humidifier Dehumidifier
     ////////////////////////////////////////////////////////////////
     else if (this.config.accessory == 'PLC_HumidifierDehumidifier'){
-      if (this.config.set_TargetHumidifierDehumidifierState == offset)
+      if ('set_TargetHumidifierDehumidifierState' in this.config && this.config.set_TargetHumidifierDehumidifierState == offset)
       {
         this.log.debug( "[" + this.name + "] Control TargetHumidifierDehumidifierState:" + value);
         this.service.getCharacteristic(Characteristic.TargetHumidifierDehumidifierState).setValue(value);
         rv = true;
       }
-      if (this.config.set_RelativeHumidityDehumidifierThreshold == offset)
+      if ('set_RelativeHumidityDehumidifierThreshold' in this.config && this.config.set_RelativeHumidityDehumidifierThreshold == offset)
       {
         this.log.debug( "[" + this.name + "] Control RelativeHumidityDehumidifierThreshold:" + value);
         this.service.getCharacteristic(Characteristic.RelativeHumidityDehumidifierThreshold).setValue(value);
         rv = true;
       }
-      if (this.config.set_RelativeHumidityHumidifierThreshold == offset)
+      if ('set_RelativeHumidityHumidifierThreshold' in this.config && this.config.set_RelativeHumidityHumidifierThreshold == offset)
       {
         this.log.debug( "[" + this.name + "] Control RelativeHumidityHumidifierThreshold:" + value);
         this.service.getCharacteristic(Characteristic.RelativeHumidityHumidifierThreshold).setValue(value);
         rv = true;
       }
-      if (this.config.set_RotationSpeed == offset || this.config.set_RotationSpeedByte == offset)
+      if ('set_RotationSpeed' in this.config && this.config.set_RotationSpeed == offset ||'set_RotationSpeedByte' in this.config &&  this.config.set_RotationSpeedByte == offset)
       {
         this.log.debug( "[" + this.name + "] Control RotationSpeed:" + value);
         this.service.getCharacteristic(Characteristic.RotationSpeed).setValue(value);
         rv = true;
       }
-      if (this.config.set_SwingMode == offset)
+      if ('set_SwingMode' in this.config && this.config.set_SwingMode == offset)
       {
         this.log.debug( "[" + this.name + "] Control SwingMode:" + value);
         this.service.getCharacteristic(Characteristic.SwingMode).setValue(value);
@@ -2305,12 +2408,12 @@ GenericPLCAccessory.prototype = {
     // Window, WindowCovering and Door
     ////////////////////////////////////////////////////////////////
     else if (this.config.accessory == 'PLC_Window' || this.config.accessory == 'PLC_WindowCovering' || this.config.accessory == 'PLC_Door'){
-      if (this.config.set_TargetPosition == offset)
+      if ('set_TargetPosition' in this.config && this.config.set_TargetPosition == offset)
       {
           this.log.debug( "[" + this.name + "] Control TargetPosition:" + String(value) );
           this.service.getCharacteristic(Characteristic.TargetPosition).setValue(value);
       }
-      if ( this.config.set_HoldPosition == offset)
+      if ('set_HoldPosition' in this.config && this.config.set_HoldPosition == offset)
       {
         this.log.debug( "[" + this.name + "] Control HoldPosition:" + String(value));
         this.service.getCharacteristic(Characteristic.HoldPosition).setValue(this.value);
@@ -2333,7 +2436,7 @@ GenericPLCAccessory.prototype = {
     // Faucet
     ////////////////////////////////////////////////////////////////
     else if (this.config.accessory == 'PLC_Faucet'){
-      if (this.config.set_Active == offset)
+      if ('set_Active' in this.config && this.config.set_Active == offset || 'set_Active_Set' in this.config && this.config.set_Active_Set == offset)
       {
         this.log.debug( "[" + this.name + "] Control Active:" + value);
         this.service.getCharacteristic(Characteristic.Active).setValue(value);
@@ -2344,13 +2447,13 @@ GenericPLCAccessory.prototype = {
     // Valve
     ////////////////////////////////////////////////////////////////
     else if (this.config.accessory == 'PLC_Valve'){
-      if (this.config.set_Active == offset)
+      if ('set_Active' in this.config && this.config.set_Active == offset || 'set_Active_Set' in this.config && this.config.set_Active_Set == offset)
       {
         this.log.debug( "[" + this.name + "] Control Active:" + value);
         this.service.getCharacteristic(Characteristic.Active).setValue(value);
         rv = true;
       }
-      if (this.config.set_SetDuration == offset)
+      if ('set_SetDuration' in this.config && this.config.set_SetDuration == offset)
       {
         this.log.debug( "[" + this.name + "] Control SetDuration:" + value);
         this.service.getCharacteristic(Characteristic.SetDuration).setValue(value);
@@ -2361,7 +2464,7 @@ GenericPLCAccessory.prototype = {
     // SecuritySystem
     ////////////////////////////////////////////////////////////////
     else if (this.config.accessory == 'PLC_SecuritySystem'){
-      if (this.config.set_SecuritySystemTargetState == offset)
+      if ('set_SecuritySystemTargetState' in this.config && this.config.set_SecuritySystemTargetState == offset)
       {
         this.log.debug( "[" + this.name + "] Control SecuritySystemTargetState:" + value);
         this.service.getCharacteristic(Characteristic.SecuritySystemTargetState).setValue(value);
@@ -2372,7 +2475,7 @@ GenericPLCAccessory.prototype = {
     // StatelessProgrammableSwitch, Doorbell
     ////////////////////////////////////////////////////////////////
     else if (this.config.accessory == 'PLC_StatelessProgrammableSwitch' || this.config.accessory == 'PLC_Doorbell'){
-      if (this.config.get_ProgrammableSwitchEvent == offset)
+      if ('get_ProgrammableSwitchEvent' in this.config && this.config.get_ProgrammableSwitchEvent == offset)
       {
         // Note: In contrast to all others accessories the control does not set the value in the PLC instead it simulates a key event.
         //       Therefore updateValue is
@@ -2385,7 +2488,7 @@ GenericPLCAccessory.prototype = {
     // LockMechanism
     ////////////////////////////////////////////////////////////////
     else if (this.config.accessory == 'PLC_LockMechanism'){
-      if (this.config.set_LockTargetState == offset || this.config.set_Secured == offset)
+      if ('set_LockTargetState' in this.config && this.config.set_LockTargetState == offset || 'set_Secured' in this.config && this.config.set_Secured == offset)
       {
         this.log.debug( "[" + this.name + "] Control LockTargetState:" + value);
         this.service.getCharacteristic(Characteristic.LockTargetState).setValue(value);
@@ -2396,7 +2499,7 @@ GenericPLCAccessory.prototype = {
     // LockMechanismBool
     ////////////////////////////////////////////////////////////////
     else if (this.config.accessory == 'PLC_LockMechanismBool'){
-      if (this.config.set_LockTargetState == offset || this.config.set_Secured == offset)
+      if ('set_LockTargetStateBool' in this.config && this.config.set_LockTargetStateBool == offset || 'set_LockTargetStateBool_Secured' in this.config && this.config.set_LockTargetStateBool_Secured == offset)
       {
         var valuePLC = this.invert_bit(parseInt(value));
         this.log.debug( "[" + this.name + "] Control LockTargetState:" + String(value) + "->" + String(valuePLC));
@@ -2408,7 +2511,7 @@ GenericPLCAccessory.prototype = {
     // GarageDoorOpener
     ////////////////////////////////////////////////////////////////
     else if (this.config.accessory == 'PLC_GarageDoorOpener'){
-      if (this.config.set_TargetDoorState == offset)
+      if ('set_TargetDoorState' in this.config && this.config.set_TargetDoorState == offset)
       {
         this.log.debug( "[" + this.name + "] Control TargetDoorState:" + value);
         this.service.getCharacteristic(Characteristic.TargetDoorState).setValue(value);
@@ -2418,33 +2521,81 @@ GenericPLCAccessory.prototype = {
     // CONTROL handling ////////////////////////////////////////////
     // SmokeSensor
     ////////////////////////////////////////////////////////////////
-    ////////////////////////////////////////////////////////////////
+    
     // CONTROL handling ////////////////////////////////////////////
     // Fan
     ////////////////////////////////////////////////////////////////
     else if (this.config.accessory == 'PLC_Fan'){
-      if (this.config.set_Active == offset)
+      if ('set_Active' in this.config && this.config.set_Active == offset || 'set_Active_Set' in this.config && this.config.set_Active_Set == offset)
       {
         this.log.debug( "[" + this.name + "] Control Active:" + value);
         this.service.getCharacteristic(Characteristic.Active).setValue(value);
         rv = true;
       }
-      if (this.config.set_TargetFanState == offset)
+      if ('set_TargetFanState' in this.config && this.config.set_TargetFanState == offset)
       {
         this.log.debug( "[" + this.name + "] Control TargetFanState:" + value);
         this.service.getCharacteristic(Characteristic.TargetFanState).setValue(value);
         rv = true;
       }
-      if (this.config.set_RotationSpeed == offset || this.config.set_RotationSpeedByte == offset)
+      if ('set_RotationSpeed' in this.config && this.config.set_RotationSpeed == offset || 'set_RotationSpeedByte' in this.config && this.config.set_RotationSpeedByte == offset)
       {
         this.log.debug( "[" + this.name + "] Control RotationSpeed:" + value);
         this.service.getCharacteristic(Characteristic.RotationSpeed).setValue(value);
         rv = true;
       }
-      if (this.config.set_RotationDirection == offset)
+      if ('set_RotationDirection' in this.config && this.config.set_RotationDirection == offset)
       {
         this.log.debug( "[" + this.name + "] Control RotationDirection:" + value);
         this.service.getCharacteristic(Characteristic.RotationDirection).setValue(value);
+        rv = true;
+      }
+    }
+    
+    // CONTROL handling ////////////////////////////////////////////
+    // AirPurifier
+    ////////////////////////////////////////////////////////////////
+    else if (this.config.accessory == 'PLC_AirPurifier'){
+      if ('set_Active' in this.config && this.config.set_Active == offset || 'set_Active_Set' in this.config && this.config.set_Active_Set == offset)
+      {
+        this.log.debug( "[" + this.name + "] Control Active:" + value);
+        this.service.getCharacteristic(Characteristic.Active).setValue(value);
+        rv = true;
+      }
+      if ('set_TargetAirPurifierState' in this.config && this.config.set_TargetAirPurifierState == offset)
+      {
+        this.log.debug( "[" + this.name + "] Control TargetAirPurifierState:" + value);
+        this.service.getCharacteristic(Characteristic.TargetAirPurifierState).setValue(value);
+        rv = true;
+      }
+      if ('set_RotationSpeed' in this.config && this.config.set_RotationSpeed == offset || 'set_RotationSpeedByte' in this.config && this.config.set_RotationSpeedByte == offset)
+      {
+        this.log.debug( "[" + this.name + "] Control RotationSpeed:" + value);
+        this.service.getCharacteristic(Characteristic.RotationSpeed).setValue(value);
+        rv = true;
+      }
+      if ('set_SwingMode' in this.config && this.config.set_SwingMode == offset)
+      {
+        this.log.debug( "[" + this.name + "] Control SwingMode:" + value);
+        this.service.getCharacteristic(Characteristic.SwingMode).setValue(value);
+        rv = true;
+      }
+      if ('set_ResetFilterIndication' in this.config && this.config.set_ResetFilterIndication == offset)
+      {
+        this.log.debug( "[" + this.name + "] Control ResetFilterIndication:" + value);
+        this.service.getCharacteristic(Characteristic.ResetFilterIndication).setValue(value);
+        rv = true;
+      }
+    }
+
+    // CONTROL handling ////////////////////////////////////////////
+    // FilterMaintenance
+    ////////////////////////////////////////////////////////////////
+    else if (this.config.accessory == 'PLC_FilterMaintenance'){
+      if ('set_ResetFilterIndication' in this.config && this.config.set_ResetFilterIndication == offset)
+      {
+        this.log.debug( "[" + this.name + "] Control ResetFilterIndication:" + value);
+        this.service.getCharacteristic(Characteristic.ResetFilterIndication).setValue(value);
         rv = true;
       }
     }
@@ -2880,7 +3031,7 @@ GenericPLCAccessory.prototype = {
     // POLL handling ///////////////////////////////////////////////
     // LightSensor
     ////////////////////////////////////////////////////////////////
-    else if (this.config.accessory == 'PLC_LightSensor') {
+    else if (this.config.accessory == 'PLC_LightSensor' || this.config.accessory == 'PLC_LightSensor_DInt'){
       // get the current target system state and update the value.
       this.service.getCharacteristic(Characteristic.CurrentAmbientLightLevel).getValue(function(err, value) {
         if (!err) {
@@ -2897,6 +3048,63 @@ GenericPLCAccessory.prototype = {
           this.service.getCharacteristic(Characteristic.StatusLowBattery).updateValue(value);
         }
       }.bind(this));
+    }
+    // POLL handling ///////////////////////////////////////////////
+    // AirPurifier
+    ////////////////////////////////////////////////////////////////
+    else if (this.config.accessory == 'PLC_AirPurifier') {
+      // get the current target system state and update the value.
+      this.service.getCharacteristic(Characteristic.Active).getValue(function(err, value) {
+        if (!err) {
+          this.service.getCharacteristic(Characteristic.Active).updateValue(value);
+        }
+      }.bind(this));
+      this.service.getCharacteristic(Characteristic.TargetAirPurifierState).getValue(function(err, value) {
+        if (!err) {
+          this.service.getCharacteristic(Characteristic.TargetAirPurifierState).updateValue(value);
+        }
+      }.bind(this));
+      this.service.getCharacteristic(Characteristic.CurrentAirPurifierState).getValue(function(err, value) {
+        if (!err) {
+          this.service.getCharacteristic(Characteristic.CurrentAirPurifierState).updateValue(value);
+        }
+      }.bind(this));
+      this.service.getCharacteristic(Characteristic.RotationSpeed).getValue(function(err, value) {
+        if (!err) {
+          this.service.getCharacteristic(Characteristic.RotationSpeed).updateValue(value);
+        }
+      }.bind(this));
+      this.service.getCharacteristic(Characteristic.SwingMode).getValue(function(err, value) {
+        if (!err) {
+          this.service.getCharacteristic(Characteristic.SwingMode).updateValue(value);
+        }
+      }.bind(this));
+      this.service.getCharacteristic(Characteristic.FilterChangeIndication).getValue(function(err, value) {
+        if (!err) {
+          this.service.getCharacteristic(Characteristic.FilterChangeIndication).updateValue(value);
+        }
+      }.bind(this));
+      this.service.getCharacteristic(Characteristic.FilterLifeLevel).getValue(function(err, value) {
+        if (!err) {
+          this.service.getCharacteristic(Characteristic.FilterLifeLevel).updateValue(value);
+        }
+      }.bind(this));    
+    }
+    // POLL handling ///////////////////////////////////////////////
+    // FilterMaintenance
+    ////////////////////////////////////////////////////////////////
+    else if (this.config.accessory == 'PLC_FilterMaintenance') {
+      // get the current target system state and update the value.
+      this.service.getCharacteristic(Characteristic.FilterChangeIndication).getValue(function(err, value) {
+        if (!err) {
+          this.service.getCharacteristic(Characteristic.FilterChangeIndication).updateValue(value);
+        }
+      }.bind(this));
+      this.service.getCharacteristic(Characteristic.FilterLifeLevel).getValue(function(err, value) {
+        if (!err) {
+          this.service.getCharacteristic(Characteristic.FilterLifeLevel).updateValue(value);
+        }
+      }.bind(this));      
     }
   },
 
