@@ -50,6 +50,8 @@ SIEMENS S7 PLC plugin for [Homebridge](https://homebridge.io)
   * [Light Sensor as `PLC_LightSensor`](#PLC_LightSensor)
   * [Air Purifier as `PLC_AirPurifier`](#PLC_AirPurifier)
   * [Filter Maintenance as `PLC_FilterMaintenance`](#PLC_FilterMaintenance)  
+  * [CarbonDioxideSensor as `PLC_CarbonDioxideSensor`](#PLC_CarbonDioxideSensor)
+  * [CarbonMonoxideSensor as `PLC_CarbonMonoxideSensor`](#PLC_CarbonMonoxideSensor)
 
 # Installation
 
@@ -731,7 +733,7 @@ Air filter
     - `100`: filter is new
   - `set_ResetFilterIndication`: **(optional)** **(control support)** offset and bit to filter change indication S7 type `Bool` **PLC has to set to 0** after detecting change to true via homebridge e.g. `55.4` for `DB4DBX55.4` NOTE: Currently not used by HomeApp
 
-### <a name='PLC_FilterMaintenance'></a>Light Sensor as `PLC_FilterMaintenance`
+### <a name='PLC_FilterMaintenance'></a>Filter mainanance indicator as `PLC_FilterMaintenance`
 Filter change indication (Currently neither supported in HomeApp and HomeBridge)
 
 ![homebridge pic](doc/filtermaintenance.png)
@@ -742,13 +744,26 @@ Filter change indication (Currently neither supported in HomeApp and HomeBridge)
 - `pollInterval`: **(optional)** poll interval in seconds. Default value see platform definition.
 - Filter change
   - `get_FilterChangeIndication`: **(push support)** offset and bit to filter change indication S7 type `Bool` e.g. `55.3` for `DB4DBX55.3`
-    - `0`: filter ok
+    - `false`: filter ok
     - `true`: change filter
   - `get_FilterLifeLevel`: **(optional)** **(push support)** offset and bit to filter live level S7 type `bate` e.g. `56` for `DB4DBX56`
     - `0`: change filter
     - `100`: filter is new
   - `set_ResetFilterIndication`: **(optional)** **(control support)** offset and bit to filter change indication S7 type `Bool` **PLC has to set to 0** after detecting change to true via homebridge e.g. `55.4` for `DB4DBX55.4` NOTE: Currently not used by HomeApp 
 
+### <a name='PLC_CarbonDioxideSensor'></a>C02 Sensor as `PLC_CarbonDioxideSensor`
+Carbon Dioxide Sensor
+- Warning
+  - `get_CarbonDioxideDetected`: **(push support)** offset and bit for CO2 detection S7 type `Bool` e.g. `55.3` for `DB4DBX55.3`
+    - `false`: normal CO2 level
+    - `true`: abnormal CO2 level
+
+### <a name='PLC_CarbonMonoxideSensor'></a>C0 Sensor as `PLC_CarbonMonoxideSensor`
+Carbon Monoxid Sensor
+- Warning
+  - `get_CarbonMonoxideDetected`: **(push support)** offset and bit for CO detection S7 type `Bool` e.g. `55.3` for `DB4DBX55.3`
+    - `false`: normal CO level
+    - `true`: abnormal CO level
 
 ## config.json Example
 Note: The example is just an example it contains also some optional settings. For testing purposes all accessories are set to one DB.
