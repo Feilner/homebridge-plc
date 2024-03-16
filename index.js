@@ -1527,6 +1527,38 @@ function GenericPLCAccessory(platform, config, accessoryNumber) {
   }
 
   // INIT handling ///////////////////////////////////////////////
+  // CarbonDioxideSensor
+  ////////////////////////////////////////////////////////////////
+  else if (config.accessory == 'PLC_CarbonDioxideSensor'){
+    this.service = new Service.CarbonDioxideSensor(this.name);
+    this.accessory.addService(this.service);
+
+    this.service.getCharacteristic(Characteristic.CarbonDioxideDetected)
+      .on('get', function(callback) {this.getBit(callback,
+        config.db,
+        Math.floor(config.get_CarbonDioxideDetected), Math.floor((config.get_CarbonDioxideDetected*10)%10),
+        "get CarbonDioxideDetected",
+        this.modFunctionGet
+      );}.bind(this));
+  }
+
+  // INIT handling ///////////////////////////////////////////////
+  // CarbonMonoxideSensor
+  ////////////////////////////////////////////////////////////////
+  else if (config.accessory == 'PLC_CarbonMonoxideSensor'){
+    this.service = new Service.CarbonMonoxideSensor(this.name);
+    this.accessory.addService(this.service);
+
+    this.service.getCharacteristic(Characteristic.CarbonMonoxideDetected)
+      .on('get', function(callback) {this.getBit(callback,
+        config.db,
+        Math.floor(config.get_CarbonMonoxideDetected), Math.floor((config.get_CarbonMonoxideDetected*10)%10),
+        "get CarbonMonoxideDetected",
+        this.modFunctionGet
+      );}.bind(this));
+  }
+
+  // INIT handling ///////////////////////////////////////////
   // Undefined
   ////////////////////////////////////////////////////////////////
   else {
@@ -2306,6 +2338,28 @@ GenericPLCAccessory.prototype = {
       {
         this.log.debug( "[" + this.name + "] Push FilterLifeLevel:" + value);
         this.service.getCharacteristic(Characteristic.FilterLifeLevel).updateValue(value);
+        rv = true;
+      }
+    }
+    // PUSH handling ///////////////////////////////////////////////
+    // CarbonDioxideSensor
+    ////////////////////////////////////////////////////////////////
+    else if (this.config.accessory == 'PLC_CarbonDioxideSensor'){
+      if ('get_CarbonDioxideDetected' in this.config && this.config.get_CarbonDioxideDetected == offset)
+      {
+        this.log.debug( "[" + this.name + "] Push CarbonDioxideDetected:" + value);
+        this.service.getCharacteristic(Characteristic.CarbonDioxideDetected).updateValue(value);
+        rv = true;
+      }
+    }
+    // PUSH handling ///////////////////////////////////////////////
+    // CarbonMonoxideSensor
+    ////////////////////////////////////////////////////////////////
+    else if (this.config.accessory == 'PLC_CarbonMonoxideSensor'){
+      if ('get_CarbonMonoxideDetected' in this.config && this.config.get_CarbonMonoxideDetected == offset)
+      {
+        this.log.debug( "[" + this.name + "] Push CarbonMonoxideDetected:" + value);
+        this.service.getCharacteristic(Characteristic.CarbonMonoxideDetected).updateValue(value);
         rv = true;
       }
     }
@@ -3106,7 +3160,29 @@ GenericPLCAccessory.prototype = {
         }
       }.bind(this));      
     }
-  },
+    // POLL handling ///////////////////////////////////////////////
+    // CarbonDioxideSensor
+    ////////////////////////////////////////////////////////////////
+    else if (this.config.accessory == 'PLC_CarbonDioxideSensor') {
+      // get the current target system state and update the value.
+      this.service.getCharacteristic(Characteristic.CarbonDioxideDetected).getValue(function(err, value) {
+        if (!err) {
+          this.service.getCharacteristic(Characteristic.CarbonDioxideDetected).updateValue(value);
+        }
+      }.bind(this));
+    }
+    // POLL handling ///////////////////////////////////////////////
+    // CarbonDioxideSensor
+    ////////////////////////////////////////////////////////////////
+    else if (this.config.accessory == 'PLC_CarbonMonoxideSensor') {
+      // get the current target system state and update the value.
+      this.service.getCharacteristic(Characteristic.CarbonMonoxideDetected).getValue(function(err, value) {
+        if (!err) {
+          this.service.getCharacteristic(Characteristic.CarbonMonoxideDetected).updateValue(value);
+        }
+      }.bind(this));
+    }
+},
 
   getServices: function() {
     return [this.accessory.getService(Service.AccessoryInformation), this.service];

@@ -216,6 +216,14 @@
                 {
                   "title": "PLC_FilterMaintenance",
                   "enum": ["PLC_FilterMaintenance"]                  
+                },
+                {
+                  "title": "PLC_CarbonDioxideSensor",
+                  "enum": ["PLC_CarbonDioxideSensor"]                  
+                },
+                {
+                  "title": "PLC_CarbonMonoxideSensor",
+                  "enum": ["PLC_CarbonMonoxideSensor"]                  
                 }
                 ]
             },
@@ -872,7 +880,6 @@
                 "functionBody": "return (!model.accessories[arrayIndices[0]].get_RotationSpeed && !model.accessories[arrayIndices[0]].set_RotationSpeed);"
               }
             },
-
             "get_RotationSpeed": {
               "title": "get_RotationSpeed <b>(optional)</b> <b>(push support)</b>",
               "type": "number",
@@ -889,9 +896,6 @@
                 "functionBody": "return (!model.accessories[arrayIndices[0]].get_RotationSpeedByte && !model.accessories[arrayIndices[0]].set_RotationSpeedByte);"
               }
             },                                                
-
-
-
             "get_RotationDirection": {
               "title": "get_RotationDirection <b>(optional)</b> <b>(push support)</b>",
               "type": "number",
@@ -971,7 +975,7 @@
                 "minimum": 0
               },
               "description": "define mapping array for `set_TargetAirPurifierState`. The home app value is used as index into the table. e.g. `[1, 0]` which maps the PLC value `0->1 1->0` when the PLC supports only two states with `0:automatic` and `1:manual`"
-            },                                 
+            },
             "get_FilterChangeIndication": {
               "title": "get_FilterChangeIndication <b>(push support)</b>",
               "type": "number",
@@ -980,7 +984,7 @@
             "get_FilterLifeLevel": {
               "title": "get_FilterLifeLevel <b>(optional)</b> <b>(push support)</b>",
               "type": "number",
-              "description":  "offset and bit to filter live level S7 type `bate` e.g. `56` for `DB4DBX56<br> - `0`: change filter<br> - `100`: filter is new"
+              "description":  "offset and bit to filter live level S7 type `bate` e.g. `56` for `DB4DBX56<br> - `false`: change filter<br> - `100`: filter is new"
             },       
             "set_ResetFilterIndication": {
               "title": "set_ResetFilterIndication <b>(optional but required when `get_TargetAirPurifierState` is defined)</b> <b>(control support)</b>",
@@ -996,6 +1000,16 @@
               "title": "get_StatusTampered <b>(optional)</b> <b>(push support)</b>",
               "type": "number",
               "description":  "offset and bit to tamper detection. (Home app shows this only within the options) S7 type `Bool` e.g. `55.2` for `DB4DBX55.2`<br> - `false`: ok<br> - `true`: tampered"
+            },
+            "get_CarbonDioxideDetected": {
+              "title": "get_CarbonDioxideDetected <b>(push support)</b>",
+              "type": "number",
+              "description":  "offset and bit for CO2 detection S7 type `Bool` e.g. `55.3` for `DB4DBX55.3 <br> - `false`: normal CO2 level<br> - `true`: abnormal CO2 level"
+            },
+            "get_CarbonMonoxideDetected": {
+              "title": "get_CarbonMonoxideDetected <b>(push support)</b>",
+              "type": "number",
+              "description":  "offset and bit for CO detection S7 type `Bool` e.g. `55.3` for `DB4DBX55.3 <br> - `false`: normal CO2 level<br> - `true`: abnormal CO2 level"
             }
           }
         }
@@ -1660,6 +1674,32 @@
               ],
               "condition": {
                 "functionBody": "return ['PLC_FilterMaintenance','PLC_AirPurifier'].includes(model.accessories[arrayIndices[0]].accessory);"
+              }
+            },
+            {
+              "key": "accessories[]",
+              "type": "section",
+              "title": "CarbonDioxide",
+              "expandable": true,
+              "expanded": false,
+              "items": [
+                "accessories[].get_CarbonDioxideDetected"
+              ],
+              "condition": {
+                "functionBody": "return ['PLC_CarbonDioxideSensor'].includes(model.accessories[arrayIndices[0]].accessory);"
+              }
+            },
+            {
+              "key": "accessories[]",
+              "type": "section",
+              "title": "CarbonMonoxide",
+              "expandable": true,
+              "expanded": false,
+              "items": [
+                "accessories[].get_CarbonMonoxideDetected"
+              ],
+              "condition": {
+                "functionBody": "return ['PLC_CarbonMonoxideSensor'].includes(model.accessories[arrayIndices[0]].accessory);"
               }
             }
           ]
