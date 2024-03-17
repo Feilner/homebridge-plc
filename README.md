@@ -2,7 +2,7 @@
 Homebridge plugin for Siemens Step7 and compatible PLCs
 
 [![NPM Version](https://img.shields.io/npm/v/homebridge-plc.svg)](https://www.npmjs.com/package/homebridge-plc)
-[![NPM Version](https://img.shields.io/npm/v/homebridge-plc/beta.svg)](https://www.npmjs.com/package/homebridge-plc)
+<!---[![NPM Version](https://img.shields.io/npm/v/homebridge-plc/beta.svg)](https://www.npmjs.com/package/homebridge-plc)--->
 [![npm](https://img.shields.io/npm/l/homebridge-plc.svg)](https://www.npmjs.com/package/homebridge-plc)
 [![npm](https://img.shields.io/npm/dt/homebridge-plc.svg)](https://www.npmjs.com/package/homebridge-plc)
 [![donate](https://img.shields.io/badge/donate-PayPal-blue.svg)](https://www.paypal.me/OFeilner)
@@ -753,7 +753,14 @@ Filter change indication (Currently neither supported in HomeApp and HomeBridge)
 
 ### <a name='PLC_CarbonDioxideSensor'></a>C02 Sensor as `PLC_CarbonDioxideSensor`
 Carbon Dioxide Sensor
-- Warning
+
+![homebridge pic](doc/carbondioxidesensor.png)
+- `name`: unique name of the accessory
+- `manufacturer`: **(optional)** description
+- `db`: s7 data base number e.g. `4` for `DB4`
+- `enablePolling`: **(optional)** when set to `true` the current state will be polled. It is mandatory as well to enable polling mode on platform level.
+- `pollInterval`: **(optional)** poll interval in seconds. Default value see platform definition.
+- Detected
   - `get_CarbonDioxideDetected`: **(push support)** offset and bit for CO2 detection S7 type `Bool` e.g. `55.3` for `DB4DBX55.3`
     - `false`: normal CO2 level
     - `true`: abnormal CO2 level
@@ -764,7 +771,14 @@ Carbon Dioxide Sensor
 
 ### <a name='PLC_CarbonMonoxideSensor'></a>C0 Sensor as `PLC_CarbonMonoxideSensor`
 Carbon Monoxid Sensor
-- Warning
+
+![homebridge pic](doc/carbonmonoxidesensor.png)
+- `name`: unique name of the accessory
+- `manufacturer`: **(optional)** description
+- `db`: s7 data base number e.g. `4` for `DB4`
+- `enablePolling`: **(optional)** when set to `true` the current state will be polled. It is mandatory as well to enable polling mode on platform level.
+- `pollInterval`: **(optional)** poll interval in seconds. Default value see platform definition.
+- Detected
   - `get_CarbonMonoxideDetected`: **(push support)** offset and bit for CO detection S7 type `Bool` e.g. `55.3` for `DB4DBX55.3`
     - `false`: normal CO level
     - `true`: abnormal CO level
