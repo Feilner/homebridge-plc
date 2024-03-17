@@ -2,7 +2,6 @@
 Homebridge plugin for Siemens Step7 and compatible PLCs
 
 [![NPM Version](https://img.shields.io/npm/v/homebridge-plc.svg)](https://www.npmjs.com/package/homebridge-plc)
-[![NPM Version](https://img.shields.io/npm/v/homebridge-plc/beta.svg)](https://www.npmjs.com/package/homebridge-plc)
 [![npm](https://img.shields.io/npm/l/homebridge-plc.svg)](https://www.npmjs.com/package/homebridge-plc)
 [![npm](https://img.shields.io/npm/dt/homebridge-plc.svg)](https://www.npmjs.com/package/homebridge-plc)
 [![donate](https://img.shields.io/badge/donate-PayPal-blue.svg)](https://www.paypal.me/OFeilner)
@@ -50,6 +49,8 @@ SIEMENS S7 PLC plugin for [Homebridge](https://homebridge.io)
   * [Light Sensor as `PLC_LightSensor`](#PLC_LightSensor)
   * [Air Purifier as `PLC_AirPurifier`](#PLC_AirPurifier)
   * [Filter Maintenance as `PLC_FilterMaintenance`](#PLC_FilterMaintenance)  
+  * [CarbonDioxideSensor as `PLC_CarbonDioxideSensor`](#PLC_CarbonDioxideSensor)
+  * [CarbonMonoxideSensor as `PLC_CarbonMonoxideSensor`](#PLC_CarbonMonoxideSensor)
 
 # Installation
 
@@ -292,10 +293,10 @@ Humidifier and/or Dehumidifier
       - `get_RotationSpeed`: **(optional)** **(push support)** offset to get rotation speed state S7 type `Real` e.g. `8` for `DB4DBB8`.
       - `set_RotationSpeed` **(optional but required when `get_RotationSpeed` is defined)** **(push support)** offset to get set speed state. S7 type `Real` e.g. `9` for `DB4DBB9`.
 - Swing Mode
-  - `get_SwingMode`: **(optional)** **(push support)** offset to get swing mode. S7 type `byte` e.g. `8` for `DB4DBB8`.
+  - `get_SwingMode`: **(optional)** **(push support)** offset to get swing mode. S7 type `Byte` e.g. `8` for `DB4DBB8`.
     - `0`: swing disabled
     - `1`: swing enabled
-  - `set_SwingMode` **(optional)** **(control support)** offset to set swing mode. S7 type `byte` e.g. `9` for `DB4DBB9`.
+  - `set_SwingMode` **(optional)** **(control support)** offset to set swing mode. S7 type `Byte` e.g. `9` for `DB4DBB9`.
     - `0`: swing disabled
     - `1`: swing enabled
 - Water Level
@@ -703,10 +704,10 @@ Air filter
   - `mapTargetAirPurifierStateGet`: **(optional)** define mapping array for `get_TargetAirPurifierState`. The PLC value is used as index into the table. e.g. `[1, 0]` which maps the PLC value `0->1 1->0` when the PLC supports only two states with `0:automatic` and `1:manual`.
   - `mapTargetAirPurifierStateSet`: **(optional)** define mapping array for `set_TargetAirPurifierState`. The home app value is used as index into the table. e.g. `[1, 0]` which maps the PLC value `0->1 1->0` when the PLC supports only two states with `0:automatic` and `1:manual`.
 - Swing Mode
-  - `get_SwingMode`: **(optional)** **(push support)** offset to get swing mode. S7 type `byte` e.g. `8` for `DB4DBB8`.
+  - `get_SwingMode`: **(optional)** **(push support)** offset to get swing mode. S7 type `Byte` e.g. `8` for `DB4DBB8`.
     - `0`: swing disabled
     - `1`: swing enabled
-  - `set_SwingMode` **(optional)** **(control support)** offset to set swing mode. S7 type `byte` e.g. `9` for `DB4DBB9`.
+  - `set_SwingMode` **(optional)** **(control support)** offset to set swing mode. S7 type `Byte` e.g. `9` for `DB4DBB9`.
     - `0`: swing disabled
     - `1`: swing enabled
 - Rotation Speed
@@ -726,12 +727,12 @@ Air filter
   - `get_FilterChangeIndication`: **(push support)** offset and bit to filter change indication S7 type `Bool` e.g. `55.3` for `DB4DBX55.3`
     - `0`: filter ok
     - `true`: change filter
-  - `get_FilterLifeLevel`: **(optional)** **(push support)** offset and bit to filter live level S7 type `bate` e.g. `56` for `DB4DBX56`
+  - `get_FilterLifeLevel`: **(optional)** **(push support)** offset and bit to filter live level S7 type `Byte` e.g. `56` for `DB4DBX56`
     - `0`: change filter
     - `100`: filter is new
   - `set_ResetFilterIndication`: **(optional)** **(control support)** offset and bit to filter change indication S7 type `Bool` **PLC has to set to 0** after detecting change to true via homebridge e.g. `55.4` for `DB4DBX55.4` NOTE: Currently not used by HomeApp
 
-### <a name='PLC_FilterMaintenance'></a>Light Sensor as `PLC_FilterMaintenance`
+### <a name='PLC_FilterMaintenance'></a>Filter mainanance indicator as `PLC_FilterMaintenance`
 Filter change indication (Currently neither supported in HomeApp and HomeBridge)
 
 ![homebridge pic](doc/filtermaintenance.png)
@@ -742,13 +743,48 @@ Filter change indication (Currently neither supported in HomeApp and HomeBridge)
 - `pollInterval`: **(optional)** poll interval in seconds. Default value see platform definition.
 - Filter change
   - `get_FilterChangeIndication`: **(push support)** offset and bit to filter change indication S7 type `Bool` e.g. `55.3` for `DB4DBX55.3`
-    - `0`: filter ok
+    - `false`: filter ok
     - `true`: change filter
-  - `get_FilterLifeLevel`: **(optional)** **(push support)** offset and bit to filter live level S7 type `bate` e.g. `56` for `DB4DBX56`
+  - `get_FilterLifeLevel`: **(optional)** **(push support)** offset and bit to filter live level S7 type `Byte` e.g. `56` for `DB4DBX56`
     - `0`: change filter
     - `100`: filter is new
   - `set_ResetFilterIndication`: **(optional)** **(control support)** offset and bit to filter change indication S7 type `Bool` **PLC has to set to 0** after detecting change to true via homebridge e.g. `55.4` for `DB4DBX55.4` NOTE: Currently not used by HomeApp 
 
+### <a name='PLC_CarbonDioxideSensor'></a>C02 Sensor as `PLC_CarbonDioxideSensor`
+Carbon Dioxide Sensor
+
+![homebridge pic](doc/carbondioxidesensor.png)
+- `name`: unique name of the accessory
+- `manufacturer`: **(optional)** description
+- `db`: s7 data base number e.g. `4` for `DB4`
+- `enablePolling`: **(optional)** when set to `true` the current state will be polled. It is mandatory as well to enable polling mode on platform level.
+- `pollInterval`: **(optional)** poll interval in seconds. Default value see platform definition.
+- Detected
+  - `get_CarbonDioxideDetected`: **(push support)** offset and bit for CO2 detection S7 type `Bool` e.g. `55.3` for `DB4DBX55.3`
+    - `false`: normal CO2 level
+    - `true`: abnormal CO2 level
+- `get_StatusTampered`: **(optional)** **(push support)** offset and bit to tamper detection. (Home app shows this only within the options) S7 type `Bool` e.g. `55.2` for `DB4DBX55.2`
+  - `false`: ok
+  - `true`: tampered
+- `get_StatusLowBattery`: **(optional)** **(push support)** offset and bit to battery low detection. (Home app does not inform with push notification) S7 type `Bool` e.g. `55.3` for 
+
+### <a name='PLC_CarbonMonoxideSensor'></a>C0 Sensor as `PLC_CarbonMonoxideSensor`
+Carbon Monoxid Sensor
+
+![homebridge pic](doc/carbonmonoxidesensor.png)
+- `name`: unique name of the accessory
+- `manufacturer`: **(optional)** description
+- `db`: s7 data base number e.g. `4` for `DB4`
+- `enablePolling`: **(optional)** when set to `true` the current state will be polled. It is mandatory as well to enable polling mode on platform level.
+- `pollInterval`: **(optional)** poll interval in seconds. Default value see platform definition.
+- Detected
+  - `get_CarbonMonoxideDetected`: **(push support)** offset and bit for CO detection S7 type `Bool` e.g. `55.3` for `DB4DBX55.3`
+    - `false`: normal CO level
+    - `true`: abnormal CO level
+- `get_StatusTampered`: **(optional)** **(push support)** offset and bit to tamper detection. (Home app shows this only within the options) S7 type `Bool` e.g. `55.2` for `DB4DBX55.2`
+  - `false`: ok
+  - `true`: tampered
+- `get_StatusLowBattery`: **(optional)** **(push support)** offset and bit to battery low detection. (Home app does not inform with push notification) S7 type `Bool` e.g. `55.3` for 
 
 ## config.json Example
 Note: The example is just an example it contains also some optional settings. For testing purposes all accessories are set to one DB.
