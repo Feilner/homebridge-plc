@@ -1203,7 +1203,7 @@
                 "accessories[].get_StatusLowBattery"
               ],
               "condition": {
-                "functionBody": "return ['PLC_TemperatureSensor','PLC_HumiditySensor','PLC_Thermostat'].includes(model.accessories[arrayIndices[0]].accessory);"
+                "functionBody": "return ['PLC_TemperatureSensor','PLC_HumiditySensor','PLC_Thermostat','PLC_CarbonDioxideSensor','PLC_CarbonMonoxideSensor'].includes(model.accessories[arrayIndices[0]].accessory);"
               }
             },
             {

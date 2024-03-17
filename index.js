@@ -460,22 +460,35 @@ function GenericPLCAccessory(platform, config, accessoryNumber) {
 
     this.initCurrentTemperature(true);
 
-    this.service.getCharacteristic(Characteristic.TargetTemperature)
-    .on('get', function(callback) {this.getReal(callback,
-      config.db,
-      config.get_TargetTemperature,
-      'get TargetTemperature'
-      );}.bind(this))
-    .on('set', function(value, callback) {this.setReal(value, callback,
-      config.db,
-      config.set_TargetTemperature,
-      'set TargetTemperature'
-      );}.bind(this))
-       .setProps({
-         minValue: ('minTargetTemperatureValue' in config) ? config.minTargetTemperatureValue : 10,
-         maxValue: ('maxTargetTemperatureValue' in config) ? config.maxTargetTemperatureValue : 38,
-         minStep: ('minTargetTemperatureStep' in config) ? config.minTargetTemperatureStep : 0.1
-       });
+    if ('get_TargetTemperature' in config && 'set_TargetTemperature' in config) {
+      this.service.getCharacteristic(Characteristic.TargetTemperature)
+      .on('get', function(callback) {this.getReal(callback,
+        config.db,
+        config.get_TargetTemperature,
+        'get TargetTemperature'
+        );}.bind(this))
+      .on('set', function(value, callback) {this.setReal(value, callback,
+        config.db,
+        config.set_TargetTemperature,
+        'set TargetTemperature'
+        );}.bind(this))
+        .setProps({
+          minValue: ('minTargetTemperatureValue' in config) ? config.minTargetTemperatureValue : 10,
+          maxValue: ('maxTargetTemperatureValue' in config) ? config.maxTargetTemperatureValue : 38,
+          minStep: ('minTargetTemperatureStep' in config) ? config.minTargetTemperatureStep : 0.1
+        });
+      } else {
+        this.log.error("Mandatory config get_TargetTemperature or set_TargetTemperature missing")
+        .on('get', function(callback) {this.getDummy(callback,
+          20,
+          'get TargetTemperature'
+          );}.bind(this))
+        .on('set', function(value, callback) {this.setDummy(value, callback,
+          'set TargetTemperature',
+          // ignore set and return current fixed values
+          informFunction
+          );}.bind(this));
+      }
 
     this.initCurrentRelativeHumidity(false);
 
@@ -1471,7 +1484,7 @@ function GenericPLCAccessory(platform, config, accessoryNumber) {
     }
 
     this.initActive(true);
-    this.initFilterMaintainance();
+    this.initFilterMaintainance(false);
 
     if ('get_RotationSpeed' in config) {
       this.service.getCharacteristic(Characteristic.RotationSpeed)
@@ -1522,8 +1535,7 @@ function GenericPLCAccessory(platform, config, accessoryNumber) {
     this.service = new Service.FilterMaintenance(this.name);
     this.accessory.addService(this.service);
 
-    this.initFilterMaintainance();
-    
+    this.initFilterMaintainance(true);    
   }
 
   // INIT handling ///////////////////////////////////////////////
@@ -1533,13 +1545,9 @@ function GenericPLCAccessory(platform, config, accessoryNumber) {
     this.service = new Service.CarbonDioxideSensor(this.name);
     this.accessory.addService(this.service);
 
-    this.service.getCharacteristic(Characteristic.CarbonDioxideDetected)
-      .on('get', function(callback) {this.getBit(callback,
-        config.db,
-        Math.floor(config.get_CarbonDioxideDetected), Math.floor((config.get_CarbonDioxideDetected*10)%10),
-        "get CarbonDioxideDetected",
-        this.modFunctionGet
-      );}.bind(this));
+    initCarbonDioxideDetected(true);
+    initStatusTampered();
+    initStatusLowBattery();
   }
 
   // INIT handling ///////////////////////////////////////////////
@@ -1549,13 +1557,10 @@ function GenericPLCAccessory(platform, config, accessoryNumber) {
     this.service = new Service.CarbonMonoxideSensor(this.name);
     this.accessory.addService(this.service);
 
-    this.service.getCharacteristic(Characteristic.CarbonMonoxideDetected)
-      .on('get', function(callback) {this.getBit(callback,
-        config.db,
-        Math.floor(config.get_CarbonMonoxideDetected), Math.floor((config.get_CarbonMonoxideDetected*10)%10),
-        "get CarbonMonoxideDetected",
-        this.modFunctionGet
-      );}.bind(this));
+    initCarbonMonoxideDetected(true);
+    initActive(false);
+    initStatusTampered();
+    initStatusLowBattery();
   }
 
   // INIT handling ///////////////////////////////////////////
@@ -1727,12 +1732,19 @@ GenericPLCAccessory.prototype = {
         );}.bind(this));
       }
   },
-  initFilterMaintainance: function() {
+  initFilterMaintainance: function(mandatory) {
     if ('get_FilterChangeIndication' in this.config) {
       this.service.getCharacteristic(Characteristic.FilterChangeIndication)
       .on('get', function(callback) {this.getBit(callback,
         this.config.db,
         Math.floor(this.config.get_FilterChangeIndication), Math.floor((this.config.get_FilterChangeIndication*10)%10),
+        'get FilterChangeIndication'
+      );}.bind(this));
+    } else if (mandatory) {
+      this.log.error("Mandatory config get_FilterChangeIndication missing")
+      this.service.getCharacteristic(Characteristic.FilterChangeIndication)
+      .on('get', function(callback) {this.getDummy(callback,
+        0,
         'get FilterChangeIndication'
       );}.bind(this));
     }
@@ -1754,7 +1766,45 @@ GenericPLCAccessory.prototype = {
         Math.floor(this.config.set_ResetFilterIndication), Math.floor((this.config.set_ResetFilterIndication*10)%10),
         'set ResetFilterIndication'
         );}.bind(this));
+    } 
+  },
+
+  initCarbonDioxideDetected: function(mandatory) {
+    if ('get_CarbonMonoxideDetected' in this.config) {
+      this.service.getCharacteristic(Characteristic.CarbonDioxideDetected)
+        .on('get', function(callback) {this.getBit(callback,
+          config.db,
+          Math.floor(config.get_CarbonDioxideDetected), Math.floor((config.get_CarbonDioxideDetected*10)%10),
+          "get CarbonDioxideDetected",
+          this.modFunctionGet
+        );}.bind(this));
+      } else if (mandatory) {
+      this.log.error("Mandatory config get_CarbonDioxideDetected missing")
+      this.service.getCharacteristic(Characteristic.CarbonDioxideDetected)
+      .on('get', function(callback) {this.getDummy(callback,
+        0,
+        'get CarbonDioxideDetected'
+      );}.bind(this));
     }
+  },
+
+  initCarbonMonoxideDetected: function(mandatory) {
+    if ('get_CarbonMonoxideDetected' in this.config) {
+      this.service.getCharacteristic(Characteristic.CarbonMonoxideDetected)
+        .on('get', function(callback) {this.getBit(callback,
+          config.db,
+          Math.floor(config.get_CarbonMonoxideDetected), Math.floor((config.get_CarbonMonoxideDetected*10)%10),
+          "get CarbonMonoxideDetected",
+          this.modFunctionGet
+        );}.bind(this));
+      } else {
+        this.log.error("Mandatory config get_CarbonMonoxideDetected missing")
+        this.service.getCharacteristic(Characteristic.CarbonMonoxideDetected)
+        .on('get', function(callback) {this.getDummy(callback,
+          0,
+          'get CarbonMonoxideDetected'
+        );}.bind(this));
+      }
     },
 
   poll: function() {
@@ -2351,6 +2401,18 @@ GenericPLCAccessory.prototype = {
         this.service.getCharacteristic(Characteristic.CarbonDioxideDetected).updateValue(value);
         rv = true;
       }
+      if ('get_StatusTampered' in this.config && this.config.get_StatusTampered == offset)
+      {
+        this.log.debug( "[" + this.name + "] Push StatusTampered:" + value);
+        this.service.getCharacteristic(Characteristic.StatusTampered).updateValue(value);
+        rv = true;
+      }
+      if ('get_StatusLowBattery' in this.config && this.config.get_StatusLowBattery == offset)
+      {
+        this.log.debug( "[" + this.name + "] Push StatusLowBattery:" + value);
+        this.service.getCharacteristic(Characteristic.StatusLowBattery).updateValue(value);
+        rv = true;
+      }
     }
     // PUSH handling ///////////////////////////////////////////////
     // CarbonMonoxideSensor
@@ -2360,6 +2422,18 @@ GenericPLCAccessory.prototype = {
       {
         this.log.debug( "[" + this.name + "] Push CarbonMonoxideDetected:" + value);
         this.service.getCharacteristic(Characteristic.CarbonMonoxideDetected).updateValue(value);
+        rv = true;
+      }
+      if ('get_StatusTampered' in this.config && this.config.get_StatusTampered == offset)
+      {
+        this.log.debug( "[" + this.name + "] Push StatusTampered:" + value);
+        this.service.getCharacteristic(Characteristic.StatusTampered).updateValue(value);
+        rv = true;
+      }
+      if ('get_StatusLowBattery' in this.config && this.config.get_StatusLowBattery == offset)
+      {
+        this.log.debug( "[" + this.name + "] Push StatusLowBattery:" + value);
+        this.service.getCharacteristic(Characteristic.StatusLowBattery).updateValue(value);
         rv = true;
       }
     }
@@ -3170,6 +3244,16 @@ GenericPLCAccessory.prototype = {
           this.service.getCharacteristic(Characteristic.CarbonDioxideDetected).updateValue(value);
         }
       }.bind(this));
+      this.service.getCharacteristic(Characteristic.StatusTampered).getValue(function(err, value) {
+        if (!err) {
+          this.service.getCharacteristic(Characteristic.StatusTampered).updateValue(value);
+        }
+      }.bind(this));
+      this.service.getCharacteristic(Characteristic.StatusLowBattery).getValue(function(err, value) {
+        if (!err) {
+          this.service.getCharacteristic(Characteristic.StatusLowBattery).updateValue(value);
+        }
+      }.bind(this));
     }
     // POLL handling ///////////////////////////////////////////////
     // CarbonDioxideSensor
@@ -3179,6 +3263,16 @@ GenericPLCAccessory.prototype = {
       this.service.getCharacteristic(Characteristic.CarbonMonoxideDetected).getValue(function(err, value) {
         if (!err) {
           this.service.getCharacteristic(Characteristic.CarbonMonoxideDetected).updateValue(value);
+        }
+      }.bind(this));
+      this.service.getCharacteristic(Characteristic.StatusTampered).getValue(function(err, value) {
+        if (!err) {
+          this.service.getCharacteristic(Characteristic.StatusTampered).updateValue(value);
+        }
+      }.bind(this));
+      this.service.getCharacteristic(Characteristic.StatusLowBattery).getValue(function(err, value) {
+        if (!err) {
+          this.service.getCharacteristic(Characteristic.StatusLowBattery).updateValue(value);
         }
       }.bind(this));
     }
