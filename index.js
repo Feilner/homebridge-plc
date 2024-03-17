@@ -1545,9 +1545,9 @@ function GenericPLCAccessory(platform, config, accessoryNumber) {
     this.service = new Service.CarbonDioxideSensor(this.name);
     this.accessory.addService(this.service);
 
-    initCarbonDioxideDetected(true);
-    initStatusTampered();
-    initStatusLowBattery();
+    this.initCarbonDioxideDetected(true);
+    this.initStatusTampered();
+    this.initStatusLowBattery();
   }
 
   // INIT handling ///////////////////////////////////////////////
@@ -1557,10 +1557,9 @@ function GenericPLCAccessory(platform, config, accessoryNumber) {
     this.service = new Service.CarbonMonoxideSensor(this.name);
     this.accessory.addService(this.service);
 
-    initCarbonMonoxideDetected(true);
-    initActive(false);
-    initStatusTampered();
-    initStatusLowBattery();
+    this.initCarbonMonoxideDetected(true);
+    this.initStatusTampered();
+    this.initStatusLowBattery();
   }
 
   // INIT handling ///////////////////////////////////////////
@@ -1766,15 +1765,15 @@ GenericPLCAccessory.prototype = {
         Math.floor(this.config.set_ResetFilterIndication), Math.floor((this.config.set_ResetFilterIndication*10)%10),
         'set ResetFilterIndication'
         );}.bind(this));
-    } 
+    }
   },
 
   initCarbonDioxideDetected: function(mandatory) {
-    if ('get_CarbonMonoxideDetected' in this.config) {
+    if ('get_CarbonDioxideDetected' in this.config) {
       this.service.getCharacteristic(Characteristic.CarbonDioxideDetected)
         .on('get', function(callback) {this.getBit(callback,
-          config.db,
-          Math.floor(config.get_CarbonDioxideDetected), Math.floor((config.get_CarbonDioxideDetected*10)%10),
+          this.config.db,
+          Math.floor(this.config.get_CarbonDioxideDetected), Math.floor((this.config.get_CarbonDioxideDetected*10)%10),
           "get CarbonDioxideDetected",
           this.modFunctionGet
         );}.bind(this));
@@ -1792,8 +1791,8 @@ GenericPLCAccessory.prototype = {
     if ('get_CarbonMonoxideDetected' in this.config) {
       this.service.getCharacteristic(Characteristic.CarbonMonoxideDetected)
         .on('get', function(callback) {this.getBit(callback,
-          config.db,
-          Math.floor(config.get_CarbonMonoxideDetected), Math.floor((config.get_CarbonMonoxideDetected*10)%10),
+          this.config.db,
+          Math.floor(this.config.get_CarbonMonoxideDetected), Math.floor((this.config.get_CarbonMonoxideDetected*10)%10),
           "get CarbonMonoxideDetected",
           this.modFunctionGet
         );}.bind(this));
