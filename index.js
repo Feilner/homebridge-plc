@@ -880,7 +880,7 @@ function GenericPLCAccessory(platform, config, accessoryNumber) {
     this.service = new Service.ContactSensor(this.name);
     this.accessory.addService(this.service);
 
-    if ('invert' in config && config.invert) {
+    if ('invertContactSensorState' in config && config.invertContactSensorState) {
         this.modFunctionGet = this.invert_bit;
     }
 
