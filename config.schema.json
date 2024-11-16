@@ -1,5 +1,5 @@
 {
-  "pluginAlias": "ExampleHomebridgePlugin",
+  "pluginAlias": "PLC",
   "pluginType": "platform",
   "singular": true,
   "strictValidation": false,
