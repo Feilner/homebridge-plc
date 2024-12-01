@@ -24,9 +24,10 @@ export class ExamplePlatformAccessory {
     private readonly accessory: PlatformAccessory,
   ) {
     // set accessory information
-    const default_nanufacturer = ('db' in accessory.context.config) ? 'homebridge-plc (DB' + String(accessory.context.config.db)+ ')' : 'homebridge-plc');
+    const default_nanufacturer = ('db' in accessory.context.config) ? 'homebridge-plc (DB' + String(accessory.context.config.db)+ ')' : 'homebridge-plc';
+    const manufacturer = ('manufacturer' in accessory.context.config) ? accessory.context.config.manufacturer : default_nanufacturer;
     this.accessory.getService(this.platform.Service.AccessoryInformation)! 
-      .setCharacteristic(this.platform.Characteristic.Manufacturer, ('manufacturer' in accessory.context.config) ? accessory.context.config.manufacturer : default_nanufacturer)
+      .setCharacteristic(this.platform.Characteristic.Manufacturer, manufacturer)
       .setCharacteristic(this.platform.Characteristic.Model, accessory.context.config.accessory)
       .setCharacteristic(this.platform.Characteristic.SerialNumber, accessory.UUID);
 
