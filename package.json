@@ -33,7 +33,7 @@
   },
   "preferGlobal": true,
   "dependencies": {
-    "node-snap7": ">=1.0.5"
+    "node-snap7": ">=1.0.7"
   },
   "scripts": {
     "build": "rimraf ./dist && tsc",
