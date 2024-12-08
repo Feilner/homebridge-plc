@@ -2,7 +2,7 @@ import type { API, Characteristic, DynamicPlatformPlugin, Logging, PlatformAcces
 
 import { ExamplePlatformAccessory } from './platformAccessory.js';
 import { PLATFORM_NAME, PLUGIN_NAME } from './settings.js';
-import { PLC } from './step7.cjs';
+import { PLC } from './step7.js';
 
 /**
  * HomebridgePlatform
@@ -25,6 +25,7 @@ export class ExampleHomebridgePlatform implements DynamicPlatformPlugin {
   ) {
     this.Service = api.hap.Service;
     this.Characteristic = api.hap.Characteristic;
+    this.log.error('nun wird es ernst' + this.config.ip);
     this.PLC = new PLC(log, this.config.ip, this.config.rack, this.config.slot, 'communicationOP' in this.config && this.config.communicationOP );
     if (!this.PLC.connect()) {
       this.log.error('Initial connect failed');
