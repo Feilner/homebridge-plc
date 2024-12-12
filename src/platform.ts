@@ -16,7 +16,7 @@ export class ExampleHomebridgePlatform implements DynamicPlatformPlugin {
   // this is used to track restored cached accessories
   public readonly accessories: Map<string, PlatformAccessory> = new Map();
   public readonly discoveredCacheUUIDs: string[] = [];
-  private PLC: PLC;
+  public PLC: PLC;
 
   constructor(
     public readonly log: Logging,
@@ -25,7 +25,6 @@ export class ExampleHomebridgePlatform implements DynamicPlatformPlugin {
   ) {
     this.Service = api.hap.Service;
     this.Characteristic = api.hap.Characteristic;
-    this.log.error('nun wird es ernst' + this.config.ip);
     this.PLC = new PLC(log, this.config.ip, this.config.rack, this.config.slot, 'communicationOP' in this.config && this.config.communicationOP );
     if (!this.PLC.connect()) {
       this.log.error('Initial connect failed');
@@ -50,17 +49,12 @@ export class ExampleHomebridgePlatform implements DynamicPlatformPlugin {
    * This function is invoked when homebridge restores cached accessories from disk at startup.
    * It should be used to set up event handlers for characteristics and update respective values.
    */
-  /*
+  
   configureAccessory(accessory: PlatformAccessory) {
     this.log.info('Loading accessory from cache:', accessory.displayName + ' (' +  accessory.context.config.accessory + ')' );
 
     // add the restored accessory to the accessories cache, so we can track if it has already been registered
     this.accessories.set(accessory.UUID, accessory);
-  }
-*/
-
-  configureAccessory(accessory: PlatformAccessory): void { // eslint-disable-line @typescript-eslint/no-unused-vars
-    return;
   }
 
   /**
@@ -139,7 +133,4 @@ export class ExampleHomebridgePlatform implements DynamicPlatformPlugin {
       }
     }
   }
-
-
-  
 }

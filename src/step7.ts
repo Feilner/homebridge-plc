@@ -1,8 +1,9 @@
 
 import { Logging } from 'homebridge';
 import snap7 from 'node-snap7';
-import { isIPv4 } from 'net';
-import dns from 'dns';
+
+
+
 
 export class PLC {
   private s7: snap7.S7Client;
@@ -50,6 +51,35 @@ export class PLC {
     }
     return rv;
   }
-}
+
+  setOnOffBit(value: boolean, db : number, on_offset : number, on_bit : number, off_offset: number, off_bit : number, characteristic : string) {
+    //Set single bit depending on value
+    const offset = value ? on_offset : off_offset;
+    const bit = value ? on_bit : off_bit;
+    const logprefix = '[' + 'this.name' + '] ' + characteristic + ': %s (setOnOffBit DB' + db + 'DBX'+ offset + '.' + bit + ')';
+    const log = this.log;
+    const buf = Buffer.alloc(1);
+
+    //ensure PLC connection
+    if (this.connect()) {
+      buf.writeUInt8(1);
+      if (!this.s7.WriteArea(/*snap7.Area.S7AreaDB*/ 0x84, db, ((offset*8) + bit), 1, /*snap7.WordLen.S7WLBit*/ 0x01 , buf)) {
+        const err = this.s7.LastError();
+        log.error(logprefix, 'WriteArea failed #' + err.toString(16) + ' - ' + this.s7.ErrorText(err));
+        if(err & 0xFFFFF) {
+          this.s7.Disconnect();
+        }
+        log.error('PLC error');
+      } else {
+        log.debug(logprefix + ' %d ms', String(value), this.s7.ExecTime());
+      }
+    } else {
+      log.error('PLC not connected');
+    }
+  }
+
+
+
+} 
 
 

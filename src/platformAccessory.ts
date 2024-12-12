@@ -1,4 +1,4 @@
-import type { CharacteristicValue, PlatformAccessory, Service } from 'homebridge';
+import type { CharacteristicGetCallback, CharacteristicValue, PlatformAccessory, Service } from 'homebridge';
 
 import type { ExampleHomebridgePlatform } from './platform.js';
 
@@ -24,6 +24,8 @@ export class ExamplePlatformAccessory {
     private readonly accessory: PlatformAccessory,
   ) {
     // set accessory information
+    this.platform.log.debug('Accessory Constructor', accessory.context.config.name);
+
     const default_nanufacturer = ('db' in accessory.context.config) ? 'homebridge-plc (DB' + String(accessory.context.config.db)+ ')' : 'homebridge-plc';
     const manufacturer = ('manufacturer' in accessory.context.config) ? accessory.context.config.manufacturer : default_nanufacturer;
     this.accessory.getService(this.platform.Service.AccessoryInformation)! 
@@ -47,9 +49,35 @@ export class ExamplePlatformAccessory {
       .onSet(this.setOn.bind(this)) // SET - bind to the `setOn` method below
       .onGet(this.getOn.bind(this)); // GET - bind to the `getOn` method below
 
+
+    /*
+    this.service.getCharacteristic(this.platform.Characteristic.On)
+      .onGet(() => {
+        this.platform.log.error('(On.get)', this.exampleStates.On);
+        return this.exampleStates.On;
+      })
+      .onSet((value: CharacteristicValue) => {
+        this.exampleStates.On = value as boolean;
+        this.platform.log.error('(On.set)', value);        
+      });
+*/
+    /*
+    this.service.getCharacteristic(this.platform.Characteristic.On)
+      .on('set', (value : CharacteristicValue, callback: CharacteristicGetCallback) => {
+        this.exampleStates.On = value as boolean;
+        this.platform.log.error('(On.set)', this.exampleStates.On);
+        callback(null);
+      } )
+      .on('get', (callback: CharacteristicGetCallback) => {
+        this.platform.log.error('(On.get)', this.exampleStates.On);
+        callback(null, this.exampleStates.On);
+      } );
+*/
+
+
     // register handlers for the Brightness Characteristic
-    this.service.getCharacteristic(this.platform.Characteristic.Brightness)
-      .onSet(this.setBrightness.bind(this)); // SET - bind to the `setBrightness` method below
+    //this.service.getCharacteristic(this.platform.Characteristic.Brightness)
+    //      .onSet(this.setBrightness.bind(this)); // SET - bind to the `setBrightness` method below
 
     /**
      * Creating multiple services of the same type.
@@ -63,12 +91,13 @@ export class ExamplePlatformAccessory {
      */
 
     // Example: add two "motion sensor" services to the accessory
+    /*
     const motionSensorOneService = this.accessory.getService('Motion Sensor One Name')
       || this.accessory.addService(this.platform.Service.MotionSensor, 'Motion Sensor One Name', 'YourUniqueIdentifier-1');
 
     const motionSensorTwoService = this.accessory.getService('Motion Sensor Two Name')
       || this.accessory.addService(this.platform.Service.MotionSensor, 'Motion Sensor Two Name', 'YourUniqueIdentifier-2');
-
+*/
     /**
      * Updating characteristics values asynchronously.
      *
@@ -84,12 +113,12 @@ export class ExamplePlatformAccessory {
       motionDetected = !motionDetected;
 
       // push the new value to HomeKit
-      motionSensorOneService.updateCharacteristic(this.platform.Characteristic.MotionDetected, motionDetected);
-      motionSensorTwoService.updateCharacteristic(this.platform.Characteristic.MotionDetected, !motionDetected);
+      //motionSensorOneService.updateCharacteristic(this.platform.Characteristic.MotionDetected, motionDetected);
+      //motionSensorTwoService.updateCharacteristic(this.platform.Characteristic.MotionDetected, !motionDetected);
 
       this.platform.log.debug('Triggering motionSensorOneService:', motionDetected);
       this.platform.log.debug('Triggering motionSensorTwoService:', !motionDetected);
-    }, 10000);
+    }, 100000);
   }
 
   /**
@@ -100,8 +129,28 @@ export class ExamplePlatformAccessory {
     // implement your own code to turn your device on/off
     this.exampleStates.On = value as boolean;
 
-    this.platform.log.debug('Set Characteristic On ->', value);
+    this.platform.log.debug('Set Characteristic On 1/2 ->', this.exampleStates.On );
+    
+    this.platform.PLC.setOnOffBit(this.exampleStates.On, 
+      this.accessory.context.config.db, 
+      Math.floor(this.accessory.context.config.set_On_Set), Math.floor((this.accessory.context.config.set_On_Set * 10) % 10),
+      Math.floor(this.accessory.context.config.set_On_Reset), Math.floor((this.accessory.context.config.set_On_Reset*10)%10),
+      'set On');   
+    this.platform.log.debug('Set Characteristic On 2/2" ->', this.exampleStates.On );
   }
+
+  /*
+  setOn(value: CharacteristicValue, context: any){ 
+    try { 
+      
+      this.platform.log.debug('Set Characteristic On 1/2 ->', this.exampleStates.On );
+      
+    } catch (error)       {
+      // Fehlerbehandlung und Callback mit Fehler aufrufen 
+      this.platform.log.error('Set fCharacteristicehler', this.exampleStates.On );
+    } 
+  }
+*/
 
   /**
    * Handle the "GET" requests from HomeKit
