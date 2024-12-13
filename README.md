@@ -3,15 +3,14 @@ Homebridge plugin for Siemens Step7 and compatible PLCs
 
 <!-- prettier-ignore -->
 > [!NOTE]
-> homebridge-plc V2.1.0-beta is compatible with homebridge V2
+> homebridge-plc V2.1.0-beta is compatible with **Homebridge V2**
 
-[![NPM Version](/npm/v/homebridge-plc.svg)](https://www.npmjs.com/package/homebridge-plc)
+[![NPM Version](https://img.shields.io/npm/v/homebridge-plc.svg)](https://www.npmjs.com/package/homebridge-plc)
 [![npm](https://img.shields.io/npm/l/homebridge-plc.svg)](https://www.npmjs.com/package/homebridge-plc)
 [![npm](https://img.shields.io/npm/dt/homebridge-plc.svg)](https://www.npmjs.com/package/homebridge-plc)
 [![donate](https://img.shields.io/badge/donate-PayPal-blue.svg)](https://www.paypal.me/OFeilner)
-[![HomebridgeV2](https://img.shields.io/badge/V2.1.0-beta%20is%2homebridge%20V2%20compatible-8A2BE2](https://github.com/homebridge/homebridge/wiki/Updating-To-Homebridge-v2.0)
 
-SIEMENS S7 PLC plugin for [Homebridge](https://homebridge.io) **2.1.0-beta.0 is compatible with Homebridge V2**
+SIEMENS S7 PLC plugin for [Homebridge](https://homebridge.io)
 - Uses snap7 for communication therefore compatible with:
   * S7 300
   * S7 400
