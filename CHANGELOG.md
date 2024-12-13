@@ -4,6 +4,11 @@
 - Version 2.0.x has changed the name of some configurations.
 - Please stay on version 1.0.x if you do not want to adapt your configuration.
 
+## [2.0.5] 2024-12-13
+
+### Fixed
+- `PLC_StatelessProgrammableSwitch` and `PLC_Doorbell` corrected config schema for get_ProgrammableSwitchEvent and fixed poll issue
+
 ## [2.0.4] 2024-08-17
 
 ### Fixed

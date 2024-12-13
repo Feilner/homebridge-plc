@@ -717,8 +717,13 @@
               "type": "number",
               "description": "offset and bit that is polled by homebridge-plc. <br><b>NOTE:</b>PLC has to set to `true`. When polled with value `true` the actual event is read from `get_ProgrammableSwitchEvent` and this flas is set to `false` by homebirdge-plc to confirm that the event is handled. S7 type `Bool` e.g. `55.1` for `DB4DBX55.1` <b>(polling only, not used for push)</b>"
             },
+            "get_ProgrammableSwitchEvent": {
+              "title": "get_ProgrammableSwitchEvent <b>(push support)</b> <b>(control support)</b>",
+              "type": "number",
+              "description": "offset to read current event of the switch. This is reported towards home app S7 type `Byte` e.g. `3` for `DB4DBB3`<br> - `0`: single press<br> - `1`: double press<br> - `2`: long press<br> - `3`: unknown"
+            },
             "get_LockCurrentState": {
-              "title": "get_LockCurrentState <b>(push support)</b> <b>(push support)</b>",
+              "title": "get_LockCurrentState <b>(push support)</b>",
               "type": "number",
               "description": "offset to read current state current state S7 type `Bool` .g. `3.1` for `DB4DBB3`<br> - `false`: secured<br> - `true`: unsecured"
             },

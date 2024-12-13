@@ -3041,26 +3041,29 @@ GenericPLCAccessory.prototype = {
     // StatelessProgrammableSwitch, Doorbell
     ////////////////////////////////////////////////////////////////
     else if (this.config.accessory == 'PLC_StatelessProgrammableSwitch' || this.config.accessory == 'PLC_Doorbell'){
-      this.getBit(function(err,value){
-          if(!err && value)
-          {
-            this.getByte(function(err, event) {
-              if (!err) {
-                this.service.getCharacteristic(Characteristic.ProgrammableSwitchEvent).updateValue(event);
-                this.log.info( "[" + this.name + "] Stateless switch event :" + event);
-                this.setBit(0,function(err){},
+      // poll isEvent bit and evaluate in callback
+      this.getBit(
+        function(err, isEvent) {
+          if(!err && isEvent) {
+            // isEvent is set get get ProgrammableSwitchEvent value
+            this.getByte(
+              function(err, value) {
+                if (!err) {
+                this.log.info( "[" + this.name + "] Stateless switch event :" + value);
+                this.service.getCharacteristic(Characteristic.ProgrammableSwitchEvent).updateValue(value);
+                // clear isEvent after sucessful reading ProgrammableSwitchEvent
+                this.setBit( 0 ,function(err){},
                   this.config.db,
                   Math.floor(this.config.isEvent), Math.floor((this.config.isEvent*10)%10),
                   'clear IsEvent');
-              }
-            }.bind(this),
-            this.config.db,
-            this.config.get_ProgrammableSwitchEvent,
-            'read Event'
-            ),
-            this.service.getCharacteristic(Characteristic.ProgrammableSwitchEvent).getValue();
+                }
+              }.bind(this),
+              this.config.db,
+              this.config.get_ProgrammableSwitchEvent,
+              'read Event'
+            );
           }
-         }.bind(this),
+        }.bind(this),
         this.config.db,
         Math.floor(this.config.isEvent), Math.floor((this.config.isEvent*10)%10),
         'poll isEvent'
