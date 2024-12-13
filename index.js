@@ -374,20 +374,21 @@ function GenericPLCAccessory(platform, config, accessoryNumber) {
     this.accessory.addService(this.service);
 
 
-    informFunction = function(notUsed){
-      // update target state and current state value.
-      this.service.getCharacteristic(Characteristic.TargetHeatingCoolingState).getValue(function(err, value) {
-        if (!err) {
-          this.service.getCharacteristic(Characteristic.TargetHeatingCoolingState).updateValue(value);
-        }
-      }.bind(this));
-
-      this.service.getCharacteristic(Characteristic.CurrentHeatingCoolingState).getValue(function(err, value) {
-        if (!err) {
-          this.service.getCharacteristic(Characteristic.CurrentHeatingCoolingState).updateValue(value);
-        }
-      }.bind(this));
-     }.bind(this);
+    informFunction = function(notUsed) {
+      // Update target state and current state value.
+      this.service.getCharacteristic(Characteristic.TargetHeatingCoolingState).handleGetRequest().then(value => {
+        this.service.getCharacteristic(Characteristic.TargetHeatingCoolingState).updateValue(value);
+      }).catch(err => {
+        this.log.error("[" + this.name + "] Error during inform", err);
+      });
+    
+      this.service.getCharacteristic(Characteristic.CurrentHeatingCoolingState).handleGetRequest().then(value => {
+        this.service.getCharacteristic(Characteristic.CurrentHeatingCoolingState).updateValue(value);
+      }).catch(err => {
+        this.log.error("[" + this.name + "] Error during inform", err);
+      });
+    }.bind(this);
+   
 
     if ('mapSetTargetHeatingCoolingState' in config && config.mapSetTargetHeatingCoolingState) {
       this.modFunctionSet = function(value){return this.mapFunction(value, config.mapSetTargetHeatingCoolingState);}.bind(this);
@@ -525,20 +526,20 @@ function GenericPLCAccessory(platform, config, accessoryNumber) {
     this.service = new Service.HumidifierDehumidifier(this.name);
     this.accessory.addService(this.service);
 
-    informFunction = function(notUsed){
-      // update target state and current state value.
-      this.service.getCharacteristic(Characteristic.TargetHumidifierDehumidifierState).getValue(function(err, value) {
-        if (!err) {
-          this.service.getCharacteristic(Characteristic.TargetHumidifierDehumidifierState).updateValue(value);
-        }
-      }.bind(this));
-
-      this.service.getCharacteristic(Characteristic.CurrentHumidifierDehumidifierState).getValue(function(err, value) {
-        if (!err) {
-          this.service.getCharacteristic(Characteristic.CurrentHumidifierDehumidifierState).updateValue(value);
-        }
-      }.bind(this));
-     }.bind(this);
+    informFunction = function(notUsed) {
+      // Update target state and current state value.
+      this.service.getCharacteristic(Characteristic.TargetHumidifierDehumidifierState).handleGetRequest().then(value => {
+        this.service.getCharacteristic(Characteristic.TargetHumidifierDehumidifierState).updateValue(value);
+      }).catch(err => {
+        this.log.error("[" + this.name + "] Error during inform", err);
+      });
+    
+      this.service.getCharacteristic(Characteristic.CurrentHumidifierDehumidifierState).handleGetRequest().then(value => {
+        this.service.getCharacteristic(Characteristic.CurrentHumidifierDehumidifierState).updateValue(value);
+      }).catch(err => {
+        this.log.error("[" + this.name + "] Error during inform", err);
+      });
+    }.bind(this);    
 
     if ('mapSetTargetHumidifierDehumidifierState' in config && config.mapSetTargetHumidifierDehumidifierState) {
       this.modFunctionSet = function(value){return this.mapFunction(value, config.mapSetTargetHumidifierDehumidifierState);}.bind(this);
@@ -776,25 +777,29 @@ function GenericPLCAccessory(platform, config, accessoryNumber) {
     }
     else
     {
-      // Not possible give a target position always use current position as target position.
+      // Not possible to give a target position; always use current position as target position.
       this.service.getCharacteristic(Characteristic.TargetPosition)
-      .on('get', function(callback) {this.getByte(callback,
-        config.db,
-        config.get_CurrentPosition,  // always use current position as target position
-        'get CurrentPosition',
-        this.modFunctionGetCurrent
-        );}.bind(this))
-      .on('set', function(value, callback) {this.setDummy(value, callback,
-        'set TargetPosition',
-        function(value){
-          // ignore new target value instead get current value and use it target position
-          this.service.getCharacteristic(Characteristic.CurrentPosition).getValue(function(err, value) {
-            if (!err) {
-              this.service.getCharacteristic(Characteristic.TargetPosition).updateValue(value);
-            }
-          }.bind(this));
-          }.bind(this)
-        );}.bind(this));
+        .on('get', function(callback) {
+          this.getByte(callback,
+            config.db,
+            config.get_CurrentPosition,  // always use current position as target position
+            'get CurrentPosition',
+            this.modFunctionGetCurrent
+          );
+        }.bind(this))
+        .on('set', function(value, callback) {
+          this.setDummy(value, callback,
+            'set TargetPosition',
+            function(value) {
+              // Ignore new target value; instead get current value and use it as target position
+              this.service.getCharacteristic(Characteristic.CurrentPosition).handleGetRequest().then(value => {
+                this.service.getCharacteristic(Characteristic.TargetPosition).updateValue(value);
+              }).catch(err => {
+                this.log.error("[" + this.name + "] Error during inform", err);
+              });
+            }.bind(this)
+          );
+        }.bind(this));
     }
     if ('get_PositionState' in config) {
       this.service.getCharacteristic(Characteristic.PositionState)
@@ -985,20 +990,22 @@ function GenericPLCAccessory(platform, config, accessoryNumber) {
     this.accessory.addService(this.service);
     this.modFunctionGetCurrent = this.plain;
 
-    informFunction = function(notUsed){
-      // get the current target system state and update the value.
-      this.service.getCharacteristic(Characteristic.SecuritySystemTargetState).getValue(function(err, value) {
-        if (!err) {
-          this.service.getCharacteristic(Characteristic.SecuritySystemTargetState).updateValue(value);
-        }
-      }.bind(this));
-      // get the current system state and update the value.
-      this.service.getCharacteristic(Characteristic.SecuritySystemCurrentState).getValue(function(err, value) {
-        if (!err) {
-          this.service.getCharacteristic(Characteristic.SecuritySystemCurrentState).updateValue(value);
-        }
-      }.bind(this));
-     }.bind(this);
+    informFunction = function(notUsed) {
+      // Get the current target system state and update the value.
+      this.service.getCharacteristic(Characteristic.SecuritySystemTargetState).handleGetRequest().then(value => {
+        this.service.getCharacteristic(Characteristic.SecuritySystemTargetState).updateValue(value);
+      }).catch(err => {
+        this.log.error("[" + this.name + "] Error during inform", err);
+      });
+    
+      // Get the current system state and update the value.
+      this.service.getCharacteristic(Characteristic.SecuritySystemCurrentState).handleGetRequest().then(value => {
+        this.service.getCharacteristic(Characteristic.SecuritySystemCurrentState).updateValue(value);
+      }).catch(err => {
+        this.log.error("[" + this.name + "] Error during inform", err);
+      });
+    }.bind(this);
+   
 
     if ('mapSetSecuritySystemTargetState' in config && config.mapSetSecuritySystemTargetState) {
       this.modFunctionSet = function(value){return this.mapFunction(value, config.mapSetSecuritySystemTargetState);}.bind(this);
@@ -1242,20 +1249,21 @@ function GenericPLCAccessory(platform, config, accessoryNumber) {
 
     var dummyInform = function(value){}.bind(this);
 
-    var informFunction = function(notUsed){
-      // update target state and current state value.
-      this.service.getCharacteristic(Characteristic.TargetFanState).getValue(function(err, value) {
-        if (!err) {
-          this.service.getCharacteristic(Characteristic.TargetFanState).updateValue(value);
-        }
-      }.bind(this));
-
-      this.service.getCharacteristic(Characteristic.CurrentFanState).getValue(function(err, value) {
-        if (!err) {
-          this.service.getCharacteristic(Characteristic.CurrentFanState).updateValue(value);
-        }
-      }.bind(this));
-     }.bind(this);
+    var informFunction = function(notUsed) {
+      // Update target state and current state value.
+      this.service.getCharacteristic(Characteristic.TargetFanState).handleGetRequest().then(value => {
+        this.service.getCharacteristic(Characteristic.TargetFanState).updateValue(value);
+      }).catch(err => {
+        this.log.error("[" + this.name + "] Error during inform", err);
+      });
+    
+      this.service.getCharacteristic(Characteristic.CurrentFanState).handleGetRequest().then(value => {
+        this.service.getCharacteristic(Characteristic.CurrentFanState).updateValue(value);
+      }).catch(err => {
+        this.log.error("[" + this.name + "] Error during inform", err);
+      });
+    }.bind(this);
+   
 
     if ('mapCurrentFanStateGet' in config && config.mapCurrentFanStateGet) {
       this.modCurrentGet = function(value){return this.mapFunction(value, config.mapCurrentFanStateGet);}.bind(this);
@@ -1412,20 +1420,20 @@ function GenericPLCAccessory(platform, config, accessoryNumber) {
 
     var dummyInform = function(value){}.bind(this);
 
-    var informFunction = function(notUsed){
-      // update target state and current state value.
-      this.service.getCharacteristic(Characteristic.TargetAirPurifierState).getValue(function(err, value) {
-        if (!err) {
-          this.service.getCharacteristic(Characteristic.TargetAirPurifierState).updateValue(value);
-        }
-      }.bind(this));
-
-      this.service.getCharacteristic(Characteristic.CurrentAirPurifierState).getValue(function(err, value) {
-        if (!err) {
-          this.service.getCharacteristic(Characteristic.CurrentAirPurifierState).updateValue(value);
-        }
-      }.bind(this));
-     }.bind(this);
+    var informFunction = function(notUsed) {
+      // Update target state and current state value.
+      this.service.getCharacteristic(Characteristic.TargetAirPurifierState).handleGetRequest().then(value => {
+        this.service.getCharacteristic(Characteristic.TargetAirPurifierState).updateValue(value);
+      }).catch(err => {
+        this.log.error("[" + this.name + "] Error during inform", err);
+      });
+    
+      this.service.getCharacteristic(Characteristic.CurrentAirPurifierState).handleGetRequest().then(value => {
+        this.service.getCharacteristic(Characteristic.CurrentAirPurifierState).updateValue(value);
+      }).catch(err => {
+        this.log.error("[" + this.name + "] Error during inform", err);
+      });
+    }.bind(this);  
 
     if ('mapCurrentAirPurifierState' in config && config.mapCurrentAirPurifierState) {
       this.modCurrentGet = function(value){return this.mapFunction(value, config.mapCurrentAirPurifierState);}.bind(this);
@@ -2743,299 +2751,338 @@ GenericPLCAccessory.prototype = {
     if (this.config.accessory == 'PLC_LightBulb' ||
     this.config.accessory == 'PLC_Outlet' ||
     this.config.accessory == 'PLC_Switch') {
-      this.service.getCharacteristic(Characteristic.On).getValue(function(err, value) {
-        if (!err) {
-          this.service.getCharacteristic(Characteristic.On).updateValue(value);
-        }
-      }.bind(this));
+      this.service.getCharacteristic(Characteristic.On).handleGetRequest().then(value => {
+        this.service.getCharacteristic(Characteristic.On).updateValue(value);
+      }).catch(err => {
+        this.log.error( "[" + this.name + "] Error during poll", err);
+      });
+      
     }
     // POLL handling ///////////////////////////////////////////////
     // TemperatureSensor
     ////////////////////////////////////////////////////////////////
     else if (this.config.accessory == 'PLC_TemperatureSensor') {
       // get the current target system state and update the value.
-      this.service.getCharacteristic(Characteristic.CurrentTemperature).getValue(function(err, value) {
-        if (!err) {
-          this.service.getCharacteristic(Characteristic.CurrentTemperature).updateValue(value);
-        }
-      }.bind(this));
-      this.service.getCharacteristic(Characteristic.StatusTampered).getValue(function(err, value) {
-        if (!err) {
-          this.service.getCharacteristic(Characteristic.StatusTampered).updateValue(value);
-        }
-      }.bind(this));
-      this.service.getCharacteristic(Characteristic.StatusLowBattery).getValue(function(err, value) {
-        if (!err) {
-          this.service.getCharacteristic(Characteristic.StatusLowBattery).updateValue(value);
-        }
-      }.bind(this));
+      this.service.getCharacteristic(Characteristic.CurrentTemperature).handleGetRequest().then(value => {
+        this.service.getCharacteristic(Characteristic.CurrentTemperature).updateValue(value);
+      }).catch(err => {
+        this.log.error("[" + this.name + "] Error during poll", err);
+      });
+      
+      this.service.getCharacteristic(Characteristic.StatusTampered).handleGetRequest().then(value => {
+        this.service.getCharacteristic(Characteristic.StatusTampered).updateValue(value);
+      }).catch(err => {
+        this.log.error("[" + this.name + "] Error during poll", err);
+      });
+      
+      this.service.getCharacteristic(Characteristic.StatusLowBattery).handleGetRequest().then(value => {
+        this.service.getCharacteristic(Characteristic.StatusLowBattery).updateValue(value);
+      }).catch(err => {
+        this.log.error("[" + this.name + "] Error during poll", err);
+      });
+      
     }
     // POLL handling ///////////////////////////////////////////////
     // HumiditySensor
     ////////////////////////////////////////////////////////////////
     else if (this.config.accessory == 'PLC_HumiditySensor') {
       // get the current target system state and update the value.
-      this.service.getCharacteristic(Characteristic.CurrentRelativeHumidity).getValue(function(err, value) {
-        if (!err) {
-          this.service.getCharacteristic(Characteristic.CurrentRelativeHumidity).updateValue(value);
-        }
-      }.bind(this));
-      this.service.getCharacteristic(Characteristic.StatusTampered).getValue(function(err, value) {
-        if (!err) {
-          this.service.getCharacteristic(Characteristic.StatusTampered).updateValue(value);
-        }
-      }.bind(this));
-      this.service.getCharacteristic(Characteristic.StatusLowBattery).getValue(function(err, value) {
-        if (!err) {
-          this.service.getCharacteristic(Characteristic.StatusLowBattery).updateValue(value);
-        }
-      }.bind(this));
+      this.service.getCharacteristic(Characteristic.CurrentRelativeHumidity).handleGetRequest().then(value => {
+        this.service.getCharacteristic(Characteristic.CurrentRelativeHumidity).updateValue(value);
+      }).catch(err => {
+        this.log.error("[" + this.name + "] Error during poll", err);
+      });
+      
+      this.service.getCharacteristic(Characteristic.StatusTampered).handleGetRequest().then(value => {
+        this.service.getCharacteristic(Characteristic.StatusTampered).updateValue(value);
+      }).catch(err => {
+        this.log.error("[" + this.name + "] Error during poll", err);
+      });
+      
+      this.service.getCharacteristic(Characteristic.StatusLowBattery).handleGetRequest().then(value => {
+        this.service.getCharacteristic(Characteristic.StatusLowBattery).updateValue(value);
+      }).catch(err => {
+        this.log.error("[" + this.name + "] Error during poll", err);
+      });
+      
     }
     // POLL handling ///////////////////////////////////////////////
     // Thermostat
     ////////////////////////////////////////////////////////////////
     else if (this.config.accessory == 'PLC_Thermostat') {
       // get the current target system state and update the value.
-      this.service.getCharacteristic(Characteristic.CurrentTemperature).getValue(function(err, value) {
-        if (!err) {
-          this.service.getCharacteristic(Characteristic.CurrentTemperature).updateValue(value);
-        }
-      }.bind(this));
-      this.service.getCharacteristic(Characteristic.TargetTemperature).getValue(function(err, value) {
-        if (!err) {
-          this.service.getCharacteristic(Characteristic.TargetTemperature).updateValue(value);
-        }
-      }.bind(this));
-      this.service.getCharacteristic(Characteristic.CurrentRelativeHumidity).getValue(function(err, value) {
-        if (!err) {
-          this.service.getCharacteristic(Characteristic.CurrentRelativeHumidity).updateValue(value);
-        }
-      }.bind(this));
-      this.service.getCharacteristic(Characteristic.TargetRelativeHumidity).getValue(function(err, value) {
-        if (!err) {
-          this.service.getCharacteristic(Characteristic.TargetRelativeHumidity).updateValue(value);
-        }
-      }.bind(this));
-      this.service.getCharacteristic(Characteristic.CurrentHeatingCoolingState).getValue(function(err, value) {
-        if (!err) {
-          this.service.getCharacteristic(Characteristic.CurrentHeatingCoolingState).updateValue(value);
-        }
-      }.bind(this));
-      this.service.getCharacteristic(Characteristic.TargetHeatingCoolingState).getValue(function(err, value) {
-        if (!err) {
-          this.service.getCharacteristic(Characteristic.TargetHeatingCoolingState).updateValue(value);
-        }
-      }.bind(this));
-      this.service.getCharacteristic(Characteristic.StatusTampered).getValue(function(err, value) {
-        if (!err) {
-          this.service.getCharacteristic(Characteristic.StatusTampered).updateValue(value);
-        }
-      }.bind(this));
-      this.service.getCharacteristic(Characteristic.StatusLowBattery).getValue(function(err, value) {
-        if (!err) {
-          this.service.getCharacteristic(Characteristic.StatusLowBattery).updateValue(value);
-        }
-      }.bind(this));
+      this.service.getCharacteristic(Characteristic.CurrentTemperature).handleGetRequest().then(value => {
+        this.service.getCharacteristic(Characteristic.CurrentTemperature).updateValue(value);
+      }).catch(err => {
+        this.log.error("[" + this.name + "] Error during poll", err);
+      });
+      
+      this.service.getCharacteristic(Characteristic.TargetTemperature).handleGetRequest().then(value => {
+        this.service.getCharacteristic(Characteristic.TargetTemperature).updateValue(value);
+      }).catch(err => {
+        this.log.error("[" + this.name + "] Error during poll", err);
+      });
+      
+      this.service.getCharacteristic(Characteristic.CurrentRelativeHumidity).handleGetRequest().then(value => {
+        this.service.getCharacteristic(Characteristic.CurrentRelativeHumidity).updateValue(value);
+      }).catch(err => {
+        this.log.error("[" + this.name + "] Error during poll", err);
+      });
+      
+      this.service.getCharacteristic(Characteristic.TargetRelativeHumidity).handleGetRequest().then(value => {
+        this.service.getCharacteristic(Characteristic.TargetRelativeHumidity).updateValue(value);
+      }).catch(err => {
+        this.log.error("[" + this.name + "] Error during poll", err);
+      });
+      
+      this.service.getCharacteristic(Characteristic.CurrentHeatingCoolingState).handleGetRequest().then(value => {
+        this.service.getCharacteristic(Characteristic.CurrentHeatingCoolingState).updateValue(value);
+      }).catch(err => {
+        this.log.error("[" + this.name + "] Error during poll", err);
+      });
+      
+      this.service.getCharacteristic(Characteristic.TargetHeatingCoolingState).handleGetRequest().then(value => {
+        this.service.getCharacteristic(Characteristic.TargetHeatingCoolingState).updateValue(value);
+      }).catch(err => {
+        this.log.error("[" + this.name + "] Error during poll", err);
+      });
+      
+      this.service.getCharacteristic(Characteristic.StatusTampered).handleGetRequest().then(value => {
+        this.service.getCharacteristic(Characteristic.StatusTampered).updateValue(value);
+      }).catch(err => {
+        this.log.error("[" + this.name + "] Error during poll", err);
+      });
+      
+      this.service.getCharacteristic(Characteristic.StatusLowBattery).handleGetRequest().then(value => {
+        this.service.getCharacteristic(Characteristic.StatusLowBattery).updateValue(value);
+      }).catch(err => {
+        this.log.error("[" + this.name + "] Error during poll", err);
+      });
+      
     }
     // POLL handling ///////////////////////////////////////////////
     // Humidifier Dehumidifier
     ////////////////////////////////////////////////////////////////
     else if (this.config.accessory == 'PLC_HumidifierDehumidifier') {
       // get the current target system state and update the value.
-      this.service.getCharacteristic(Characteristic.Active).getValue(function(err, value) {
-        if (!err) {
-          this.service.getCharacteristic(Characteristic.Active).updateValue(value);
-        }
-      }.bind(this));
-      this.service.getCharacteristic(Characteristic.CurrentHumidifierDehumidifierState).getValue(function(err, value) {
-        if (!err) {
-          this.service.getCharacteristic(Characteristic.CurrentHumidifierDehumidifierState).updateValue(value);
-        }
-      }.bind(this));
-      this.service.getCharacteristic(Characteristic.TargetHumidifierDehumidifierState).getValue(function(err, value) {
-        if (!err) {
-          this.service.getCharacteristic(Characteristic.TargetHumidifierDehumidifierState).updateValue(value);
-        }
-      }.bind(this));
-      this.service.getCharacteristic(Characteristic.CurrentRelativeHumidity).getValue(function(err, value) {
-        if (!err) {
-          this.service.getCharacteristic(Characteristic.CurrentRelativeHumidity).updateValue(value);
-        }
-      }.bind(this));
-      this.service.getCharacteristic(Characteristic.RelativeHumidityDehumidifierThreshold).getValue(function(err, value) {
-        if (!err) {
-          this.service.getCharacteristic(Characteristic.RelativeHumidityDehumidifierThreshold).updateValue(value);
-        }
-      }.bind(this));
-      this.service.getCharacteristic(Characteristic.RelativeHumidityHumidifierThreshold).getValue(function(err, value) {
-        if (!err) {
-          this.service.getCharacteristic(Characteristic.RelativeHumidityHumidifierThreshold).updateValue(value);
-        }
-      }.bind(this));
-      this.service.getCharacteristic(Characteristic.RotationSpeed).getValue(function(err, value) {
-        if (!err) {
-          this.service.getCharacteristic(Characteristic.RotationSpeed).updateValue(value);
-        }
-      }.bind(this));
-      this.service.getCharacteristic(Characteristic.SwingMode).getValue(function(err, value) {
-        if (!err) {
-          this.service.getCharacteristic(Characteristic.SwingMode).updateValue(value);
-        }
-      }.bind(this));
-      this.service.getCharacteristic(Characteristic.StatusTampered).getValue(function(err, value) {
-        if (!err) {
-          this.service.getCharacteristic(Characteristic.StatusTampered).updateValue(value);
-        }
-      }.bind(this));
-      this.service.getCharacteristic(Characteristic.StatusLowBattery).getValue(function(err, value) {
-        if (!err) {
-          this.service.getCharacteristic(Characteristic.StatusLowBattery).updateValue(value);
-        }
-      }.bind(this));
+      this.service.getCharacteristic(Characteristic.Active).handleGetRequest().then(value => {
+        this.service.getCharacteristic(Characteristic.Active).updateValue(value);
+      }).catch(err => {
+        this.log.error("[" + this.name + "] Error during poll", err);
+      });
+      
+      this.service.getCharacteristic(Characteristic.CurrentHumidifierDehumidifierState).handleGetRequest().then(value => {
+        this.service.getCharacteristic(Characteristic.CurrentHumidifierDehumidifierState).updateValue(value);
+      }).catch(err => {
+        this.log.error("[" + this.name + "] Error during poll", err);
+      });
+      
+      this.service.getCharacteristic(Characteristic.TargetHumidifierDehumidifierState).handleGetRequest().then(value => {
+        this.service.getCharacteristic(Characteristic.TargetHumidifierDehumidifierState).updateValue(value);
+      }).catch(err => {
+        this.log.error("[" + this.name + "] Error during poll", err);
+      });
+      
+      this.service.getCharacteristic(Characteristic.CurrentRelativeHumidity).handleGetRequest().then(value => {
+        this.service.getCharacteristic(Characteristic.CurrentRelativeHumidity).updateValue(value);
+      }).catch(err => {
+        this.log.error("[" + this.name + "] Error during poll", err);
+      });
+      
+      this.service.getCharacteristic(Characteristic.RelativeHumidityDehumidifierThreshold).handleGetRequest().then(value => {
+        this.service.getCharacteristic(Characteristic.RelativeHumidityDehumidifierThreshold).updateValue(value);
+      }).catch(err => {
+        this.log.error("[" + this.name + "] Error during poll", err);
+      });
+      
+      this.service.getCharacteristic(Characteristic.RelativeHumidityHumidifierThreshold).handleGetRequest().then(value => {
+        this.service.getCharacteristic(Characteristic.RelativeHumidityHumidifierThreshold).updateValue(value);
+      }).catch(err => {
+        this.log.error("[" + this.name + "] Error during poll", err);
+      });
+      
+      this.service.getCharacteristic(Characteristic.RotationSpeed).handleGetRequest().then(value => {
+        this.service.getCharacteristic(Characteristic.RotationSpeed).updateValue(value);
+      }).catch(err => {
+        this.log.error("[" + this.name + "] Error during poll", err);
+      });
+      
+      this.service.getCharacteristic(Characteristic.SwingMode).handleGetRequest().then(value => {
+        this.service.getCharacteristic(Characteristic.SwingMode).updateValue(value);
+      }).catch(err => {
+        this.log.error("[" + this.name + "] Error during poll", err);
+      });
+      
+      this.service.getCharacteristic(Characteristic.StatusTampered).handleGetRequest().then(value => {
+        this.service.getCharacteristic(Characteristic.StatusTampered).updateValue(value);
+      }).catch(err => {
+        this.log.error("[" + this.name + "] Error during poll", err);
+      });
+      
+      this.service.getCharacteristic(Characteristic.StatusLowBattery).handleGetRequest().then(value => {
+        this.service.getCharacteristic(Characteristic.StatusLowBattery).updateValue(value);
+      }).catch(err => {
+        this.log.error("[" + this.name + "] Error during poll", err);
+      });
+      
     }
     // POLL handling ///////////////////////////////////////////////
     // Window, WindowCovering and Door
     ////////////////////////////////////////////////////////////////
     else if (this.config.accessory == 'PLC_Window' || this.config.accessory == 'PLC_WindowCovering' || this.config.accessory == 'PLC_Door'){
-      this.service.getCharacteristic(Characteristic.CurrentPosition).getValue(function(err, value) {
-        if (!err) {
-          if (this.adaptivePollActive )  {
-            if( this.lastTargetPos == value) {
-              this.adaptivePollActive = false;
-              this.log.debug( "[" + this.name + "] reached target position disable adaptive polling: " + value);
-            }
-            else
-            {
-              this.pollCounter = this.adaptivePollingInterval;
-              this.log.debug( "[" + this.name + "] continue adaptive polling (" + this.pollCounter + "s): " + this.lastTargetPos +" != " + value);
-            }
+      this.service.getCharacteristic(Characteristic.CurrentPosition).handleGetRequest().then(value => {
+        if (this.adaptivePollActive) {
+          if (this.lastTargetPos == value) {
+            this.adaptivePollActive = false;
+            this.log.debug("[" + this.name + "] reached target position disable adaptive polling: " + value);
+          } else {
+            this.pollCounter = this.adaptivePollingInterval;
+            this.log.debug("[" + this.name + "] continue adaptive polling (" + this.pollCounter + "s): " + this.lastTargetPos + " != " + value);
           }
-          this.service.getCharacteristic(Characteristic.CurrentPosition).updateValue(value);
         }
-      }.bind(this));
+        this.service.getCharacteristic(Characteristic.CurrentPosition).updateValue(value);
+      }).catch(err => {
+        this.log.error("[" + this.name + "] Error during poll", err);
+      });
+      
     }
     // POLL handling ///////////////////////////////////////////////
     // OccupancySensor
     ////////////////////////////////////////////////////////////////
     else if (this.config.accessory == 'PLC_OccupancySensor') {
       // get the current target system state and update the value.
-      this.service.getCharacteristic(Characteristic.OccupancyDetected).getValue(function(err, value) {
-        if (!err) {
-          this.service.getCharacteristic(Characteristic.OccupancyDetected).updateValue(value);
-        }
-      }.bind(this));
-      this.service.getCharacteristic(Characteristic.StatusTampered).getValue(function(err, value) {
-        if (!err) {
-          this.service.getCharacteristic(Characteristic.StatusTampered).updateValue(value);
-        }
-      }.bind(this));
-      this.service.getCharacteristic(Characteristic.StatusLowBattery).getValue(function(err, value) {
-        if (!err) {
-          this.service.getCharacteristic(Characteristic.StatusLowBattery).updateValue(value);
-        }
-      }.bind(this));
+      this.service.getCharacteristic(Characteristic.OccupancyDetected).handleGetRequest().then(value => {
+        this.service.getCharacteristic(Characteristic.OccupancyDetected).updateValue(value);
+      }).catch(err => {
+        this.log.error("[" + this.name + "] Error during poll", err);
+      });
+      
+      this.service.getCharacteristic(Characteristic.StatusTampered).handleGetRequest().then(value => {
+        this.service.getCharacteristic(Characteristic.StatusTampered).updateValue(value);
+      }).catch(err => {
+        this.log.error("[" + this.name + "] Error during poll", err);
+      });
+      
+      this.service.getCharacteristic(Characteristic.StatusLowBattery).handleGetRequest().then(value => {
+        this.service.getCharacteristic(Characteristic.StatusLowBattery).updateValue(value);
+      }).catch(err => {
+        this.log.error("[" + this.name + "] Error during poll", err);
+      });
+      
     }
     // POLL handling ///////////////////////////////////////////////
     // MotionSensor
     ////////////////////////////////////////////////////////////////
     else if (this.config.accessory == 'PLC_MotionSensor') {
       // get the current target system state and update the value.
-      this.service.getCharacteristic(Characteristic.MotionDetected).getValue(function(err, value) {
-        if (!err) {
-          this.service.getCharacteristic(Characteristic.MotionDetected).updateValue(value);
-        }
-      }.bind(this));
-      this.service.getCharacteristic(Characteristic.StatusTampered).getValue(function(err, value) {
-        if (!err) {
-          this.service.getCharacteristic(Characteristic.StatusTampered).updateValue(value);
-        }
-      }.bind(this));
-      this.service.getCharacteristic(Characteristic.StatusLowBattery).getValue(function(err, value) {
-        if (!err) {
-          this.service.getCharacteristic(Characteristic.StatusLowBattery).updateValue(value);
-        }
-      }.bind(this));
+      this.service.getCharacteristic(Characteristic.MotionDetected).handleGetRequest().then(value => {
+        this.service.getCharacteristic(Characteristic.MotionDetected).updateValue(value);
+      }).catch(err => {
+        this.log.error("[" + this.name + "] Error during poll", err);
+      });
+      
+      this.service.getCharacteristic(Characteristic.StatusTampered).handleGetRequest().then(value => {
+        this.service.getCharacteristic(Characteristic.StatusTampered).updateValue(value);
+      }).catch(err => {
+        this.log.error("[" + this.name + "] Error during poll", err);
+      });
+      
+      this.service.getCharacteristic(Characteristic.StatusLowBattery).handleGetRequest().then(value => {
+        this.service.getCharacteristic(Characteristic.StatusLowBattery).updateValue(value);
+      }).catch(err => {
+        this.log.error("[" + this.name + "] Error during poll", err);
+      });
+      
     }
     // POLL handling ///////////////////////////////////////////////
     // ContactSensor
     ////////////////////////////////////////////////////////////////
     else if (this.config.accessory == 'PLC_ContactSensor') {
-      // get the current target system state and update the value.
-      this.service.getCharacteristic(Characteristic.ContactSensorState).getValue(function(err, value) {
-        if (!err) {
-          this.service.getCharacteristic(Characteristic.ContactSensorState).updateValue(value);
-        }
-      }.bind(this));
-      this.service.getCharacteristic(Characteristic.StatusTampered).getValue(function(err, value) {
-        if (!err) {
-          this.service.getCharacteristic(Characteristic.StatusTampered).updateValue(value);
-        }
-      }.bind(this));
-      this.service.getCharacteristic(Characteristic.StatusLowBattery).getValue(function(err, value) {
-        if (!err) {
-          this.service.getCharacteristic(Characteristic.StatusLowBattery).updateValue(value);
-        }
-      }.bind(this));
+    // Get the current target system state and update the value.
+    this.service.getCharacteristic(Characteristic.ContactSensorState).handleGetRequest().then(value => {
+      this.service.getCharacteristic(Characteristic.ContactSensorState).updateValue(value);
+    }).catch(err => {
+      this.log.error("[" + this.name + "] Error during poll", err);
+    });
+
+    this.service.getCharacteristic(Characteristic.StatusTampered).handleGetRequest().then(value => {
+      this.service.getCharacteristic(Characteristic.StatusTampered).updateValue(value);
+    }).catch(err => {
+      this.log.error("[" + this.name + "] Error during poll", err);
+    });
+
+    this.service.getCharacteristic(Characteristic.StatusLowBattery).handleGetRequest().then(value => {
+      this.service.getCharacteristic(Characteristic.StatusLowBattery).updateValue(value);
+    }).catch(err => {
+      this.log.error("[" + this.name + "] Error during poll", err);
+    });
+
     }
     // POLL handling ///////////////////////////////////////////////
     // LeakSensor
     ////////////////////////////////////////////////////////////////
     else if (this.config.accessory == 'PLC_LeakSensor') {
       // get the current target system state and update the value.
-      this.service.getCharacteristic(Characteristic.LeakDetected).getValue(function(err, value) {
-        if (!err) {
-          this.service.getCharacteristic(Characteristic.LeakDetected).updateValue(value);
-        }
-      }.bind(this));
-      this.service.getCharacteristic(Characteristic.StatusTampered).getValue(function(err, value) {
-        if (!err) {
-          this.service.getCharacteristic(Characteristic.StatusTampered).updateValue(value);
-        }
-      }.bind(this));
-      this.service.getCharacteristic(Characteristic.StatusLowBattery).getValue(function(err, value) {
-        if (!err) {
-          this.service.getCharacteristic(Characteristic.StatusLowBattery).updateValue(value);
-        }
-      }.bind(this));
+      this.service.getCharacteristic(Characteristic.LeakDetected).handleGetRequest().then(value => {
+        this.service.getCharacteristic(Characteristic.LeakDetected).updateValue(value);
+      }).catch(err => {
+        this.log.error("[" + this.name + "] Error during poll", err);
+      });
+      
+      this.service.getCharacteristic(Characteristic.StatusTampered).handleGetRequest().then(value => {
+        this.service.getCharacteristic(Characteristic.StatusTampered).updateValue(value);
+      }).catch(err => {
+        this.log.error("[" + this.name + "] Error during poll", err);
+      });
+      
+      this.service.getCharacteristic(Characteristic.StatusLowBattery).handleGetRequest().then(value => {
+        this.service.getCharacteristic(Characteristic.StatusLowBattery).updateValue(value);
+      }).catch(err => {
+        this.log.error("[" + this.name + "] Error during poll", err);
+      });
+      
     }
     // POLL handling ///////////////////////////////////////////////
     // Faucet
     ////////////////////////////////////////////////////////////////
     else if (this.config.accessory == 'PLC_Faucet') {
       // get the current target system state and update the value.
-      this.service.getCharacteristic(Characteristic.Active).getValue(function(err, value) {
-        if (!err) {
-          this.service.getCharacteristic(Characteristic.Active).updateValue(value);
-        }
-      }.bind(this));
+      this.service.getCharacteristic(Characteristic.Active).handleGetRequest().then(value => {
+        this.service.getCharacteristic(Characteristic.Active).updateValue(value);
+      }).catch(err => {
+        this.log.error("[" + this.name + "] Error during poll", err);
+      });
+      
     }
     // POLL handling ///////////////////////////////////////////////
     // Valve
     ////////////////////////////////////////////////////////////////
     else if (this.config.accessory == 'PLC_Valve') {
       // get the current target system state and update the value.
-      this.service.getCharacteristic(Characteristic.Active).getValue(function(err, value) {
-        if (!err) {
-          this.service.getCharacteristic(Characteristic.Active).updateValue(value);
-        }
-      }.bind(this));
+      this.service.getCharacteristic(Characteristic.Active).handleGetRequest().then(value => {
+        this.service.getCharacteristic(Characteristic.Active).updateValue(value);
+      }).catch(err => {
+        this.log.error("[" + this.name + "] Error during poll", err);
+      });
+      
     }
     // POLL handling ///////////////////////////////////////////////
     // SecuritySystem
     ////////////////////////////////////////////////////////////////
     else if (this.config.accessory == 'PLC_SecuritySystem') {
       // get the current target system state and update the value.
-      this.service.getCharacteristic(Characteristic.SecuritySystemTargetState).getValue(function(err, value) {
-        if (!err) {
-          this.service.getCharacteristic(Characteristic.SecuritySystemTargetState).updateValue(value);
-        }
-      }.bind(this));
-      // get the current system state and update the value.
-      this.service.getCharacteristic(Characteristic.SecuritySystemCurrentState).getValue(function(err, value) {
-        if (!err) {
-          this.service.getCharacteristic(Characteristic.SecuritySystemCurrentState).updateValue(value);
-        }
-      }.bind(this));
+      this.service.getCharacteristic(Characteristic.SecuritySystemTargetState).handleGetRequest().then(value => {
+        this.service.getCharacteristic(Characteristic.SecuritySystemTargetState).updateValue(value);
+      }).catch(err => {
+        this.log.error("[" + this.name + "] Error during poll", err);
+      });
+      
+      // Get the current system state and update the value.
+      this.service.getCharacteristic(Characteristic.SecuritySystemCurrentState).handleGetRequest().then(value => {
+        this.service.getCharacteristic(Characteristic.SecuritySystemCurrentState).updateValue(value);
+      }).catch(err => {
+        this.log.error("[" + this.name + "] Error during poll", err);
+      });      
     }
     // POLL handling ///////////////////////////////////////////////
     // StatelessProgrammableSwitch, Doorbell
@@ -3074,209 +3121,235 @@ GenericPLCAccessory.prototype = {
     ////////////////////////////////////////////////////////////////
     else if (this.config.accessory == 'PLC_LockMechanism' || this.config.accessory == 'PLC_LockMechanismBool') {
       // get the current target system state and update the value.
-      this.service.getCharacteristic(Characteristic.LockCurrentState).getValue(function(err, value) {
-        if (!err) {
-          this.service.getCharacteristic(Characteristic.LockCurrentState).updateValue(value);
-        }
-      }.bind(this));
-      this.service.getCharacteristic(Characteristic.LockTargetState).getValue(function(err, value) {
-        if (!err) {
-          this.service.getCharacteristic(Characteristic.LockTargetState).updateValue(value);
-        }
-      }.bind(this));
+      this.service.getCharacteristic(Characteristic.LockCurrentState).handleGetRequest().then(value => {
+        this.service.getCharacteristic(Characteristic.LockCurrentState).updateValue(value);
+      }).catch(err => {
+        this.log.error("[" + this.name + "] Error during poll", err);
+      });
+      
+      this.service.getCharacteristic(Characteristic.LockTargetState).handleGetRequest().then(value => {
+        this.service.getCharacteristic(Characteristic.LockTargetState).updateValue(value);
+      }).catch(err => {
+        this.log.error("[" + this.name + "] Error during poll", err);
+      });      
     }
     // POLL handling ///////////////////////////////////////////////
     // GarageDoorOpener
     ////////////////////////////////////////////////////////////////
     else if (this.config.accessory == 'PLC_GarageDoorOpener') {
       // get the current target system state and update the value.
-      this.service.getCharacteristic(Characteristic.CurrentDoorState).getValue(function(err, value) {
-        if (!err) {
-          this.service.getCharacteristic(Characteristic.CurrentDoorState).updateValue(value);
-        }
-      }.bind(this));
-      this.service.getCharacteristic(Characteristic.ObstructionDetected).getValue(function(err, value) {
-        if (!err) {
-          this.service.getCharacteristic(Characteristic.ObstructionDetected).updateValue(value);
-        }
-      }.bind(this));
-      this.service.getCharacteristic(Characteristic.TargetDoorState).getValue(function(err, value) {
-        if (!err) {
-          this.service.getCharacteristic(Characteristic.TargetDoorState).updateValue(value);
-        }
-      }.bind(this));
+      this.service.getCharacteristic(Characteristic.CurrentDoorState).handleGetRequest().then(value => {
+        this.service.getCharacteristic(Characteristic.CurrentDoorState).updateValue(value);
+      }).catch(err => {
+        this.log.error("[" + this.name + "] Error during poll", err);
+      });
+      
+      this.service.getCharacteristic(Characteristic.ObstructionDetected).handleGetRequest().then(value => {
+        this.service.getCharacteristic(Characteristic.ObstructionDetected).updateValue(value);
+      }).catch(err => {
+        this.log.error("[" + this.name + "] Error during poll", err);
+      });
+      
+      this.service.getCharacteristic(Characteristic.TargetDoorState).handleGetRequest().then(value => {
+        this.service.getCharacteristic(Characteristic.TargetDoorState).updateValue(value);
+      }).catch(err => {
+        this.log.error("[" + this.name + "] Error during poll", err);
+      });
+      
     }
     // POLL handling ///////////////////////////////////////////////
     // SmokeSensor
     ////////////////////////////////////////////////////////////////
     else if (this.config.accessory == 'PLC_SmokeSensor') {
       // get the current target system state and update the value.
-      this.service.getCharacteristic(Characteristic.SmokeDetected).getValue(function(err, value) {
-        if (!err) {
-          this.service.getCharacteristic(Characteristic.SmokeDetected).updateValue(value);
-        }
-      }.bind(this));
-      this.service.getCharacteristic(Characteristic.StatusTampered).getValue(function(err, value) {
-        if (!err) {
-          this.service.getCharacteristic(Characteristic.StatusTampered).updateValue(value);
-        }
-      }.bind(this));
-      this.service.getCharacteristic(Characteristic.StatusLowBattery).getValue(function(err, value) {
-        if (!err) {
-          this.service.getCharacteristic(Characteristic.StatusLowBattery).updateValue(value);
-        }
-      }.bind(this));
+      this.service.getCharacteristic(Characteristic.SmokeDetected).handleGetRequest().then(value => {
+        this.service.getCharacteristic(Characteristic.SmokeDetected).updateValue(value);
+      }).catch(err => {
+        this.log.error("[" + this.name + "] Error during poll", err);
+      });
+      
+      this.service.getCharacteristic(Characteristic.StatusTampered).handleGetRequest().then(value => {
+        this.service.getCharacteristic(Characteristic.StatusTampered).updateValue(value);
+      }).catch(err => {
+        this.log.error("[" + this.name + "] Error during poll", err);
+      });
+      
+      this.service.getCharacteristic(Characteristic.StatusLowBattery).handleGetRequest().then(value => {
+        this.service.getCharacteristic(Characteristic.StatusLowBattery).updateValue(value);
+      }).catch(err => {
+        this.log.error("[" + this.name + "] Error during poll", err);
+      });
+      
     }
     // POLL handling ///////////////////////////////////////////////
     // Fan
     ////////////////////////////////////////////////////////////////
     else if (this.config.accessory == 'PLC_Fan') {
       // get the current target system state and update the value.
-      this.service.getCharacteristic(Characteristic.Active).getValue(function(err, value) {
-        if (!err) {
-          this.service.getCharacteristic(Characteristic.Active).updateValue(value);
-        }
-      }.bind(this));
-      this.service.getCharacteristic(Characteristic.TargetFanState).getValue(function(err, value) {
-        if (!err) {
-          this.service.getCharacteristic(Characteristic.TargetFanState).updateValue(value);
-        }
-      }.bind(this));
-      this.service.getCharacteristic(Characteristic.CurrentFanState).getValue(function(err, value) {
-        if (!err) {
-          this.service.getCharacteristic(Characteristic.CurrentFanState).updateValue(value);
-        }
-      }.bind(this));
-      this.service.getCharacteristic(Characteristic.RotationSpeed).getValue(function(err, value) {
-        if (!err) {
-          this.service.getCharacteristic(Characteristic.RotationSpeed).updateValue(value);
-        }
-      }.bind(this));
-      this.service.getCharacteristic(Characteristic.RotationDirection).getValue(function(err, value) {
-        if (!err) {
-          this.service.getCharacteristic(Characteristic.RotationDirection).updateValue(value);
-        }
-      }.bind(this));
+      this.service.getCharacteristic(Characteristic.Active).handleGetRequest().then(value => {
+        this.service.getCharacteristic(Characteristic.Active).updateValue(value);
+      }).catch(err => {
+        this.log.error("[" + this.name + "] Error during poll", err);
+      });
+      
+      this.service.getCharacteristic(Characteristic.TargetFanState).handleGetRequest().then(value => {
+        this.service.getCharacteristic(Characteristic.TargetFanState).updateValue(value);
+      }).catch(err => {
+        this.log.error("[" + this.name + "] Error during poll", err);
+      });
+      
+      this.service.getCharacteristic(Characteristic.CurrentFanState).handleGetRequest().then(value => {
+        this.service.getCharacteristic(Characteristic.CurrentFanState).updateValue(value);
+      }).catch(err => {
+        this.log.error("[" + this.name + "] Error during poll", err);
+      });
+      
+      this.service.getCharacteristic(Characteristic.RotationSpeed).handleGetRequest().then(value => {
+        this.service.getCharacteristic(Characteristic.RotationSpeed).updateValue(value);
+      }).catch(err => {
+        this.log.error("[" + this.name + "] Error during poll", err);
+      });
+      
+      this.service.getCharacteristic(Characteristic.RotationDirection).handleGetRequest().then(value => {
+        this.service.getCharacteristic(Characteristic.RotationDirection).updateValue(value);
+      }).catch(err => {
+        this.log.error("[" + this.name + "] Error during poll", err);
+      });
+      
     }
     // POLL handling ///////////////////////////////////////////////
     // LightSensor
     ////////////////////////////////////////////////////////////////
     else if (this.config.accessory == 'PLC_LightSensor' || this.config.accessory == 'PLC_LightSensor_DInt'){
       // get the current target system state and update the value.
-      this.service.getCharacteristic(Characteristic.CurrentAmbientLightLevel).getValue(function(err, value) {
-        if (!err) {
-          this.service.getCharacteristic(Characteristic.CurrentAmbientLightLevel).updateValue(value);
-        }
-      }.bind(this));
-      this.service.getCharacteristic(Characteristic.StatusTampered).getValue(function(err, value) {
-        if (!err) {
-          this.service.getCharacteristic(Characteristic.StatusTampered).updateValue(value);
-        }
-      }.bind(this));
-      this.service.getCharacteristic(Characteristic.StatusLowBattery).getValue(function(err, value) {
-        if (!err) {
-          this.service.getCharacteristic(Characteristic.StatusLowBattery).updateValue(value);
-        }
-      }.bind(this));
+      this.service.getCharacteristic(Characteristic.CurrentAmbientLightLevel).handleGetRequest().then(value => {
+        this.service.getCharacteristic(Characteristic.CurrentAmbientLightLevel).updateValue(value);
+      }).catch(err => {
+        this.log.error("[" + this.name + "] Error during poll", err);
+      });
+      
+      this.service.getCharacteristic(Characteristic.StatusTampered).handleGetRequest().then(value => {
+        this.service.getCharacteristic(Characteristic.StatusTampered).updateValue(value);
+      }).catch(err => {
+        this.log.error("[" + this.name + "] Error during poll", err);
+      });
+      
+      this.service.getCharacteristic(Characteristic.StatusLowBattery).handleGetRequest().then(value => {
+        this.service.getCharacteristic(Characteristic.StatusLowBattery).updateValue(value);
+      }).catch(err => {
+        this.log.error("[" + this.name + "] Error during poll", err);
+      });      
     }
     // POLL handling ///////////////////////////////////////////////
     // AirPurifier
     ////////////////////////////////////////////////////////////////
     else if (this.config.accessory == 'PLC_AirPurifier') {
       // get the current target system state and update the value.
-      this.service.getCharacteristic(Characteristic.Active).getValue(function(err, value) {
-        if (!err) {
-          this.service.getCharacteristic(Characteristic.Active).updateValue(value);
-        }
-      }.bind(this));
-      this.service.getCharacteristic(Characteristic.TargetAirPurifierState).getValue(function(err, value) {
-        if (!err) {
-          this.service.getCharacteristic(Characteristic.TargetAirPurifierState).updateValue(value);
-        }
-      }.bind(this));
-      this.service.getCharacteristic(Characteristic.CurrentAirPurifierState).getValue(function(err, value) {
-        if (!err) {
-          this.service.getCharacteristic(Characteristic.CurrentAirPurifierState).updateValue(value);
-        }
-      }.bind(this));
-      this.service.getCharacteristic(Characteristic.RotationSpeed).getValue(function(err, value) {
-        if (!err) {
-          this.service.getCharacteristic(Characteristic.RotationSpeed).updateValue(value);
-        }
-      }.bind(this));
-      this.service.getCharacteristic(Characteristic.SwingMode).getValue(function(err, value) {
-        if (!err) {
-          this.service.getCharacteristic(Characteristic.SwingMode).updateValue(value);
-        }
-      }.bind(this));
-      this.service.getCharacteristic(Characteristic.FilterChangeIndication).getValue(function(err, value) {
-        if (!err) {
-          this.service.getCharacteristic(Characteristic.FilterChangeIndication).updateValue(value);
-        }
-      }.bind(this));
-      this.service.getCharacteristic(Characteristic.FilterLifeLevel).getValue(function(err, value) {
-        if (!err) {
-          this.service.getCharacteristic(Characteristic.FilterLifeLevel).updateValue(value);
-        }
-      }.bind(this));    
+      this.service.getCharacteristic(Characteristic.Active).handleGetRequest().then(value => {
+        this.service.getCharacteristic(Characteristic.Active).updateValue(value);
+      }).catch(err => {
+        this.log.error("[" + this.name + "] Error during poll", err);
+      });
+      
+      this.service.getCharacteristic(Characteristic.TargetAirPurifierState).handleGetRequest().then(value => {
+        this.service.getCharacteristic(Characteristic.TargetAirPurifierState).updateValue(value);
+      }).catch(err => {
+        this.log.error("[" + this.name + "] Error during poll", err);
+      });
+      
+      this.service.getCharacteristic(Characteristic.CurrentAirPurifierState).handleGetRequest().then(value => {
+        this.service.getCharacteristic(Characteristic.CurrentAirPurifierState).updateValue(value);
+      }).catch(err => {
+        this.log.error("[" + this.name + "] Error during poll", err);
+      });
+      
+      this.service.getCharacteristic(Characteristic.RotationSpeed).handleGetRequest().then(value => {
+        this.service.getCharacteristic(Characteristic.RotationSpeed).updateValue(value);
+      }).catch(err => {
+        this.log.error("[" + this.name + "] Error during poll", err);
+      });
+      
+      this.service.getCharacteristic(Characteristic.SwingMode).handleGetRequest().then(value => {
+        this.service.getCharacteristic(Characteristic.SwingMode).updateValue(value);
+      }).catch(err => {
+        this.log.error("[" + this.name + "] Error during poll", err);
+      });
+      
+      this.service.getCharacteristic(Characteristic.FilterChangeIndication).handleGetRequest().then(value => {
+        this.service.getCharacteristic(Characteristic.FilterChangeIndication).updateValue(value);
+      }).catch(err => {
+        this.log.error("[" + this.name + "] Error during poll", err);
+      });
+      
+      this.service.getCharacteristic(Characteristic.FilterLifeLevel).handleGetRequest().then(value => {
+        this.service.getCharacteristic(Characteristic.FilterLifeLevel).updateValue(value);
+      }).catch(err => {
+        this.log.error("[" + this.name + "] Error during poll", err);
+      });
+        
     }
     // POLL handling ///////////////////////////////////////////////
     // FilterMaintenance
     ////////////////////////////////////////////////////////////////
     else if (this.config.accessory == 'PLC_FilterMaintenance') {
       // get the current target system state and update the value.
-      this.service.getCharacteristic(Characteristic.FilterChangeIndication).getValue(function(err, value) {
-        if (!err) {
-          this.service.getCharacteristic(Characteristic.FilterChangeIndication).updateValue(value);
-        }
-      }.bind(this));
-      this.service.getCharacteristic(Characteristic.FilterLifeLevel).getValue(function(err, value) {
-        if (!err) {
-          this.service.getCharacteristic(Characteristic.FilterLifeLevel).updateValue(value);
-        }
-      }.bind(this));      
+      this.service.getCharacteristic(Characteristic.FilterChangeIndication).handleGetRequest().then(value => {
+        this.service.getCharacteristic(Characteristic.FilterChangeIndication).updateValue(value);
+      }).catch(err => {
+        this.log.error("[" + this.name + "] Error during poll", err);
+      });
+      
+      this.service.getCharacteristic(Characteristic.FilterLifeLevel).handleGetRequest().then(value => {
+        this.service.getCharacteristic(Characteristic.FilterLifeLevel).updateValue(value);
+      }).catch(err => {
+        this.log.error("[" + this.name + "] Error during poll", err);
+      });      
     }
     // POLL handling ///////////////////////////////////////////////
     // CarbonDioxideSensor
     ////////////////////////////////////////////////////////////////
     else if (this.config.accessory == 'PLC_CarbonDioxideSensor') {
       // get the current target system state and update the value.
-      this.service.getCharacteristic(Characteristic.CarbonDioxideDetected).getValue(function(err, value) {
-        if (!err) {
-          this.service.getCharacteristic(Characteristic.CarbonDioxideDetected).updateValue(value);
-        }
-      }.bind(this));
-      this.service.getCharacteristic(Characteristic.StatusTampered).getValue(function(err, value) {
-        if (!err) {
-          this.service.getCharacteristic(Characteristic.StatusTampered).updateValue(value);
-        }
-      }.bind(this));
-      this.service.getCharacteristic(Characteristic.StatusLowBattery).getValue(function(err, value) {
-        if (!err) {
-          this.service.getCharacteristic(Characteristic.StatusLowBattery).updateValue(value);
-        }
-      }.bind(this));
+      this.service.getCharacteristic(Characteristic.CarbonDioxideDetected).handleGetRequest().then(value => {
+        this.service.getCharacteristic(Characteristic.CarbonDioxideDetected).updateValue(value);
+      }).catch(err => {
+        this.log.error("[" + this.name + "] Error during poll", err);
+      });
+      
+      this.service.getCharacteristic(Characteristic.StatusTampered).handleGetRequest().then(value => {
+        this.service.getCharacteristic(Characteristic.StatusTampered).updateValue(value);
+      }).catch(err => {
+        this.log.error("[" + this.name + "] Error during poll", err);
+      });
+      
+      this.service.getCharacteristic(Characteristic.StatusLowBattery).handleGetRequest().then(value => {
+        this.service.getCharacteristic(Characteristic.StatusLowBattery).updateValue(value);
+      }).catch(err => {
+        this.log.error("[" + this.name + "] Error during poll", err);
+      });      
     }
     // POLL handling ///////////////////////////////////////////////
     // CarbonDioxideSensor
     ////////////////////////////////////////////////////////////////
     else if (this.config.accessory == 'PLC_CarbonMonoxideSensor') {
       // get the current target system state and update the value.
-      this.service.getCharacteristic(Characteristic.CarbonMonoxideDetected).getValue(function(err, value) {
-        if (!err) {
-          this.service.getCharacteristic(Characteristic.CarbonMonoxideDetected).updateValue(value);
-        }
-      }.bind(this));
-      this.service.getCharacteristic(Characteristic.StatusTampered).getValue(function(err, value) {
-        if (!err) {
-          this.service.getCharacteristic(Characteristic.StatusTampered).updateValue(value);
-        }
-      }.bind(this));
-      this.service.getCharacteristic(Characteristic.StatusLowBattery).getValue(function(err, value) {
-        if (!err) {
-          this.service.getCharacteristic(Characteristic.StatusLowBattery).updateValue(value);
-        }
-      }.bind(this));
+      this.service.getCharacteristic(Characteristic.CarbonMonoxideDetected).handleGetRequest().then(value => {
+        this.service.getCharacteristic(Characteristic.CarbonMonoxideDetected).updateValue(value);
+      }).catch(err => {
+        this.log.error("[" + this.name + "] Error during poll", err);
+      });
+      
+      this.service.getCharacteristic(Characteristic.StatusTampered).handleGetRequest().then(value => {
+        this.service.getCharacteristic(Characteristic.StatusTampered).updateValue(value);
+      }).catch(err => {
+        this.log.error("[" + this.name + "] Error during poll", err);
+      });
+      
+      this.service.getCharacteristic(Characteristic.StatusLowBattery).handleGetRequest().then(value => {
+        this.service.getCharacteristic(Characteristic.StatusLowBattery).updateValue(value);
+      }).catch(err => {
+        this.log.error("[" + this.name + "] Error during poll", err);
+      });      
     }
 },
 

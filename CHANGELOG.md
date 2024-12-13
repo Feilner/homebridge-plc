@@ -4,6 +4,11 @@
 - Version 2.0.x has changed the name of some configurations.
 - Please stay on version 1.0.x if you do not want to adapt your configuration.
 
+## [2.1.0-beta.0] 2024-12-13
+
+### Updated
+- Compability with homebridge 2.0.0-beta.0
+
 ## [2.0.5] 2024-12-13
 
 ### Fixed
