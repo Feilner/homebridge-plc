@@ -1,22 +1,35 @@
 # homebridge-plc
 Homebridge plugin for Siemens Step7 and compatible PLCs
 
-[![NPM Version](https://img.shields.io/npm/v/homebridge-plc.svg)](https://www.npmjs.com/package/homebridge-plc)
+<!-- prettier-ignore -->
+> [!NOTE]
+> homebridge-plc V2.1.0-beta is compatible with homebridge V2
+
+[![NPM Version](/npm/v/homebridge-plc.svg)](https://www.npmjs.com/package/homebridge-plc)
 [![npm](https://img.shields.io/npm/l/homebridge-plc.svg)](https://www.npmjs.com/package/homebridge-plc)
 [![npm](https://img.shields.io/npm/dt/homebridge-plc.svg)](https://www.npmjs.com/package/homebridge-plc)
 [![donate](https://img.shields.io/badge/donate-PayPal-blue.svg)](https://www.paypal.me/OFeilner)
+[![HomebridgeV2](https://img.shields.io/badge/V2.1.0-beta%20is%2homebridge%20V2%20compatible-8A2BE2](https://github.com/homebridge/homebridge/wiki/Updating-To-Homebridge-v2.0)
 
-SIEMENS S7 PLC plugin for [Homebridge](https://homebridge.io)
+SIEMENS S7 PLC plugin for [Homebridge](https://homebridge.io) **2.1.0-beta.0 is compatible with Homebridge V2**
 - Uses snap7 for communication therefore compatible with:
   * S7 300
   * S7 400
   * S7 1200 see [Snap7 notes](http://snap7.sourceforge.net/snap7_client.html#1200_1500)
   * S7 1500 see [Snap7 notes](http://snap7.sourceforge.net/snap7_client.html#1200_1500)
-  * and compatible PLCs e.g. Yaskawa or VIPA
+  * and compatible PLCs e.g. YASKAWA / VIPA 
+    * SLIO e.g. 
+      * 013-CCF0R00
+      * 014-CEF0R01
+      * 015-CEFNR00
+      * 015-CEFPR01
+      * 017-CEFPR00
+    * MICRO PLC  
+    * 300S+
   * uses PG-Communication (programming device communication) to connect the PLC
   * optional also OP-Communication (HMI or panel communication) can be used for to connect the PLC
   * **NOTE:** You may need to increase the connection resources for PG-Communication or OP-Communication within Siemens Simatic Manager or Siemens TIA Portal. The default value is 1 and thus lead to connection problems using programming tool or panel and this plugin at the same time.
-- Tested with S7-300, S7-1200 and S7-300 compatible PLCs from Yaskawa
+- Tested with S7-300, S7-1200 and S7-300 compatible PLCs from YASKAWA and VIPA
 - Implementation is based on documentation of the [Homebridge API](https://developers.homebridge.io)
 - Supports [**polling**](#poll) of PLC from homebridge-plc plugin by per accessory defined interval
 - Supports [**push**](#push) from PLC to homebridge-plc plugin by http PUT/GET
