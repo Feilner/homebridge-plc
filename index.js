@@ -1,5 +1,5 @@
 /*
- * (c) 2020-2023 Feilner
+ * (c) 2020-2024 Feilner
  */
 
 var PlatformAccessory, Service, Characteristic, UUIDGen;
