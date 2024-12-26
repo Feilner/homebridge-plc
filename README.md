@@ -1,6 +1,20 @@
 # homebridge-plc
 Homebridge plugin for Siemens Step7 and compatible PLCs
 
+> [!CAUTION]
+> Currently not compatible with node.js 22
+> 
+> The underlaying node-snap7 lib does not compile against node.js 22
+>
+> When using the Homebridge docker image:
+>   - Use version [2024-12-11](https://hub.docker.com/layers/homebridge/homebridge/2024-12-11/images/sha256-e14ddee0d03b6529ab14a2b507df35c45bd331a778970e2f3bf80eff4b966d31)
+>     
+> When using the Homebridge debian or ubuntu apt pkg: 
+>   - Use version [1.3.12](https://github.com/homebridge/homebridge-apt-pkg/releases/tag/v1.3.12)
+>
+> It's safe to update the Homebridge or Homebridge UI version from the UI as this does not update the node version!
+
+
 <!-- prettier-ignore -->
 > [!NOTE]
 > homebridge-plc V2.1.0-beta is compatible with **Homebridge V2**
@@ -11,7 +25,7 @@ Homebridge plugin for Siemens Step7 and compatible PLCs
 [![donate](https://img.shields.io/badge/donate-PayPal-blue.svg)](https://www.paypal.me/OFeilner)
 
 SIEMENS S7 PLC plugin for [Homebridge](https://homebridge.io)
-- Uses snap7 for communication therefore compatible with:
+- Uses [snap7](https://snap7.sourceforge.net) via [node-snap7](https://github.com/mathiask88/node-snap7) for communication therefore compatible with:
   * S7 300
   * S7 400
   * S7 1200 see [Snap7 notes](http://snap7.sourceforge.net/snap7_client.html#1200_1500)
@@ -72,7 +86,7 @@ SIEMENS S7 PLC plugin for [Homebridge](https://homebridge.io)
   - Run Homebridge
 
 - Install via Homebridge UI (recommended)
-  - Search for `plc` on the plugin screen of [config-ui-x](https://github.com/oznu/homebridge-config-ui-x) .
+  - Search for `plc` on the plugin screen of [Homebridge UI](https://github.com/homebridge/homebridge-config-ui-x) .
   - Find `homebridge-plc`
   - Click install.
   - Edit configuration
