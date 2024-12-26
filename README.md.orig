@@ -1,6 +1,8 @@
 # homebridge-plc
 Homebridge plugin for Siemens Step7 and compatible PLCs
 
+<<<<<<< HEAD
+=======
 > [!CAUTION]
 > Currently not compatible with node.js 22
 > 
@@ -15,6 +17,7 @@ Homebridge plugin for Siemens Step7 and compatible PLCs
 > It's safe to update the Homebridge or Homebridge UI version from the UI as this does not update the node version!
 
 
+>>>>>>> master
 <!-- prettier-ignore -->
 > [!NOTE]
 > homebridge-plc V2.1.0-beta is compatible with **Homebridge V2**
