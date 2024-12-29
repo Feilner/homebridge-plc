@@ -1,3 +1,5 @@
+![Homebridge and Homebridge-PLC](doc/Homebridge_and_PLC.png)
+
 # homebridge-plc
 Homebridge plugin for Siemens Step7 and compatible PLCs
 
