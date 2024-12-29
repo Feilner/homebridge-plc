@@ -1,7 +1,7 @@
 {
   "name": "homebridge-plc",
   "displayName": "Homebridge PLC (Step7)",
-  "version": "2.1.0-beta.0",
+  "version": "2.1.0-beta.1",
   "description": "Homebridge plugin for Siemens Step7 and compatible PLCs. (https://github.com/homebridge)",
   "license": "MIT",
   "author": "Feilner",

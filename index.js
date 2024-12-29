@@ -1,5 +1,5 @@
 /*
- * (c) 2020-2023 Feilner
+ * (c) 2020-2024 Feilner
  */
 
 var PlatformAccessory, Service, Characteristic, UUIDGen;
@@ -3442,7 +3442,7 @@ GenericPLCAccessory.prototype = {
     //Set single bit depending on value
     const offset = value ? on_offset : off_offset;
     const bit = value ? on_bit : off_bit;
-    var logprefix = "[" + this.name + "] " + characteristic + ": %s (setOnOffBit DB" + db + "DBX"+ offset + "." + bit + ")";
+    var logprefix = "[" + this.name + "] " + characteristic + ": %s (setOnOffBit DB" + db + "DBX"+ offset + "." + bit + ") %d ms";
     var S7Client = this.platform.S7Client;
     var log = this.log;
     var buf = Buffer.alloc(1);
@@ -3450,14 +3450,16 @@ GenericPLCAccessory.prototype = {
     //ensure PLC connection
     if (this.platform.S7ClientConnect()) {
       buf.writeUInt8(1);
-      if (!S7Client.WriteArea(S7Client.S7AreaDB, db, ((offset*8) + bit), 1, S7Client.S7WLBit, buf)) {
+      var result = S7Client.WriteArea(S7Client.S7AreaDB, db, ((offset*8) + bit), 1, S7Client.S7WLBit, buf);
+      var execTime = S7Client.ExecTime();
+      if (!result) {
         var err = S7Client.LastError();
-        log.error(logprefix, "WriteArea failed #" + err.toString(16) + " - " + S7Client.ErrorText(err));
+        log.error(logprefix, "WriteArea failed #" + err.toString(16) + " - " + S7Client.ErrorText(err), execTime);
         if(err & 0xFFFFF) {S7Client.Disconnect();}
         callback(new Error('PLC error'));
       }
       else {
-        log.debug(logprefix + " %d ms", String(value), S7Client.ExecTime());
+        log.debug(logprefix, String(value), execTime);
         callback(null);
         if (typeof(inform) != 'undefined' && inform)
         {
@@ -3473,7 +3475,7 @@ GenericPLCAccessory.prototype = {
 
   setBit: function(value, callback, db, offset, bit, characteristic, inform, valueMod) {
     //Set single bit depending on value
-    var logprefix = "[" + this.name + "] " + characteristic + ": %s (setBit DB" + db + "DBX"+ offset + "." + bit + ")";
+    var logprefix = "[" + this.name + "] " + characteristic + ": %s (setBit DB" + db + "DBX"+ offset + "." + bit + ") %d ms";
     var S7Client = this.platform.S7Client;
     var log = this.log;
     var buf = Buffer.alloc(1);
@@ -3486,20 +3488,21 @@ GenericPLCAccessory.prototype = {
     //ensure PLC connection
     if (this.platform.S7ClientConnect()) {
       buf.writeInt8(valuePLC ? 1 : 0);
-      if (!S7Client.WriteArea(S7Client.S7AreaDB, db, ((offset*8) + bit), 1, S7Client.S7WLBit, buf)) {
+      const result = S7Client.WriteArea(S7Client.S7AreaDB, db, ((offset*8) + bit), 1, S7Client.S7WLBit, buf);
+      if (!result) {
         var err = S7Client.LastError();
-        log.error(logprefix, "WriteArea failed #" + err.toString(16) + " - " + S7Client.ErrorText(err));
+        log.error(logprefix, "WriteArea failed #" + err.toString(16) + " - " + S7Client.ErrorText(err), execTime);
         if(err & 0xFFFFF) {S7Client.Disconnect();}
         callback(new Error('PLC error'));
       }
       else {
         if (typeof(valueMod) != 'undefined' && valueMod)
         {
-          log.debug(logprefix + " %d ms", String(value) + "->" + String(valuePLC), S7Client.ExecTime());
+          log.debug(logprefix, String(value) + "->" + String(valuePLC), execTime);
         }
         else
         {
-          log.debug(logprefix + " %d ms", String(value), S7Client.ExecTime());
+          log.debug(logprefix, String(value), execTime);
         }
         callback(null);
         if (typeof(inform) != 'undefined' && inform)
@@ -3517,7 +3520,7 @@ GenericPLCAccessory.prototype = {
 
   getBit: function(callback, db, offset, bit, characteristic, valueMod) {
     //read single bit
-    var logprefix = "[" + this.name + "] " + characteristic + ": %s (getBit DB" + db + "DBX"+ offset + "." + bit + ")";
+    var logprefix = "[" + this.name + "] " + characteristic + ": %s (getBit DB" + db + "DBX"+ offset + "." + bit + ") %d ms";
     var S7Client = this.platform.S7Client;
     var log = this.log;
     var pushMirror = function(value) { this.platform.mirrorGet(logprefix, "&db="+db+"&offset="+ offset + "." + bit + "&value="+ value);}.bind(this);
@@ -3525,8 +3528,9 @@ GenericPLCAccessory.prototype = {
     //check PLC connection
     if (this.platform.S7ClientConnect()) {
       S7Client.ReadArea(S7Client.S7AreaDB, db, ((offset*8) + bit), 1, S7Client.S7WLBit, function(err, res) {
+        var execTime = S7Client.ExecTime();
         if(err) {
-          log.error(logprefix, "ReadArea failed #" + err.toString(16) + " - " + S7Client.ErrorText(err));
+          log.error(logprefix, "ReadArea failed #" + err.toString(16) + " - " + S7Client.ErrorText(err) ,execTime);
           if(err & 0xFFFFF) {S7Client.Disconnect();}
           callback(err, 0);
         }
@@ -3536,11 +3540,11 @@ GenericPLCAccessory.prototype = {
           if (typeof(valueMod) != 'undefined' && valueMod)
           {
             value = valueMod(valuePLC);
-            log.debug(logprefix , String(value) + "<-" + String(valuePLC));
+            log.debug(logprefix , String(value) + "<-" + String(valuePLC), execTime);
           }
           else
           {
-            log.debug(logprefix , String(value));
+            log.debug(logprefix , String(value), execTime);
           }
           callback(null, value);
           pushMirror(valuePLC);
@@ -3556,7 +3560,7 @@ GenericPLCAccessory.prototype = {
   // REAL
   //////////////////////////////////////////////////////////////////////////////
   setReal: function(value, callback, db, offset, characteristic, inform, valueMod) {
-    var logprefix = "[" + this.name + "] " + characteristic + ": %s (setReal DB" + db + "DBD"+ offset + ")";
+    var logprefix = "[" + this.name + "] " + characteristic + ": %s (setReal DB" + db + "DBD"+ offset + ") %d ms";
     var S7Client = this.platform.S7Client;
     var log = this.log;
     var buf = Buffer.alloc(4);
@@ -3569,20 +3573,22 @@ GenericPLCAccessory.prototype = {
     //ensure PLC connection
     if (this.platform.S7ClientConnect()) {
       buf.writeFloatBE(valuePLC);
-      if (!S7Client.WriteArea(S7Client.S7AreaDB, db, offset, 1, S7Client.S7WLReal, buf)) {
+      var result = S7Client.WriteArea(S7Client.S7AreaDB, db, offset, 1, S7Client.S7WLReal, buf);
+      var execTime = S7Client.ExecTime();
+      if (!result) {
         var err = S7Client.LastError();
-        log.error(logprefix, "WriteArea failed #" + err.toString(16) + " - " + S7Client.ErrorText(err));
+        log.error(logprefix, "WriteArea failed #" + err.toString(16) + " - " + S7Client.ErrorText(err), execTime);
         if(err & 0xFFFFF) {S7Client.Disconnect();}
         callback(new Error('PLC error'));
       }
       else {
         if (typeof(valueMod) != 'undefined' && valueMod)
         {
-          log.debug(logprefix + " %d ms", String(value) + "->" + String(valuePLC), S7Client.ExecTime());
+          log.debug(logprefix, String(value) + "->" + String(valuePLC), execTime);
         }
         else
         {
-          log.debug(logprefix + " %d ms", String(value), S7Client.ExecTime());
+          log.debug(logprefix, String(value), execTime);
         }
         callback(null);
         if (typeof(inform) != 'undefined' && inform)
@@ -3598,7 +3604,7 @@ GenericPLCAccessory.prototype = {
   },
 
   getReal: function(callback, db, offset, characteristic, valueMod) {
-    var logprefix = "[" + this.name + "] " + characteristic + ": %s (getReal DB" + db + "DBD"+ offset + ")";
+    var logprefix = "[" + this.name + "] " + characteristic + ": %s (getReal DB" + db + "DBD"+ offset + ") %d ms";
     var S7Client = this.platform.S7Client;
     var log = this.log;
     var value = 0;
@@ -3607,8 +3613,9 @@ GenericPLCAccessory.prototype = {
     //ensure PLC connection
     if (this.platform.S7ClientConnect()) {
         S7Client.ReadArea(S7Client.S7AreaDB, db, offset, 1, S7Client.S7WLReal, function(err, res) {
+          var execTime = S7Client.ExecTime();
           if(err) {
-            log.error(logprefix, "ReadArea failed #" + err.toString(16) + " - " + S7Client.ErrorText(err));
+            log.error(logprefix, "ReadArea failed #" + err.toString(16) + " - " + S7Client.ErrorText(err)), execTime;
             if(err & 0xFFFFF) {S7Client.Disconnect();}
             callback(new Error('PLC error'));
           }
@@ -3617,12 +3624,12 @@ GenericPLCAccessory.prototype = {
             if (typeof(valueMod) != 'undefined' && valueMod)
             {
               value = valueMod(valuePLC);
-              log.debug(logprefix , String(value) + "<-" + String(valuePLC));
+              log.debug(logprefix , String(value) + "<-" + String(valuePLC), execTime);
             }
             else
             {
               value = valuePLC;
-              log.debug(logprefix , String(value));
+              log.debug(logprefix , String(value), execTime);
             }
             callback(null, value);
             pushMirror(valuePLC);
@@ -3639,7 +3646,7 @@ GenericPLCAccessory.prototype = {
   // BYTE
   //////////////////////////////////////////////////////////////////////////////
   setByte: function(value, callback, db, offset, characteristic, inform, valueMod) {
-    var logprefix = "[" + this.name + "] " + characteristic + ": %s (setByte DB" + db + "DBB"+ offset + ")";
+    var logprefix = "[" + this.name + "] " + characteristic + ": %s (setByte DB" + db + "DBB"+ offset + ") %d ms";
     var S7Client = this.platform.S7Client;
     var log = this.log;
     var buf = Buffer.alloc(1);
@@ -3651,21 +3658,23 @@ GenericPLCAccessory.prototype = {
 
     //ensure PLC connection
     if (this.platform.S7ClientConnect()) {
-      buf.writeUInt8(valuePLC);
-      if (!S7Client.WriteArea(S7Client.S7AreaDB, db, offset, 1, S7Client.S7WLByte, buf)) {
+      buf.writeUInt8(valuePLC);      
+      var result = S7Client.WriteArea(S7Client.S7AreaDB, db, offset, 1, S7Client.S7WLByte, buf);
+      var execTime = S7Client.ExecTime();
+      if (!result) {
         var err = S7Client.LastError();
-        log.error(logprefix, "WriteArea failed #" + err.toString(16) + " - " + S7Client.ErrorText(err));
+        log.error(logprefix, "WriteArea failed #" + err.toString(16) + " - " + S7Client.ErrorText(err), execTime);
         if(err & 0xFFFFF) {S7Client.Disconnect();}
         callback(new Error('PLC error'));
       }
       else {
         if (typeof(valueMod) != 'undefined' && valueMod)
         {
-          log.debug(logprefix , String(value) + "->" + String(valuePLC));
+          log.debug(logprefix , String(value) + "->" + String(valuePLC), execTime);
         }
         else
         {
-          log.debug(logprefix , String(value));
+          log.debug(logprefix , String(value), execTime);
         }
         callback(null);
         if (typeof(inform) != 'undefined' && inform)
@@ -3681,7 +3690,7 @@ GenericPLCAccessory.prototype = {
   },
 
   getByte: function(callback, db, offset, characteristic, valueMod) {
-    var logprefix = "[" + this.name + "] " + characteristic + ": %s (getByte DB" + db + "DBB"+ offset + ")";
+    var logprefix = "[" + this.name + "] " + characteristic + ": %s (getByte DB" + db + "DBB"+ offset + ") %d ms";
     var S7Client = this.platform.S7Client;
     var log = this.log;
     var value = 0;
@@ -3690,6 +3699,7 @@ GenericPLCAccessory.prototype = {
     //ensure PLC connection
     if (this.platform.S7ClientConnect()) {
         S7Client.ReadArea(S7Client.S7AreaDB, db, offset, 1, S7Client.S7WLByte, function(err, res) {
+          var execTime = S7Client.ExecTime();
           if(err) {
             log.error(logprefix, "ReadArea failed #" + err.toString(16) + " - " + S7Client.ErrorText(err));
             if(err & 0xFFFFF) {S7Client.Disconnect();}
@@ -3700,12 +3710,12 @@ GenericPLCAccessory.prototype = {
             if (typeof(valueMod) != 'undefined' && valueMod)
             {
               value = valueMod(valuePLC);
-              log.debug(logprefix , String(value) + "<-" + String(valuePLC));
+              log.debug(logprefix , String(value) + "<-" + String(valuePLC), execTime);
             }
             else
             {
               value = valuePLC;
-              log.debug(logprefix , String(value));
+              log.debug(logprefix , String(value), execTime);
             }
             callback(null, value);
             pushMirror(valuePLC);
@@ -3721,7 +3731,7 @@ GenericPLCAccessory.prototype = {
   // INT
   //////////////////////////////////////////////////////////////////////////////
   setInt: function(value, callback, db, offset, characteristic, inform, valueMod) {
-    var logprefix = "[" + this.name + "] " + characteristic + ": %s (setInt DB" + db + "DBW"+ offset + ")";
+    var logprefix = "[" + this.name + "] " + characteristic + ": %s (setInt DB" + db + "DBW"+ offset + ") %d ms";
     var S7Client = this.platform.S7Client;
     var log = this.log;
     var buf = Buffer.alloc(2);
@@ -3734,20 +3744,22 @@ GenericPLCAccessory.prototype = {
     //ensure PLC connection
     if (this.platform.S7ClientConnect()) {
       buf.writeInt16BE(valuePLC);
-      if (!S7Client.WriteArea(S7Client.S7AreaDB, db, offset, 1, S7Client.S7WLWord, buf)) {
+      var result = S7Client.WriteArea(S7Client.S7AreaDB, db, offset, 1, S7Client.S7WLWord, buf);
+      var execTime = S7Client.ExecTime();
+      if (!result) {
         var err = S7Client.LastError();
-        log.error(logprefix, "WriteArea failed #" + err.toString(16) + " - " + S7Client.ErrorText(err));
+        log.error(logprefix, "WriteArea failed #" + err.toString(16) + " - " + S7Client.ErrorText(err), execTime);
         if(err & 0xFFFFF) {S7Client.Disconnect();}
         callback(new Error('PLC error'));
       }
       else {
         if (typeof(valueMod) != 'undefined' && valueMod)
         {
-          log.debug(logprefix + " %d ms", String(value) + "->" + String(valuePLC)), S7Client.ExecTime();
+          log.debug(logprefix, String(value) + "->" + String(valuePLC), execTime);
         }
         else
         {
-          log.debug(logprefix + " %d ms", String(value), S7Client.ExecTime());
+          log.debug(logprefix, String(value), execTime);
         }
         callback(null);
         if (typeof(inform) != 'undefined' && inform)
@@ -3763,7 +3775,7 @@ GenericPLCAccessory.prototype = {
   },
 
   getInt: function(callback, db, offset, characteristic, valueMod) {
-    var logprefix = "[" + this.name + "] " + characteristic + ": %s (getInt DB" + db + "DBW"+ offset + ")";
+    var logprefix = "[" + this.name + "] " + characteristic + ": %s (getInt DB" + db + "DBW"+ offset + ") %d ms";
     var S7Client = this.platform.S7Client;
     var log = this.log;
     var value = 0;
@@ -3773,8 +3785,9 @@ GenericPLCAccessory.prototype = {
     //ensure PLC connection
     if (this.platform.S7ClientConnect()) {
         S7Client.ReadArea(S7Client.S7AreaDB, db, offset, 1, S7Client.S7WLWord, function(err, res) {
+          var execTime = S7Client.ExecTime();
           if(err) {
-            log.error(logprefix, "ReadArea failed #" + err.toString(16) + " - " + S7Client.ErrorText(err));
+            log.error(logprefix, "ReadArea failed #" + err.toString(16) + " - " + S7Client.ErrorText(err), execTime);
             if(err & 0xFFFFF) {S7Client.Disconnect();}
             callback(new Error('PLC error'));
           }
@@ -3783,12 +3796,12 @@ GenericPLCAccessory.prototype = {
             if (typeof(valueMod) != 'undefined' && valueMod)
             {
               value = valueMod(valuePLC);
-              log.debug(logprefix , String(value) + "<-" + String(valuePLC));
+              log.debug(logprefix, String(value) + "<-" + String(valuePLC), execTime);
             }
             else
             {
               value = valuePLC;
-              log.debug(logprefix , String(value));
+              log.debug(logprefix, String(value), execTime);
             }
             callback(null, value);
             pushMirror(valuePLC);
@@ -3806,7 +3819,7 @@ GenericPLCAccessory.prototype = {
   // DInt
   //////////////////////////////////////////////////////////////////////////////
   setDInt: function(value, callback, db, offset, characteristic, inform, valueMod) {
-    var logprefix = "[" + this.name + "] " + characteristic + ": %s (setDInt DB" + db + "DBD"+ offset + ")";
+    var logprefix = "[" + this.name + "] " + characteristic + ": %s (setDInt DB" + db + "DBD"+ offset + ") %d ms";
     var S7Client = this.platform.S7Client;
     var log = this.log;
     var buf = Buffer.alloc(4);
@@ -3819,20 +3832,22 @@ GenericPLCAccessory.prototype = {
     //ensure PLC connection
     if (this.platform.S7ClientConnect()) {
       buf.writeInt32BE(valuePLC);
-      if (!S7Client.WriteArea(S7Client.S7AreaDB, db, offset, 1, S7Client.S7WLDWord, buf)) {
+      var result = S7Client.WriteArea(S7Client.S7AreaDB, db, offset, 1, S7Client.S7WLDWord, buf);
+      var execTime = S7Client.ExecTime();
+      if (!result) {
         var err = S7Client.LastError();
-        log.error(logprefix, "WriteArea failed #" + err.toString(16) + " - " + S7Client.ErrorText(err));
+        log.error(logprefix, "WriteArea failed #" + err.toString(16) + " - " + S7Client.ErrorText(err), execTime);
         if(err & 0xFFFFF) {S7Client.Disconnect();}
         callback(new Error('PLC error'));
       }
       else {
         if (typeof(valueMod) != 'undefined' && valueMod)
         {
-          log.debug(logprefix + " %d ms", String(value) + "->" + String(valuePLC), S7Client.ExecTime());
+          log.debug(logprefix, String(value) + "->" + String(valuePLC), execTime);
         }
         else
         {
-          log.debug(logprefix + " %d ms", String(value), S7Client.ExecTime());
+          log.debug(logprefix, String(value), execTime);
         }
         callback(null);
         if (typeof(inform) != 'undefined' && inform)
@@ -3848,7 +3863,7 @@ GenericPLCAccessory.prototype = {
   },
 
   getDInt: function(callback, db, offset, characteristic, valueMod) {
-    var logprefix = "[" + this.name + "] " + characteristic + ": %s (getDInt DB" + db + "DBD"+ offset + ")";
+    var logprefix = "[" + this.name + "] " + characteristic + ": %s (getDInt DB" + db + "DBD"+ offset + ") %d ms";
     var S7Client = this.platform.S7Client;
     var log = this.log;
     var value = 0;
@@ -3858,6 +3873,7 @@ GenericPLCAccessory.prototype = {
     //ensure PLC connection
     if (this.platform.S7ClientConnect()) {
         S7Client.ReadArea(S7Client.S7AreaDB, db, offset, 1, S7Client.S7WLDWord, function(err, res) {
+          var execTime = S7Client.ExecTime();
           if(err) {
             log.error(logprefix, "ReadArea failed #" + err.toString(16) + " - " + S7Client.ErrorText(err));
             if(err & 0xFFFFF) {S7Client.Disconnect();}
@@ -3868,12 +3884,12 @@ GenericPLCAccessory.prototype = {
             if (typeof(valueMod) != 'undefined' && valueMod)
             {
               value = valueMod(valuePLC);
-              log.debug(logprefix , String(value) + "<-" + String(valuePLC));
+              log.debug(logprefix, String(value) + "<-" + String(valuePLC), execTime);
             }
             else
             {
               value = valuePLC;
-              log.debug(logprefix , String(value));
+              log.debug(logprefix, String(value), execTime);
             }
             callback(null, value);
             pushMirror(valuePLC);

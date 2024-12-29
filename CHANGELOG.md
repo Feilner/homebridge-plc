@@ -1,13 +1,29 @@
 # Changelog
 
-⚠️⚠️⚠️**Action required breaking changes!** ⚠️⚠️⚠️
-- Version 2.0.x has changed the name of some configurations.
-- Please stay on version 1.0.x if you do not want to adapt your configuration.
+⚠️⚠️⚠️ **Stay on Node.js 20.18.0 ** ⚠️⚠️⚠️
+- The underlaying node-snap7 lib does not compile against node.js 22.12.0
+- Do NOT update the Homebridge docker image bejond 2024-12-11
+- Updating Homebridge and Homebridge UI via the GUI is save as this does not update the Node.js version.
+
+
+## [2.1.0-beta.1] 2024-12-29
+
+### Update from master
+- In debug mode also log the time for the PLC access
+- Added warning related to Node.js 22.12.0 that comes with homebridge apt pkg version 1.4.0 and and is used in Homebridge docker from 2024-12-12
 
 ## [2.1.0-beta.0] 2024-12-13
 
 ### Updated
 - Compability with homebridge 2.0.0-beta.0
+
+## [2.0.7] 2024-12-28
+
+- In debug mode also log the time for the PLC access
+
+## [2.0.6] 2024-12-26
+
+- Added warning related to Node.js 22.12.0 that comes with homebridge apt pkg version 1.4.0 and and is used in Homebridge docker from 2024-12-12
 
 ## [2.0.5] 2024-12-13
 
