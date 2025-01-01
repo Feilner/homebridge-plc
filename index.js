@@ -1,5 +1,5 @@
 /*
- * (c) 2020-2024 Feilner
+ * (c) 2020-2025 Feilner
  */
 
 var PlatformAccessory, Service, Characteristic, UUIDGen;
@@ -3416,6 +3416,7 @@ GenericPLCAccessory.prototype = {
     if (this.platform.S7ClientConnect()) {
       buf.writeInt8(valuePLC ? 1 : 0);
       const result = S7Client.WriteArea(S7Client.S7AreaDB, db, ((offset*8) + bit), 1, S7Client.S7WLBit, buf);
+      var execTime = S7Client.ExecTime();
       if (!result) {
         var err = S7Client.LastError();
         log.error(logprefix, "WriteArea failed #" + err.toString(16) + " - " + S7Client.ErrorText(err), execTime);

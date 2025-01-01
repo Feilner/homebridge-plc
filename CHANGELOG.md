@@ -5,6 +5,11 @@
 - Do NOT update the Homebridge docker image bejond 2024-12-11
 - Updating Homebridge and Homebridge UI via the GUI is save as this does not update the Node.js version.
 
+## [2.0.8] 2024-01-01
+
+### Fixed
+ - add missing execution time for setBit
+
 ## [2.0.7] 2024-12-28
 
 - In debug mode also log the time for the PLC access
