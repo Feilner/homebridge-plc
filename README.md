@@ -100,17 +100,21 @@ SIEMENS S7 PLC plugin for [Homebridge](https://homebridge.io)
 The plugin is configured as single platform by defining a `PLC` platform.
 Parameters:
 - `ip`: the IPv4 address of the PLC
-- `rack`: the rack number of the PLC typically 0
-- `slot`: the slot number of the PLC for S7 300/400 typically `2`, for 1200/1500 typically `1`.
-- `communicationOP`: **(optional)** when set to `true` OP-Communication is used instead of PG-Communication
-- `enablePolling`: **(optional)** when set to `true` a background task is executed every second enable polling for the accessories
-- `defaultPollInterval` **(optional)** default polling interval for all accessories in seconds. Default value is `10` seconds
-- `distributePolling` **(optional)** when set to `true` the polling of the accessories does not start at the same time. In order to distribute the PLC load for the queries
-- `enablePush`: **(optional)** when set to `true` a the configured `port` is opened to push updates of values form plc to the plugin
-- `enableControl`: **(optional)** when set to `true` a the configured `port` is opened to control accessories by http request
-- `port`: **(optional)** port for http server to handle incoming http requests for push and control functionality. Default port is `8888`
-- `forward`: **(optional)** there is a limit of maximum 149 supported accessories by homebridge. To overcome this is limited you can create a second instance of homebridge running homebridge-plc and forward all **push** and **control** with no matching `db`  to the other instance. Set the destination address of the second instance e.g. `http:\\127.0.0.1:8889`.
-- `mirror` **(optional)** There are environments where it could make sense to share the same accessories on two homebridge instances. To allow pairing with another Home with Apple Home App or Home Assistant. This option mirrors all values read from PLC by this instance to a second instance. It also forwards all **push** requests to the second instance. The option `enablePush` has to be enabled on the second instance. on the destination instance.  Set the destination address of the second instance e.g. `http:\\192.168.1.11:8888`. (expirimental feature)
+- `rack`: the rack number of the PLC:
+  - typically `0`
+- `slot`: the slot number of the PLC:
+  - for S7 300/400 typically `2`
+  - for S7 1200/1500 typically `1`.
+- `communicationOP`: **(optional)** when set to `true` OP-Communication is used instead of PG-Communication. Default is `false` to use PG-Communication.
+- `enablePolling`: **(optional)** when set to `true` a background task is executed every second enable polling for the accessories. Default is `false`.
+- `defaultPollInterval` **(optional)** default polling interval for all accessories in seconds. Default value is `10` seconds.
+- `distributePolling` **(optional)** when set to `true` the polling of the accessories does not start at the same time. In order to distribute the PLC load for the queries. Default is `false`.
+- `enablePush`: **(optional)** when set to `true` a the configured `port` is opened to push updates of values form plc to the plugin. Default is `false`.
+- `enableControl`: **(optional)** when set to `true` a the configured `port` is opened to control accessories by http request. Default is `false`.
+- `port`: **(optional)** port for http server to handle incoming http requests for push and control functionality. Default port is `8888`.
+- **Expirimental features**
+  - `forward`: **(optional)** there is a limit of maximum 149 supported accessories by homebridge. To overcome this is limited you can create a second instance of homebridge running homebridge-plc and forward all **push** and **control** with no matching `db`  to the other instance. Set the destination address of the second instance e.g. `http:\\127.0.0.1:8889`.
+  - `mirror` **(optional)** There are environments where it could make sense to share the same accessories on two homebridge instances. To allow pairing with another Home with Apple Home App or Home Assistant. This option mirrors all values read from PLC by this instance to a second instance. It also forwards all **push** requests to the second instance. The option `enablePush` has to be enabled on the second instance. on the destination instance.  Set the destination address of the second instance e.g. `http:\\192.168.1.11:8888`. 
 ## Accessories
 - In the platform, you can declare different types of accessories
 - The notation **(push support)** identifies that parameter supports direct updates from the PLC
@@ -1126,10 +1130,17 @@ Note: The example is just an example it contains also some optional settings. Fo
       ]
     }
 
-# Update of values
+# Update of accessory values
+The current values of the acessories are only updated in the folliwing cases:
+ - Apple Home App:
+   - App is closed and opened
+   - Switch between rooms is done
+ - Homebride Devices page is opened
+
 The home app does not regularly poll for updates of values. Only when switching rooms or close/open the app the actual values are requested.
 This behavior is even the case when a AppleTV or HomePod is configured as control center.
-There are three possible ways to workaround this.
+
+There are three possible ways to handle this:
 
 1. That's ok for you
 2. You enable the polling mode
