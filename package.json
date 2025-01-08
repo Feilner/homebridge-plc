@@ -25,12 +25,12 @@
   ],
   "main": "index.js",
   "engines": {
-    "node": "^18 || ^20",
+    "node": "^18 || ^20 || ^22",
     "homebridge": "^1.8.0 || ^2.0.0-beta.0"
   },
   "preferGlobal": true,
   "dependencies": {
-    "node-snap7": ">=1.0.7"
+    "node-snap7": ">=1.0.8"
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
