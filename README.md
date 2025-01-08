@@ -3,19 +3,6 @@
 # homebridge-plc
 Homebridge plugin for Siemens Step7 and compatible PLCs
 
-> [!CAUTION]
-> Currently not compatible with Node.js 22.12.0
-> 
-> The underlaying node-snap7 lib does not compile against Node.js 22.12.0 that comes with Homebridge apt pkg version 1.4.0 and and is used in Homebridge docker image from 2024-12-12
->
-> When using the Homebridge docker image:
->   - Use version [2024-12-11](https://hub.docker.com/layers/homebridge/homebridge/2024-12-11/images/sha256-e14ddee0d03b6529ab14a2b507df35c45bd331a778970e2f3bf80eff4b966d31)
->     
-> When using the Homebridge debian or ubuntu apt pkg: 
->   - Use version [1.3.12](https://github.com/homebridge/homebridge-apt-pkg/releases/tag/v1.3.12)
->
-> It's safe to update the Homebridge or Homebridge UI version from the UI as this does not update the node version!
-
 
 <!-- prettier-ignore -->
 > [!NOTE]
