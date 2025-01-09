@@ -1,25 +1,20 @@
 ![Homebridge and Homebridge-PLC](doc/Homebridge_and_PLC.png)
 
 # homebridge-plc
-Homebridge plugin for Siemens Step7 and compatible PLCs
-
-
-<!-- prettier-ignore -->
-> [!NOTE]
-> homebridge-plc V2.1.0-beta is compatible with **Homebridge V2**
+Homebridge plugin for SIEMENS Step7 and compatible PLCs
 
 [![NPM Version](https://img.shields.io/npm/v/homebridge-plc.svg)](https://www.npmjs.com/package/homebridge-plc)
 [![npm](https://img.shields.io/npm/l/homebridge-plc.svg)](https://www.npmjs.com/package/homebridge-plc)
 [![npm](https://img.shields.io/npm/dt/homebridge-plc.svg)](https://www.npmjs.com/package/homebridge-plc)
 [![donate](https://img.shields.io/badge/donate-PayPal-blue.svg)](https://www.paypal.me/OFeilner)
 
-SIEMENS S7 PLC plugin for [Homebridge](https://homebridge.io)
-- Uses [snap7](https://snap7.sourceforge.net) via [node-snap7](https://github.com/mathiask88/node-snap7) for communication therefore compatible with:
+## SIEMENS S7 PLC plugin for [Homebridge](https://homebridge.io)
+- This plugin uses [snap7](https://snap7.sourceforge.net) via [node-snap7](https://github.com/mathiask88/node-snap7), making it compatible with the following PLCs:
   * S7 300
   * S7 400
   * S7 1200 see [Snap7 notes](http://snap7.sourceforge.net/snap7_client.html#1200_1500)
   * S7 1500 see [Snap7 notes](http://snap7.sourceforge.net/snap7_client.html#1200_1500)
-  * and compatible PLCs e.g. YASKAWA / VIPA 
+  * Compatible PLCs such as YASKAWA / VIPA:
     * SLIO e.g. 
       * 013-CCF0R00
       * 014-CEF0R01
@@ -28,14 +23,14 @@ SIEMENS S7 PLC plugin for [Homebridge](https://homebridge.io)
       * 017-CEFPR00
     * MICRO PLC  
     * 300S+
-  * uses PG-Communication (programming device communication) to connect the PLC
-  * optional also OP-Communication (HMI or panel communication) can be used for to connect the PLC
-  * **NOTE:** You may need to increase the connection resources for PG-Communication or OP-Communication within Siemens Simatic Manager or Siemens TIA Portal. The default value is 1 and thus lead to connection problems using programming tool or panel and this plugin at the same time.
+  * The plugin uses PG-Communication (programming device communication) to connect to the the PLC
+  * Optionally also OP-Communication (HMI or panel communication) can also be used to connect to the PLC
+  * **NOTE:** You may need to increase the connection resources for PG-Communication or OP-Communication within Siemens Simatic Manager or Siemens TIA Portal. The default value is 1, which may lead to connection problems when using the programming tool or panel and this plugin simultaneously.
 - Tested with S7-300, S7-1200 and S7-300 compatible PLCs from YASKAWA and VIPA
-- Implementation is based on documentation of the [Homebridge API](https://developers.homebridge.io)
-- Supports [**polling**](#poll) of PLC from homebridge-plc plugin by per accessory defined interval
-- Supports [**push**](#push) from PLC to homebridge-plc plugin by http PUT/GET
-- Supports [**control**](#control) of PLC accessories by http PUT/GET
+- Implementation is based on the documentation of the [Homebridge API](https://developers.homebridge.io)
+- Supports [**polling**](#poll) of the PLC from the homebridge-plc plugin with a per accessory defined interval
+- Supports [**push**](#push) from the PLC to the homebridge-plc plugin via http PUT/GET
+- Supports [**control**](#control) of PLC accessories via http PUT/GET
 - Supported Accessories:
   * [LightBulb as `PLC_LightBulb`](#PLC_LightBulb)
   * [Outlet as `PLC_Outlet`](#PLC_Outlet)
