@@ -18,11 +18,6 @@
 ### Fixed
 - Added missing execution time for setBit
 
-## [2.0.8] 2024-01-01
-
-### Fixed
- - add missing execution time for setBit
-
 ## [2.0.7] 2024-12-28
 
 - In debug mode, also log the time for the PLC access
