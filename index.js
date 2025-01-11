@@ -4,6 +4,8 @@
 
 var PlatformAccessory, Service, Characteristic, UUIDGen;
 var snap7 = require('node-snap7');
+var url = require('url');
+var http = require('http');
 
 // Exports
 module.exports = function(homebridge) {
@@ -42,7 +44,7 @@ PLC_Platform.prototype = {
 
       if (!('name' in config)) {
         log.error("[" + String(accessoryNumber) + "/" + String(numberOfAccessories) + "] Missing name in config and was not added!");
-        break;
+        continue;
       }
 
       var removedOptions = ['minValue', 'maxValue', 'minStep', 'minHumidityValue', 'maxHumidityValue', 'minHumidityStep', 'mapGetCurrent', 'mapGetTarget', 'mapSetTarget', 'invert', 'set_Secured', 'set_Unsecured', 'forceCurrentState', 'set_Deactivate', 'set_Off', 'mapSet', 'mapGet'];
@@ -90,7 +92,7 @@ PLC_Platform.prototype = {
         } else {
           this.log.info('Enable control server...');
         }
-        this.listener = require('http').createServer((req, res) => this.httpListener(req, res));
+        this.listener = http.createServer((req, res) => this.httpListener(req, res));
         this.listener.listen(this.port);
         this.log.info('Listening on port ' + this.port);
       });
@@ -105,7 +107,7 @@ PLC_Platform.prototype = {
   },
 
   forwardHTTP: function(logprefix, url) {
-    require('http').get(url, (resp) => {
+    http.get(url, (resp) => {
       if (resp.statusCode !== 200) {
         this.log.error(logprefix + " Forward failed with HTTP status: " + resp.statusCode);
         return;
