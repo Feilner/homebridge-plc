@@ -262,9 +262,9 @@ function GenericPLCAccessory(platform, config, accessoryNumber) {
   this.platform = platform;
   this.log = platform.log;
   this.name = config.name;
-  var uuid = UUIDGen.generate(config.name + config.accessory);
+  var accessoryUUID = UUIDGen.generate(config.name + config.accessory);
   this.config = config;
-  this.accessory = new PlatformAccessory(this.name, uuid);
+  this.accessory = new PlatformAccessory(this.name, accessoryUUID);
   this.modFunctionGet = this.plain;
   this.modFunctionSet = this.plain;
 
@@ -283,14 +283,12 @@ function GenericPLCAccessory(platform, config, accessoryNumber) {
   // Lightbulb, Outlet, Switch
   ////////////////////////////////////////////////////////////////
   if (config.accessory == 'PLC_LightBulb' || config.accessory == 'PLC_Outlet' || config.accessory == 'PLC_Switch') {
-    this.service = new Service.Lightbulb(this.name);
-
-    if (config.accessory == 'PLC_LightBulb') {
-      this.service = new Service.Lightbulb(this.name);
-    } else if (config.accessory == 'PLC_Outlet') {
+    if (config.accessory == 'PLC_Outlet') {
       this.service = new Service.Outlet(this.name);
-    } else {
+    } else if (config.accessory == 'PLC_Switch') {
       this.service = new Service.Switch(this.name);
+    } else {
+      this.service = new Service.Lightbulb(this.name);
     }
 
     this.accessory.addService(this.service);
@@ -475,7 +473,8 @@ function GenericPLCAccessory(platform, config, accessoryNumber) {
           minStep: ('minTargetTemperatureStep' in config) ? config.minTargetTemperatureStep : 0.1
         });
     } else {
-      this.log.error("Mandatory config get_TargetTemperature or set_TargetTemperature missing")
+      this.log.error("Mandatory config get_TargetTemperature or set_TargetTemperature missing");
+      this.service.getCharacteristic(Characteristic.TargetTemperature)
         .on('get', function(callback) {
           this.getDummy(callback,
             20,
@@ -1579,7 +1578,7 @@ function GenericPLCAccessory(platform, config, accessoryNumber) {
             config.set_TargetAirPurifierState,
             'set TargetAirPurifierState',
             informFunction,
-            this.mapTargetSet
+            this.modTargetSet
           );
         }.bind(this));
     } else if ('default_TargetAirPurifierState' in config) {
@@ -1620,7 +1619,7 @@ function GenericPLCAccessory(platform, config, accessoryNumber) {
     }
 
     this.initActive(true);
-    this.initFilterMaintainance(false);
+    this.initFilterMaintenance(false);
 
     if ('get_RotationSpeed' in config) {
       this.service.getCharacteristic(Characteristic.RotationSpeed)
@@ -1682,7 +1681,7 @@ function GenericPLCAccessory(platform, config, accessoryNumber) {
     this.service = new Service.FilterMaintenance(this.name);
     this.accessory.addService(this.service);
 
-    this.initFilterMaintainance(true);
+    this.initFilterMaintenance(true);
   }
 
   // INIT handling ///////////////////////////////////////////////
@@ -1719,7 +1718,7 @@ function GenericPLCAccessory(platform, config, accessoryNumber) {
   this.accessory.getService(Service.AccessoryInformation)
     .setCharacteristic(Characteristic.Manufacturer, ('manufacturer' in config) ? config.manufacturer : ('db' in config) ? 'homebridge-plc (DB' + String(config.db) + ')' : 'homebridge-plc')
     .setCharacteristic(Characteristic.Model, config.accessory)
-    .setCharacteristic(Characteristic.SerialNumber, uuid)
+    .setCharacteristic(Characteristic.SerialNumber, accessoryUUID)
     .setCharacteristic(Characteristic.FirmwareRevision, '0.0.1');
 
   // this.log.debug("Done " + this.service.displayName + " (" + this.service.subtype + ") " + this.service.UUID);
@@ -1910,7 +1909,7 @@ GenericPLCAccessory.prototype = {
     }
   },
 
-  initFilterMaintainance: function(mandatory) {
+  initFilterMaintenance: function(mandatory) {
     if ('get_FilterChangeIndication' in this.config) {
       this.service.getCharacteristic(Characteristic.FilterChangeIndication)
         .on('get', function(callback) {
