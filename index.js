@@ -33,10 +33,17 @@ PLC_Platform.prototype = {
     }
 
     log.info("Add PLC accessories...");
+
     // Create accessory for each configuration
-    this.config.accessories.forEach((config, index) => {
+    for (let index = 0; index < this.config.accessories.length; index++) {
+      var config = this.config.accessories[index];
       var accessoryNumber = index + 1;
       var numberOfAccessories = this.config.accessories.length;
+
+      if (!('name' in config)) {
+        log.error("[" + String(accessoryNumber) + "/" + String(numberOfAccessories) + "] Missing name in config and was not added!");
+        break;
+      }
 
       var removedOptions = ['minValue', 'maxValue', 'minStep', 'minHumidityValue', 'maxHumidityValue', 'minHumidityStep', 'mapGetCurrent', 'mapGetTarget', 'mapSetTarget', 'invert', 'set_Secured', 'set_Unsecured', 'forceCurrentState', 'set_Deactivate', 'set_Off', 'mapSet', 'mapGet'];
       var removedOptionsLockMechanismBool = ['get_LockCurrentState', 'get_LockTargetState', 'set_LockTargetState', 'set_Secured', 'set_Unsecured'];
@@ -65,7 +72,7 @@ PLC_Platform.prototype = {
         var accessory = new GenericPLCAccessory(this, config, accessoryNumber);
         this.s7PlatformAccessories.push(accessory);
       }
-    });
+    }
     callback(this.s7PlatformAccessories);
 
     if (this.config.enablePolling) {
