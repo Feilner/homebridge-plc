@@ -9,7 +9,9 @@
 ### Changed
 - Updated README.md and added logo
 - Updated comments in config.schema.json
-- Formating
+
+### Fixed
+- Runtime error if no accessory name is defined
 
 ## [2.0.8] 2025-01-01
 
