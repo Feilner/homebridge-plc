@@ -1,8 +1,18 @@
 {
   "name": "homebridge-plc",
-  "version": "2.0.8",
-  "description": "Homebridge plugin for Siemens Step7 and compatible PLCs. (https://github.com/homebridge)",
+  "displayName": "Homebridge PLC (Step7)",
+  "version": "2.1.0",
+  "description": "Homebridge plugin for SIEMENS Step7 and compatible PLCs. (https://github.com/homebridge)",
   "license": "MIT",
+  "author": "Feilner",
+  "homepage": "https://github.com/Feilner/homebridge-plc#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Feilner/homebridge-plc.git"
+  },
+  "bugs": {
+    "url": "https://github.com/Feilner/homebridge-plc/issues"
+  },
   "keywords": [
     "homebridge-plugin",
     "homebridge",
@@ -13,24 +23,15 @@
     "YASKAWA",
     "SLIO"
   ],
-  "author": "Feilner",
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/Feilner/homebridge-plc.git"
-  },
-  "bugs": {
-    "url": "https://github.com/Feilner/homebridge-plc/issues"
-  },
+  "main": "index.js",
   "engines": {
-    "node": ">=4.3.2",
-    "homebridge": ">=1.1.6"
+    "node": "^18 || ^20 || ^22",
+    "homebridge": "^1.8.0 || ^2.0.0-beta.0"
   },
   "preferGlobal": true,
   "dependencies": {
-    "node-snap7": ">=1.0.5"
+    "node-snap7": ">=1.0.8"
   },
-  "homepage": "https://github.com/Feilner/homebridge-plc#readme",
-  "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   }
