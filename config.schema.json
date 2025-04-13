@@ -245,6 +245,12 @@
               "placeholder": "Homebridge",
               "description": "Set the manufacturer name for display in the Home app."
             },
+              "disable": {
+              "title": "Disable acessory (disable)",
+              "description": "Disable acessory.",
+              "type": "boolean",
+              "placeholder": false
+            },
             "enablePolling": {
               "title": "Enable Polling (enablePolling)",
               "description": "Effective only when polling is enabled at the platform level.",
