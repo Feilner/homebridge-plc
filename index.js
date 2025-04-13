@@ -2314,13 +2314,13 @@ GenericPLCAccessory.prototype = {
         rv = true;
       }
       if ('get_SetDuration' in this.config && this.config.get_SetDuration == offset) {
-        this.log.debug("[" + this.name + "] Push SetDuration:" + value);
-        this.service.getCharacteristic(Characteristic.SetDuration).updateValue(value);
+        this.log.debug("[" + this.name + "] Push GetDuration:" + String(this.s7time2int(parseInt(value))) + "<-" + String(value));
+        this.service.getCharacteristic(Characteristic.SetDuration).updateValue(this.s7time2int(parseInt(value)));
         rv = true;
       }
       if ('get_RemainingDuration' in this.config && this.config.get_RemainingDuration == offset) {
-        this.log.debug("[" + this.name + "] Push RemainingDuration:" + value);
-        this.service.getCharacteristic(Characteristic.RemainingDuration).updateValue(value);
+        this.log.debug("[" + this.name + "] Push RemainingDuration:" + String(this.s7time2int(parseInt(value))) + "<-" + String(value));
+        this.service.getCharacteristic(Characteristic.RemainingDuration).updateValue(this.s7time2int(parseInt(value)));
         rv = true;
       }
     }
