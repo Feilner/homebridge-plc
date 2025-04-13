@@ -2310,6 +2310,7 @@ GenericPLCAccessory.prototype = {
       if ('get_Active' in this.config && this.config.get_Active == offset) {
         this.log.debug("[" + this.name + "] Push Active:" + value);
         this.service.getCharacteristic(Characteristic.Active).updateValue(value);
+        this.service.getCharacteristic(Characteristic.InUse).updateValue(value);
         rv = true;
       }
       if ('get_SetDuration' in this.config && this.config.get_SetDuration == offset) {
@@ -2680,6 +2681,7 @@ GenericPLCAccessory.prototype = {
       if ('set_Active' in this.config && this.config.set_Active == offset || 'set_Active_Set' in this.config && this.config.set_Active_Set == offset) {
         this.log.debug("[" + this.name + "] Control Active:" + value);
         this.service.getCharacteristic(Characteristic.Active).setValue(value);
+        this.service.getCharacteristic(Characteristic.InUse).updateValue(value);
         rv = true;
       }
       if ('set_SetDuration' in this.config && this.config.set_SetDuration == offset) {
@@ -3127,6 +3129,7 @@ GenericPLCAccessory.prototype = {
       // Get the current target system state and update the value.
       this.service.getCharacteristic(Characteristic.Active).handleGetRequest().then(value => {
         this.service.getCharacteristic(Characteristic.Active).updateValue(value);
+        this.service.getCharacteristic(Characteristic.InUse).updateValue(value);
       }).catch(err => {
         this.log.error("[" + this.name + "] Error during poll", err);
       });
