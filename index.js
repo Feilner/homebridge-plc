@@ -1019,7 +1019,7 @@ function GenericPLCAccessory(platform, config, accessoryNumber) {
         }.bind(this));
     }
     
-    if ('get_SetDuration' in config && 'set_SetDuration' in config && ) {
+    if ('get_SetDuration' in config && 'set_SetDuration' in config) {
       this.service.getCharacteristic(Characteristic.SetDuration)
         .on('get', function(callback) {
           this.getDInt(callback,
