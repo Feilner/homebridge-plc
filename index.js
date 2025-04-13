@@ -985,7 +985,8 @@ function GenericPLCAccessory(platform, config, accessoryNumber) {
     this.service = new Service.Valve(this.name);
     this.accessory.addService(this.service);
 
-    this.initActive(true);
+    informFunction = function(value) { this.service.getCharacteristic(Characteristic.InUse).updateValue(value); }.bind(this);
+    this.initActive(true, informFunction);
 
     this.service.getCharacteristic(Characteristic.InUse)
       .on('get', function(callback) {
@@ -1807,7 +1808,7 @@ GenericPLCAccessory.prototype = {
     }
   },
 
-  initActive: function(mandatory) {
+  initActive: function(mandatory, inform) {
     if ('set_Active' in this.config && 'get_Active' in this.config) {
       this.service.getCharacteristic(Characteristic.Active)
         .on('get', function(callback) {
@@ -1821,7 +1822,8 @@ GenericPLCAccessory.prototype = {
           this.setBit(powerOn, callback,
             this.config.db,
             Math.floor(this.config.set_Active), Math.floor((this.config.set_Active * 10) % 10),
-            'set Active'
+            'set Active',
+            inform          
           );
         }.bind(this));
     } else if ('get_Active' in this.config && 'set_Active_Set' in this.config && 'set_Active_Reset' in this.config) {
@@ -1838,7 +1840,8 @@ GenericPLCAccessory.prototype = {
             this.config.db,
             Math.floor(this.config.set_Active_Set), Math.floor((this.config.set_Active_Set * 10) % 10),
             Math.floor(this.config.set_Active_Reset), Math.floor((this.config.set_Active_Reset * 10) % 10),
-            'set Active'
+            'set Active',
+            inform
           );
         }.bind(this));
     } else if (mandatory) {
