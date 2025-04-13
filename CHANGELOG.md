@@ -1,6 +1,11 @@
 # Changelog
 
-## [2.1.0] 2022-01-12
+## [2.1.1] 2025-04-13
+
+### Fixed
+- `PLC_Valve` Update inUse after setting Active to update status in Home App
+
+## [2.1.0] 2025-01-12
 
 ### Notable changes
 - Compatible with homebridge 2.0.0-beta.0
