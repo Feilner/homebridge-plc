@@ -68,7 +68,7 @@ PLC_Platform.prototype = {
       }
       if (hasRemovedOption) {
         log.error("[" + String(accessoryNumber) + "/" + String(numberOfAccessories) + "] " + config.name + " (" + config.accessory + ") needs update of config and was not added!");
-      } else if ('disable' in config && !config.disable)) {
+      } else if ('disable' in config && !config.disable) {
         log.warn("[" + String(accessoryNumber) + "/" + String(numberOfAccessories) + "] " + config.name + " (" + config.accessory + ") is disabled!");
       } else {
         log.info("[" + String(accessoryNumber) + "/" + String(numberOfAccessories) + "] " + config.name + " (" + config.accessory + ")");
