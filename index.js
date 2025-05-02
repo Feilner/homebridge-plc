@@ -68,6 +68,8 @@ PLC_Platform.prototype = {
       }
       if (hasRemovedOption) {
         log.error("[" + String(accessoryNumber) + "/" + String(numberOfAccessories) + "] " + config.name + " (" + config.accessory + ") needs update of config and was not added!");
+      } else if ('disable' in config && !config.disable) {
+        log.warn("[" + String(accessoryNumber) + "/" + String(numberOfAccessories) + "] " + config.name + " (" + config.accessory + ") is disabled!");
       } else {
         log.info("[" + String(accessoryNumber) + "/" + String(numberOfAccessories) + "] " + config.name + " (" + config.accessory + ")");
         // Call accessory construction
@@ -985,7 +987,8 @@ function GenericPLCAccessory(platform, config, accessoryNumber) {
     this.service = new Service.Valve(this.name);
     this.accessory.addService(this.service);
 
-    this.initActive(true);
+    informFunction = function(value) { this.service.getCharacteristic(Characteristic.InUse).updateValue(value); }.bind(this);
+    this.initActive(true, informFunction);
 
     this.service.getCharacteristic(Characteristic.InUse)
       .on('get', function(callback) {
@@ -1016,7 +1019,9 @@ function GenericPLCAccessory(platform, config, accessoryNumber) {
             this.s7time2int
           );
         }.bind(this));
-
+    }
+    
+    if ('get_SetDuration' in config && 'set_SetDuration' in config) {
       this.service.getCharacteristic(Characteristic.SetDuration)
         .on('get', function(callback) {
           this.getDInt(callback,
@@ -1807,7 +1812,7 @@ GenericPLCAccessory.prototype = {
     }
   },
 
-  initActive: function(mandatory) {
+  initActive: function(mandatory, inform) {
     if ('set_Active' in this.config && 'get_Active' in this.config) {
       this.service.getCharacteristic(Characteristic.Active)
         .on('get', function(callback) {
@@ -1821,7 +1826,8 @@ GenericPLCAccessory.prototype = {
           this.setBit(powerOn, callback,
             this.config.db,
             Math.floor(this.config.set_Active), Math.floor((this.config.set_Active * 10) % 10),
-            'set Active'
+            'set Active',
+            inform          
           );
         }.bind(this));
     } else if ('get_Active' in this.config && 'set_Active_Set' in this.config && 'set_Active_Reset' in this.config) {
@@ -1838,7 +1844,8 @@ GenericPLCAccessory.prototype = {
             this.config.db,
             Math.floor(this.config.set_Active_Set), Math.floor((this.config.set_Active_Set * 10) % 10),
             Math.floor(this.config.set_Active_Reset), Math.floor((this.config.set_Active_Reset * 10) % 10),
-            'set Active'
+            'set Active',
+            inform
           );
         }.bind(this));
     } else if (mandatory) {
@@ -2305,16 +2312,17 @@ GenericPLCAccessory.prototype = {
       if ('get_Active' in this.config && this.config.get_Active == offset) {
         this.log.debug("[" + this.name + "] Push Active:" + value);
         this.service.getCharacteristic(Characteristic.Active).updateValue(value);
+        this.service.getCharacteristic(Characteristic.InUse).updateValue(value);
         rv = true;
       }
       if ('get_SetDuration' in this.config && this.config.get_SetDuration == offset) {
-        this.log.debug("[" + this.name + "] Push SetDuration:" + value);
-        this.service.getCharacteristic(Characteristic.SetDuration).updateValue(value);
+        this.log.debug("[" + this.name + "] Push GetDuration:" + String(this.s7time2int(parseInt(value))) + "<-" + String(value));
+        this.service.getCharacteristic(Characteristic.SetDuration).updateValue(this.s7time2int(parseInt(value)));
         rv = true;
       }
       if ('get_RemainingDuration' in this.config && this.config.get_RemainingDuration == offset) {
-        this.log.debug("[" + this.name + "] Push RemainingDuration:" + value);
-        this.service.getCharacteristic(Characteristic.RemainingDuration).updateValue(value);
+        this.log.debug("[" + this.name + "] Push RemainingDuration:" + String(this.s7time2int(parseInt(value))) + "<-" + String(value));
+        this.service.getCharacteristic(Characteristic.RemainingDuration).updateValue(this.s7time2int(parseInt(value)));
         rv = true;
       }
     }
@@ -2675,6 +2683,7 @@ GenericPLCAccessory.prototype = {
       if ('set_Active' in this.config && this.config.set_Active == offset || 'set_Active_Set' in this.config && this.config.set_Active_Set == offset) {
         this.log.debug("[" + this.name + "] Control Active:" + value);
         this.service.getCharacteristic(Characteristic.Active).setValue(value);
+        this.service.getCharacteristic(Characteristic.InUse).updateValue(value);
         rv = true;
       }
       if ('set_SetDuration' in this.config && this.config.set_SetDuration == offset) {
@@ -3122,6 +3131,7 @@ GenericPLCAccessory.prototype = {
       // Get the current target system state and update the value.
       this.service.getCharacteristic(Characteristic.Active).handleGetRequest().then(value => {
         this.service.getCharacteristic(Characteristic.Active).updateValue(value);
+        this.service.getCharacteristic(Characteristic.InUse).updateValue(value);
       }).catch(err => {
         this.log.error("[" + this.name + "] Error during poll", err);
       });
