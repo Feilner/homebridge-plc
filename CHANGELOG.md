@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.1.2] 2015-08-28
+- Align documentation and rode regarding renamings introduced with version 2.0.1
+- Update Readme.md and example code picture
+- `PLC_LockMechanismBool` (perform change inteded for version 2.0.1)
+  - Renamed option `set_Secured` -> `set_LockTargetStateBool_Secured`
+  - Renamed option `set_Unsecured` -> `set_LockTargetStateBool_Unsecured`
+
 ## [2.1.1] 2025-04-13
 
 ### Fixed

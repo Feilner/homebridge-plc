@@ -118,8 +118,8 @@ Normal light. See also simple PLC example for [single bit](doc/ligtbulb_plc_exam
 - Single Bit for on/off:
   - `set_On`: **(control support)** offset and bit to set on/off S7 type `Bool` e.g. `55.0` for `DB4DBX55.0` (could be the same as get_On)
 - Separate Bits for on/off:
-  - `set_On`: **(control support)** offset and bit to set on S7 type `Bool` **PLC has to set to 0** e.g. `55.1` for `DB4DBX55.1`
-  - `set_Off`: offset and bit to set off S7 type `Bool` **PLC has to set to 0** e.g. `55.2` for `DB4DBX55.2`
+  - `set_On_Set`: **(control support)** offset and bit to set on S7 type `Bool` **PLC has to set to 0** e.g. `55.1` for `DB4DBX55.1`
+  - `set_On_Reset`: offset and bit to set off S7 type `Bool` **PLC has to set to 0** e.g. `55.2` for `DB4DBX55.2`
 - `get_Brightness`: **(optional)** **(push support)** get brightness value S7 type `Byte` e.g. `56` for `DB4DBB56`
 - `set_Brightness`: **(optional but required when `get_Brightness` is defined)** **(control support)** set brightness value S7 type `Byte` e.g. `57` for `DB4DBB57`
 - Brightness range definitions **(optional)**
@@ -156,8 +156,8 @@ Switch, possible to show also as ventilator or light.
 - Single Bit for on/off:
   - `set_On`: **(control support)** offset and bit to set on/off S7 type `Bool` e.g. `55.0` for `DB4DBX55.0` (could be the same as get_On)
 - Separate Bits for on/off:
-  - `set_On`: **(control support)** offset and bit to set on S7 type `Bool` **PLC has to set to 0** e.g. `55.1` for `DB4DBX55.1`
-  - `set_Off`: offset and bit to set off S7 type `Bool` **PLC has to set to 0** e.g. `55.2` for `DB4DBX55.2`
+  - `set_On_Set`: **(control support)** offset and bit to set on S7 type `Bool` **PLC has to set to 0** e.g. `55.1` for `DB4DBX55.1`
+  - `set_On_Reset`: offset and bit to set off S7 type `Bool` **PLC has to set to 0** e.g. `55.2` for `DB4DBX55.2`
 
 ### <a name='PLC_TemperatureSensor'></a>Temperature Sensor as `PLC_TemperatureSensor`
 Normal temperature sensor.
@@ -453,8 +453,8 @@ Watering for the garden.
 - Single Bit for on/off:
   - `set_Active`: **(control support)** offset and bit to set on/off S7 type `Bool` e.g. `55.0` for `DB4DBX55.0` (could be the same as get_Active)
 - Separate Bits for on/off:
-  - `set_Active`: **(control support)** offset and bit to set on S7 type `Bool` **PLC has to set to 0** e.g. `55.1` for `DB4DBX55.1`
-  - `set_Deactivate`: offset and bit to set off S7 type `Bool` **PLC has to set to 0** e.g. `55.2` for `DB4DBX55.2`
+  - `set_Active_Set`: **(control support)** offset and bit to set on S7 type `Bool` **PLC has to set to 0** e.g. `55.1` for `DB4DBX55.1`
+  - `set_Active_Reset`: offset and bit to set off S7 type `Bool` **PLC has to set to 0** e.g. `55.2` for `DB4DBX55.2`
 
 ### <a name='PLC_Valve'></a>Valve as `PLC_Valve`
 Valve configurable as generic valve, irrigation, shower head, or water faucet.
@@ -474,8 +474,8 @@ Valve configurable as generic valve, irrigation, shower head, or water faucet.
 - Single Bit for on/off:
   - `set_Active`: **(control support)** offset and bit to set on/off S7 type `Bool` e.g. `55.0` for `DB4DBX55.0` (could be the same as get_Active)
 - Separate Bits for on/off:
-  - `set_Active`: **(control support)** offset and bit to set on S7 type `Bool` **PLC has to set to 0** e.g. `55.1` for `DB4DBX55.1`
-  - `set_Deactivate`: offset and bit to set off S7 type `Bool` **PLC has to set to 0** e.g. `55.2` for `DB4DBX55.2`
+  - `set_Active_Set`: **(control support)** offset and bit to set on S7 type `Bool` **PLC has to set to 0** e.g. `55.1` for `DB4DBX55.1`
+  - `set_Active_Reset`: offset and bit to set off S7 type `Bool` **PLC has to set to 0** e.g. `55.2` for `DB4DBX55.2`
 - If one of the **(optional)** duration settings is specified, all are needed:
   - `get_SetDuration`: **(optional)** **(push support)** offset to get duration 0..3600 sec S7 type `Time` e.g. `10` for `DB4DBD10`
   - `set_SetDuration`: **(optional)** **(control support)** offset to set duration 0..3600 sec S7 type `Time` e.g. `14` for `DB4DBD14`
@@ -843,8 +843,8 @@ Note: The example is just an example. It contains also some optional settings. F
               "enablePolling": true,
               "db": 12,
               "get_On": 0.0,
-              "set_On": 0.1,
-              "set_Off": 0.2
+              "set_On_Set": 0.1,
+              "set_On_Reset": 0.2
             },
             {
               "accessory": "PLC_LightBulb",
@@ -853,8 +853,8 @@ Note: The example is just an example. It contains also some optional settings. F
               "enablePolling": true,
               "db": 12,
               "get_On": 2.0,
-              "set_On": 2.1,
-              "set_Off": 2.2,
+              "set_On_Set": 2.1,
+              "set_On_Reset": 2.2,
               "get_Brightness": 1,
               "set_Brightness": 1
             },
@@ -881,8 +881,8 @@ Note: The example is just an example. It contains also some optional settings. F
               "enablePolling": true,
               "db": 12,
               "get_On": 2.6,
-              "set_On": 2.7,
-              "set_Off": 3.0
+              "set_On_Set": 2.7,
+              "set_On_Reset": 3.0
             },
             {
               "accessory": "PLC_TemperatureSensor",
@@ -1065,9 +1065,9 @@ Note: The example is just an example. It contains also some optional settings. F
               "name": "LockBool",
               "db": 12,
               "enablePolling": true,
-              "get_LockCurrentState": 41.0,
-              "get_LockTargetState": 41.1,
-              "set_LockTargetState": 41.1
+              "get_LockTargetStateBool": 41.0,
+              "set_LockTargetStateBool_Secured": 41.1,
+              "set_LockTargetStateBool_Unsecured": 41.1
             },
             {
               "accessory": "PLC_GarageDoorOpener",
@@ -1226,7 +1226,7 @@ To enable this, you have to set `"enableControl": true,` at the platform level a
 The interface that the PLC operates consists only of the keyword 'control', the database number 'db', the address within the db 'offset' and the value 'value'.
 The value is assigned to the matching ('db' and 'offset') set_* accessory configurations. All configurations that are supported are marked with **(control support)** in the description.
 
-For accessories with separate on/off configurations e.g. `PLC_LightBulb` `set_On`/`set_Off` the `set_On` or `PLC_LockMechanismBool` `set_Secured`/`set_Unsecured` the `set_Secured` has to be used. With `1` for on and `0` for off.
+For accessories with separate on/off configurations e.g. `PLC_LightBulb` `set_On_Set`/`set_On_Reset` the `set_On_Set` or `PLC_LockMechanismBool` `set_LockTargetStateBool_Secured`/`set_LockTargetStateBool_Unsecured` the `set_LockTargetStateBool_Secured` has to be used. With `1` for on and `0` for off.
 
 All information is transmitted within the URL and in decimal.
 
@@ -1251,8 +1251,8 @@ Example to switch a light bulb from the browser. Let's say the light bulb has th
             "accessory": "PLC_LightBulb",
             "name": "Light",
             "db": 6096,
-            "set_On": 1.1,
-            "set_Off": 1.0,
+            "set_On_Set": 1.1,
+            "set_On_Reset": 1.0,
             "get_On": 0.0
         }
       ]

@@ -1248,8 +1248,8 @@ function GenericPLCAccessory(platform, config, accessoryNumber) {
         .on('set', function(value, callback) {
           this.setOnOffBit(value, callback,
             config.db,
-            Math.floor(config.set_LockTargetStateBool_Set), Math.floor((config.set_LockTargetStateBool_Set * 10) % 10),
-            Math.floor(config.set_LockTargetStateBool_Reset), Math.floor((config.set_LockTargetStateBool_Reset * 10) % 10),
+            Math.floor(config.set_LockTargetStateBool_Secured), Math.floor((config.set_LockTargetStateBool_Secured * 10) % 10),
+            Math.floor(config.set_LockTargetStateBool_Unsecured), Math.floor((config.set_LockTargetStateBool_Unsecured * 10) % 10),
             'set LockTargetState',
             informFunction
           );
