@@ -1,6 +1,4 @@
-# This workflow will run tests using node and then publish a package to GitHub Packages when a release is created
-# For more information see: https://help.github.com/actions/language-and-framework-guides/publishing-nodejs-packages
-
+# This workflow will run when a release is created and publish to npm.
 name: Node.js Package
 
 on:
@@ -12,22 +10,21 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
-      - name: Setup
-        uses: actions/setup-node@v1
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
         with:
-          node-version: 12
+          node-version: 24
+
+      - name: Configure npm auth
+        run: |
+          echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}" > ~/.npmrc
+
       - name: Publish release
         if: "!contains(github.event.release.tag_name, 'beta')"
-        uses: JS-DevTools/npm-publish@v1
-        with:
-          token: ${{ secrets.NPM_TOKEN }}
-          tag: latest
-          access: public
+        run: npm publish --access public --tag latest
+
       - name: Publish beta
         if: "contains(github.event.release.tag_name, 'beta')"
-        uses: JS-DevTools/npm-publish@v1
-        with:
-          token: ${{ secrets.NPM_TOKEN }}
-          tag: beta
-          access: public
+        run: npm publish --access public --tag beta
