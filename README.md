@@ -10,8 +10,9 @@ Homebridge plugin for SIEMENS Step7 and compatible PLCs
 
 <!-- prettier-ignore -->
 > [!NOTE]
->  - Now compatible with the beta version of **Homebridge 2.0.0**
->  - Now compatible with Node.js v22 and the latest Docker images of Homebridge
+>  - Compatible with the version of **Homebridge 2.0.0**
+>  - Compatible with Node.js v24 and the latest Docker images of Homebridge
+>  - It might be necessary to reinstall the plugin to update the node-snap7 dependancy
 
 ## SIEMENS S7 PLC plugin for [Homebridge](https://homebridge.io)
 - This plugin uses [snap7](https://snap7.sourceforge.net) via [node-snap7](https://github.com/mathiask88/node-snap7), making it compatible with the following PLCs:
