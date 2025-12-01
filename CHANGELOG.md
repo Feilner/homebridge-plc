@@ -1,5 +1,8 @@
 # Changelog
 
+## [2.1.3] 2015-12-01
+- Update dependencies for Node.js 24 compatibility
+  
 ## [2.1.2] 2015-08-28
 - Align documentation and rode regarding renamings introduced with version 2.0.1
 - Update Readme.md and example code picture
